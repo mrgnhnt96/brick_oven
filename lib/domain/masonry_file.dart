@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:masonry/domain/masonry_path.dart';
 import 'package:masonry/domain/masonry_variable.dart';
 import 'package:masonry/enums/mason_format.dart';
+import 'package:masonry/enums/mason_loops.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
@@ -141,21 +142,32 @@ class MasonryFile {
     var content = this.content();
 
     for (final variable in variables!) {
-      final pattern = RegExp(variable.placeholder + r'(\w*)');
+      final pattern = RegExp('(.*)${variable.placeholder}' r'(\w*!?)(.*)');
       content = content.replaceAllMapped(pattern, (match) {
         print(match);
-        final value = match.group(1);
+        final value = match.group(2);
+
+        final loop = MasonLoops.values.retrieve(value);
+        if (loop != null) {
+          return MasonLoops.toMustache(variable.name, () => loop);
+        }
 
         final format = MasonFormat.values.retrieve('${value}Case');
 
+        String result;
         if (format == null) {
-          return variable.formattedName;
+          result = variable.formattedName;
+        } else {
+          result = variable.formatName(format);
         }
 
-        return variable.formatName(format);
+        final prefix = match.group(1) ?? '';
+        final suffix = match.group(3) ?? '';
+
+        return '$prefix$result$suffix';
       });
     }
 
-    file.writeAsStringSync('// this has been created\n\n$content');
+    file.writeAsStringSync(content);
   }
 }
