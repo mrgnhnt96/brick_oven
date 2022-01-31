@@ -6,14 +6,14 @@ import 'package:yaml/yaml.dart';
 
 class MasonryDirectory {
   const MasonryDirectory(
-    this.path,
+    this.sourcePath,
   )   : _masonryFiles = const <String, MasonryFile>{},
-        _name = null;
+        _targetDir = null;
 
   const MasonryDirectory._fromYaml(
-    this.path,
+    this.sourcePath,
     this._masonryFiles,
-    this._name,
+    this._targetDir,
   );
 
   factory MasonryDirectory.fromYaml(String path, YamlMap yaml) {
@@ -44,12 +44,12 @@ class MasonryDirectory {
     );
   }
 
-  final String path;
+  final String sourcePath;
   final Map<String, MasonryFile> _masonryFiles;
-  final String? _name;
+  final String? _targetDir;
 
   Iterable<MasonryFile> files() {
-    final dir = Directory(path);
+    final dir = Directory(sourcePath);
 
     if (!dir.existsSync()) {
       return {};
@@ -60,8 +60,8 @@ class MasonryDirectory {
 
     final masonryFiles = {
       for (final file in files)
-        file.path:
-            MasonryFile(file.path.replaceFirst('$path$separator', ''), path)
+        file.path: MasonryFile(
+            file.path.replaceFirst('$sourcePath$separator', ''), sourcePath)
     }..removeWhere((key, _) => key.contains('.dart_tool'));
 
     final masonry = <String, MasonryFile>{}
@@ -71,12 +71,12 @@ class MasonryDirectory {
     return masonry.values;
   }
 
-  String get root => dirname(path);
+  String get root => dirname(sourcePath);
 
   void writeMason() {
-    var name = _name ?? root;
+    var name = _targetDir ?? root;
     if (name == '.') {
-      name = path;
+      name = sourcePath;
     }
 
     final dir = join(
@@ -97,17 +97,15 @@ class MasonryDirectory {
   }
 
   void _writeAnalysis() {
-    final newAnalysisOptions = File(join('bricks', 'analysis_options.yaml'));
-
-    if (!newAnalysisOptions.existsSync()) {
-      newAnalysisOptions.writeAsStringSync(
+    File(join('bricks', 'analysis_options.yaml'))
+      ..createSync()
+      ..writeAsStringSync(
         '''
 analyzer:
   exclude:
     - "**/*.dart"''',
       );
 
-      return;
-    }
+    return;
   }
 }

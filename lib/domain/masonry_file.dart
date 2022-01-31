@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:masonry/domain/masonry_variable.dart';
+import 'package:masonry/enums/mason_format.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
 class MasonryFile {
-  const MasonryFile(this._path, this.target)
-      : _extension = null,
-        variables = null,
+  const MasonryFile(this._path, this.sourceDir)
+      : variables = null,
         _prefix = null,
         _suffix = null,
         _name = null;
@@ -15,13 +15,11 @@ class MasonryFile {
   const MasonryFile._fromYaml(
     this._path, {
     required this.variables,
-    required String? extension,
     required String? prefix,
     required String? suffix,
     required String? name,
-    required this.target,
-  })  : _extension = extension,
-        _prefix = prefix,
+    required this.sourceDir,
+  })  : _prefix = prefix,
         _suffix = suffix,
         _name = name;
 
@@ -41,51 +39,69 @@ class MasonryFile {
       }
     }
 
-    final name = yaml['name'] as String?;
-    final prefix = yaml['prefix'] as String?;
-    final suffix = yaml['suffix'] as String?;
-    final extension = yaml['extension'] as String?;
+    final fileConfig = yaml['file'] as YamlMap?;
+
+    final name = fileConfig?.value['name'] as String?;
+    final prefix = fileConfig?.value['prefix'] as String?;
+    final suffix = fileConfig?.value['suffix'] as String?;
 
     return MasonryFile._fromYaml(
       path,
       variables: variables(),
-      extension: extension,
       prefix: prefix,
       suffix: suffix,
       name: name,
-      target: target,
+      sourceDir: target,
     );
   }
 
   final String _path;
   final Iterable<MasonryVariable>? variables;
-  final String? _extension;
   final String? _prefix;
   final String? _suffix;
   final String? _name;
-  final String target;
+  final String sourceDir;
 
-  String get path {
-    if (_name == null && _suffix == null && _prefix == null) {
-      return _path;
+  String get fileName {
+    if (_name == null) {
+      return basename(_path);
+    }
+    final prefix = _prefix ?? '';
+    final suffix = _suffix ?? '';
+
+    final name = MasonFormat.snakeCase.toMustache('{$_name}');
+
+    return '$prefix$name$suffix$_preExtension$_extension';
+  }
+
+  String get targetDir {
+    final dir = dirname(_path);
+    if (dir == '.') {
+      return '';
     }
 
-    return join(dirName, '');
+    return dir;
   }
 
-  String get fileName => basename(path);
-  String get dirName => dirname(path);
-  String get _filePathExtension => basename(path).split('.').last;
-  String get extension => _extension ?? _filePathExtension;
-  String get targetPath => join(target, path);
+  String get _extension => extension(_path);
+  String get _preExtension {
+    final base = basenameWithoutExtension(_path);
+    if (!base.contains('.')) {
+      return '';
+    }
+
+    return base.substring(base.indexOf('.'));
+  }
+
+  String get sourcePath => join(sourceDir, _path);
+  String get targetPath => join(targetDir, fileName);
 
   String content() {
-    return File(targetPath).readAsStringSync();
+    return File(sourcePath).readAsStringSync();
   }
 
-  void writeMason(String dir) {
-    final filePath = join(dir, path);
-    final file = File(filePath);
+  void writeMason(String targetDir) {
+    final file = File(join(targetDir, targetPath));
 
     try {
       file.createSync(recursive: true);
@@ -95,15 +111,12 @@ class MasonryFile {
     }
 
     if (variables == null || variables?.isEmpty == true) {
-      File(targetPath).copySync(file.path);
+      File(sourcePath).copySync(file.path);
 
       return;
     }
 
     var content = this.content();
-
-    // hide comments that contain
-    // hide:
 
     for (final variable in variables!) {
       content = content.replaceAll(
