@@ -1,0 +1,25 @@
+targets:
+  lib/test_package:
+    name: my_package
+    paths:
+      lib/nested:
+        part: other_nested
+    files:
+      lib/main.dart:
+        vars:
+          _CLASS_NAME_:
+            name: Masonry
+            format: pascalCase
+            prefix: some_prefix
+            suffix: some_suffix
+            type: string
+      lib/nested/nested_file.dart:
+        file:
+          name: other
+          prefix: some_prefix
+          suffix: some_suffix
+      lib/nested/nested_file.g.dart:
+        file:
+          name: other_generated
+          prefix: some_prefix
+          suffix: some_suffix
