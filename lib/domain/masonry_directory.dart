@@ -91,16 +91,13 @@ class MasonryDirectory {
       file.writeMason(dir);
     }
 
-    _writeAnalysis(join(
-      'bricks',
-      name,
-    ));
+    _writeAnalysis();
 
     print('complete!');
   }
 
-  void _writeAnalysis(String dir) {
-    final newAnalysisOptions = File(join(dir, 'analysis_options.yaml'));
+  void _writeAnalysis() {
+    final newAnalysisOptions = File(join('bricks', 'analysis_options.yaml'));
 
     if (!newAnalysisOptions.existsSync()) {
       newAnalysisOptions.writeAsStringSync(
