@@ -16,10 +16,15 @@ enum MasonFormat {
 }
 
 extension MasonFormatX on MasonFormat {
-  String toMustache(String content, {bool invert = false}) {
+  String toMustache(
+    String content, {
+    bool invert = false,
+    String prefix = '',
+    String suffix = '',
+  }) {
     final entry = invert ? '^' : '#';
 
-    return '{{$entry$name}}{{$content}}{{/$name}}';
+    return '{{$entry$name}}$prefix{{$content}}$suffix{{/$name}}';
   }
 }
 
