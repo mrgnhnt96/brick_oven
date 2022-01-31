@@ -9,14 +9,14 @@ class MasonryDirectory {
   const MasonryDirectory(
     this.sourcePath,
   )   : _masonryFiles = const <String, MasonryFile>{},
-        paths = const <MasonryPath>{},
+        dirs = const <MasonryPath>{},
         _targetDir = null;
 
   const MasonryDirectory._fromYaml(
     this.sourcePath,
     this._masonryFiles,
     this._targetDir,
-    this.paths,
+    this.dirs,
   );
 
   factory MasonryDirectory.fromYaml(String path, YamlMap yaml) {
@@ -39,11 +39,11 @@ class MasonryDirectory {
     }
 
     Iterable<MasonryPath> paths() sync* {
-      if (!yaml.containsKey('paths')) {
+      if (!yaml.containsKey('directories')) {
         return;
       }
 
-      final value = yaml['paths'] as YamlMap;
+      final value = yaml['directories'] as YamlMap;
 
       for (final entry in value.entries) {
         final path = entry.key as String;
@@ -66,7 +66,7 @@ class MasonryDirectory {
   final String sourcePath;
   final Map<String, MasonryFile> _masonryFiles;
   final String? _targetDir;
-  final Iterable<MasonryPath> paths;
+  final Iterable<MasonryPath> dirs;
 
   Iterable<MasonryFile> files() {
     final dir = Directory(sourcePath);
@@ -81,8 +81,10 @@ class MasonryDirectory {
     final masonryFiles = {
       for (final file in files)
         file.path: MasonryFile(
-            file.path.replaceFirst('$sourcePath$separator', ''), sourcePath)
-    }..removeWhere((key, _) => key.contains('.dart_tool'));
+          file.path.replaceFirst('$sourcePath$separator', ''),
+          sourcePath,
+        )
+    };
 
     final masonry = <String, MasonryFile>{}
       ..addAll(masonryFiles)
@@ -105,10 +107,18 @@ class MasonryDirectory {
       '__brick__',
     );
 
+    final directory = Directory(dir);
+    if (directory.existsSync()) {
+      print('deleting ${directory.path}');
+
+      // TODO(mrgnhnt96): ask for permission?
+      directory.deleteSync(recursive: true);
+    }
+
     print('writing $name');
 
     for (final file in files()) {
-      file.writeMason(dir);
+      file.writeMason(dir, dirs);
     }
 
     _writeAnalysis();

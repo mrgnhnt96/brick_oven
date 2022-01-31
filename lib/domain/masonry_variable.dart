@@ -48,10 +48,16 @@ class MasonryVariable {
   final MasonFormat format;
   final MasonType type;
 
-  String get name {
-    final prefix = _prefix ?? '';
-    final suffix = _suffix ?? '';
+  String get prefix => _prefix ?? '';
+  String get suffix => _suffix ?? '';
 
-    return '$prefix${format.toMustache(_name)}$suffix';
+  String formatName(MasonFormat format) {
+    return format.toMustache(
+      _name,
+      prefix: prefix,
+      suffix: suffix,
+    );
   }
+
+  String get formattedName => formatName(format);
 }

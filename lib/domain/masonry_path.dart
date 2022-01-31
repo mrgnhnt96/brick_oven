@@ -1,30 +1,34 @@
+import 'package:masonry/enums/mason_format.dart';
 import 'package:yaml/yaml.dart';
 
 class MasonryPath {
   const MasonryPath({
-    required this.part,
-    required this.path,
+    required this.placeholder,
     required this.name,
   });
 
-  factory MasonryPath.fromYaml(String path, YamlMap yaml) {
-    final part = yaml['part'] as String;
+  factory MasonryPath.fromYaml(String part, YamlMap yaml) {
     final name = yaml['name'] as String;
 
     return MasonryPath(
-      part: part,
-      path: path,
+      placeholder: part,
       name: name,
     );
   }
 
-  final String path;
-  final String part;
+  final String placeholder;
   final String name;
 
-  String get replacedPath {
-    final pattern = RegExp(r'\b' + part + r'\b');
+  String apply(String path) {
+    if (!path.contains(placeholder)) {
+      return path;
+    }
 
-    return path.replaceAll(pattern, '{{$name}}');
+    final pattern = RegExp(r'\b' + placeholder + r'\b');
+
+    return path.replaceAll(
+      pattern,
+      MasonFormat.snakeCase.toMustache('{$name}'),
+    );
   }
 }

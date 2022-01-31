@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:masonry/domain/masonry_path.dart';
 import 'package:masonry/domain/masonry_variable.dart';
 import 'package:masonry/enums/mason_format.dart';
 import 'package:path/path.dart';
@@ -20,6 +21,18 @@ class MasonryFile {
     required String? name,
     required this.sourceDir,
   })  : _prefix = prefix,
+        _suffix = suffix,
+        _name = name;
+
+  const MasonryFile._({
+    required this.variables,
+    required String? prefix,
+    required String? suffix,
+    required String? name,
+    required this.sourceDir,
+    required String path,
+  })  : _path = path,
+        _prefix = prefix,
         _suffix = suffix,
         _name = name;
 
@@ -100,8 +113,17 @@ class MasonryFile {
     return File(sourcePath).readAsStringSync();
   }
 
-  void writeMason(String targetDir) {
-    final file = File(join(targetDir, targetPath));
+  void writeMason(
+    String targetDir,
+    Iterable<MasonryPath> masonryPaths,
+  ) {
+    var path = join(targetDir, targetPath);
+
+    for (final masonryPath in masonryPaths) {
+      path = masonryPath.apply(path);
+    }
+
+    final file = File(path);
 
     try {
       file.createSync(recursive: true);
@@ -119,10 +141,19 @@ class MasonryFile {
     var content = this.content();
 
     for (final variable in variables!) {
-      content = content.replaceAll(
-        variable.placeholder,
-        variable.name,
-      );
+      final pattern = RegExp(variable.placeholder + r'(\w*)');
+      content = content.replaceAllMapped(pattern, (match) {
+        print(match);
+        final value = match.group(1);
+
+        final format = MasonFormat.values.retrieve('${value}Case');
+
+        if (format == null) {
+          return variable.formattedName;
+        }
+
+        return variable.formatName(format);
+      });
     }
 
     file.writeAsStringSync('// this has been created\n\n$content');
