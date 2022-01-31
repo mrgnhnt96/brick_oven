@@ -1,3 +1,18 @@
 // this has been created
 
-class some_prefix{{#pascalCase}}{{Masonry}}{{/pascalCase}}some_suffix {}
+part '{{#snakeCase}}SomePrefix{{masonry}}SomeSuffix{{/snakeCase}}.dart';
+
+class {{#pascalCase}}SomePrefix{{masonry}}SomeSuffix{{/pascalCase}} {
+  const {{#pascalCase}}SomePrefix{{masonry}}SomeSuffix{{/pascalCase}}({
+    required this.name,
+    required this.value,
+  });
+
+  const {{#pascalCase}}SomePrefix{{masonry}}SomeSuffix{{/pascalCase}}._private()
+      : name = '',
+        value = '';
+
+  final String name;
+  final String value;
+  // @list
+}

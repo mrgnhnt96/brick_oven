@@ -1,17 +1,19 @@
 targets:
   lib/test_package:
     name: my_package
-    paths:
-      lib/nested:
-        part: other_nested
+    directories:
+      nested:
+        name: my_nested
+      outta_hand:
+        name: my_hand
     files:
       lib/main.dart:
         vars:
           _CLASS_NAME_:
-            name: Masonry
+            name: masonry
             format: pascalCase
-            prefix: some_prefix
-            suffix: some_suffix
+            prefix: SomePrefix
+            suffix: SomeSuffix
             type: string
       lib/nested/nested_file.dart:
         file:
