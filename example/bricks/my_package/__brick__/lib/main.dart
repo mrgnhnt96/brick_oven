@@ -1,5 +1,3 @@
-// this has been created
-
 part '{{#snakeCase}}SomePrefix{{masonry}}SomeSuffix{{/snakeCase}}.dart';
 
 class {{#pascalCase}}SomePrefix{{masonry}}SomeSuffix{{/pascalCase}} {
@@ -14,5 +12,4 @@ class {{#pascalCase}}SomePrefix{{masonry}}SomeSuffix{{/pascalCase}} {
 
   final String name;
   final String value;
-  // @list
 }
