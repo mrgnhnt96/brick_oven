@@ -1,43 +1,45 @@
-targets:
-  # lib/test_package:
-  #   name: my_package
-  #   directories:
-  #     lib/nested:
-  #       name: my_nested
-  #     lib/nested/super_nested/outta_hand:
-  #       name: my_hand
-  #     lib/nested/super_nested:
-  #       name: my_super_nested
-  #   files:
-  #     lib/readme.md:
-  #       vars:
-  #         _OPTIONAL_:
-  #           name: optional
-  #     lib/main.dart:
-  #       vars:
-  #         _CLASS_NAME_:
-  #           name: masonry
-  #           format: pascalCase
-  #           prefix: some_prefix_
-  #           suffix: _some_suffix
-  #     lib/nested/nested_file.dart:
-  #       file:
-  #         name: other
-  #         prefix: some_prefix_
-  #         suffix: _some_suffix
-  #     lib/nested/nested_file.g.dart:
-  #       file:
-  #         name: other_generated
-  #         prefix: some_prefix_
-  #         suffix: _some_suffix
-  lib/test_package/lib/nested:
-    name: my_nested
-    directories:
+bricks:
+  my_package:
+    source: lib/test_package
+    dirs:
+      lib/nested:
+        name: my_nested
+      lib/nested/super_nested/outta_hand:
+        name: my_hand
+      lib/nested/super_nested:
+        name: my_super_nested
+    files:
+      lib/readme.md:
+        vars:
+          _OPTIONAL_:
+            name: optional
+      lib/main.dart:
+        vars:
+          _CLASS_NAME_:
+            name: masonry
+            format: pascalCase
+            prefix: some_prefix_
+            suffix: _some_suffix
+      lib/nested/nested_file.dart:
+        file:
+          name: other
+          prefix: some_prefix_
+          suffix: _some_suffix
+      lib/nested/nested_file.g.dart:
+        file:
+          name: other_generated
+          prefix: some_prefix_
+          suffix: _some_suffix
+  my_nested:
+    source: lib/test_package/lib/nested
+    dirs:
       super_nested/outta_hand/:
         name: my_hand
       super_nested/outta_hand/nested/:
         name: my_nested_hand
       /nested/:
+        name: does not exist
+      /nested/super_nested:
         name: does not exist
     files:
       super_nested/outta_hand/outta_hand_file.dart:
