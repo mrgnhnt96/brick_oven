@@ -119,13 +119,17 @@ class LayerFile {
     String targetDir,
     Iterable<LayerPath> layerPaths,
   ) {
-    var path = join(targetDir, targetPath);
+    var path = targetPath;
 
-    for (final layerPath in layerPaths) {
-      path = layerPath.apply(path);
+    if (path.contains(separator)) {
+      final originalPath = path;
+
+      for (final layerPath in layerPaths) {
+        path = layerPath.apply(path, originalPath: originalPath);
+      }
     }
 
-    final file = File(path);
+    final file = File(join(targetDir, path));
 
     try {
       file.createSync(recursive: true);

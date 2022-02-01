@@ -1,34 +1,46 @@
 import 'package:brick_layer/enums/mustache_format.dart';
+import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
 class LayerPath {
-  const LayerPath({
-    required this.placeholder,
+  LayerPath({
     required this.name,
-  });
+    required this.path,
+  }) : placeholder = path.substring(path.lastIndexOf(separator) + 1).replaceAll(
+              RegExp(r'^\' + separator + r'|\' + separator + r'$'),
+              '',
+            );
 
-  factory LayerPath.fromYaml(String part, YamlMap yaml) {
+  factory LayerPath.fromYaml(String path, YamlMap yaml) {
     final name = yaml['name'] as String;
 
-    return LayerPath(
-      placeholder: part,
-      name: name,
-    );
+    return LayerPath(path: path, name: name);
   }
 
   final String placeholder;
   final String name;
+  final String path;
 
-  String apply(String path) {
-    if (!path.contains(placeholder)) {
+  List<String> get parts => path.split(separator);
+
+  String apply(
+    String path, {
+    required String originalPath,
+  }) {
+    if (!this.path.contains(separator)) {
+      return path;
+    } else if (!originalPath.contains(this.path)) {
       return path;
     }
 
-    final pattern = RegExp(r'\b' + placeholder + r'\b');
+    final replacement = MustacheFormat.snakeCase.toMustache('{{{$name}}}');
 
-    return path.replaceAll(
-      pattern,
-      MustacheFormat.snakeCase.toMustache('{{{$name}}}'),
-    );
+    final pattern = RegExp(r'(?<=[\w|}])\' + separator);
+
+    final pathParts = path.split(pattern);
+
+    pathParts[parts.length - 1] = replacement;
+
+    return pathParts.join(separator);
   }
 }
