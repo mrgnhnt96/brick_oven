@@ -8,19 +8,18 @@ import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
 class BrickFile {
-  const BrickFile(this._path, this.sourceDir)
+  const BrickFile(this.path)
       : variables = null,
         _prefix = null,
         _suffix = null,
         _name = null;
 
   const BrickFile._fromYaml(
-    this._path, {
+    this.path, {
     required this.variables,
     required String? prefix,
     required String? suffix,
     required String? name,
-    required this.sourceDir,
   })  : _prefix = prefix,
         _suffix = suffix,
         _name = name;
@@ -30,14 +29,15 @@ class BrickFile {
     required String? prefix,
     required String? suffix,
     required String? name,
-    required this.sourceDir,
-    required String path,
-  })  : _path = path,
-        _prefix = prefix,
+    required this.path,
+  })  : _prefix = prefix,
         _suffix = suffix,
         _name = name;
 
-  factory BrickFile.fromYaml(String path, String target, YamlMap yaml) {
+  factory BrickFile.fromYaml(
+    YamlMap yaml, {
+    required String path,
+  }) {
     Iterable<Variable> variables() sync* {
       if (!yaml.containsKey('vars')) {
         return;
@@ -65,20 +65,18 @@ class BrickFile {
       prefix: prefix,
       suffix: suffix,
       name: name,
-      sourceDir: target,
     );
   }
 
-  final String _path;
+  final String path;
   final Iterable<Variable>? variables;
   final String? _prefix;
   final String? _suffix;
   final String? _name;
-  final String sourceDir;
 
   String get fileName {
     if (_name == null) {
-      return basename(_path);
+      return basename(path);
     }
     final prefix = _prefix ?? '';
     final suffix = _suffix ?? '';
@@ -86,45 +84,22 @@ class BrickFile {
     final name = '$prefix{{{$_name}}}$suffix';
     final formattedName = MustacheFormat.snakeCase.toMustache(name);
 
-    return '$formattedName$_preExtension$_extension';
+    return '$formattedName$_extension';
   }
 
-  String get targetDir {
-    final dir = dirname(_path);
-    if (dir == '.') {
-      return '';
-    }
+  String get _extension => extension(path, 10);
 
-    return dir;
-  }
-
-  String get _extension => extension(_path);
-  String get _preExtension {
-    final base = basenameWithoutExtension(_path);
-    if (!base.contains('.')) {
-      return '';
-    }
-
-    return base.substring(base.indexOf('.'));
-  }
-
-  String get sourcePath => join(sourceDir, _path);
-  String get targetPath => join(targetDir, fileName);
-
-  String content() {
-    return File(sourcePath).readAsStringSync();
-  }
-
-  void writeTargetFile(
-    String targetDir,
-    Iterable<BrickPath> layerPaths,
-  ) {
-    var path = targetPath;
+  void writeTargetFile({
+    required String targetDir,
+    required File sourceFile,
+    required Iterable<BrickPath> configuredDirs,
+  }) {
+    var path = this.path;
 
     if (path.contains(separator)) {
       final originalPath = path;
 
-      for (final layerPath in layerPaths) {
+      for (final layerPath in configuredDirs) {
         path = layerPath.apply(path, originalPath: originalPath);
       }
     }
@@ -139,12 +114,12 @@ class BrickFile {
     }
 
     if (variables == null || variables?.isEmpty == true) {
-      File(sourcePath).copySync(file.path);
+      sourceFile.copySync(file.path);
 
       return;
     }
 
-    var content = this.content();
+    var content = sourceFile.readAsStringSync();
 
     for (final variable in variables!) {
       final pattern = RegExp('(.*)${variable.placeholder}' r'(\w*!?)(.*)');

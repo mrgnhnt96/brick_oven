@@ -3,13 +3,24 @@ import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
 class BrickPath {
-  BrickPath({
+  factory BrickPath({
+    required String name,
+    required String path,
+  }) {
+    final _path = path.replaceAll(slashPattern, '');
+
+    return BrickPath._(
+      name: name,
+      path: _path,
+      placeholder: _path.substring(_path.lastIndexOf(separator) + 1),
+    );
+  }
+
+  const BrickPath._({
     required this.name,
     required this.path,
-  }) : placeholder = path.substring(path.lastIndexOf(separator) + 1).replaceAll(
-              RegExp(r'^\' + separator + r'|\' + separator + r'$'),
-              '',
-            );
+    required this.placeholder,
+  });
 
   factory BrickPath.fromYaml(String path, YamlMap yaml) {
     final name = yaml['name'] as String;
@@ -21,25 +32,38 @@ class BrickPath {
   final String name;
   final String path;
 
-  List<String> get parts => path.split(separator);
+  static RegExp separatorPattern = RegExp(r'(?<=[\w|}])\' + separator);
+  static RegExp slashPattern =
+      RegExp(r'^\' + separator + r'|\' + separator + r'$');
+
+  List<String> get configuredParts => path.split(separatorPattern);
 
   String apply(
     String path, {
     required String originalPath,
   }) {
-    if (!this.path.contains(separator)) {
-      return path;
-    } else if (!originalPath.contains(this.path)) {
+    final isNotFile = extension(placeholder).isNotEmpty;
+    final isNotDirectoryDeep = !this.path.contains(separatorPattern);
+    final pathsDontMatch = !originalPath.contains(this.path);
+
+    if (isNotFile || isNotDirectoryDeep || pathsDontMatch) {
       return path;
     }
 
+    // ignore: parameter_assignments
+    path = path.replaceAll(slashPattern, '');
+
     final replacement = MustacheFormat.snakeCase.toMustache('{{{$name}}}');
 
-    final pattern = RegExp(r'(?<=[\w|}])\' + separator);
+    final pathParts = path.split(separatorPattern);
 
-    final pathParts = path.split(pattern);
+    if (pathParts.length < configuredParts.length) {
+      return path;
+    }
 
-    pathParts[parts.length - 1] = replacement;
+    if (pathParts[configuredParts.length - 1] == placeholder) {
+      pathParts[configuredParts.length - 1] = replacement;
+    }
 
     return pathParts.join(separator);
   }

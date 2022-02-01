@@ -2,48 +2,42 @@ import 'dart:io';
 
 import 'package:brick_layer/domain/brick_file.dart';
 import 'package:brick_layer/domain/brick_path.dart';
+import 'package:brick_layer/domain/brick_source.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
 class Brick {
-  const Brick(
-    this.sourcePath,
-  )   : _layerFiles = const <String, BrickFile>{},
-        layerDirs = const <BrickPath>{},
-        _targetDir = null;
+  const Brick._fromYaml({
+    required this.name,
+    required this.source,
+    required this.configuredFiles,
+    required this.configuredDirs,
+  });
 
-  const Brick._fromYaml(
-    this.sourcePath,
-    this._layerFiles,
-    this._targetDir,
-    this.layerDirs,
-  );
+  factory Brick.fromYaml(String name, YamlMap yaml) {
+    final source = BrickSource.fromYaml(yaml);
 
-  factory Brick.fromYaml(String path, YamlMap yaml) {
-    Map<String, BrickFile> files() {
-      final files = <String, BrickFile>{};
-
+    Iterable<BrickFile> files() sync* {
       if (!yaml.containsKey('files')) {
-        return files;
+        return;
       }
 
       final value = yaml['files'] as YamlMap;
 
       for (final entry in value.entries) {
-        final name = entry.key as String;
-        final value = entry.value as YamlMap;
+        final path = entry.key as String;
+        final yaml = entry.value as YamlMap;
 
-        files[join(path, name)] = BrickFile.fromYaml(name, path, value);
+        yield BrickFile.fromYaml(yaml, path: path);
       }
-      return files;
     }
 
     Iterable<BrickPath> paths() sync* {
-      if (!yaml.containsKey('directories')) {
+      if (!yaml.containsKey('dirs')) {
         return;
       }
 
-      final value = yaml['directories'] as YamlMap;
+      final value = yaml['dirs'] as YamlMap;
 
       for (final entry in value.entries) {
         final path = entry.key as String;
@@ -53,61 +47,27 @@ class Brick {
       }
     }
 
-    final name = yaml.value['name'] as String?;
-
     return Brick._fromYaml(
-      path,
-      files(),
-      name,
-      paths(),
+      configuredFiles: files(),
+      source: source,
+      name: name,
+      configuredDirs: paths(),
     );
   }
 
-  final String sourcePath;
-  final Map<String, BrickFile> _layerFiles;
-  final String? _targetDir;
-  final Iterable<BrickPath> layerDirs;
-
-  Iterable<BrickFile> files() {
-    final dir = Directory(sourcePath);
-
-    if (!dir.existsSync()) {
-      return {};
-    }
-
-    final files = dir.listSync(recursive: true)
-      ..removeWhere((element) => element is Directory);
-
-    final layerFiles = {
-      for (final file in files)
-        file.path: BrickFile(
-          file.path.replaceFirst('$sourcePath$separator', ''),
-          sourcePath,
-        )
-    };
-
-    final layer = <String, BrickFile>{}
-      ..addAll(layerFiles)
-      ..addAll(_layerFiles);
-
-    return layer.values;
-  }
-
-  String get root => dirname(sourcePath);
+  final String name;
+  final BrickSource source;
+  final Iterable<BrickFile> configuredFiles;
+  final Iterable<BrickPath> configuredDirs;
 
   void writeBrick() {
-    var name = _targetDir ?? root;
-    if (name == '.') {
-      name = sourcePath;
-    }
-
-    final dir = join(
+    final targetDir = join(
       'bricks',
       name,
       '__brick__',
     );
 
-    final directory = Directory(dir);
+    final directory = Directory(targetDir);
     if (directory.existsSync()) {
       print('deleting ${directory.path}');
 
@@ -116,8 +76,12 @@ class Brick {
 
     print('writing $name');
 
-    for (final file in files()) {
-      file.writeTargetFile(dir, layerDirs);
+    for (final file in source.mergeFilesAndConfig(configuredFiles)) {
+      file.writeTargetFile(
+        targetDir: targetDir,
+        sourceFile: source.from(file),
+        configuredDirs: configuredDirs,
+      );
     }
 
     print('complete!');
