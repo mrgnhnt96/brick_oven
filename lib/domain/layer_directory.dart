@@ -95,7 +95,7 @@ class LayerDirectory {
 
   String get root => dirname(sourcePath);
 
-  void writeMason() {
+  void writeBrick() {
     var name = _targetDir ?? root;
     if (name == '.') {
       name = sourcePath;
@@ -117,24 +117,9 @@ class LayerDirectory {
     print('writing $name');
 
     for (final file in files()) {
-      file.writeMason(dir, layerDirs);
+      file.writeTargetFile(dir, layerDirs);
     }
 
-    _writeAnalysis();
-
     print('complete!');
-  }
-
-  void _writeAnalysis() {
-    File(join('bricks', 'analysis_options.yaml'))
-      ..createSync()
-      ..writeAsStringSync(
-        '''
-analyzer:
-  exclude:
-    - "**/*.dart"''',
-      );
-
-    return;
   }
 }

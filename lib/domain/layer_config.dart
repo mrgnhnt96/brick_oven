@@ -40,7 +40,7 @@ class LayerConfig {
 
   void writeMason() {
     for (final dir in directories) {
-      dir.writeMason();
+      dir.writeBrick();
     }
   }
 }

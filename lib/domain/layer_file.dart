@@ -115,7 +115,7 @@ class LayerFile {
     return File(sourcePath).readAsStringSync();
   }
 
-  void writeMason(
+  void writeTargetFile(
     String targetDir,
     Iterable<LayerPath> layerPaths,
   ) {
