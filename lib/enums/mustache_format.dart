@@ -15,7 +15,7 @@ enum MustacheFormat {
   upperCase,
 }
 
-extension MasonFormatX on MustacheFormat {
+extension MustacheFormatX on MustacheFormat {
   String toMustache(
     String content, {
     bool invert = false,
