@@ -111,7 +111,6 @@ class LayerDirectory {
     if (directory.existsSync()) {
       print('deleting ${directory.path}');
 
-      // TODO(mrgnhnt96): ask for permission?
       directory.deleteSync(recursive: true);
     }
 
