@@ -83,9 +83,10 @@ class MasonryFile {
     final prefix = _prefix ?? '';
     final suffix = _suffix ?? '';
 
-    final name = MasonFormat.snakeCase.toMustache('{$_name}');
+    final name = '$prefix{{{$_name}}}$suffix';
+    final formattedName = MasonFormat.snakeCase.toMustache(name);
 
-    return '$prefix$name$suffix$_preExtension$_extension';
+    return '$formattedName$_preExtension$_extension';
   }
 
   String get targetDir {

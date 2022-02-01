@@ -28,7 +28,7 @@ class MasonryPath {
 
     return path.replaceAll(
       pattern,
-      MasonFormat.snakeCase.toMustache('{$name}'),
+      MasonFormat.snakeCase.toMustache('{{{$name}}}'),
     );
   }
 }
