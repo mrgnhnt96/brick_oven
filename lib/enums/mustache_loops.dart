@@ -20,7 +20,7 @@ extension on String {
       case MustacheLoops.end:
         return '{{/$key}}';
       default:
-        throw Exception('Invalid loop type');
+        throw ArgumentError('Invalid loop type');
     }
   }
 }
