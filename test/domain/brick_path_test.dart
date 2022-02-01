@@ -1,22 +1,88 @@
-import 'package:brick_layer/domain/layer_path.dart';
+import 'package:brick_layer/domain/brick_path.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('#apply', () {
     const replacement = 'batman';
 
-    LayerPath layerPath(String path, [String replacement = replacement]) {
-      return LayerPath(
+    BrickPath brickPath(String path, [String replacement = replacement]) {
+      return BrickPath(
         path: path,
         name: replacement,
       );
     }
 
-    test('return original path when parts do not match', () {
-      final path = layerPath('/path/to/some');
-      const original = '/path/to/other/file.png';
-      final result = path.apply(original, originalPath: original);
-      expect(result, original);
+    group('return original path when', () {
+      test('parts do not match', () {
+        final path = brickPath('/path/to/some');
+        const original = '/path/to/other/file.png';
+        final result = path.apply(original, originalPath: original);
+        expect(result, original);
+      });
+
+      test('brick path is not a directory', () {
+        final path = brickPath('/path/to/some/file.png');
+        const original = '/path/to/some/file.png';
+        final result = path.apply(original, originalPath: original);
+
+        expect(result, original);
+      });
+
+      group('brick path is not more than 1 level', () {
+        group('without slashes', () {
+          test('as starting position', () {
+            final path = brickPath('path');
+            const original = '/path/to/some/file.png';
+            final result = path.apply(original, originalPath: original);
+
+            expect(result, original);
+          });
+
+          test('as non starting position', () {
+            final path = brickPath('to');
+            const original = '/path/to/some/file.png';
+            final result = path.apply(original, originalPath: original);
+
+            expect(result, original);
+          });
+        });
+
+        group('with starting slash', () {
+          test('as starting position', () {
+            final path = brickPath('/path');
+            const original = '/path/to/some/file.png';
+            final result = path.apply(original, originalPath: original);
+
+            expect(result, original);
+          });
+
+          test('as non starting position', () {
+            final path = brickPath('/to');
+            const original = '/path/to/some/file.png';
+            final result = path.apply(original, originalPath: original);
+
+            expect(result, original);
+          });
+        });
+
+        group('with ending slash', () {
+          test('as starting position', () {
+            final path = brickPath('path/');
+            const original = '/path/to/some/file.png';
+            final result = path.apply(original, originalPath: original);
+
+            expect(result, original);
+          });
+
+          test('as non starting position', () {
+            final path = brickPath('to/');
+            const original = '/path/to/some/file.png';
+            final result = path.apply(original, originalPath: original);
+
+            expect(result, original);
+          });
+        });
+      });
     });
 
     group('replaces only the first occurrence', () {
@@ -24,7 +90,7 @@ void main() {
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final layer = layerPath('foo');
+        final layer = brickPath('foo');
         path = layer.apply(path, originalPath: originalPath);
 
         expect(
@@ -37,7 +103,7 @@ void main() {
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final layer = layerPath('foo/bar');
+        final layer = brickPath('foo/bar');
         path = layer.apply(path, originalPath: originalPath);
 
         expect(
@@ -50,7 +116,7 @@ void main() {
         const originalPath = 'foo/bar/baz/foo/bar/baz';
         var path = originalPath;
 
-        final layer = layerPath('foo/bar/baz');
+        final layer = brickPath('foo/bar/baz');
         path = layer.apply(path, originalPath: originalPath);
 
         expect(
@@ -65,7 +131,7 @@ void main() {
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final layer = layerPath('foo/bar/baz/foo');
+        final layer = brickPath('foo/bar/baz/foo');
         path = layer.apply(path, originalPath: originalPath);
 
         expect(
@@ -78,7 +144,7 @@ void main() {
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final layer = layerPath('foo/bar/baz/foo/bar');
+        final layer = brickPath('foo/bar/baz/foo/bar');
         path = layer.apply(path, originalPath: originalPath);
 
         expect(
@@ -91,7 +157,7 @@ void main() {
         const originalPath = 'foo/bar/baz/foo/bar/baz';
         var path = originalPath;
 
-        final layer = layerPath('foo/bar/baz/foo/bar/baz');
+        final layer = brickPath('foo/bar/baz/foo/bar/baz');
         path = layer.apply(path, originalPath: originalPath);
 
         expect(
@@ -107,10 +173,10 @@ void main() {
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final layer = layerPath('foo');
+        final layer = brickPath('foo');
         path = layer.apply(path, originalPath: originalPath);
 
-        final layer2 = layerPath('foo/bar/baz/foo', replacement2);
+        final layer2 = brickPath('foo/bar/baz/foo', replacement2);
         path = layer2.apply(path, originalPath: originalPath);
 
         expect(
@@ -123,10 +189,10 @@ void main() {
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final layer = layerPath('foo');
+        final layer = brickPath('foo');
         path = layer.apply(path, originalPath: originalPath);
 
-        final layer2 = layerPath('foo/bar', replacement2);
+        final layer2 = brickPath('foo/bar', replacement2);
         path = layer2.apply(path, originalPath: originalPath);
 
         expect(

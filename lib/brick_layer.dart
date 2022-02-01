@@ -1,5 +1,5 @@
-import 'package:brick_layer/domain/layer_config.dart';
+import 'package:brick_layer/domain/brick_config.dart';
 
 void handle(List<String> arguements) {
-  LayerConfig().writeMason();
+  BrickConfig().writeMason();
 }
