@@ -8,15 +8,15 @@ import 'package:yaml/yaml.dart';
 class LayerDirectory {
   const LayerDirectory(
     this.sourcePath,
-  )   : _masonryFiles = const <String, LayerFile>{},
-        dirs = const <LayerPath>{},
+  )   : _layerFiles = const <String, LayerFile>{},
+        layerDirs = const <LayerPath>{},
         _targetDir = null;
 
   const LayerDirectory._fromYaml(
     this.sourcePath,
-    this._masonryFiles,
+    this._layerFiles,
     this._targetDir,
-    this.dirs,
+    this.layerDirs,
   );
 
   factory LayerDirectory.fromYaml(String path, YamlMap yaml) {
@@ -64,9 +64,9 @@ class LayerDirectory {
   }
 
   final String sourcePath;
-  final Map<String, LayerFile> _masonryFiles;
+  final Map<String, LayerFile> _layerFiles;
   final String? _targetDir;
-  final Iterable<LayerPath> dirs;
+  final Iterable<LayerPath> layerDirs;
 
   Iterable<LayerFile> files() {
     final dir = Directory(sourcePath);
@@ -78,7 +78,7 @@ class LayerDirectory {
     final files = dir.listSync(recursive: true)
       ..removeWhere((element) => element is Directory);
 
-    final masonryFiles = {
+    final layerFiles = {
       for (final file in files)
         file.path: LayerFile(
           file.path.replaceFirst('$sourcePath$separator', ''),
@@ -86,11 +86,11 @@ class LayerDirectory {
         )
     };
 
-    final masonry = <String, LayerFile>{}
-      ..addAll(masonryFiles)
-      ..addAll(_masonryFiles);
+    final layer = <String, LayerFile>{}
+      ..addAll(layerFiles)
+      ..addAll(_layerFiles);
 
-    return masonry.values;
+    return layer.values;
   }
 
   String get root => dirname(sourcePath);
@@ -117,7 +117,7 @@ class LayerDirectory {
     print('writing $name');
 
     for (final file in files()) {
-      file.writeMason(dir, dirs);
+      file.writeMason(dir, layerDirs);
     }
 
     _writeAnalysis();

@@ -117,12 +117,12 @@ class LayerFile {
 
   void writeMason(
     String targetDir,
-    Iterable<LayerPath> masonryPaths,
+    Iterable<LayerPath> layerPaths,
   ) {
     var path = join(targetDir, targetPath);
 
-    for (final masonryPath in masonryPaths) {
-      path = masonryPath.apply(path);
+    for (final layerPath in layerPaths) {
+      path = layerPath.apply(path);
     }
 
     final file = File(path);
