@@ -1,20 +1,20 @@
 import 'dart:io';
 
-import 'package:brick_layer/domain/layer_path.dart';
-import 'package:brick_layer/domain/layer_variable.dart';
+import 'package:brick_layer/domain/brick_path.dart';
+import 'package:brick_layer/domain/variable.dart';
 import 'package:brick_layer/enums/mustache_format.dart';
 import 'package:brick_layer/enums/mustache_loops.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
-class LayerFile {
-  const LayerFile(this._path, this.sourceDir)
+class BrickFile {
+  const BrickFile(this._path, this.sourceDir)
       : variables = null,
         _prefix = null,
         _suffix = null,
         _name = null;
 
-  const LayerFile._fromYaml(
+  const BrickFile._fromYaml(
     this._path, {
     required this.variables,
     required String? prefix,
@@ -25,7 +25,7 @@ class LayerFile {
         _suffix = suffix,
         _name = name;
 
-  const LayerFile._({
+  const BrickFile._({
     required this.variables,
     required String? prefix,
     required String? suffix,
@@ -37,8 +37,8 @@ class LayerFile {
         _suffix = suffix,
         _name = name;
 
-  factory LayerFile.fromYaml(String path, String target, YamlMap yaml) {
-    Iterable<LayerVariable> variables() sync* {
+  factory BrickFile.fromYaml(String path, String target, YamlMap yaml) {
+    Iterable<Variable> variables() sync* {
       if (!yaml.containsKey('vars')) {
         return;
       }
@@ -49,7 +49,7 @@ class LayerFile {
         final name = entry.key as String;
         final value = entry.value as YamlMap;
 
-        yield LayerVariable.fromYaml(name, value);
+        yield Variable.fromYaml(name, value);
       }
     }
 
@@ -59,7 +59,7 @@ class LayerFile {
     final prefix = fileConfig?.value['prefix'] as String?;
     final suffix = fileConfig?.value['suffix'] as String?;
 
-    return LayerFile._fromYaml(
+    return BrickFile._fromYaml(
       path,
       variables: variables(),
       prefix: prefix,
@@ -70,7 +70,7 @@ class LayerFile {
   }
 
   final String _path;
-  final Iterable<LayerVariable>? variables;
+  final Iterable<Variable>? variables;
   final String? _prefix;
   final String? _suffix;
   final String? _name;
@@ -117,7 +117,7 @@ class LayerFile {
 
   void writeTargetFile(
     String targetDir,
-    Iterable<LayerPath> layerPaths,
+    Iterable<BrickPath> layerPaths,
   ) {
     var path = targetPath;
 

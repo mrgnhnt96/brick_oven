@@ -2,8 +2,8 @@ import 'package:brick_layer/enums/mustache_format.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
-class LayerPath {
-  LayerPath({
+class BrickPath {
+  BrickPath({
     required this.name,
     required this.path,
   }) : placeholder = path.substring(path.lastIndexOf(separator) + 1).replaceAll(
@@ -11,10 +11,10 @@ class LayerPath {
               '',
             );
 
-  factory LayerPath.fromYaml(String path, YamlMap yaml) {
+  factory BrickPath.fromYaml(String path, YamlMap yaml) {
     final name = yaml['name'] as String;
 
-    return LayerPath(path: path, name: name);
+    return BrickPath(path: path, name: name);
   }
 
   final String placeholder;

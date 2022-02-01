@@ -1,15 +1,15 @@
 import 'package:brick_layer/enums/mustache_format.dart';
 import 'package:yaml/yaml.dart';
 
-class LayerVariable {
-  const LayerVariable({
+class Variable {
+  const Variable({
     required this.placeholder,
     required this.name,
     required this.format,
   })  : _suffix = null,
         _prefix = null;
 
-  const LayerVariable._fromYaml({
+  const Variable._fromYaml({
     required this.placeholder,
     required this.name,
     required String? suffix,
@@ -18,7 +18,7 @@ class LayerVariable {
   })  : _suffix = suffix,
         _prefix = prefix;
 
-  factory LayerVariable.fromYaml(String placeholder, YamlMap yaml) {
+  factory Variable.fromYaml(String placeholder, YamlMap yaml) {
     final format =
         MustacheFormat.values.retrieve(yaml.value['format'] as String?);
 
@@ -26,7 +26,7 @@ class LayerVariable {
     final suffix = yaml.value['suffix'] as String?;
     final prefix = yaml.value['prefix'] as String?;
 
-    return LayerVariable._fromYaml(
+    return Variable._fromYaml(
       placeholder: placeholder,
       name: name,
       format: format ?? MustacheFormat.camelCase,

@@ -1,27 +1,27 @@
 import 'dart:io';
 
-import 'package:brick_layer/domain/layer_file.dart';
-import 'package:brick_layer/domain/layer_path.dart';
+import 'package:brick_layer/domain/brick_file.dart';
+import 'package:brick_layer/domain/brick_path.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
-class LayerDirectory {
-  const LayerDirectory(
+class Brick {
+  const Brick(
     this.sourcePath,
-  )   : _layerFiles = const <String, LayerFile>{},
-        layerDirs = const <LayerPath>{},
+  )   : _layerFiles = const <String, BrickFile>{},
+        layerDirs = const <BrickPath>{},
         _targetDir = null;
 
-  const LayerDirectory._fromYaml(
+  const Brick._fromYaml(
     this.sourcePath,
     this._layerFiles,
     this._targetDir,
     this.layerDirs,
   );
 
-  factory LayerDirectory.fromYaml(String path, YamlMap yaml) {
-    Map<String, LayerFile> files() {
-      final files = <String, LayerFile>{};
+  factory Brick.fromYaml(String path, YamlMap yaml) {
+    Map<String, BrickFile> files() {
+      final files = <String, BrickFile>{};
 
       if (!yaml.containsKey('files')) {
         return files;
@@ -33,12 +33,12 @@ class LayerDirectory {
         final name = entry.key as String;
         final value = entry.value as YamlMap;
 
-        files[join(path, name)] = LayerFile.fromYaml(name, path, value);
+        files[join(path, name)] = BrickFile.fromYaml(name, path, value);
       }
       return files;
     }
 
-    Iterable<LayerPath> paths() sync* {
+    Iterable<BrickPath> paths() sync* {
       if (!yaml.containsKey('directories')) {
         return;
       }
@@ -49,13 +49,13 @@ class LayerDirectory {
         final path = entry.key as String;
         final value = entry.value as YamlMap;
 
-        yield LayerPath.fromYaml(path, value);
+        yield BrickPath.fromYaml(path, value);
       }
     }
 
     final name = yaml.value['name'] as String?;
 
-    return LayerDirectory._fromYaml(
+    return Brick._fromYaml(
       path,
       files(),
       name,
@@ -64,11 +64,11 @@ class LayerDirectory {
   }
 
   final String sourcePath;
-  final Map<String, LayerFile> _layerFiles;
+  final Map<String, BrickFile> _layerFiles;
   final String? _targetDir;
-  final Iterable<LayerPath> layerDirs;
+  final Iterable<BrickPath> layerDirs;
 
-  Iterable<LayerFile> files() {
+  Iterable<BrickFile> files() {
     final dir = Directory(sourcePath);
 
     if (!dir.existsSync()) {
@@ -80,13 +80,13 @@ class LayerDirectory {
 
     final layerFiles = {
       for (final file in files)
-        file.path: LayerFile(
+        file.path: BrickFile(
           file.path.replaceFirst('$sourcePath$separator', ''),
           sourcePath,
         )
     };
 
-    final layer = <String, LayerFile>{}
+    final layer = <String, BrickFile>{}
       ..addAll(layerFiles)
       ..addAll(_layerFiles);
 
