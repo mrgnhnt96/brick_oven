@@ -16,12 +16,12 @@ class BrickConfig {
 
     final directories = <Brick>[];
 
-    if (config.containsKey('targets')) {
-      final targets = config['targets'] as YamlMap;
+    if (config.containsKey('bricks')) {
+      final bricks = config['bricks'] as YamlMap;
 
-      for (final target in targets.entries) {
-        final name = target.key as String;
-        final value = target.value as YamlMap;
+      for (final brick in bricks.entries) {
+        final name = brick.key as String;
+        final value = brick.value as YamlMap;
 
         directories.add(Brick.fromYaml(name, value));
       }
