@@ -1,27 +1,27 @@
 import 'dart:io';
 
-import 'package:masonry/domain/masonry_file.dart';
-import 'package:masonry/domain/masonry_path.dart';
+import 'package:brick_layer/domain/layer_file.dart';
+import 'package:brick_layer/domain/layer_path.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
-class MasonryDirectory {
-  const MasonryDirectory(
+class LayerDirectory {
+  const LayerDirectory(
     this.sourcePath,
-  )   : _masonryFiles = const <String, MasonryFile>{},
-        dirs = const <MasonryPath>{},
+  )   : _masonryFiles = const <String, LayerFile>{},
+        dirs = const <LayerPath>{},
         _targetDir = null;
 
-  const MasonryDirectory._fromYaml(
+  const LayerDirectory._fromYaml(
     this.sourcePath,
     this._masonryFiles,
     this._targetDir,
     this.dirs,
   );
 
-  factory MasonryDirectory.fromYaml(String path, YamlMap yaml) {
-    Map<String, MasonryFile> files() {
-      final files = <String, MasonryFile>{};
+  factory LayerDirectory.fromYaml(String path, YamlMap yaml) {
+    Map<String, LayerFile> files() {
+      final files = <String, LayerFile>{};
 
       if (!yaml.containsKey('files')) {
         return files;
@@ -33,12 +33,12 @@ class MasonryDirectory {
         final name = entry.key as String;
         final value = entry.value as YamlMap;
 
-        files[join(path, name)] = MasonryFile.fromYaml(name, path, value);
+        files[join(path, name)] = LayerFile.fromYaml(name, path, value);
       }
       return files;
     }
 
-    Iterable<MasonryPath> paths() sync* {
+    Iterable<LayerPath> paths() sync* {
       if (!yaml.containsKey('directories')) {
         return;
       }
@@ -49,13 +49,13 @@ class MasonryDirectory {
         final path = entry.key as String;
         final value = entry.value as YamlMap;
 
-        yield MasonryPath.fromYaml(path, value);
+        yield LayerPath.fromYaml(path, value);
       }
     }
 
     final name = yaml.value['name'] as String?;
 
-    return MasonryDirectory._fromYaml(
+    return LayerDirectory._fromYaml(
       path,
       files(),
       name,
@@ -64,11 +64,11 @@ class MasonryDirectory {
   }
 
   final String sourcePath;
-  final Map<String, MasonryFile> _masonryFiles;
+  final Map<String, LayerFile> _masonryFiles;
   final String? _targetDir;
-  final Iterable<MasonryPath> dirs;
+  final Iterable<LayerPath> dirs;
 
-  Iterable<MasonryFile> files() {
+  Iterable<LayerFile> files() {
     final dir = Directory(sourcePath);
 
     if (!dir.existsSync()) {
@@ -80,13 +80,13 @@ class MasonryDirectory {
 
     final masonryFiles = {
       for (final file in files)
-        file.path: MasonryFile(
+        file.path: LayerFile(
           file.path.replaceFirst('$sourcePath$separator', ''),
           sourcePath,
         )
     };
 
-    final masonry = <String, MasonryFile>{}
+    final masonry = <String, LayerFile>{}
       ..addAll(masonryFiles)
       ..addAll(_masonryFiles);
 

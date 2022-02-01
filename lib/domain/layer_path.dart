@@ -1,16 +1,16 @@
-import 'package:masonry/enums/mason_format.dart';
+import 'package:brick_layer/enums/mustache_format.dart';
 import 'package:yaml/yaml.dart';
 
-class MasonryPath {
-  const MasonryPath({
+class LayerPath {
+  const LayerPath({
     required this.placeholder,
     required this.name,
   });
 
-  factory MasonryPath.fromYaml(String part, YamlMap yaml) {
+  factory LayerPath.fromYaml(String part, YamlMap yaml) {
     final name = yaml['name'] as String;
 
-    return MasonryPath(
+    return LayerPath(
       placeholder: part,
       name: name,
     );
@@ -28,7 +28,7 @@ class MasonryPath {
 
     return path.replaceAll(
       pattern,
-      MasonFormat.snakeCase.toMustache('{{{$name}}}'),
+      MustacheFormat.snakeCase.toMustache('{{{$name}}}'),
     );
   }
 }

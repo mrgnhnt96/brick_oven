@@ -1,6 +1,6 @@
 // ignore_for_file: parameter_assignments
 
-enum MasonFormat {
+enum MustacheFormat {
   camelCase,
   constantCase,
   dotCase,
@@ -15,7 +15,7 @@ enum MasonFormat {
   upperCase,
 }
 
-extension MasonFormatX on MasonFormat {
+extension MasonFormatX on MustacheFormat {
   String toMustache(
     String content, {
     bool invert = false,

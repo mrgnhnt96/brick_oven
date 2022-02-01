@@ -2,11 +2,11 @@
 //
 import 'dart:io';
 
-import 'package:masonry/domain/masonry_directory.dart';
+import 'package:brick_layer/domain/layer_directory.dart';
 import 'package:yaml/yaml.dart';
 
-class MasonryConfig {
-  factory MasonryConfig() {
+class LayerConfig {
+  factory LayerConfig() {
     final configFile = File('masonry.yaml');
     if (!configFile.existsSync()) {
       throw Exception('masonry.yaml not found');
@@ -14,7 +14,7 @@ class MasonryConfig {
 
     final config = loadYaml(configFile.readAsStringSync()) as YamlMap;
 
-    final directories = <MasonryDirectory>[];
+    final directories = <LayerDirectory>[];
 
     if (config.containsKey('targets')) {
       final targets = config['targets'] as YamlMap;
@@ -23,20 +23,20 @@ class MasonryConfig {
         final name = target.key as String;
         final value = target.value as YamlMap;
 
-        directories.add(MasonryDirectory.fromYaml(name, value));
+        directories.add(LayerDirectory.fromYaml(name, value));
       }
     }
 
-    return MasonryConfig._(
+    return LayerConfig._(
       directories: directories,
     );
   }
 
-  const MasonryConfig._({
+  const LayerConfig._({
     required this.directories,
   });
 
-  final Iterable<MasonryDirectory> directories;
+  final Iterable<LayerDirectory> directories;
 
   void writeMason() {
     for (final dir in directories) {

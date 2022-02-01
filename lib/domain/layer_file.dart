@@ -1,20 +1,20 @@
 import 'dart:io';
 
-import 'package:masonry/domain/masonry_path.dart';
-import 'package:masonry/domain/masonry_variable.dart';
-import 'package:masonry/enums/mason_format.dart';
-import 'package:masonry/enums/mason_loops.dart';
+import 'package:brick_layer/domain/layer_path.dart';
+import 'package:brick_layer/domain/layer_variable.dart';
+import 'package:brick_layer/enums/mustache_format.dart';
+import 'package:brick_layer/enums/mustache_loops.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
-class MasonryFile {
-  const MasonryFile(this._path, this.sourceDir)
+class LayerFile {
+  const LayerFile(this._path, this.sourceDir)
       : variables = null,
         _prefix = null,
         _suffix = null,
         _name = null;
 
-  const MasonryFile._fromYaml(
+  const LayerFile._fromYaml(
     this._path, {
     required this.variables,
     required String? prefix,
@@ -25,7 +25,7 @@ class MasonryFile {
         _suffix = suffix,
         _name = name;
 
-  const MasonryFile._({
+  const LayerFile._({
     required this.variables,
     required String? prefix,
     required String? suffix,
@@ -37,8 +37,8 @@ class MasonryFile {
         _suffix = suffix,
         _name = name;
 
-  factory MasonryFile.fromYaml(String path, String target, YamlMap yaml) {
-    Iterable<MasonryVariable> variables() sync* {
+  factory LayerFile.fromYaml(String path, String target, YamlMap yaml) {
+    Iterable<LayerVariable> variables() sync* {
       if (!yaml.containsKey('vars')) {
         return;
       }
@@ -49,7 +49,7 @@ class MasonryFile {
         final name = entry.key as String;
         final value = entry.value as YamlMap;
 
-        yield MasonryVariable.fromYaml(name, value);
+        yield LayerVariable.fromYaml(name, value);
       }
     }
 
@@ -59,7 +59,7 @@ class MasonryFile {
     final prefix = fileConfig?.value['prefix'] as String?;
     final suffix = fileConfig?.value['suffix'] as String?;
 
-    return MasonryFile._fromYaml(
+    return LayerFile._fromYaml(
       path,
       variables: variables(),
       prefix: prefix,
@@ -70,7 +70,7 @@ class MasonryFile {
   }
 
   final String _path;
-  final Iterable<MasonryVariable>? variables;
+  final Iterable<LayerVariable>? variables;
   final String? _prefix;
   final String? _suffix;
   final String? _name;
@@ -84,7 +84,7 @@ class MasonryFile {
     final suffix = _suffix ?? '';
 
     final name = '$prefix{{{$_name}}}$suffix';
-    final formattedName = MasonFormat.snakeCase.toMustache(name);
+    final formattedName = MustacheFormat.snakeCase.toMustache(name);
 
     return '$formattedName$_preExtension$_extension';
   }
@@ -117,7 +117,7 @@ class MasonryFile {
 
   void writeMason(
     String targetDir,
-    Iterable<MasonryPath> masonryPaths,
+    Iterable<LayerPath> masonryPaths,
   ) {
     var path = join(targetDir, targetPath);
 
@@ -147,12 +147,12 @@ class MasonryFile {
       content = content.replaceAllMapped(pattern, (match) {
         final value = match.group(2);
 
-        final loop = MasonLoops.values.retrieve(value);
+        final loop = MustacheLoops.values.retrieve(value);
         if (loop != null) {
-          return MasonLoops.toMustache(variable.name, () => loop);
+          return MustacheLoops.toMustache(variable.name, () => loop);
         }
 
-        final format = MasonFormat.values.retrieve('${value}Case');
+        final format = MustacheFormat.values.retrieve('${value}Case');
 
         String result;
         if (format == null) {

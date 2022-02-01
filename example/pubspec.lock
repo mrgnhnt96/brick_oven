@@ -36,6 +36,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  brick_layer:
+    dependency: "direct main"
+    description:
+      path: ".."
+      relative: true
+    source: path
+    version: "1.0.0"
+  brick_layer_test:
+    dependency: "direct dev"
+    description:
+      path: "../../brick_layer_test"
+      relative: true
+    source: path
+    version: "1.0.0"
   charcode:
     dependency: transitive
     description:
@@ -134,20 +148,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
-  masonry:
-    dependency: "direct main"
-    description:
-      path: ".."
-      relative: true
-    source: path
-    version: "1.0.0"
-  masonry_test:
-    dependency: "direct dev"
-    description:
-      path: "../../masonry_test"
-      relative: true
-    source: path
-    version: "1.0.0"
   matcher:
     dependency: transitive
     description:

@@ -1,15 +1,15 @@
-import 'package:masonry/enums/mason_format.dart';
+import 'package:brick_layer/enums/mustache_format.dart';
 import 'package:yaml/yaml.dart';
 
-class MasonryVariable {
-  const MasonryVariable({
+class LayerVariable {
+  const LayerVariable({
     required this.placeholder,
     required this.name,
     required this.format,
   })  : _suffix = null,
         _prefix = null;
 
-  const MasonryVariable._fromYaml({
+  const LayerVariable._fromYaml({
     required this.placeholder,
     required this.name,
     required String? suffix,
@@ -18,17 +18,18 @@ class MasonryVariable {
   })  : _suffix = suffix,
         _prefix = prefix;
 
-  factory MasonryVariable.fromYaml(String placeholder, YamlMap yaml) {
-    final format = MasonFormat.values.retrieve(yaml.value['format'] as String?);
+  factory LayerVariable.fromYaml(String placeholder, YamlMap yaml) {
+    final format =
+        MustacheFormat.values.retrieve(yaml.value['format'] as String?);
 
     final name = yaml.value['name'] as String;
     final suffix = yaml.value['suffix'] as String?;
     final prefix = yaml.value['prefix'] as String?;
 
-    return MasonryVariable._fromYaml(
+    return LayerVariable._fromYaml(
       placeholder: placeholder,
       name: name,
-      format: format ?? MasonFormat.camelCase,
+      format: format ?? MustacheFormat.camelCase,
       suffix: suffix,
       prefix: prefix,
     );
@@ -38,12 +39,12 @@ class MasonryVariable {
   final String name;
   final String? _prefix;
   final String? _suffix;
-  final MasonFormat format;
+  final MustacheFormat format;
 
   String get prefix => _prefix ?? '';
   String get suffix => _suffix ?? '';
 
-  String formatName(MasonFormat format) {
+  String formatName(MustacheFormat format) {
     return format.toMustache('$prefix{{{$name}}}$suffix');
   }
 

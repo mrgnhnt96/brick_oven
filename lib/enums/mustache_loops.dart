@@ -1,4 +1,4 @@
-class MasonLoops {
+class MustacheLoops {
   static const start = 'start';
   static const end = 'end';
   static const startInvert = 'nstart';
@@ -13,11 +13,11 @@ class MasonLoops {
 extension on String {
   String getloop(String key) {
     switch (this) {
-      case MasonLoops.start:
+      case MustacheLoops.start:
         return '{{#$key}}';
-      case MasonLoops.startInvert:
+      case MustacheLoops.startInvert:
         return '{{^$key}}';
-      case MasonLoops.end:
+      case MustacheLoops.end:
         return '{{/$key}}';
       default:
         throw Exception('Invalid loop type');

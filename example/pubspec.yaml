@@ -4,11 +4,11 @@ environment:
   sdk: '>=2.15.1 <3.0.0'
 
 dependencies:
-  masonry:
+  brick_layer:
     path: ../
 
 dev_dependencies:
-  masonry_test:
-    path: ../../masonry_test
+  brick_layer_test:
+    path: ../../brick_layer_test
   test: ^1.16.0
   very_good_analysis: ^2.4.0
