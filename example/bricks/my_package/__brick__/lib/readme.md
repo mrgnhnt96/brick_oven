@@ -1,4 +1,4 @@
-this will show up 
+this will show up
 
 {{#optional}}
 This may show up
