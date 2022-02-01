@@ -1,0 +1,28 @@
+name: my_package
+description: My package
+version: 0.1.0+1
+vars:
+  masonry:
+    type: string
+    default: masonry
+    prompt: What is the name of the library?
+  other:
+    type: string
+    default: other
+    prompt: What is the name of the file?
+  other_generated:
+    type: string
+    default: other_generated
+    prompt: What is the name of the generated file?
+  my_nested:
+    type: string
+    default: my_nested
+    prompt: What is the name of the nested directory?
+  my_hand:
+    type: string
+    default: my_hand
+    prompt: What is the name of the outta-hand directory?
+  optional:
+    type: boolean
+    default: true
+    prompt: optional?

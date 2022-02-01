@@ -16,15 +16,15 @@ targets:
           _CLASS_NAME_:
             name: masonry
             format: pascalCase
-            prefix: SomePrefix
-            suffix: SomeSuffix
+            prefix: some_prefix_
+            suffix: _some_suffix
       lib/nested/nested_file.dart:
         file:
           name: other
-          prefix: some_prefix
-          suffix: some_suffix
+          prefix: some_prefix_
+          suffix: _some_suffix
       lib/nested/nested_file.g.dart:
         file:
           name: other_generated
-          prefix: some_prefix
-          suffix: some_suffix
+          prefix: some_prefix_
+          suffix: _some_suffix

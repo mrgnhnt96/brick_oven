@@ -1,12 +1,12 @@
-part '{{#snakeCase}}SomePrefix{{masonry}}SomeSuffix{{/snakeCase}}.dart';
+part '{{#snakeCase}}some_prefix_{{{masonry}}}_some_suffix{{/snakeCase}}.dart';
 
-class {{#pascalCase}}SomePrefix{{masonry}}SomeSuffix{{/pascalCase}} {
-  const {{#pascalCase}}SomePrefix{{masonry}}SomeSuffix{{/pascalCase}}({
+class {{#pascalCase}}some_prefix_{{{masonry}}}_some_suffix{{/pascalCase}} {
+  const {{#pascalCase}}some_prefix_{{{masonry}}}_some_suffix{{/pascalCase}}({
     required this.name,
     required this.value,
   });
 
-  const {{#pascalCase}}SomePrefix{{masonry}}SomeSuffix{{/pascalCase}}._private()
+  const {{#pascalCase}}some_prefix_{{{masonry}}}_some_suffix{{/pascalCase}}._private()
       : name = '',
         value = '';
 
