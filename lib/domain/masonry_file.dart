@@ -144,7 +144,6 @@ class MasonryFile {
     for (final variable in variables!) {
       final pattern = RegExp('(.*)${variable.placeholder}' r'(\w*!?)(.*)');
       content = content.replaceAllMapped(pattern, (match) {
-        print(match);
         final value = match.group(2);
 
         final loop = MasonLoops.values.retrieve(value);
