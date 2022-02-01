@@ -1,4 +1,4 @@
-import 'package:brick_layer/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_path.dart';
 import 'package:test/test.dart';
 
 void main() {

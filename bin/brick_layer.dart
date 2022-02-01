@@ -1,4 +1,4 @@
-import 'package:brick_layer/brick_layer.dart';
+import 'package:brick_oven/brick_oven.dart';
 
 void main(List<String> arguments) {
   handle(arguments);

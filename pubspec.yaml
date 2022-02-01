@@ -1,4 +1,4 @@
-name: brick_layer
+name: brick_oven
 description: A sample command-line application.
 version: 1.0.0
 publish_to: none
@@ -18,6 +18,6 @@ dev_dependencies:
   very_good_analysis: ^2.4.0
 
 executables:
-  brick_layer:
-    path: bin/brick_layer.dart
-    dart: bin/brick_layer.dart
+  brick_oven:
+    path: bin/brick_oven.dart
+    dart: bin/brick_oven.dart

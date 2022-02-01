@@ -2,14 +2,14 @@
 //
 import 'dart:io';
 
-import 'package:brick_layer/domain/brick.dart';
+import 'package:brick_oven/domain/brick.dart';
 import 'package:yaml/yaml.dart';
 
 class BrickConfig {
   factory BrickConfig() {
-    final configFile = File('brick_layer.yaml');
+    final configFile = File('brick_oven.yaml');
     if (!configFile.existsSync()) {
-      throw Exception('brick_layer.yaml not found');
+      throw Exception('brick_oven.yaml not found');
     }
 
     final config = loadYaml(configFile.readAsStringSync()) as YamlMap;

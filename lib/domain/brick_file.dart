@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:brick_layer/domain/brick_path.dart';
-import 'package:brick_layer/domain/variable.dart';
-import 'package:brick_layer/enums/mustache_format.dart';
-import 'package:brick_layer/enums/mustache_loops.dart';
+import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/variable.dart';
+import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 

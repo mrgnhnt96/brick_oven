@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:brick_layer/domain/brick_file.dart';
-import 'package:brick_layer/domain/brick_path.dart';
-import 'package:brick_layer/domain/brick_source.dart';
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_source.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
