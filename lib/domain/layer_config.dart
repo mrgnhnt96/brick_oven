@@ -7,9 +7,9 @@ import 'package:yaml/yaml.dart';
 
 class LayerConfig {
   factory LayerConfig() {
-    final configFile = File('masonry.yaml');
+    final configFile = File('brick_layer.yaml');
     if (!configFile.existsSync()) {
-      throw Exception('masonry.yaml not found');
+      throw Exception('brick_layer.yaml not found');
     }
 
     final config = loadYaml(configFile.readAsStringSync()) as YamlMap;
