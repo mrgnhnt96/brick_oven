@@ -5,8 +5,9 @@ class Variable {
   const Variable({
     required this.placeholder,
     required this.name,
-    required this.format,
+    MustacheFormat? format,
   })  : _suffix = null,
+        format = format ?? MustacheFormat.camelCase,
         _prefix = null;
 
   const Variable._fromYaml({
@@ -14,22 +15,28 @@ class Variable {
     required this.name,
     required String? suffix,
     required String? prefix,
-    required this.format,
+    MustacheFormat? format,
   })  : _suffix = suffix,
+        format = format ?? MustacheFormat.camelCase,
         _prefix = prefix;
 
-  factory Variable.fromYaml(String placeholder, YamlMap yaml) {
-    final format =
-        MustacheFormat.values.retrieve(yaml.value['format'] as String?);
+  factory Variable.fromYaml(String name, YamlMap yaml) {
+    final map = yaml.value;
 
-    final name = yaml.value['name'] as String;
-    final suffix = yaml.value['suffix'] as String?;
-    final prefix = yaml.value['prefix'] as String?;
+    final formatString = map.remove('format') as String?;
+    final format = MustacheFormat.values.retrieve(formatString);
+    final placeholder = map.remove('placeholder') as String?;
+    final suffix = map.remove('suffix') as String?;
+    final prefix = map.remove('prefix') as String?;
+
+    if (map.isNotEmpty) {
+      throw ArgumentError('Unknown keys in variable: ${map.keys}');
+    }
 
     return Variable._fromYaml(
-      placeholder: placeholder,
+      placeholder: placeholder ?? name,
       name: name,
-      format: format ?? MustacheFormat.camelCase,
+      format: format,
       suffix: suffix,
       prefix: prefix,
     );
