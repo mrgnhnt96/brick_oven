@@ -1,8 +1,9 @@
 import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
-class BrickPath {
+class BrickPath extends Equatable {
   factory BrickPath({
     required String name,
     required String path,
@@ -22,8 +23,30 @@ class BrickPath {
     required this.placeholder,
   });
 
-  factory BrickPath.fromYaml(String path, YamlMap yaml) {
-    final name = yaml['name'] as String;
+  factory BrickPath.fromYaml(String path, dynamic yaml) {
+    String? handleYaml(YamlMap yaml) {
+      final data = yaml.value;
+
+      final name = data.remove('name') as String?;
+
+      if (data.isNotEmpty) {
+        throw ArgumentError('Unknown keys in path: ${data.keys}');
+      }
+
+      return name;
+    }
+
+    String? name;
+    switch (yaml.runtimeType) {
+      case String:
+        name = yaml as String;
+        break;
+      case YamlMap:
+        name = handleYaml(yaml as YamlMap);
+        break;
+    }
+
+    name ??= basename(path);
 
     return BrickPath(path: path, name: name);
   }
@@ -67,4 +90,7 @@ class BrickPath {
 
     return pathParts.join(separator);
   }
+
+  @override
+  List<Object?> get props => [name, path, placeholder];
 }
