@@ -1,20 +1,38 @@
 import 'dart:io';
 
 import 'package:brick_oven/domain/brick_file.dart';
+import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
-class BrickSource {
+class BrickSource extends Equatable {
   const BrickSource({
     required this.localPath,
   });
 
-  factory BrickSource.fromYaml(YamlMap yaml) {
-    final path = yaml.value['source'] as String?;
+  const BrickSource.none() : localPath = null;
 
-    return BrickSource(
-      localPath: path,
-    );
+  factory BrickSource.fromYaml(dynamic yaml) {
+    BrickSource handleYaml(YamlMap yaml) {
+      final data = yaml.value;
+
+      final localPath = data.remove('path') as String?;
+
+      if (data.isNotEmpty) {
+        throw ArgumentError('Unknown keys in source: ${data.keys}');
+      }
+
+      return BrickSource(localPath: localPath);
+    }
+
+    switch (yaml.runtimeType) {
+      case String:
+        return BrickSource(localPath: yaml as String);
+      case YamlMap:
+        return handleYaml(yaml as YamlMap);
+      default:
+        return const BrickSource.none();
+    }
   }
 
   final String? localPath;
@@ -76,6 +94,9 @@ class BrickSource {
   File from(BrickFile file) {
     return File(join(sourceDir, file.path));
   }
+
+  @override
+  List<Object?> get props => [localPath];
 }
 
 extension on Iterable<BrickFile> {
