@@ -1,24 +1,23 @@
 import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:equatable/equatable.dart';
 import 'package:yaml/yaml.dart';
 
-class Variable {
+class Variable extends Equatable {
   const Variable({
     required this.placeholder,
     required this.name,
     MustacheFormat? format,
-  })  : _suffix = null,
-        format = format ?? MustacheFormat.camelCase,
-        _prefix = null;
+    this.suffix,
+    this.prefix,
+  }) : format = format ?? MustacheFormat.camelCase;
 
   const Variable._fromYaml({
     required this.placeholder,
     required this.name,
-    required String? suffix,
-    required String? prefix,
+    required this.suffix,
+    required this.prefix,
     MustacheFormat? format,
-  })  : _suffix = suffix,
-        format = format ?? MustacheFormat.camelCase,
-        _prefix = prefix;
+  }) : format = format ?? MustacheFormat.camelCase;
 
   factory Variable.fromYaml(String name, YamlMap yaml) {
     final map = yaml.value;
@@ -44,16 +43,22 @@ class Variable {
 
   final String placeholder;
   final String name;
-  final String? _prefix;
-  final String? _suffix;
+  final String? prefix;
+  final String? suffix;
   final MustacheFormat format;
 
-  String get prefix => _prefix ?? '';
-  String get suffix => _suffix ?? '';
-
   String formatName(MustacheFormat format) {
-    return format.toMustache('$prefix{{{$name}}}$suffix');
+    return format.toMustache('${prefix ?? ''}{{{$name}}}${suffix ?? ''}');
   }
 
   String get formattedName => formatName(format);
+
+  @override
+  List<Object?> get props => [
+        placeholder,
+        name,
+        prefix,
+        suffix,
+        format,
+      ];
 }
