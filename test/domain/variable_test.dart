@@ -1,8 +1,9 @@
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
+
+import '../utils/fakes.dart';
+import '../utils/to_yaml.dart';
 
 void main() {
   const name = 'scooby-doo';
@@ -48,16 +49,19 @@ void main() {
     }
 
     test('parses everything when provided', () {
-      final map = json(
+      const variable = Variable(
+        name: name,
         placeholder: 'placeholder',
         format: MustacheFormat.camelCase,
         suffix: 'suffix',
         prefix: 'prefix',
       );
 
-      final variable = variableFromJson(map);
+      final yaml = variable.toJson();
 
-      expect(variable, isNotNull);
+      final result = variableFromJson(yaml);
+
+      expect(result, variable);
     });
 
     test('parses everything except for format', () {
@@ -202,13 +206,4 @@ void main() {
 
     expect(variable.formattedName, '{{#camelCase}}{{{$name}}}{{/camelCase}}');
   });
-}
-
-class FakeYamlMap extends Fake implements YamlMap {
-  FakeYamlMap(Map<String, dynamic> value) : _map = value;
-
-  final Map<String, dynamic> _map;
-
-  @override
-  Map get value => _map;
 }
