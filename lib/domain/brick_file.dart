@@ -4,48 +4,47 @@ import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
+import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
-class BrickFile {
+class BrickFile extends Equatable {
   const BrickFile(this.path)
-      : variables = null,
-        _prefix = null,
-        _suffix = null,
-        _name = null;
+      : variables = const [],
+        prefix = null,
+        suffix = null,
+        providedName = null;
 
   const BrickFile._fromYaml(
     this.path, {
     required this.variables,
-    required String? prefix,
-    required String? suffix,
+    required this.prefix,
+    required this.suffix,
     required String? name,
-  })  : _prefix = prefix,
-        _suffix = suffix,
-        _name = name;
+  }) : providedName = name;
 
   const BrickFile._({
     required this.variables,
-    required String? prefix,
-    required String? suffix,
+    required this.prefix,
+    required this.suffix,
     required String? name,
     required this.path,
-  })  : _prefix = prefix,
-        _suffix = suffix,
-        _name = name;
+  }) : providedName = name;
 
   factory BrickFile.fromYaml(
     YamlMap yaml, {
     required String path,
   }) {
+    final data = yaml.value;
+
+    final variablesData = data.remove('vars') as YamlMap?;
+
     Iterable<Variable> variables() sync* {
-      if (!yaml.containsKey('vars')) {
+      if (variablesData == null) {
         return;
       }
 
-      final variables = yaml['vars'] as YamlMap;
-
-      for (final entry in variables.entries) {
+      for (final entry in variablesData.entries) {
         final name = entry.key as String;
         final value = entry.value as YamlMap;
 
@@ -53,11 +52,22 @@ class BrickFile {
       }
     }
 
-    final fileConfig = yaml['file'] as YamlMap?;
+    final fileConfigYaml = data.remove('file') as YamlMap?;
+    final fileConfig = fileConfigYaml?.value;
 
-    final name = fileConfig?.value['name'] as String?;
-    final prefix = fileConfig?.value['prefix'] as String?;
-    final suffix = fileConfig?.value['suffix'] as String?;
+    final name = fileConfig?.remove('name') as String?;
+    final prefix = fileConfig?.remove('prefix') as String?;
+    final suffix = fileConfig?.remove('suffix') as String?;
+
+    if (data.isNotEmpty) {
+      throw ArgumentError('Unrecognized keys in file config: ${data.keys}');
+    }
+
+    if (fileConfig?.isNotEmpty == true) {
+      throw ArgumentError(
+        'Unrecognized keys in file config: ${fileConfig!.keys}',
+      );
+    }
 
     return BrickFile._fromYaml(
       path,
@@ -69,19 +79,19 @@ class BrickFile {
   }
 
   final String path;
-  final Iterable<Variable>? variables;
-  final String? _prefix;
-  final String? _suffix;
-  final String? _name;
+  final Iterable<Variable> variables;
+  final String? prefix;
+  final String? suffix;
+  final String? providedName;
 
   String get fileName {
-    if (_name == null) {
+    if (providedName == null) {
       return basename(path);
     }
-    final prefix = _prefix ?? '';
-    final suffix = _suffix ?? '';
+    final prefix = this.prefix ?? '';
+    final suffix = this.suffix ?? '';
 
-    final name = '$prefix{{{$_name}}}$suffix';
+    final name = '$prefix{{{$providedName}}}$suffix';
     final formattedName = MustacheFormat.snakeCase.toMustache(name);
 
     return '$formattedName$_extension';
@@ -113,7 +123,7 @@ class BrickFile {
       return;
     }
 
-    if (variables == null || variables?.isEmpty == true) {
+    if (variables.isEmpty == true) {
       sourceFile.copySync(file.path);
 
       return;
@@ -121,7 +131,7 @@ class BrickFile {
 
     var content = sourceFile.readAsStringSync();
 
-    for (final variable in variables!) {
+    for (final variable in variables) {
       final pattern = RegExp('(.*)${variable.placeholder}' r'(\w*!?)(.*)');
       content = content.replaceAllMapped(pattern, (match) {
         final value = match.group(2);
@@ -149,4 +159,13 @@ class BrickFile {
 
     file.writeAsStringSync(content);
   }
+
+  @override
+  List<Object?> get props => [
+        path,
+        variables.toList(),
+        prefix,
+        suffix,
+        providedName,
+      ];
 }
