@@ -11,12 +11,12 @@ bricks:
     files:
       lib/readme.md:
         vars:
-          _OPTIONAL_:
-            name: optional
+          optional:
+            placeholder: _OPTIONAL_
       lib/main.dart:
         vars:
-          _CLASS_NAME_:
-            name: masonry
+          masonry:
+            placeholder: _CLASS_NAME_
             format: pascalCase
             prefix: some_prefix_
             suffix: _some_suffix
@@ -48,6 +48,6 @@ bricks:
           prefix: some_prefix_
           suffix: _some_suffix
         vars:
-          outta hand:
-            name: something
+          something:
+            placeholder: otta hand
             format: pascalCase
