@@ -3,10 +3,18 @@ import 'dart:io';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
+import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
-class Brick {
+class Brick extends Equatable {
+  const Brick({
+    required this.name,
+    required this.source,
+    required this.configuredDirs,
+    required this.configuredFiles,
+  });
+
   const Brick._fromYaml({
     required this.name,
     required this.source,
@@ -15,16 +23,16 @@ class Brick {
   });
 
   factory Brick.fromYaml(String name, YamlMap yaml) {
-    final source = BrickSource.fromYaml(yaml);
+    final data = yaml.value;
+    final source = BrickSource.fromYaml(data.remove('source'));
 
+    final filesData = data.remove('files') as YamlMap?;
     Iterable<BrickFile> files() sync* {
-      if (!yaml.containsKey('files')) {
+      if (filesData == null) {
         return;
       }
 
-      final value = yaml['files'] as YamlMap;
-
-      for (final entry in value.entries) {
+      for (final entry in filesData.entries) {
         final path = entry.key as String;
         final yaml = entry.value as YamlMap;
 
@@ -32,19 +40,22 @@ class Brick {
       }
     }
 
+    final pathsData = data.remove('dirs') as YamlMap?;
+
     Iterable<BrickPath> paths() sync* {
-      if (!yaml.containsKey('dirs')) {
+      if (pathsData == null) {
         return;
       }
 
-      final value = yaml['dirs'] as YamlMap;
-
-      for (final entry in value.entries) {
+      for (final entry in pathsData.entries) {
         final path = entry.key as String;
-        final value = entry.value as YamlMap;
 
-        yield BrickPath.fromYaml(path, value);
+        yield BrickPath.fromYaml(path, entry.value);
       }
+    }
+
+    if (data.isNotEmpty) {
+      throw ArgumentError('Unknown keys in brick: ${data.keys}');
     }
 
     return Brick._fromYaml(
@@ -86,4 +97,12 @@ class Brick {
 
     print('complete!');
   }
+
+  @override
+  List<Object?> get props => [
+        name,
+        source,
+        configuredFiles.toList(),
+        configuredDirs.toList(),
+      ];
 }
