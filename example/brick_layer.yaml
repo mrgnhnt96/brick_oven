@@ -4,10 +4,8 @@ bricks:
     dirs:
       lib/nested:
         name: my_nested
-      lib/nested/super_nested/outta_hand:
-        name: my_hand
+      lib/nested/super_nested/outta_hand: my_hand
       lib/nested/super_nested:
-        name: my_super_nested
     files:
       lib/readme.md:
         vars:
