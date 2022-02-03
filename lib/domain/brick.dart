@@ -1,6 +1,7 @@
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -35,7 +36,7 @@ class Brick extends Equatable {
 
   factory Brick.fromYaml(String name, YamlMap yaml) {
     final data = yaml.value;
-    final source = BrickSource.fromYaml(data.remove('source'));
+    final source = BrickSource.fromYaml(YamlValue.from(data.remove('source')));
 
     final filesData = data.remove('files') as YamlMap?;
     Iterable<BrickFile> files() sync* {
@@ -109,7 +110,7 @@ class Brick extends Equatable {
   List<Object?> get props => [
         name,
         source,
-        configuredFiles.toList(),
-        configuredDirs.toList(),
+        configuredFiles.toList(growable: false),
+        configuredDirs.toList(growable: false),
       ];
 }
