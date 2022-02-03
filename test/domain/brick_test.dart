@@ -12,6 +12,15 @@ import '../utils/fakes.dart';
 import '../utils/to_yaml.dart';
 
 void main() {
+  const brickName = 'super_awesome';
+  const localPath = 'localPath';
+  const brickPath = 'bricks/$brickName/__brick__';
+  const dirName = 'director_of_shield';
+  const newDirName = 'director_of_world';
+  const fileName = 'nick_fury.dart';
+  const dirPath = 'path/to/$dirName';
+  const filePath = '$dirPath/$fileName';
+
   group('#fromYaml', () {
     test('parses when provided', () {
       final brick = Brick(
@@ -45,15 +54,6 @@ void main() {
   });
 
   group('#writeBrick', () {
-    const brickName = 'super_awesome';
-    const localPath = 'localPath';
-    const brickPath = 'bricks/$brickName/__brick__';
-    const dirName = 'director_of_shield';
-    const newDirName = 'director_of_world';
-    const fileName = 'nick_fury.dart';
-    const dirPath = 'path/to/$dirName';
-    const filePath = '$dirPath/$fileName';
-
     late FileSystem fs;
 
     setUp(() {
@@ -143,6 +143,76 @@ void main() {
 
       for (final file in testBrick.configuredFiles) {
         expect(fs.file('$brickPath/${file.path}').existsSync(), isTrue);
+      }
+    });
+  });
+
+  group('#props', () {
+    const fileNames = ['file1.dart', 'file2.dart', 'file3.dart'];
+
+    const source = BrickSource(localPath: localPath);
+    final dir = [BrickPath(name: newDirName, path: dirPath)];
+    final files = fileNames.map(BrickFile.new);
+
+    Brick brick({
+      bool createFile = false,
+      bool createDir = false,
+    }) {
+      return Brick(
+        name: brickName,
+        source: source,
+        configuredDirs: [
+          if (createDir) ...dir,
+        ],
+        configuredFiles: [
+          if (createFile) ...files,
+        ],
+      );
+    }
+
+    test('should return length 4', () {
+      final testBrick = brick();
+
+      expect(testBrick.props.length, 4);
+    });
+
+    test('should contain name', () {
+      final testBrick = brick();
+
+      expect(testBrick.props.contains(brickName), isTrue);
+    });
+
+    test('should contain source', () {
+      final testBrick = brick();
+
+      expect(testBrick.props.contains(source), isTrue);
+    });
+
+    test('should contain list of config files', () {
+      final testBrick = brick(createFile: true);
+
+      final propFiles =
+          testBrick.props.firstWhere((prop) => prop is List<BrickFile>);
+
+      expect(propFiles, isA<List<BrickFile>>());
+      propFiles as List<BrickFile>?;
+
+      for (final file in propFiles!) {
+        expect(testBrick.configuredFiles.contains(file), isTrue);
+      }
+    });
+
+    test('should contain list of config dirs', () {
+      final testBrick = brick(createDir: true);
+
+      final propDirs =
+          testBrick.props.firstWhere((prop) => prop is List<BrickPath>);
+
+      expect(propDirs, isA<List<BrickPath>>());
+      propDirs as List<BrickPath>?;
+
+      for (final dir in propDirs!) {
+        expect(testBrick.configuredDirs.contains(dir), isTrue);
       }
     });
   });
