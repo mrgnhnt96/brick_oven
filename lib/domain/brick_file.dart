@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:equatable/equatable.dart';
+import 'package:file/file.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
@@ -103,6 +102,7 @@ class BrickFile extends Equatable {
     required String targetDir,
     required File sourceFile,
     required Iterable<BrickPath> configuredDirs,
+    required FileSystem fileSystem,
   }) {
     var path = this.path;
 
@@ -114,7 +114,7 @@ class BrickFile extends Equatable {
       }
     }
 
-    final file = File(join(targetDir, path));
+    final file = fileSystem.file(join(targetDir, path));
 
     try {
       file.createSync(recursive: true);

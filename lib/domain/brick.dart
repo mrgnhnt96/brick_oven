@@ -1,9 +1,11 @@
-import 'dart:io';
-
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:equatable/equatable.dart';
+import 'package:file/file.dart';
+import 'package:file/local.dart';
+import 'package:file/memory.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
@@ -13,14 +15,23 @@ class Brick extends Equatable {
     required this.source,
     required this.configuredDirs,
     required this.configuredFiles,
-  });
+  }) : fileSystem = const LocalFileSystem();
+
+  @visibleForTesting
+  Brick.memory({
+    required this.name,
+    required this.source,
+    required this.configuredDirs,
+    required this.configuredFiles,
+    required FileSystem? fileSystem,
+  }) : fileSystem = fileSystem ?? MemoryFileSystem();
 
   const Brick._fromYaml({
     required this.name,
     required this.source,
     required this.configuredFiles,
     required this.configuredDirs,
-  });
+  }) : fileSystem = const LocalFileSystem();
 
   factory Brick.fromYaml(String name, YamlMap yaml) {
     final data = yaml.value;
@@ -70,6 +81,7 @@ class Brick extends Equatable {
   final BrickSource source;
   final Iterable<BrickFile> configuredFiles;
   final Iterable<BrickPath> configuredDirs;
+  final FileSystem fileSystem;
 
   void writeBrick() {
     final targetDir = join(
@@ -78,24 +90,19 @@ class Brick extends Equatable {
       '__brick__',
     );
 
-    final directory = Directory(targetDir);
+    final directory = fileSystem.directory(targetDir);
     if (directory.existsSync()) {
-      print('deleting ${directory.path}');
-
       directory.deleteSync(recursive: true);
     }
-
-    print('writing $name');
 
     for (final file in source.mergeFilesAndConfig(configuredFiles)) {
       file.writeTargetFile(
         targetDir: targetDir,
-        sourceFile: source.from(file),
+        sourceFile: fileSystem.file(source.fromSourcePath(file)),
         configuredDirs: configuredDirs,
+        fileSystem: fileSystem,
       );
     }
-
-    print('complete!');
   }
 
   @override

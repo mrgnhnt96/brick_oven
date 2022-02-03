@@ -91,8 +91,8 @@ class BrickSource extends Equatable {
     }
   }
 
-  File from(BrickFile file) {
-    return File(join(sourceDir, file.path));
+  String fromSourcePath(BrickFile file) {
+    return join(sourceDir, file.path);
   }
 
   @override
