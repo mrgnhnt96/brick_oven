@@ -4,6 +4,7 @@ import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
@@ -29,6 +30,14 @@ class BrickFile extends Equatable {
     required String? name,
     required this.path,
   }) : providedName = name;
+
+  @visibleForTesting
+  const BrickFile.config(
+    this.path, {
+    this.variables = const [],
+    this.prefix,
+    this.suffix,
+  }) : providedName = null;
 
   factory BrickFile.fromYaml(
     YamlMap yaml, {
