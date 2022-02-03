@@ -1,18 +1,37 @@
-import 'dart:io';
-
 import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:equatable/equatable.dart';
+import 'package:file/file.dart';
+import 'package:file/local.dart';
+import 'package:file/memory.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
 class BrickSource extends Equatable {
   const BrickSource({
     required this.localPath,
-  });
+  }) : fileSystem = const LocalFileSystem();
 
-  const BrickSource.none() : localPath = null;
+  factory BrickSource.fromString(String value) {
+    return BrickSource(localPath: value);
+  }
 
-  factory BrickSource.fromYaml(dynamic yaml) {
+  @visibleForTesting
+  BrickSource.memory({
+    required this.localPath,
+    FileSystem? fileSystem,
+  }) : fileSystem = fileSystem ?? MemoryFileSystem();
+
+  const BrickSource.none()
+      : localPath = null,
+        fileSystem = const LocalFileSystem();
+
+  factory BrickSource.fromYaml(YamlValue yaml) {
+    if (yaml.isString()) {
+      return BrickSource.fromString(yaml.asString().value);
+    }
+
     BrickSource handleYaml(YamlMap yaml) {
       final data = yaml.value;
 
@@ -25,24 +44,20 @@ class BrickSource extends Equatable {
       return BrickSource(localPath: localPath);
     }
 
-    switch (yaml.runtimeType) {
-      case String:
-        return BrickSource(localPath: yaml as String);
-      case YamlMap:
-        return handleYaml(yaml as YamlMap);
-      default:
-        return const BrickSource.none();
+    if (yaml.isYaml()) {
+      return handleYaml(yaml.asYaml().value);
     }
+
+    return const BrickSource.none();
   }
 
   final String? localPath;
+  final FileSystem fileSystem;
 
   Iterable<BrickFile> files() sync* {
-    if (localPath == null) {
-      return;
+    if (localPath != null) {
+      yield* _fromDir();
     }
-
-    yield* _fromDir();
   }
 
   String get sourceDir {
@@ -56,13 +71,7 @@ class BrickSource extends Equatable {
   Iterable<BrickFile> mergeFilesAndConfig(Iterable<BrickFile> configFiles) {
     final configs = configFiles.toMap();
 
-    Map<String, BrickFile> sourceFiles;
-
-    if (localPath != null) {
-      sourceFiles = _fromDir().toMap();
-    } else {
-      sourceFiles = <String, BrickFile>{};
-    }
+    final sourceFiles = files().toMap();
 
     final result = <String, BrickFile>{}
       ..addAll(sourceFiles)
@@ -77,7 +86,7 @@ class BrickSource extends Equatable {
       throw Exception('path is null');
     }
 
-    final dir = Directory(localPath);
+    final dir = fileSystem.directory(localPath);
 
     if (!dir.existsSync()) {
       return;
