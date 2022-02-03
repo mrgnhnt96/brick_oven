@@ -86,7 +86,7 @@ packages:
     source: hosted
     version: "2.0.3"
   file:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: file
       url: "https://pub.dartlang.org"
@@ -149,7 +149,7 @@ packages:
     source: hosted
     version: "0.12.11"
   meta:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: meta
       url: "https://pub.dartlang.org"

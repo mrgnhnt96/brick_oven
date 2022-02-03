@@ -10,6 +10,8 @@ environment:
 
 dependencies:
   equatable: ^2.0.3
+  file: ^6.1.2
+  meta: ^1.7.0
   path: ^1.8.1
   watcher: ^1.0.1
   yaml: ^3.1.0
