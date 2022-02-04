@@ -3,6 +3,7 @@ import 'package:yaml/yaml.dart';
 
 class FakeYamlMap extends Fake implements YamlMap {
   FakeYamlMap(Map<String, dynamic> value) : _map = value;
+  FakeYamlMap.empty() : _map = <String, dynamic>{};
 
   final Map<String, dynamic> _map;
 

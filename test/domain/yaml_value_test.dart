@@ -14,7 +14,7 @@ void main() {
   });
 
   test('#yaml can be instanciated', () {
-    final yaml = YamlValue.yaml(FakeYamlMap(<String, dynamic>{}));
+    final yaml = YamlValue.yaml(FakeYamlMap.empty());
 
     expect(yaml, isA<YamlValue>());
     expect(yaml, isA<YamlMapValue>());
@@ -70,7 +70,7 @@ void main() {
     });
 
     test('returns false when provided a non-string', () {
-      final value = YamlValue.from(FakeYamlMap(<String, dynamic>{}));
+      final value = YamlValue.from(FakeYamlMap.empty());
 
       expect(value.isString(), isFalse);
     });
@@ -78,7 +78,7 @@ void main() {
 
   group('#isYaml', () {
     test('returns true when provided a yaml', () {
-      final value = YamlValue.from(FakeYamlMap(<String, dynamic>{}));
+      final value = YamlValue.from(FakeYamlMap.empty());
 
       expect(value.isYaml(), isTrue);
     });
@@ -112,7 +112,7 @@ void main() {
     });
 
     test('should throw when value is not string', () {
-      final value = YamlValue.from(FakeYamlMap(<String, dynamic>{}));
+      final value = YamlValue.from(FakeYamlMap.empty());
 
       expect(value.asString, throwsA(isA<ArgumentError>()));
     });
@@ -120,7 +120,7 @@ void main() {
 
   group('#asYaml', () {
     test('should return as $YamlMapValue when value is yaml', () {
-      final value = YamlValue.from(FakeYamlMap(<String, dynamic>{}));
+      final value = YamlValue.from(FakeYamlMap.empty());
 
       expect(value.asYaml(), isA<YamlMapValue>());
     });
@@ -168,7 +168,7 @@ void main() {
 
   group('$YamlMapValue', () {
     test('can be instanciated', () {
-      final yaml = FakeYamlMap(<String, dynamic>{});
+      final yaml = FakeYamlMap.empty();
 
       final value = YamlMapValue(yaml);
 
@@ -176,7 +176,7 @@ void main() {
     });
 
     test('is type $YamlValue', () {
-      final yaml = FakeYamlMap(<String, dynamic>{});
+      final yaml = FakeYamlMap.empty();
 
       final value = YamlMapValue(yaml);
 
@@ -184,7 +184,7 @@ void main() {
     });
 
     test('value is type YamlMap', () {
-      final yaml = FakeYamlMap(<String, dynamic>{});
+      final yaml = FakeYamlMap.empty();
 
       final value = YamlMapValue(yaml);
 
