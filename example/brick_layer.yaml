@@ -18,16 +18,15 @@ bricks:
             format: pascalCase
             prefix: some_prefix_
             suffix: _some_suffix
+        name: my_main
       lib/nested/nested_file.dart:
-        file:
-          name: other
+        name:
+          value: other
           prefix: some_prefix_
           suffix: _some_suffix
       lib/nested/nested_file.g.dart:
-        file:
+        name:
           name: other_generated
-          prefix: some_prefix_
-          suffix: _some_suffix
   my_nested:
     source: lib/test_package/lib/nested
     dirs:
