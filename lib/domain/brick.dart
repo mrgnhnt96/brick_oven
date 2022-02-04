@@ -62,7 +62,7 @@ class Brick extends Equatable {
       for (final entry in pathsData.entries) {
         final path = entry.key as String;
 
-        yield BrickPath.fromYaml(path, entry.value);
+        yield BrickPath.fromYaml(path, YamlValue.from(entry.value));
       }
     }
 
