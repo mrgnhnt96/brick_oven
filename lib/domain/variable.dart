@@ -19,8 +19,8 @@ class Variable extends Equatable {
     MustacheFormat? format,
   }) : format = format ?? MustacheFormat.camelCase;
 
-  factory Variable.fromYaml(String name, YamlMap yaml) {
-    final map = yaml.value;
+  factory Variable.fromYaml(String name, YamlMap? yaml) {
+    final map = yaml?.value ?? <String, dynamic>{};
 
     final formatString = map.remove('format') as String?;
     final format = MustacheFormat.values.retrieve(formatString);
