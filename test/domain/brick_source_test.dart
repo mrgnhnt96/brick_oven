@@ -20,9 +20,9 @@ void main() {
     createFileSystem(fileSystem);
 
     final fakePaths = [
-      '$localPath/file1.dart',
-      '$localPath/to/file2.dart',
-      '$localPath/to/some/file3.dart',
+      join(localPath, 'file1.dart'),
+      join(localPath, 'to', 'file2.dart'),
+      join(localPath, 'to', 'some', 'file3.dart'),
     ];
 
     for (final file in fakePaths) {

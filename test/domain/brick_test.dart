@@ -6,6 +6,7 @@ import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:path/path.dart';
 import 'package:test/test.dart';
 
 import '../utils/fakes.dart';
@@ -14,12 +15,12 @@ import '../utils/to_yaml.dart';
 void main() {
   const brickName = 'super_awesome';
   const localPath = 'localPath';
-  const brickPath = 'bricks/$brickName/__brick__';
+  final brickPath = join('bricks', brickName, '__brick__');
   const dirName = 'director_of_shield';
   const newDirName = 'director_of_world';
   const fileName = 'nick_fury.dart';
-  const dirPath = 'path/to/$dirName';
-  const filePath = '$dirPath/$fileName';
+  final dirPath = join('path', 'to', dirName);
+  final filePath = join(dirPath, fileName);
 
   group('#fromYaml', () {
     test('parses when provided', () {
@@ -72,9 +73,9 @@ void main() {
           if (createDir) BrickPath(name: newDirName, path: dirPath),
         ],
         configuredFiles: [
-          if (createFile && fileNames != null) const BrickFile(filePath),
+          if (createFile && fileNames != null) BrickFile(filePath),
           if (fileNames != null)
-            for (final name in fileNames) BrickFile('$dirPath/$name'),
+            for (final name in fileNames) BrickFile(join(dirPath, name)),
         ],
         fileSystem: fs,
       );
@@ -91,13 +92,13 @@ void main() {
         testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
       );
 
-      expect(fs.file('$brickPath/$filePath').existsSync(), isFalse);
+      expect(fs.file(join(brickPath, filePath)).existsSync(), isFalse);
 
       fs.file(fakeSourcePath).createSync(recursive: true);
 
       testBrick.writeBrick();
 
-      expect(fs.file('$brickPath/$filePath').existsSync(), isTrue);
+      expect(fs.file(join(brickPath, filePath)).existsSync(), isTrue);
     });
 
     test('deletes directory if exists', () {
@@ -107,7 +108,7 @@ void main() {
         testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
       );
 
-      final fakeUnneededFile = fs.file('$brickPath/unneeded.dart');
+      final fakeUnneededFile = fs.file(join(brickPath, 'unneeded.dart'));
 
       expect(fakeUnneededFile.existsSync(), isFalse);
 
@@ -136,13 +137,13 @@ void main() {
       }
 
       for (final file in testBrick.configuredFiles) {
-        expect(fs.file('$brickPath/${file.path}').existsSync(), isFalse);
+        expect(fs.file(join(brickPath, file.path)).existsSync(), isFalse);
       }
 
       testBrick.writeBrick();
 
       for (final file in testBrick.configuredFiles) {
-        expect(fs.file('$brickPath/${file.path}').existsSync(), isTrue);
+        expect(fs.file(join(brickPath, file.path)).existsSync(), isTrue);
       }
     });
   });
@@ -179,13 +180,13 @@ void main() {
     test('should contain name', () {
       final testBrick = brick();
 
-      expect(testBrick.props.contains(brickName), isTrue);
+      expect(testBrick.props, contains(brickName));
     });
 
     test('should contain source', () {
       final testBrick = brick();
 
-      expect(testBrick.props.contains(source), isTrue);
+      expect(testBrick.props, contains(source));
     });
 
     test('should contain list of config files', () {
@@ -198,7 +199,7 @@ void main() {
       propFiles as List<BrickFile>?;
 
       for (final file in propFiles!) {
-        expect(testBrick.configuredFiles.contains(file), isTrue);
+        expect(testBrick.configuredFiles, contains(file));
       }
     });
 
@@ -212,7 +213,7 @@ void main() {
       propDirs as List<BrickPath>?;
 
       for (final dir in propDirs!) {
-        expect(testBrick.configuredDirs.contains(dir), isTrue);
+        expect(testBrick.configuredDirs, contains(dir));
       }
     });
   });
