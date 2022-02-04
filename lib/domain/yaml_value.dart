@@ -9,13 +9,14 @@ abstract class YamlValue {
   const factory YamlValue.none() = YamlNone;
 
   factory YamlValue.from(dynamic value) {
-    switch (value.runtimeType) {
-      case String:
-        return YamlValue.string(value as String);
-      case YamlMap:
-        return YamlValue.yaml(value as YamlMap);
-      default:
-        return const YamlValue.none();
+    if (value is String) {
+      return YamlValue.string(value);
+    } else if (value is YamlMap) {
+      return YamlValue.yaml(value);
+    } else if (value == null) {
+      return const YamlValue.none();
+    } else {
+      throw UnsupportedError('Unsupported value type: ${value.runtimeType}');
     }
   }
 
@@ -23,9 +24,29 @@ abstract class YamlValue {
   bool isYaml() => this is YamlMapValue;
   bool isNone() => this is YamlNone;
 
-  YamlMapValue asYaml() => this as YamlMapValue;
-  YamlString asString() => this as YamlString;
-  YamlNone asNone() => this as YamlNone;
+  YamlMapValue asYaml() {
+    if (!isYaml()) {
+      throw ArgumentError('$this is not a $YamlMapValue');
+    }
+
+    return this as YamlMapValue;
+  }
+
+  YamlString asString() {
+    if (!isString()) {
+      throw ArgumentError('$this is not a $YamlString');
+    }
+
+    return this as YamlString;
+  }
+
+  YamlNone asNone() {
+    if (!isNone()) {
+      throw ArgumentError('$this is not a $YamlNone');
+    }
+
+    return this as YamlNone;
+  }
 
   final dynamic value;
 }
