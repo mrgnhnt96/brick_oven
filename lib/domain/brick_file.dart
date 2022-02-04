@@ -23,14 +23,6 @@ class BrickFile extends Equatable {
     required String? name,
   }) : providedName = name;
 
-  const BrickFile._({
-    required this.variables,
-    required this.prefix,
-    required this.suffix,
-    required String? name,
-    required this.path,
-  }) : providedName = name;
-
   @visibleForTesting
   const BrickFile.config(
     this.path, {
