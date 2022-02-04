@@ -1,11 +1,13 @@
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/variable.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' hide extension;
+import 'package:path/path.dart' as p show extension;
 import 'package:yaml/yaml.dart';
 
 class BrickFile extends Equatable {
@@ -13,15 +15,15 @@ class BrickFile extends Equatable {
       : variables = const [],
         prefix = null,
         suffix = null,
-        providedName = null;
+        name = null;
 
   const BrickFile._fromYaml(
     this.path, {
     required this.variables,
     required this.prefix,
     required this.suffix,
-    required String? name,
-  }) : providedName = name;
+    required this.name,
+  });
 
   @visibleForTesting
   const BrickFile.config(
@@ -29,7 +31,8 @@ class BrickFile extends Equatable {
     this.variables = const [],
     this.prefix,
     this.suffix,
-  }) : providedName = null;
+    this.name,
+  });
 
   factory BrickFile.fromYaml(
     YamlMap yaml, {
@@ -46,27 +49,34 @@ class BrickFile extends Equatable {
 
       for (final entry in variablesData.entries) {
         final name = entry.key as String;
-        final value = entry.value as YamlMap;
+        final value = entry.value as YamlMap?;
 
         yield Variable.fromYaml(name, value);
       }
     }
 
-    final fileConfigYaml = data.remove('file') as YamlMap?;
-    final fileConfig = fileConfigYaml?.value;
+    final nameConfigYaml = YamlValue.from(data.remove('name'));
 
-    final name = fileConfig?.remove('name') as String?;
-    final prefix = fileConfig?.remove('prefix') as String?;
-    final suffix = fileConfig?.remove('suffix') as String?;
+    String? name, prefix, suffix;
+
+    if (nameConfigYaml.isYaml()) {
+      final nameConfig = nameConfigYaml.asYaml().value.value;
+
+      name = nameConfig.remove('value') as String?;
+      prefix = nameConfig.remove('prefix') as String?;
+      suffix = nameConfig.remove('suffix') as String?;
+
+      if (nameConfig.isNotEmpty == true) {
+        throw ArgumentError(
+          'Unrecognized keys in file config: ${nameConfig.keys}',
+        );
+      }
+    } else if (nameConfigYaml.isString()) {
+      name = nameConfigYaml.asString().value;
+    }
 
     if (data.isNotEmpty) {
       throw ArgumentError('Unrecognized keys in file config: ${data.keys}');
-    }
-
-    if (fileConfig?.isNotEmpty == true) {
-      throw ArgumentError(
-        'Unrecognized keys in file config: ${fileConfig!.keys}',
-      );
     }
 
     return BrickFile._fromYaml(
@@ -82,22 +92,22 @@ class BrickFile extends Equatable {
   final Iterable<Variable> variables;
   final String? prefix;
   final String? suffix;
-  final String? providedName;
+  final String? name;
 
   String get fileName {
-    if (providedName == null) {
+    if (name == null) {
       return basename(path);
     }
     final prefix = this.prefix ?? '';
     final suffix = this.suffix ?? '';
 
-    final name = '$prefix{{{$providedName}}}$suffix';
-    final formattedName = MustacheFormat.snakeCase.toMustache(name);
+    final formattedName = '$prefix{{{$name}}}$suffix';
+    final mustacheName = MustacheFormat.snakeCase.toMustache(formattedName);
 
-    return '$formattedName$_extension';
+    return '$mustacheName$extension';
   }
 
-  String get _extension => extension(path, 10);
+  String get extension => p.extension(path, 10);
 
   void writeTargetFile({
     required String targetDir,
@@ -106,12 +116,14 @@ class BrickFile extends Equatable {
     required FileSystem fileSystem,
   }) {
     var path = this.path;
+    path = path.replaceAll(basename(path), '');
+    path = join(path, fileName);
 
     if (path.contains(separator)) {
       final originalPath = path;
 
-      for (final layerPath in configuredDirs) {
-        path = layerPath.apply(path, originalPath: originalPath);
+      for (final configDir in configuredDirs) {
+        path = configDir.apply(path, originalPath: originalPath);
       }
     }
 
@@ -151,10 +163,10 @@ class BrickFile extends Equatable {
           result = variable.formatName(format);
         }
 
-        final prefix = match.group(1) ?? '';
-        final suffix = match.group(3) ?? '';
+        final beforeMatch = match.group(1) ?? '';
+        final afterMatch = match.group(3) ?? '';
 
-        return '$prefix$result$suffix';
+        return '$beforeMatch$result$afterMatch';
       });
     }
 
@@ -167,6 +179,6 @@ class BrickFile extends Equatable {
         variables.toList(),
         prefix,
         suffix,
-        providedName,
+        name,
       ];
 }
