@@ -82,8 +82,8 @@ extension BrickFileX on BrickFile {
     return <String, dynamic>{
       path: FakeYamlMap(<String, dynamic>{
         'vars': FakeYamlMap(variablesData),
-        'file': FakeYamlMap(<String, dynamic>{
-          'name': providedName,
+        'name': FakeYamlMap(<String, dynamic>{
+          'value': name,
           'prefix': prefix,
           'suffix': suffix,
         })
