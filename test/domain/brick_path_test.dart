@@ -1,7 +1,130 @@
 import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import '../utils/fakes.dart';
+
 void main() {
+  const highestLevel = 'dir';
+  const dirPath = 'path/to/some/$highestLevel';
+
+  group('$BrickPath unnamed ctor', () {
+    test('can be instanciated', () {
+      expect(
+        () => BrickPath(name: highestLevel, path: dirPath),
+        returnsNormally,
+      );
+    });
+
+    test('removes leading and trailing slashes from path', () {
+      final brickPath = BrickPath(name: 'name', path: '/$dirPath');
+
+      expect(brickPath.path, dirPath);
+
+      final brickPath2 = BrickPath(name: 'name', path: '$dirPath/');
+
+      expect(brickPath2.path, dirPath);
+    });
+
+    test('placeholder is the highest level from path', () {
+      final brickPath = BrickPath(name: 'name', path: '/$dirPath');
+
+      expect(brickPath.placeholder, highestLevel);
+    });
+  });
+
+  group('#fromYaml', () {
+    test('throws when path points to a file', () {
+      expect(
+        () => BrickPath.fromYaml(
+          '$dirPath/file.dart',
+          const YamlValue.none(),
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('throws when extra keys are provided', () {
+      final yaml = FakeYamlMap(
+        <String, dynamic>{'name': 'name', 'path': 'path'},
+      );
+
+      expect(
+        () => BrickPath.fromYaml(dirPath, YamlValue.yaml(yaml)),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('name is the highest level from path when null is provided', () {
+      final brickPath = BrickPath.fromYaml(dirPath, const YamlValue.none());
+
+      expect(brickPath.name, highestLevel);
+    });
+  });
+
+  const paths = {
+    'path/to/some/dir': 4,
+    'path/to/some/dir/': 4,
+    '/path/to/some/dir': 4,
+    '/path/to/some/dir/': 4,
+    '/path/to/some/dir/file.dart': 5,
+    '/path/to/some/dir/file.dart/': 5,
+    '//path/to/some/dir': 4,
+    '//path/to/some/dir//': 4,
+    '//path/to/some/dir//file.dart': 5,
+    r'path\to\some\dir': 4,
+    r'path\to\some\dir\': 4,
+    r'\path\to\some\dir': 4,
+    r'\path\to\some\dir\': 4,
+    r'\path\to\some\dir\file.dart': 5,
+    r'\path\to\some\dir\file.dart\': 5,
+    r'\\path\to\some\dir': 4,
+    r'\\path\to\some\dir\\': 4,
+    r'\\path\to\some\dir\\file.dart': 5,
+  };
+
+  group('#separatorPattern', () {
+    test('returns a RegExp', () {
+      expect(BrickPath.separatorPattern, isA<RegExp>());
+    });
+
+    test('#separatePath separates path into segments', () {
+      for (final path in paths.keys) {
+        final segments = paths[path];
+
+        expect(BrickPath.separatePath(path).length, segments);
+      }
+    });
+  });
+
+  group('#slashPattern', () {
+    test('returns a RegExp', () {
+      expect(BrickPath.slashPattern, isA<RegExp>());
+    });
+
+    test('#cleanPath removes slashes from beginning and end of path', () {
+      for (final path in paths.keys) {
+        final cleanPath = BrickPath.cleanPath(path);
+        separator;
+
+        expect(cleanPath, isNot(startsWith('/')));
+        expect(cleanPath, isNot(startsWith(r'\')));
+        expect(cleanPath, isNot(endsWith('/')));
+        expect(cleanPath, isNot(endsWith(r'\')));
+      }
+    });
+  });
+
+  test('#configuredParts returns segmented path', () {
+    for (final path in paths.keys) {
+      final segments = paths[path];
+      final brickPath = BrickPath(name: 'name', path: path);
+
+      expect(brickPath.configuredParts.length, segments);
+    }
+  });
+
   group('#apply', () {
     const replacement = 'batman';
 
@@ -90,8 +213,8 @@ void main() {
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final layer = brickPath('foo');
-        path = layer.apply(path, originalPath: originalPath);
+        final brick = brickPath('foo');
+        path = brick.apply(path, originalPath: originalPath);
 
         expect(
           path,
@@ -103,8 +226,8 @@ void main() {
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final layer = brickPath('foo/bar');
-        path = layer.apply(path, originalPath: originalPath);
+        final brick = brickPath('foo/bar');
+        path = brick.apply(path, originalPath: originalPath);
 
         expect(
           path,
@@ -116,8 +239,8 @@ void main() {
         const originalPath = 'foo/bar/baz/foo/bar/baz';
         var path = originalPath;
 
-        final layer = brickPath('foo/bar/baz');
-        path = layer.apply(path, originalPath: originalPath);
+        final brick = brickPath('foo/bar/baz');
+        path = brick.apply(path, originalPath: originalPath);
 
         expect(
           path,
@@ -131,8 +254,8 @@ void main() {
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final layer = brickPath('foo/bar/baz/foo');
-        path = layer.apply(path, originalPath: originalPath);
+        final brick = brickPath('foo/bar/baz/foo');
+        path = brick.apply(path, originalPath: originalPath);
 
         expect(
           path,
@@ -144,8 +267,8 @@ void main() {
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final layer = brickPath('foo/bar/baz/foo/bar');
-        path = layer.apply(path, originalPath: originalPath);
+        final brick = brickPath('foo/bar/baz/foo/bar');
+        path = brick.apply(path, originalPath: originalPath);
 
         expect(
           path,
@@ -157,8 +280,8 @@ void main() {
         const originalPath = 'foo/bar/baz/foo/bar/baz';
         var path = originalPath;
 
-        final layer = brickPath('foo/bar/baz/foo/bar/baz');
-        path = layer.apply(path, originalPath: originalPath);
+        final brick = brickPath('foo/bar/baz/foo/bar/baz');
+        path = brick.apply(path, originalPath: originalPath);
 
         expect(
           path,
@@ -173,11 +296,11 @@ void main() {
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final layer = brickPath('foo');
-        path = layer.apply(path, originalPath: originalPath);
+        final brick = brickPath('foo');
+        path = brick.apply(path, originalPath: originalPath);
 
-        final layer2 = brickPath('foo/bar/baz/foo', replacement2);
-        path = layer2.apply(path, originalPath: originalPath);
+        final brick2 = brickPath('foo/bar/baz/foo', replacement2);
+        path = brick2.apply(path, originalPath: originalPath);
 
         expect(
           path,
@@ -189,17 +312,37 @@ void main() {
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final layer = brickPath('foo');
-        path = layer.apply(path, originalPath: originalPath);
+        final brick = brickPath('foo');
+        path = brick.apply(path, originalPath: originalPath);
 
-        final layer2 = brickPath('foo/bar', replacement2);
-        path = layer2.apply(path, originalPath: originalPath);
+        final brick2 = brickPath('foo/bar', replacement2);
+        path = brick2.apply(path, originalPath: originalPath);
 
         expect(
           path,
           '{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}/{{#snakeCase}}{{{$replacement2}}}{{/snakeCase}}/baz/foo/bar',
         );
       });
+    });
+  });
+
+  group('#props', () {
+    final brick = BrickPath(name: 'foo', path: 'bar/baz');
+
+    test('length should be 3', () {
+      expect(brick.props.length, 3);
+    });
+
+    test('should contain name', () {
+      expect(brick.props.contains('foo'), isTrue);
+    });
+
+    test('should contain path', () {
+      expect(brick.props.contains('bar/baz'), isTrue);
+    });
+
+    test('should contain placeholder', () {
+      expect(brick.props.contains('baz'), isTrue);
     });
   });
 }
