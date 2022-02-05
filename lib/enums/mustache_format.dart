@@ -45,5 +45,7 @@ extension EnumListX<T> on List<T> {
         }
       }
     }
+
+    return null;
   }
 }
