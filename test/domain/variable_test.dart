@@ -85,7 +85,7 @@ void main() {
 
       final variable = variableFromJson(map);
 
-      expect(variable.suffix, isEmpty);
+      expect(variable.suffix, isNull);
     });
 
     test('parses everything except for prefix', () {
@@ -97,7 +97,7 @@ void main() {
 
       final variable = variableFromJson(map);
 
-      expect(variable.prefix, isEmpty);
+      expect(variable.prefix, isNull);
     });
 
     test('parses everything except for placeholder', () {
@@ -133,10 +133,10 @@ void main() {
       expect(variable.prefix, 'prefix');
     });
 
-    test('returns empty string when not provided', () {
+    test('returns nothing when not provided', () {
       final variable = variableWithFixes();
 
-      expect(variable.prefix, isEmpty);
+      expect(variable.prefix, isNull);
     });
   });
 
@@ -147,10 +147,10 @@ void main() {
       expect(variable.suffix, 'suffix');
     });
 
-    test('returns empty string when not provided', () {
+    test('returns nothing when not provided', () {
       final variable = variableWithFixes();
 
-      expect(variable.suffix, isEmpty);
+      expect(variable.suffix, isNull);
     });
   });
 
