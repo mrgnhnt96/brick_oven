@@ -36,9 +36,16 @@ class BrickFile extends Equatable {
   });
 
   factory BrickFile.fromYaml(
-    YamlMap yaml, {
+    YamlMap? yaml, {
     required String path,
   }) {
+    if (yaml == null) {
+      throw ArgumentError(
+        'There are not any configurations for $path, '
+        'please remove it or add congfiguration',
+      );
+    }
+
     final data = yaml.data;
 
     final variablesData = data.remove('vars') as YamlMap?;
@@ -74,6 +81,8 @@ class BrickFile extends Equatable {
       }
     } else if (nameConfigYaml.isString()) {
       name = nameConfigYaml.asString().value;
+    } else if (nameConfigYaml.isNone() && yaml.value.containsKey('name')) {
+      name = basenameWithoutExtension(path);
     }
 
     if (data.isNotEmpty) {
