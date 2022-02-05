@@ -47,7 +47,7 @@ class Brick extends Equatable {
 
       for (final entry in filesData.entries) {
         final path = entry.key as String;
-        final yaml = entry.value as YamlMap;
+        final yaml = entry.value as YamlMap?;
 
         yield BrickFile.fromYaml(yaml, path: path);
       }
