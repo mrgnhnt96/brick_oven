@@ -94,10 +94,9 @@ class BrickPath extends Equatable {
     required String originalPath,
   }) {
     final isNotFile = extension(placeholder).isNotEmpty;
-    final isNotDirectoryDeep = !this.path.contains(separatorPattern);
     final pathsDontMatch = !originalPath.contains(this.path);
 
-    if (isNotFile || isNotDirectoryDeep || pathsDontMatch) {
+    if (isNotFile || pathsDontMatch) {
       return path;
     }
 
