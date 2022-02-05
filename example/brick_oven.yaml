@@ -7,6 +7,8 @@ bricks:
       lib/nested/super_nested/outta_hand: my_hand
       lib/nested/super_nested:
     files:
+      .packages:
+        name:
       lib/readme.md:
         vars:
           optional:
