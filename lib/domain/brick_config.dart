@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_dynamic_calls
-//
+
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:file/file.dart';
