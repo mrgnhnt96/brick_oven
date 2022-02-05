@@ -35,8 +35,8 @@ class Brick extends Equatable {
     required this.configuredDirs,
   }) : fileSystem = const LocalFileSystem();
 
-  factory Brick.fromYaml(String name, YamlMap yaml) {
-    final data = yaml.data;
+  factory Brick.fromYaml(String name, YamlMap? yaml) {
+    final data = yaml?.data ?? <String, dynamic>{};
     final source = BrickSource.fromYaml(YamlValue.from(data.remove('source')));
 
     final filesData = data.remove('files') as YamlMap?;
