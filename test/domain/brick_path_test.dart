@@ -152,18 +152,26 @@ void main() {
       });
 
       group('brick path is not more than 1 level', () {
+        String toSnake(String name) {
+          return '{{#snakeCase}}{{{$name}}}{{/snakeCase}}';
+        }
+
         group('without slashes', () {
           test('as starting position', () {
-            final path = brickPath('path');
-            const original = '/path/to/some/file.png';
+            const dir = 'path';
+            const filePath = '/to/some/file.png';
+
+            final path = brickPath(dir);
+            const original = '$dir$filePath';
+
             final result = path.apply(original, originalPath: original);
 
-            expect(result, original);
+            expect(result, '${toSnake(replacement)}$filePath');
           });
 
           test('as non starting position', () {
             final path = brickPath('to');
-            const original = '/path/to/some/file.png';
+            const original = 'path/to/some/file.png';
             final result = path.apply(original, originalPath: original);
 
             expect(result, original);
@@ -172,16 +180,20 @@ void main() {
 
         group('with starting slash', () {
           test('as starting position', () {
-            final path = brickPath('/path');
-            const original = '/path/to/some/file.png';
+            const dir = '/path';
+            const filePath = '/to/some/file.png';
+
+            final path = brickPath(dir);
+            const original = '$dir$filePath';
+
             final result = path.apply(original, originalPath: original);
 
-            expect(result, original);
+            expect(result, '${toSnake(replacement)}$filePath');
           });
 
           test('as non starting position', () {
             final path = brickPath('/to');
-            const original = '/path/to/some/file.png';
+            const original = 'path/to/some/file.png';
             final result = path.apply(original, originalPath: original);
 
             expect(result, original);
@@ -190,16 +202,20 @@ void main() {
 
         group('with ending slash', () {
           test('as starting position', () {
-            final path = brickPath('path/');
-            const original = '/path/to/some/file.png';
+            const dir = 'path/';
+            const filePath = '/to/some/file.png';
+
+            final path = brickPath(dir);
+            const original = '$dir$filePath';
+
             final result = path.apply(original, originalPath: original);
 
-            expect(result, original);
+            expect(result, '${toSnake(replacement)}$filePath');
           });
 
           test('as non starting position', () {
             final path = brickPath('to/');
-            const original = '/path/to/some/file.png';
+            const original = 'path/to/some/file.png';
             final result = path.apply(original, originalPath: original);
 
             expect(result, original);
