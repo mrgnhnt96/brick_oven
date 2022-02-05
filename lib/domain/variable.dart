@@ -1,4 +1,5 @@
 import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:yaml/yaml.dart';
 
@@ -20,7 +21,7 @@ class Variable extends Equatable {
   }) : format = format ?? MustacheFormat.camelCase;
 
   factory Variable.fromYaml(String name, YamlMap? yaml) {
-    final map = yaml?.value ?? <String, dynamic>{};
+    final map = yaml?.data ?? <String, dynamic>{};
 
     final formatString = map.remove('format') as String?;
     final format = MustacheFormat.values.retrieve(formatString);

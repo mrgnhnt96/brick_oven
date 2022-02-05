@@ -1,5 +1,6 @@
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -33,7 +34,7 @@ class BrickSource extends Equatable {
     }
 
     BrickSource handleYaml(YamlMap yaml) {
-      final data = yaml.value;
+      final data = yaml.data;
 
       final localPath = data.remove('path') as String?;
 
@@ -110,12 +111,6 @@ class BrickSource extends Equatable {
 
 extension on Iterable<BrickFile> {
   Map<String, BrickFile> toMap() {
-    return fold<Map<String, BrickFile>>(
-      <String, BrickFile>{},
-      (Map<String, BrickFile> map, BrickFile file) {
-        map[file.path] = file;
-        return map;
-      },
-    );
+    return {for (final val in this) val.path: val};
   }
 }

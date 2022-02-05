@@ -1,5 +1,6 @@
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
@@ -36,7 +37,7 @@ class BrickPath extends Equatable {
     }
 
     String? handleYaml(YamlMap yaml) {
-      final data = yaml.value;
+      final data = yaml.data;
 
       final name = data.remove('name') as String?;
 
@@ -92,10 +93,11 @@ class BrickPath extends Equatable {
     String path, {
     required String originalPath,
   }) {
+    final isNotFile = extension(placeholder).isNotEmpty;
     final isNotDirectoryDeep = !this.path.contains(separatorPattern);
     final pathsDontMatch = !originalPath.contains(this.path);
 
-    if (isNotDirectoryDeep || pathsDontMatch) {
+    if (isNotFile || isNotDirectoryDeep || pathsDontMatch) {
       return path;
     }
 

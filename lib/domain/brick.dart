@@ -2,6 +2,7 @@ import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -35,7 +36,7 @@ class Brick extends Equatable {
   }) : fileSystem = const LocalFileSystem();
 
   factory Brick.fromYaml(String name, YamlMap yaml) {
-    final data = yaml.value;
+    final data = yaml.data;
     final source = BrickSource.fromYaml(YamlValue.from(data.remove('source')));
 
     final filesData = data.remove('files') as YamlMap?;

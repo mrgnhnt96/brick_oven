@@ -3,6 +3,7 @@ import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -38,7 +39,7 @@ class BrickFile extends Equatable {
     YamlMap yaml, {
     required String path,
   }) {
-    final data = yaml.value;
+    final data = yaml.data;
 
     final variablesData = data.remove('vars') as YamlMap?;
 
@@ -60,7 +61,7 @@ class BrickFile extends Equatable {
     String? name, prefix, suffix;
 
     if (nameConfigYaml.isYaml()) {
-      final nameConfig = nameConfigYaml.asYaml().value.value;
+      final nameConfig = nameConfigYaml.asYaml().value.data;
 
       name = nameConfig.remove('value') as String?;
       prefix = nameConfig.remove('prefix') as String?;
