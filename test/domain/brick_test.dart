@@ -73,7 +73,7 @@ void main() {
           if (createDir) BrickPath(name: newDirName, path: dirPath),
         ],
         configuredFiles: [
-          if (createFile && fileNames != null) BrickFile(filePath),
+          if (createFile && fileNames == null) BrickFile(filePath),
           if (fileNames != null)
             for (final name in fileNames) BrickFile(join(dirPath, name)),
         ],
@@ -92,13 +92,15 @@ void main() {
         testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
       );
 
-      expect(fs.file(join(brickPath, filePath)).existsSync(), isFalse);
+      final targetFile = fs.file(join(brickPath, filePath));
+
+      expect(targetFile.existsSync(), isFalse);
 
       fs.file(fakeSourcePath).createSync(recursive: true);
 
       testBrick.writeBrick();
 
-      expect(fs.file(join(brickPath, filePath)).existsSync(), isTrue);
+      expect(targetFile.existsSync(), isTrue);
     });
 
     test('deletes directory if exists', () {
