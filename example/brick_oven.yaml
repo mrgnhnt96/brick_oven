@@ -26,7 +26,7 @@ bricks:
           suffix: _some_suffix
       lib/nested/nested_file.g.dart:
         name:
-          name: other_generated
+          value: other_generated
   my_nested:
     source: lib/test_package/lib/nested
     dirs:
@@ -40,8 +40,8 @@ bricks:
         name: does not exist
     files:
       super_nested/outta_hand/outta_hand_file.dart:
-        file:
-          name: other
+        name:
+          value: other
           prefix: some_prefix_
           suffix: _some_suffix
         vars:

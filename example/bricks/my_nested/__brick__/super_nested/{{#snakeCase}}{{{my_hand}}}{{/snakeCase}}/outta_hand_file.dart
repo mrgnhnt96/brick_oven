@@ -1,1 +1,0 @@
-// this is getting a bit {{#pascalCase}}{{{something}}}{{/pascalCase}}
