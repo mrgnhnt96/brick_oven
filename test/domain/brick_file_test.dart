@@ -89,9 +89,39 @@ void main() {
       });
     }
 
-    BrickFile brickFromYaml(FakeYamlMap yaml) {
-      return BrickFile.fromYaml(yaml, path: defaultPath);
+    BrickFile brickFromYaml(FakeYamlMap yaml, [String? path]) {
+      return BrickFile.fromYaml(yaml, path: path ?? defaultPath);
     }
+
+    test('throws exception on null value', () {
+      expect(
+        () => BrickFile.fromYaml(null, path: 'path'),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('gets files name when not provided value in the name key', () {
+      const fileName = 'file';
+      const ext = '.dart';
+      const file = '$fileName$ext';
+      final paths = [
+        join('path', file),
+        join('path', 'to', file),
+        join('path', 'to', 'some', file),
+      ];
+
+      for (final path in paths) {
+        final yaml = FakeYamlMap(<String, dynamic>{
+          'name': null,
+        });
+        final file = BrickFile.fromYaml(yaml, path: path);
+
+        expect(
+          file.fileName,
+          '{{#snakeCase}}{{{$fileName}}}{{/snakeCase}}$ext',
+        );
+      }
+    });
 
     test('can parse all provided values', () {
       final instance = brickFromYaml(yaml());
@@ -127,9 +157,12 @@ void main() {
       });
 
       test('can parse when value is not provided', () {
-        final instance = brickFromYaml(yaml(useInferredName: true));
+        final instance = brickFromYaml(
+          yaml(useInferredName: true),
+          join('path', 'to', 'some', 'file.dart'),
+        );
 
-        expect(instance.name, isNull);
+        expect(instance.name, 'file');
       });
     });
 
