@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_dynamic_calls
 
 import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/brick_arguments.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -12,14 +13,26 @@ import 'package:yaml/yaml.dart';
 /// {@endtemplate}
 class BrickConfig {
   /// {@macro brick_config}
-  factory BrickConfig() => BrickConfig._create(const LocalFileSystem());
+  factory BrickConfig(BrickArguments arguments) => BrickConfig._create(
+        const LocalFileSystem(),
+        arguments: arguments,
+      );
 
   /// Allows passing a [fileSystem] to support testing
   @visibleForTesting
-  factory BrickConfig.config(FileSystem fileSystem) =>
-      BrickConfig._create(fileSystem);
+  factory BrickConfig.config(
+    FileSystem fileSystem, {
+    BrickArguments? arguments,
+  }) =>
+      BrickConfig._create(
+        fileSystem,
+        arguments: arguments ?? const BrickArguments(),
+      );
 
-  factory BrickConfig._create(FileSystem fileSystem) {
+  factory BrickConfig._create(
+    FileSystem fileSystem, {
+    required BrickArguments arguments,
+  }) {
     final configFile = fileSystem.file(file);
 
     if (!configFile.existsSync()) {
@@ -53,23 +66,28 @@ class BrickConfig {
 
     return BrickConfig._(
       bricks: directories,
+      arguments: arguments,
     );
   }
 
   const BrickConfig._({
     required this.bricks,
+    required this.arguments,
   });
 
   /// the bricks that the configuration applies to
   final Iterable<Brick> bricks;
 
+  /// the arguments provided by the package
+  final BrickArguments arguments;
+
   /// the name of the yaml file
   static const file = 'brick_oven.yaml';
 
   /// writes all [bricks] to the brick dir
-  void writeMason() {
+  Future<void> writeMason() async {
     for (final brick in bricks) {
-      brick.writeBrick();
+      await brick.writeBrick(watch: arguments.watch);
     }
   }
 }
