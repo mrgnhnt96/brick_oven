@@ -33,14 +33,14 @@ void main() {
   }
 
   test('can be instanciated', () {
-    const instance = BrickSource(localPath: 'test');
+    final instance = BrickSource(localPath: 'test');
 
     expect(instance, isA<BrickSource>());
   });
 
   group('#none', () {
     test('local path is null', () {
-      const instance = BrickSource.none();
+      final instance = BrickSource.none();
 
       expect(instance.localPath, isNull);
     });
@@ -65,7 +65,7 @@ void main() {
       });
 
       test('should throw when extra keys in yaml map are provided', () {
-        final yaml = const BrickSource(localPath: 'test').toYaml();
+        final yaml = BrickSource(localPath: 'test').toYaml();
         yaml.value['extra'] = 'extra';
 
         expect(
@@ -84,7 +84,7 @@ void main() {
 
   group('#files', () {
     test('should return no files when no source is provided', () {
-      const instance = BrickSource.none();
+      final instance = BrickSource.none();
 
       expect(instance.files(), isEmpty);
     });
@@ -138,7 +138,7 @@ void main() {
     });
 
     test('should return all config files', () {
-      const source = BrickSource(localPath: localPath);
+      final source = BrickSource(localPath: localPath);
 
       final configFiles = ['file1.dart', 'file2.dart'].map(BrickFile.new);
 
@@ -193,7 +193,7 @@ void main() {
 
   group('#fromSourcePath', () {
     test('should join source dir with files path', () {
-      const source = BrickSource(localPath: localPath);
+      final source = BrickSource(localPath: localPath);
       const fileName = 'file.dart';
 
       const file = BrickFile(fileName);
@@ -204,13 +204,13 @@ void main() {
 
   group('#props', () {
     test('length should be 1', () {
-      const source = BrickSource(localPath: localPath);
+      final source = BrickSource(localPath: localPath);
 
       expect(source.props, hasLength(1));
     });
 
     test('should contain local path', () {
-      const source = BrickSource(localPath: localPath);
+      final source = BrickSource(localPath: localPath);
 
       expect(source.props.single, localPath);
     });

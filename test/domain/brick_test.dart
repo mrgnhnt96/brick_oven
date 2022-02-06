@@ -28,7 +28,7 @@ void main() {
         configuredDirs: [BrickPath(name: 'name', path: 'path/to/dir')],
         configuredFiles: const [BrickFile('file/path/name.dart')],
         name: 'brick',
-        source: const BrickSource(localPath: 'localPath'),
+        source: BrickSource(localPath: 'localPath'),
       );
 
       final data = brick.toYaml();
@@ -43,7 +43,7 @@ void main() {
         configuredDirs: [BrickPath(name: 'name', path: 'path/to/dir')],
         configuredFiles: const [BrickFile('file/path/name.dart')],
         name: 'brick',
-        source: const BrickSource(localPath: 'localPath'),
+        source: BrickSource(localPath: 'localPath'),
       );
 
       final data = brick.toJson();
@@ -68,7 +68,7 @@ void main() {
     }) {
       return Brick.memory(
         name: brickName,
-        source: const BrickSource(localPath: localPath),
+        source: BrickSource(localPath: localPath),
         configuredDirs: [
           if (createDir) BrickPath(name: newDirName, path: dirPath),
         ],
@@ -153,7 +153,7 @@ void main() {
   group('#props', () {
     const fileNames = ['file1.dart', 'file2.dart', 'file3.dart'];
 
-    const source = BrickSource(localPath: localPath);
+    final source = BrickSource(localPath: localPath);
     final dir = [BrickPath(name: newDirName, path: dirPath)];
     final files = fileNames.map(BrickFile.new);
 
