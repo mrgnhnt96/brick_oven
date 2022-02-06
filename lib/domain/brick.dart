@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
@@ -11,7 +9,6 @@ import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
-import 'package:watcher/watcher.dart';
 import 'package:yaml/yaml.dart';
 
 /// {@template brick}
@@ -19,7 +16,7 @@ import 'package:yaml/yaml.dart';
 /// {@endtemplate}
 class Brick extends Equatable {
   /// {@macro brick}
-  Brick({
+  const Brick({
     required this.name,
     required this.source,
     required this.configuredDirs,
@@ -36,7 +33,7 @@ class Brick extends Equatable {
     required FileSystem? fileSystem,
   }) : _fileSystem = fileSystem ?? MemoryFileSystem();
 
-  Brick._fromYaml({
+  const Brick._fromYaml({
     required this.name,
     required this.source,
     required this.configuredFiles,
@@ -99,45 +96,32 @@ class Brick extends Equatable {
 
   /// the configured directories that will alter/update the paths of the [source] files
   final Iterable<BrickPath> configuredDirs;
+
   final FileSystem _fileSystem;
 
-  StreamSubscription<WatchEvent>? _watcher;
+  /// whether the brick has a running watcher
+  bool get hasRunningWatcher => source.hasRunningWatcher;
 
-  /// resets the listener for the directory
-  void resetWatch() {
-    _watcher?.cancel();
+  /// watches the local files and updates the brick on events
+  void watchBrick() {
+    final watcher = source.watcher;
+    if (watcher != null) {
+      watcher
+        ..addEvent(writeBrick)
+        ..startWatcher();
 
-    _watch();
-  }
-
-  void _watch() {
-    final watcher = DirectoryWatcher(source.sourceDir);
-
-    _watcher = watcher.events.listen((e) {
-      print(e);
-      _write();
-    });
-
-    // TODO(mrgnhnt96):
-    // - add listener to yaml file
-    // - update bricks when yaml is updated? Or stop whole process?
-    // - refactor listener, and add tests
+      if (!watcher.hasRun) {
+        writeBrick();
+      }
+    } else {
+      writeBrick();
+    }
   }
 
   /// writes the brick's files, from the [source]'s files.
   ///
   /// targets: bricks -> [name] -> __brick__
-  Future<void> writeBrick({bool watch = false}) async {
-    if (watch) {
-      _watch();
-      return Completer<void>().future;
-    }
-
-    _write();
-    return;
-  }
-
-  void _write() {
+  void writeBrick() {
     final targetDir = join(
       'bricks',
       name,
