@@ -9,10 +9,14 @@ class BrickArguments {
 
   /// parses the arguments from the command line
   factory BrickArguments.from(List<String> arguments) {
-    var watch = false;
-    if (arguments.contains('--watch') || arguments.contains('-w')) {
-      watch = true;
+    final args = List<String>.from(arguments);
+
+    final watch = args.containsArg('--watch', '-w');
+
+    if (args.isNotEmpty) {
+      throw ArgumentError('unrecognized args, $args');
     }
+
     return BrickArguments(
       watch: watch,
     );
@@ -20,4 +24,18 @@ class BrickArguments {
 
   /// Whether to watch the directory and update on changes
   final bool watch;
+}
+
+extension on List<String> {
+  bool containsArg(String flag, [String? shortFlag]) {
+    final containsFlag = remove(flag);
+
+    if (!containsFlag && shortFlag != null) {
+      final containsShortFlag = remove(shortFlag);
+
+      return containsShortFlag;
+    }
+
+    return containsFlag;
+  }
 }
