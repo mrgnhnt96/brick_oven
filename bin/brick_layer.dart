@@ -1,5 +1,5 @@
-import 'package:brick_oven/brick_oven.dart';
+import 'package:brick_oven/brick_oven.dart' as bo;
 
 void main(List<String> arguments) {
-  handle(arguments);
+  bo.main(arguments);
 }
