@@ -19,7 +19,7 @@ import 'package:yaml/yaml.dart';
 /// {@endtemplate}
 class Brick extends Equatable {
   /// {@macro brick}
-  const Brick({
+  Brick({
     required this.name,
     required this.source,
     required this.configuredDirs,
@@ -36,7 +36,7 @@ class Brick extends Equatable {
     required FileSystem? fileSystem,
   }) : _fileSystem = fileSystem ?? MemoryFileSystem();
 
-  const Brick._fromYaml({
+  Brick._fromYaml({
     required this.name,
     required this.source,
     required this.configuredFiles,
@@ -101,18 +101,19 @@ class Brick extends Equatable {
   final Iterable<BrickPath> configuredDirs;
   final FileSystem _fileSystem;
 
-  /// writes the brick's files, from the [source]'s files.
-  ///
-  /// targets: bricks -> [name] -> __brick__
-  Future<void> writeBrick({bool watch = false}) async {
-    if (!watch) {
-      _write();
-      return;
-    }
+  StreamSubscription<WatchEvent>? _watcher;
 
+  /// resets the listener for the directory
+  void resetWatch() {
+    _watcher?.cancel();
+
+    _watch();
+  }
+
+  void _watch() {
     final watcher = DirectoryWatcher(source.sourceDir);
 
-    watcher.events.listen((e) {
+    _watcher = watcher.events.listen((e) {
       print(e);
       _write();
     });
@@ -121,8 +122,19 @@ class Brick extends Equatable {
     // - add listener to yaml file
     // - update bricks when yaml is updated? Or stop whole process?
     // - refactor listener, and add tests
+  }
 
-    return Completer<void>().future;
+  /// writes the brick's files, from the [source]'s files.
+  ///
+  /// targets: bricks -> [name] -> __brick__
+  Future<void> writeBrick({bool watch = false}) async {
+    if (watch) {
+      _watch();
+      return Completer<void>().future;
+    }
+
+    _write();
+    return;
   }
 
   void _write() {
