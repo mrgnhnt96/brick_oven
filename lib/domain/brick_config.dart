@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_dynamic_calls
 
+import 'dart:async';
+
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_arguments.dart';
 import 'package:brick_oven/utils/extensions.dart';
@@ -70,7 +72,7 @@ class BrickConfig {
     );
   }
 
-  const BrickConfig._({
+  BrickConfig._({
     required this.bricks,
     required this.arguments,
   });
@@ -86,8 +88,30 @@ class BrickConfig {
 
   /// writes all [bricks] to the brick dir
   Future<void> writeMason() async {
-    for (final brick in bricks) {
-      await brick.writeBrick(watch: arguments.watch);
+    if (arguments.watch) {
+      await _watch();
+      return;
     }
+
+    _write();
+  }
+
+  void _write() {
+    for (final brick in bricks) {
+      brick.writeBrick();
+    }
+  }
+
+  Future<void> _watch() async {
+    for (final brick in bricks) {
+      brick.watchBrick();
+    }
+
+    if (!bricks.any((brick) => brick.hasRunningWatcher)) {
+      print('There are no bricks currently watching local files, ending');
+      return;
+    }
+
+    return Completer<void>().future;
   }
 }
