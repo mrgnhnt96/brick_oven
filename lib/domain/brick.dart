@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
@@ -9,6 +11,7 @@ import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
+import 'package:watcher/watcher.dart';
 import 'package:yaml/yaml.dart';
 
 /// {@template brick}
@@ -101,7 +104,28 @@ class Brick extends Equatable {
   /// writes the brick's files, from the [source]'s files.
   ///
   /// targets: bricks -> [name] -> __brick__
-  void writeBrick() {
+  Future<void> writeBrick({bool watch = false}) async {
+    if (!watch) {
+      _write();
+      return;
+    }
+
+    final watcher = DirectoryWatcher(source.sourceDir);
+
+    watcher.events.listen((e) {
+      print(e);
+      _write();
+    });
+
+    // TODO(mrgnhnt96):
+    // - add listener to yaml file
+    // - update bricks when yaml is updated? Or stop whole process?
+    // - refactor listener, and add tests
+
+    return Completer<void>().future;
+  }
+
+  void _write() {
     final targetDir = join(
       'bricks',
       name,
