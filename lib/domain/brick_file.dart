@@ -6,12 +6,17 @@ import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' hide extension;
 import 'package:path/path.dart' as p show extension;
 import 'package:yaml/yaml.dart';
 
+/// {@template brick_file}
+/// Represents the file from the `brick_oven.yaml` file
+/// {@endtemplate}
 class BrickFile extends Equatable {
+  /// {macro brick_file}
   const BrickFile(this.path)
       : variables = const [],
         prefix = null,
@@ -26,6 +31,8 @@ class BrickFile extends Equatable {
     required this.name,
   });
 
+  /// configures the brick file will all available properties,
+  /// should only be used in testing
   @visibleForTesting
   const BrickFile.config(
     this.path, {
@@ -35,6 +42,7 @@ class BrickFile extends Equatable {
     this.name,
   });
 
+  /// parses the [yaml]
   factory BrickFile.fromYaml(
     YamlMap? yaml, {
     required String path,
@@ -98,12 +106,31 @@ class BrickFile extends Equatable {
     );
   }
 
+  /// the path of the file
   final String path;
+
+  /// All variables that the content contains and will be updated with
   final Iterable<Variable> variables;
+
+  /// the prefix to the [fileName]
   final String? prefix;
+
+  /// the suffix to the [fileName]
   final String? suffix;
+
+  /// the name of the file
+  ///
+  /// if provided, [fileName] will format the name
+  /// using mustache
   final String? name;
 
+  /// the name of file with extension
+  ///
+  /// If a [name] is provided, it will be formatted with mustache,
+  /// prepended with [prefix],
+  /// and appended with [suffix]
+  ///
+  /// Otherwise returns the file's name and its extension
   String get fileName {
     if (name == null) {
       return basename(path);
@@ -117,14 +144,23 @@ class BrickFile extends Equatable {
     return '$mustacheName$extension';
   }
 
+  /// all of the extensions of the file
+  ///
+  /// eg: `.g.dart`
   String get extension => p.extension(path, 10);
 
+  /// writes the file in the [targetDir], with the
+  /// contents of the [sourceFile].
+  ///
+  /// If there are any [configuredDirs], they will be applied
+  /// to the [path]
   void writeTargetFile({
     required String targetDir,
     required File sourceFile,
     required Iterable<BrickPath> configuredDirs,
-    required FileSystem fileSystem,
+    required FileSystem? fileSystem,
   }) {
+    fileSystem ??= const LocalFileSystem();
     var path = this.path;
     path = path.replaceAll(basename(path), '');
     path = join(path, fileName);

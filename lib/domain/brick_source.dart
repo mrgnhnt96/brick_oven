@@ -9,25 +9,33 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
+/// {@template brick_source}
+/// The brick's source, where the files are retrived, copied &/or altered
+/// {@endtemplate}
 class BrickSource extends Equatable {
+  /// {@macro brick_source}
   const BrickSource({
     required this.localPath,
-  }) : fileSystem = const LocalFileSystem();
+  }) : _fileSystem = const LocalFileSystem();
 
+  /// parses the [value] into the appropriate type of source
   factory BrickSource.fromString(String value) {
     return BrickSource(localPath: value);
   }
 
+  /// creates a memory source, avoids writing files to machine/locally
   @visibleForTesting
   BrickSource.memory({
     required this.localPath,
     FileSystem? fileSystem,
-  }) : fileSystem = fileSystem ?? MemoryFileSystem();
+  }) : _fileSystem = fileSystem ?? MemoryFileSystem();
 
+  /// creates and empty source
   const BrickSource.none()
       : localPath = null,
-        fileSystem = const LocalFileSystem();
+        _fileSystem = const LocalFileSystem();
 
+  /// parse [yaml] into the source
   factory BrickSource.fromYaml(YamlValue yaml) {
     if (yaml.isString()) {
       return BrickSource.fromString(yaml.asString().value);
@@ -52,15 +60,19 @@ class BrickSource extends Equatable {
     return const BrickSource.none();
   }
 
+  /// the local path of the source files
   final String? localPath;
-  final FileSystem fileSystem;
+  final FileSystem _fileSystem;
 
+  /// retrieves the files from the source path
   Iterable<BrickFile> files() sync* {
     if (localPath != null) {
       yield* _fromDir();
+      return;
     }
   }
 
+  /// the directory of the source
   String get sourceDir {
     if (localPath == null) {
       return '';
@@ -69,6 +81,8 @@ class BrickSource extends Equatable {
     return localPath!;
   }
 
+  /// merges the [configFiles] onto [files], which copies all
+  /// variables & configurations
   Iterable<BrickFile> mergeFilesAndConfig(Iterable<BrickFile> configFiles) {
     final configs = configFiles.toMap();
 
@@ -87,7 +101,7 @@ class BrickSource extends Equatable {
       throw Exception('path is null');
     }
 
-    final dir = fileSystem.directory(localPath);
+    final dir = _fileSystem.directory(localPath);
 
     if (!dir.existsSync()) {
       return;
@@ -101,6 +115,7 @@ class BrickSource extends Equatable {
     }
   }
 
+  /// returns the path of [file] as if it were from the [sourceDir]
   String fromSourcePath(BrickFile file) {
     return join(sourceDir, file.path);
   }

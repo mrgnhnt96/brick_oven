@@ -11,14 +11,19 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
+/// {@template brick}
+/// Represents the brick configured in the `brick_oven.yaml` file
+/// {@endtemplate}
 class Brick extends Equatable {
+  /// {@macro brick}
   const Brick({
     required this.name,
     required this.source,
     required this.configuredDirs,
     required this.configuredFiles,
-  }) : fileSystem = const LocalFileSystem();
+  }) : _fileSystem = const LocalFileSystem();
 
+  /// provide
   @visibleForTesting
   Brick.memory({
     required this.name,
@@ -26,15 +31,16 @@ class Brick extends Equatable {
     required this.configuredDirs,
     required this.configuredFiles,
     required FileSystem? fileSystem,
-  }) : fileSystem = fileSystem ?? MemoryFileSystem();
+  }) : _fileSystem = fileSystem ?? MemoryFileSystem();
 
   const Brick._fromYaml({
     required this.name,
     required this.source,
     required this.configuredFiles,
     required this.configuredDirs,
-  }) : fileSystem = const LocalFileSystem();
+  }) : _fileSystem = const LocalFileSystem();
 
+  /// parses [yaml]
   factory Brick.fromYaml(String name, YamlMap? yaml) {
     final data = yaml?.data ?? <String, dynamic>{};
     final source = BrickSource.fromYaml(YamlValue.from(data.remove('source')));
@@ -79,12 +85,22 @@ class Brick extends Equatable {
     );
   }
 
+  /// the name of the brick
   final String name;
-  final BrickSource source;
-  final Iterable<BrickFile> configuredFiles;
-  final Iterable<BrickPath> configuredDirs;
-  final FileSystem fileSystem;
 
+  /// the source of the content that the brick will create
+  final BrickSource source;
+
+  /// the configured files that will alter/update the [source] files
+  final Iterable<BrickFile> configuredFiles;
+
+  /// the configured directories that will alter/update the paths of the [source] files
+  final Iterable<BrickPath> configuredDirs;
+  final FileSystem _fileSystem;
+
+  /// writes the brick's files, from the [source]'s files.
+  ///
+  /// targets: bricks -> [name] -> __brick__
   void writeBrick() {
     final targetDir = join(
       'bricks',
@@ -92,7 +108,7 @@ class Brick extends Equatable {
       '__brick__',
     );
 
-    final directory = fileSystem.directory(targetDir);
+    final directory = _fileSystem.directory(targetDir);
     if (directory.existsSync()) {
       directory.deleteSync(recursive: true);
     }
@@ -100,9 +116,9 @@ class Brick extends Equatable {
     for (final file in source.mergeFilesAndConfig(configuredFiles)) {
       file.writeTargetFile(
         targetDir: targetDir,
-        sourceFile: fileSystem.file(source.fromSourcePath(file)),
+        sourceFile: _fileSystem.file(source.fromSourcePath(file)),
         configuredDirs: configuredDirs,
-        fileSystem: fileSystem,
+        fileSystem: _fileSystem,
       );
     }
   }

@@ -7,9 +7,14 @@ import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
+/// {@template brick_config}
+/// The configuration for the brick
+/// {@endtemplate}
 class BrickConfig {
+  /// {@macro brick_config}
   factory BrickConfig() => BrickConfig._create(const LocalFileSystem());
 
+  /// Allows passing a [fileSystem] to support testing
   @visibleForTesting
   factory BrickConfig.config(FileSystem fileSystem) =>
       BrickConfig._create(fileSystem);
@@ -47,21 +52,24 @@ class BrickConfig {
     }
 
     return BrickConfig._(
-      directories: directories,
+      bricks: directories,
     );
   }
 
   const BrickConfig._({
-    required this.directories,
+    required this.bricks,
   });
 
-  final Iterable<Brick> directories;
+  /// the bricks that the configuration applies to
+  final Iterable<Brick> bricks;
 
+  /// the name of the yaml file
   static const file = 'brick_oven.yaml';
 
+  /// writes all [bricks] to the brick dir
   void writeMason() {
-    for (final dir in directories) {
-      dir.writeBrick();
+    for (final brick in bricks) {
+      brick.writeBrick();
     }
   }
 }

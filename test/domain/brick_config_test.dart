@@ -72,7 +72,7 @@ $bricksMapping
     }
     final instance = BrickConfig.config(fileSystem);
 
-    for (final brick in instance.directories) {
+    for (final brick in instance.bricks) {
       expect(bricks.keys, contains(brick.name));
       expect(bricks.values, contains(brick.source.localPath));
     }
