@@ -1,4 +1,5 @@
 import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
@@ -14,7 +15,7 @@ import 'package:yaml/yaml.dart';
 /// {@endtemplate}
 class BrickSource extends Equatable {
   /// {@macro brick_source}
-  const BrickSource({
+  BrickSource({
     required this.localPath,
   }) : _fileSystem = const LocalFileSystem();
 
@@ -31,7 +32,7 @@ class BrickSource extends Equatable {
   }) : _fileSystem = fileSystem ?? MemoryFileSystem();
 
   /// creates and empty source
-  const BrickSource.none()
+  BrickSource.none()
       : localPath = null,
         _fileSystem = const LocalFileSystem();
 
@@ -57,12 +58,27 @@ class BrickSource extends Equatable {
       return handleYaml(yaml.asYaml().value);
     }
 
-    return const BrickSource.none();
+    return BrickSource.none();
   }
 
   /// the local path of the source files
   final String? localPath;
   final FileSystem _fileSystem;
+
+  BrickWatcher? _watcher;
+
+  /// the source of the content that the brick will create
+  bool get hasRunningWatcher => _watcher?.isRunning ?? false;
+
+  /// listens to the local files and updates the brick on events
+  BrickWatcher? get watcher {
+    final path = localPath;
+    if (path == null) {
+      return null;
+    }
+
+    return BrickWatcher(path);
+  }
 
   /// retrieves the files from the source path
   Iterable<BrickFile> files() sync* {
