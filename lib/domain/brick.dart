@@ -110,7 +110,7 @@ class Brick extends Equatable {
     if (watcher != null) {
       watcher
         ..addEvent(() => writeBrick(path))
-        ..startWatcher();
+        ..start();
 
       if (!watcher.hasRun) {
         writeBrick(path);
@@ -118,6 +118,11 @@ class Brick extends Equatable {
     } else {
       writeBrick(path);
     }
+  }
+
+  /// stops watching the directories that impact the brick
+  void stopWatching() {
+    source.watcher?.stop();
   }
 
   /// writes the brick's files, from the [source]'s files.
@@ -149,7 +154,7 @@ class Brick extends Equatable {
       );
     }
 
-    done('$name: $count files');
+    done('$name: $count file${count == 1 ? '' : 's'}');
   }
 
   @override
