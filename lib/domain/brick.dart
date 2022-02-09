@@ -105,6 +105,7 @@ class Brick extends Equatable {
   /// watches the local files and updates the brick on events
   void watchBrick() {
     final watcher = source.watcher;
+
     if (watcher != null) {
       watcher
         ..addEvent(writeBrick)
