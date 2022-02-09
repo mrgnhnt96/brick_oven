@@ -103,13 +103,13 @@ class BrickConfig {
 
   void _write() {
     for (final brick in bricks) {
-      brick.writeBrick();
+      brick.writeBrick(arguments.outputDir);
     }
   }
 
   Future<void> _watch() async {
     for (final brick in bricks) {
-      brick.watchBrick();
+      brick.watchBrick(arguments.outputDir);
     }
 
     if (!bricks.any((brick) => brick.hasRunningWatcher)) {
@@ -118,6 +118,8 @@ class BrickConfig {
       );
       return;
     }
+
+    logger.info('\nWatching local files\n');
 
     return Completer<void>().future;
   }

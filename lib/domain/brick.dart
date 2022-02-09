@@ -104,30 +104,30 @@ class Brick extends Equatable {
   bool get hasRunningWatcher => source.hasRunningWatcher;
 
   /// watches the local files and updates the brick on events
-  void watchBrick() {
+  void watchBrick([String? path]) {
     final watcher = source.watcher;
 
     if (watcher != null) {
       watcher
-        ..addEvent(writeBrick)
+        ..addEvent(() => writeBrick(path))
         ..startWatcher();
 
       if (!watcher.hasRun) {
-        writeBrick();
+        writeBrick(path);
       }
     } else {
-      writeBrick();
+      writeBrick(path);
     }
   }
 
   /// writes the brick's files, from the [source]'s files.
   ///
   /// targets: bricks -> [name] -> __brick__
-  void writeBrick() {
+  void writeBrick([String? path]) {
     final done = logger.progress('Writing Brick: $name');
 
     final targetDir = join(
-      'bricks',
+      path ?? 'bricks',
       name,
       '__brick__',
     );
