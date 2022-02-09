@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:brick_oven/domain/brick_config.dart';
 import 'package:path/path.dart';
 
 /// {@template brick_arguments}
@@ -13,6 +16,11 @@ class BrickArguments {
   /// parses the arguments from the command line
   factory BrickArguments.from(List<String> arguments) {
     final args = List<String>.from(arguments);
+
+    if (args.containsArg('--help', '-h')) {
+      logger.info('brick_oven: you need help...');
+      exit(0);
+    }
 
     final watch = args.containsArg('--watch', '-w');
     final output = args.retrieveArg('--output', '-o');
