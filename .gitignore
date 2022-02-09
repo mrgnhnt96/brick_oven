@@ -4,3 +4,7 @@
 
 # Conventional directory for build output.
 build/
+
+# code coverage
+.codecov_secret
+codecov
