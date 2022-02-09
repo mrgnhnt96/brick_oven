@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:brick_oven/domain/brick_config.dart';
 import 'package:watcher/watcher.dart';
 
 /// the function that happens on the file event
@@ -37,10 +38,10 @@ class BrickWatcher {
       return resetWatcher();
     }
 
-    _listener = watcher.events.listen((e) {
+    _listener = watcher.events.listen((watchEvent) {
       _hasRun = true;
-      print(e);
       for (final event in _events) {
+        logger.info('Running brick_oven');
         event();
       }
     });
