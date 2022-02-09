@@ -26,12 +26,26 @@ void main() {
     });
   });
 
-  group('EnumListX', () {
+  group('ListX', () {
     group('#retrieve', () {
-      test('returns the value when provided', () {
+      test('enum returns the value when provided', () {
         final result = MustacheFormat.values.retrieve('camelCase');
 
         expect(result, MustacheFormat.camelCase);
+      });
+
+      test('string returns the value when provided', () {
+        const search = 'num';
+        final result = ['val', search].retrieve(search);
+
+        expect(result, search);
+      });
+
+      test('int returns the value when provided', () {
+        const search = 1;
+        final result = [2, search].retrieve(search);
+
+        expect(result, search);
       });
 
       test('returns null when not provided', () {
