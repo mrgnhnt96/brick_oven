@@ -1,3 +1,5 @@
+import 'package:path/path.dart';
+
 /// {@template brick_arguments}
 /// The arguments to be provided to the brick_oven package
 /// {@endtemplate}
@@ -5,6 +7,7 @@ class BrickArguments {
   /// {@macro brick_arguments}
   const BrickArguments({
     this.watch = false,
+    this.outputDir = '',
   });
 
   /// parses the arguments from the command line
@@ -12,6 +15,7 @@ class BrickArguments {
     final args = List<String>.from(arguments);
 
     final watch = args.containsArg('--watch', '-w');
+    final output = args.retrieveArg('--output', '-o');
 
     if (args.isNotEmpty) {
       throw ArgumentError('unrecognized args, $args');
@@ -19,11 +23,15 @@ class BrickArguments {
 
     return BrickArguments(
       watch: watch,
+      outputDir: output,
     );
   }
 
   /// Whether to watch the directory and update on changes
   final bool watch;
+
+  /// the output directory for the bricks
+  final String? outputDir;
 }
 
 extension on List<String> {
@@ -37,5 +45,34 @@ extension on List<String> {
     }
 
     return containsFlag;
+  }
+
+  String? retrieveArg(String flag, [String? shortFlag]) {
+    final flagIndex = indexOf(flag);
+
+    String get(int index) {
+      if (index == -1) {
+        throw ArgumentError('$flag is not found');
+      }
+
+      removeAt(index);
+      final result = removeAt(index);
+
+      final path = normalize(result);
+
+      return path;
+    }
+
+    if (flagIndex == -1 && shortFlag != null) {
+      final shortFlagIndex = indexOf(shortFlag);
+
+      if (shortFlagIndex != -1) {
+        return get(shortFlagIndex);
+      }
+    } else if (flagIndex != -1) {
+      return get(flagIndex);
+    }
+
+    return null;
   }
 }
