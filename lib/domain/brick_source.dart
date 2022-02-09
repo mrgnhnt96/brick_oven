@@ -17,7 +17,8 @@ class BrickSource extends Equatable {
   /// {@macro brick_source}
   BrickSource({
     required this.localPath,
-  }) : _fileSystem = const LocalFileSystem();
+  })  : _fileSystem = const LocalFileSystem(),
+        watcher = localPath != null ? BrickWatcher(localPath) : null;
 
   /// parses the [value] into the appropriate type of source
   factory BrickSource.fromString(String value) {
@@ -29,12 +30,14 @@ class BrickSource extends Equatable {
   BrickSource.memory({
     required this.localPath,
     FileSystem? fileSystem,
-  }) : _fileSystem = fileSystem ?? MemoryFileSystem();
+  })  : _fileSystem = fileSystem ?? MemoryFileSystem(),
+        watcher = localPath != null ? BrickWatcher(localPath) : null;
 
   /// creates and empty source
-  BrickSource.none()
+  const BrickSource.none()
       : localPath = null,
-        _fileSystem = const LocalFileSystem();
+        _fileSystem = const LocalFileSystem(),
+        watcher = null;
 
   /// parse [yaml] into the source
   factory BrickSource.fromYaml(YamlValue yaml) {
@@ -58,27 +61,18 @@ class BrickSource extends Equatable {
       return handleYaml(yaml.asYaml().value);
     }
 
-    return BrickSource.none();
+    return const BrickSource.none();
   }
 
   /// the local path of the source files
   final String? localPath;
   final FileSystem _fileSystem;
 
-  BrickWatcher? _watcher;
+  /// Watches the local files, and updates on events
+  final BrickWatcher? watcher;
 
   /// the source of the content that the brick will create
-  bool get hasRunningWatcher => _watcher?.isRunning ?? false;
-
-  /// listens to the local files and updates the brick on events
-  BrickWatcher? get watcher {
-    final path = localPath;
-    if (path == null) {
-      return null;
-    }
-
-    return BrickWatcher(path);
-  }
+  bool get hasRunningWatcher => watcher?.isRunning ?? false;
 
   /// retrieves the files from the source path
   Iterable<BrickFile> files() sync* {
