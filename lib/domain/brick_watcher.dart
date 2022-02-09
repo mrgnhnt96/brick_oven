@@ -6,16 +6,16 @@ import 'package:watcher/watcher.dart';
 typedef OnEvent = void Function();
 
 /// {@template brick_watcher}
-/// Watches the local files of [dir], and updates on events
+/// Watches the local files, and updates on events
 /// {@endtemplate}
 class BrickWatcher {
   /// {@macro brick_watcher}
-  BrickWatcher(this.dir);
+  BrickWatcher(String dir) : watcher = DirectoryWatcher(dir);
 
   /// the source directory of the brick, which will be watched
-  final String dir;
+  final DirectoryWatcher watcher;
 
-  StreamSubscription<WatchEvent>? _watcher;
+  StreamSubscription<WatchEvent>? _listener;
 
   final _events = <OnEvent>[];
 
@@ -24,7 +24,7 @@ class BrickWatcher {
   var _hasRun = false;
 
   /// whether the watcher is running
-  bool get isRunning => _watcher != null && _events.isNotEmpty;
+  bool get isRunning => _listener != null && _events.isNotEmpty;
 
   /// adds event that will be called when a file creates an event
   void addEvent(OnEvent onEvent) {
@@ -33,13 +33,11 @@ class BrickWatcher {
 
   /// starts the watcher
   void startWatcher() {
-    if (_watcher != null) {
+    if (_listener != null) {
       return resetWatcher();
     }
 
-    final watcher = DirectoryWatcher(dir);
-
-    _watcher = watcher.events.listen((e) {
+    _listener = watcher.events.listen((e) {
       _hasRun = true;
       print(e);
       for (final event in _events) {
@@ -55,8 +53,8 @@ class BrickWatcher {
 
   /// resets the watcher
   void resetWatcher() {
-    _watcher?.cancel();
-    _watcher = null;
+    _listener?.cancel();
+    _listener = null;
 
     startWatcher();
   }
