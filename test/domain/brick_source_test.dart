@@ -40,7 +40,7 @@ void main() {
 
   group('#none', () {
     test('local path is null', () {
-      final instance = BrickSource.none();
+      const instance = BrickSource.none();
 
       expect(instance.localPath, isNull);
     });
@@ -84,7 +84,7 @@ void main() {
 
   group('#files', () {
     test('should return no files when no source is provided', () {
-      final instance = BrickSource.none();
+      const instance = BrickSource.none();
 
       expect(instance.files(), isEmpty);
     });
