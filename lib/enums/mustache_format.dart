@@ -59,16 +59,14 @@ extension MustacheFormatX on MustacheFormat {
 /// The extensions for Lists
 extension ListX<T> on List<T> {
   /// loops through looking for a matched [value], return null if not found
-  T? retrieve(String? value) {
-    value = value?.toLowerCase();
-
+  T? retrieve(Object? value) {
     for (final e in this) {
       if (e is Enum) {
-        if (e.name.toLowerCase() == value) {
+        if (e.name.toLowerCase() == '$value'.toLowerCase()) {
           return e;
         }
       } else if (e is String) {
-        if (e.toLowerCase() == value) {
+        if (e.toLowerCase() == '$value'.toLowerCase()) {
           return e;
         }
       } else {
