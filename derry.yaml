@@ -1,0 +1,10 @@
+coverage:
+  - format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
+  - genhtml coverage/lcov.info -o coverage
+  - open coverage/index.html
+  - curl -Os https://uploader.codecov.io/latest/macos/codecov
+  - chmod +x codecov
+
+runtests:
+  - dart run test --coverage coverage -r expanded --test-randomize-ordering-seed random --timeout 60s
+  - $coverage

@@ -18,6 +18,7 @@ dependencies:
   yaml: ^3.1.0
 
 dev_dependencies:
+  derry: ^1.4.3
   mocktail: ^0.2.0
   test: ^1.16.0
   very_good_analysis: ^2.4.0
@@ -26,3 +27,5 @@ executables:
   brick_oven:
     path: bin/brick_oven.dart
     dart: bin/brick_oven.dart
+
+scripts: derry.yaml
