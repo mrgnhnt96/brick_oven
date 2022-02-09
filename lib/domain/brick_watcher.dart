@@ -33,17 +33,20 @@ class BrickWatcher {
   }
 
   /// starts the watcher
-  void startWatcher() {
+  void start() {
     if (_listener != null) {
-      return resetWatcher();
+      return reset();
     }
 
     _listener = watcher.events.listen((watchEvent) {
       _hasRun = true;
+
+      logger.info('Running brick_oven...');
       for (final event in _events) {
-        logger.info('Running brick_oven');
         event();
       }
+
+      logger.info('\nWatching local files...\n');
     });
 
     // TODO(mrgnhnt96):
@@ -52,11 +55,16 @@ class BrickWatcher {
     // - refactor listener, and add tests
   }
 
-  /// resets the watcher
-  void resetWatcher() {
+  /// resets the watcher by stopping it and restarting it
+  void reset() {
+    stop();
+
+    start();
+  }
+
+  /// stops the watcher
+  void stop() {
     _listener?.cancel();
     _listener = null;
-
-    startWatcher();
   }
 }
