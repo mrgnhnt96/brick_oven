@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_dynamic_calls
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_arguments.dart';
@@ -9,6 +10,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
+import 'package:watcher/watcher.dart';
 import 'package:yaml/yaml.dart';
 
 /// the logger to be used by the [Brick]s
@@ -94,11 +96,9 @@ class BrickConfig {
   Future<void> writeMason() async {
     if (arguments.watch) {
       await _watch();
-
-      return;
+    } else {
+      _write();
     }
-
-    _write();
   }
 
   void _write() {
@@ -108,6 +108,8 @@ class BrickConfig {
   }
 
   Future<void> _watch() async {
+    final yamlWatcher = FileWatcher(file);
+
     for (final brick in bricks) {
       brick.watchBrick(arguments.outputDir);
     }
@@ -119,8 +121,23 @@ class BrickConfig {
       return;
     }
 
-    logger.info('\nWatching local files\n');
+    final watchCompleter = Completer<void>();
 
-    return Completer<void>().future;
+    final _yamlListener = yamlWatcher.events.listen((event) {
+      logger.alert('$file changed, updating bricks configuration');
+
+      for (final brick in bricks) {
+        brick.stopWatching();
+      }
+
+      watchCompleter.complete();
+
+      exitCode = 205;
+    });
+
+    logger.info('\nWatching local files...\n');
+
+    await watchCompleter.future;
+    await _yamlListener.cancel();
   }
 }
