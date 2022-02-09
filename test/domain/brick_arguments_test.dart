@@ -17,6 +17,17 @@ void main() {
       }
     });
 
+    test('parses output', () {
+      const args = ['-o', '--output'];
+      const outDir = 'out_dir';
+
+      for (final arg in args) {
+        final instance = BrickArguments.from([arg, outDir]);
+
+        expect(instance.outputDir, outDir);
+      }
+    });
+
     test('throws when extra keys are provided', () {
       const args = [
         '-w --watch',
