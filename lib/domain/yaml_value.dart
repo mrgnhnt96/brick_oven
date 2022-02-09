@@ -77,21 +77,33 @@ abstract class YamlValue {
   final dynamic value;
 }
 
+/// {@template yaml_string}
+/// Represents a value that is a `String`
+/// {@endtemplate}
 class YamlString extends YamlValue {
+  /// {@macro yaml_string}
   const YamlString(this.value) : super(value);
 
   @override
   final String value;
 }
 
+/// {@template yaml_map}
+/// Represents a value that is a `YamlMap`
+/// {@endtemplate}
 class YamlMapValue extends YamlValue {
+  /// {@macro yaml_map}
   const YamlMapValue(this.value) : super(value);
 
   @override
   final YamlMap value;
 }
 
+/// {@template yaml_none}
+/// Represents a value that is `null`
+/// {@endtemplate}
 class YamlNone extends YamlValue {
+  /// {@macro yaml_none}
   const YamlNone() : super(null);
 
   @override
