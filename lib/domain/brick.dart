@@ -1,3 +1,4 @@
+import 'package:brick_oven/domain/brick_config.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
@@ -123,6 +124,8 @@ class Brick extends Equatable {
   ///
   /// targets: bricks -> [name] -> __brick__
   void writeBrick() {
+    final done = logger.progress('Writing Brick: $name');
+
     final targetDir = join(
       'bricks',
       name,
@@ -134,7 +137,10 @@ class Brick extends Equatable {
       directory.deleteSync(recursive: true);
     }
 
-    for (final file in source.mergeFilesAndConfig(configuredFiles)) {
+    final files = source.mergeFilesAndConfig(configuredFiles);
+    final count = files.length;
+
+    for (final file in files) {
       file.writeTargetFile(
         targetDir: targetDir,
         sourceFile: _fileSystem.file(source.fromSourcePath(file)),
@@ -142,6 +148,8 @@ class Brick extends Equatable {
         fileSystem: _fileSystem,
       );
     }
+
+    done('$name: $count files');
   }
 
   @override
