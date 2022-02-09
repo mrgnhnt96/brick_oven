@@ -173,14 +173,8 @@ class BrickFile extends Equatable {
       }
     }
 
-    final file = fileSystem.file(join(targetDir, path));
-
-    try {
-      file.createSync(recursive: true);
-    } catch (e) {
-      print(e);
-      return;
-    }
+    final file = fileSystem.file(join(targetDir, path))
+      ..createSync(recursive: true);
 
     if (variables.isEmpty == true) {
       sourceFile.copySync(file.path);
