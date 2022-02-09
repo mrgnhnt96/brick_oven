@@ -7,8 +7,12 @@ import 'package:brick_oven/domain/brick_arguments.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
+
+/// the logger to be used by the [Brick]s
+final logger = Logger();
 
 /// {@template brick_config}
 /// The configuration for the brick
@@ -90,6 +94,7 @@ class BrickConfig {
   Future<void> writeMason() async {
     if (arguments.watch) {
       await _watch();
+
       return;
     }
 
@@ -108,7 +113,9 @@ class BrickConfig {
     }
 
     if (!bricks.any((brick) => brick.hasRunningWatcher)) {
-      print('There are no bricks currently watching local files, ending');
+      logger.err(
+        'There are no bricks currently watching local files, ending',
+      );
       return;
     }
 
