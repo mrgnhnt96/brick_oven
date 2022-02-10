@@ -7,7 +7,7 @@ export 'package:brick_oven/domain/brick_arguments.dart';
 
 /// runs the brick oven, generating bricks
 Future<void> runBrickOven(BrickArguments arguments) async {
-  await BrickConfig(arguments).writeMason();
+  await BrickConfig(arguments).writeBricks();
 
   if (exitCode == 205) {
     await runBrickOven(arguments);

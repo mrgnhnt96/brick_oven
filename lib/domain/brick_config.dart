@@ -93,7 +93,7 @@ class BrickConfig {
   static const file = 'brick_oven.yaml';
 
   /// writes all [bricks] to the brick dir
-  Future<void> writeMason() async {
+  Future<void> writeBricks() async {
     if (arguments.watch) {
       await _watch();
     } else {
