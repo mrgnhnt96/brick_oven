@@ -30,8 +30,8 @@ class BrickSource extends Equatable {
   BrickSource.memory({
     required this.localPath,
     FileSystem? fileSystem,
-  })  : _fileSystem = fileSystem ?? MemoryFileSystem(),
-        watcher = localPath != null ? BrickWatcher(localPath) : null;
+    this.watcher,
+  }) : _fileSystem = fileSystem ?? MemoryFileSystem();
 
   /// creates and empty source
   const BrickSource.none()
