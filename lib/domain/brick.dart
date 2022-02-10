@@ -26,13 +26,13 @@ class Brick extends Equatable {
 
   /// provide
   @visibleForTesting
-  Brick.memory({
+  const Brick.memory({
     required this.name,
     required this.source,
     required this.configuredDirs,
     required this.configuredFiles,
-    required FileSystem? fileSystem,
-  }) : _fileSystem = fileSystem ?? MemoryFileSystem();
+    required FileSystem fileSystem,
+  }) : _fileSystem = fileSystem;
 
   const Brick._fromYaml({
     required this.name,
