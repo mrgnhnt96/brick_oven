@@ -4,6 +4,7 @@ import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
+import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mocktail/mocktail.dart';
@@ -55,113 +56,171 @@ void main() {
     });
   });
 
-  group('#watchBrick', () {
-    late FileSystem fs;
+  // Watcher only listens to local files, so we need to mock the file system
+  group(
+    'watcher',
+    () {
+      late FileSystem fs;
+      late BrickWatcher mockWatcher;
+      // ignore: prefer_function_declarations_over_variables, omit_local_variable_types
+      final void Function() voidCallback = () {};
 
-    setUp(() {
-      fs = MemoryFileSystem();
-    });
+      setUp(() {
+        fs = MemoryFileSystem();
+        mockWatcher = MockBrickWatcher();
 
-    Brick brick({
-      bool createFile = false,
-      bool createDir = false,
-      List<String>? fileNames,
-    }) {
-      return Brick.memory(
-        name: brickName,
-        source: BrickSource(localPath: localPath),
-        configuredDirs: [
-          if (createDir) BrickPath(name: newDirName, path: dirPath),
-        ],
-        configuredFiles: [
-          if (createFile && fileNames == null) BrickFile(filePath),
-          if (fileNames != null)
-            for (final name in fileNames) BrickFile(join(dirPath, name)),
-        ],
-        fileSystem: fs,
-      );
-    }
+        when(() => mockWatcher.addEvent(any())).thenReturn(voidCallback());
+        when(mockWatcher.start).thenReturn(voidCallback());
+        when(() => mockWatcher.hasRun).thenReturn(false);
+      });
 
-    test(
-        'uses default directory bricks/{name}/__brick__ when path not provided',
-        () {
-      final testBrick = brick(createFile: true);
+      Brick brick({bool mockWatch = false}) {
+        return Brick.memory(
+          name: brickName,
+          source: BrickSource.memory(
+            localPath: localPath,
+            fileSystem: fs,
+            watcher: mockWatch ? mockWatcher : null,
+          ),
+          configuredDirs: const [],
+          configuredFiles: const [],
+          fileSystem: fs,
+        );
+      }
 
-      final fakeSourcePath = fs.file(
-        testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
-      );
+      group('#watchBrick', () {
+        test(
+            'uses default directory bricks/{name}/__brick__ when path not provided',
+            () {
+          final testBrick = brick(mockWatch: true);
 
-      final targetFile = fs.file(join(brickPath, filePath));
+          final fakeSourcePath = fs.file(join(localPath, filePath));
 
-      expect(targetFile.existsSync(), isFalse);
+          final targetFile = fs.file(join(brickPath, filePath));
 
-      fs.file(fakeSourcePath).createSync(recursive: true);
+          expect(targetFile.existsSync(), isFalse);
 
-      testBrick.watchBrick();
+          fs.file(fakeSourcePath).createSync(recursive: true);
 
-      expect(targetFile.existsSync(), isTrue);
-    });
+          testBrick.watchBrick();
 
-    test('uses provided path for output when provided', () {
-      final testBrick = brick(createFile: true);
+          expect(targetFile.existsSync(), isTrue);
+        });
 
-      final fakeSourcePath = fs.file(
-        testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
-      );
+        test('uses provided path for output when provided', () {
+          final testBrick = brick(mockWatch: true);
 
-      const output = 'out';
+          final fakeSourcePath = fs.file(join(localPath, filePath));
 
-      final targetFile = fs.file(
-        join(output, brickName, '__brick__', filePath),
-      );
+          const output = 'out';
 
-      expect(targetFile.existsSync(), isFalse);
+          final targetFile = fs.file(
+            join(output, brickName, '__brick__', filePath),
+          );
 
-      fs.file(fakeSourcePath).createSync(recursive: true);
+          expect(targetFile.existsSync(), isFalse);
 
-      testBrick.watchBrick(output);
+          fs.file(fakeSourcePath).createSync(recursive: true);
 
-      expect(targetFile.existsSync(), isTrue);
-    });
+          testBrick.watchBrick(output);
 
-    test('is running watcher', () async {
-      final testBrick = brick(createFile: true);
+          expect(targetFile.existsSync(), isTrue);
+        });
 
-      final sourceFile = fs.file(
-        testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
-      );
+        test('is running watcher', () async {
+          final testBrick = brick(mockWatch: true);
 
-      const content = '// content';
+          final sourceFile = fs.file(join(localPath, filePath));
 
-      sourceFile
-        ..createSync(recursive: true)
-        ..writeAsStringSync(content);
+          const content = '// content';
 
-      final targetFile = fs.file(
-        join(brickPath, filePath),
-      );
+          sourceFile
+            ..createSync(recursive: true)
+            ..writeAsStringSync(content);
 
-      expect(targetFile.existsSync(), isFalse);
+          final targetFile = fs.file(join(brickPath, filePath));
 
-      testBrick.watchBrick();
+          expect(targetFile.existsSync(), isFalse);
 
-      expect(targetFile.existsSync(), isTrue);
-      expect(targetFile.readAsStringSync(), content);
+          testBrick.watchBrick();
 
-      // Because MemoryFileSystem doesn't support watching,
-      // We are just checking if watcher is running.
-      //
-      // const newContent = '// new content';
-      // sourceFile.writeAsStringSync(newContent);
-      // expect(targetFile.readAsStringSync(), newContent);
+          expect(targetFile.existsSync(), isTrue);
+          expect(targetFile.readAsStringSync(), content);
 
-      expect(testBrick.source.watcher?.isRunning, isTrue);
-    });
-  });
+          // Because MemoryFileSystem doesn't support watching,
+          // We are just checking if watcher is running.
+          //
+          // const newContent = '// new content';
+          // sourceFile.writeAsStringSync(newContent);
+          // expect(targetFile.readAsStringSync(), newContent);
 
-  group('#stopWatching', () {
-    test('stops watching files for updates', () {});
-  });
+          when(() => mockWatcher.isRunning).thenReturn(true);
+
+          expect(testBrick.source.watcher?.isRunning, isTrue);
+        });
+
+        test('writes bricks when no watcher is available', () {
+          final testBrick = brick();
+
+          final sourceFile = fs.file(join(localPath, filePath));
+
+          const content = '// content';
+
+          sourceFile
+            ..createSync(recursive: true)
+            ..writeAsStringSync(content);
+
+          final targetFile = fs.file(join(brickPath, filePath));
+
+          expect(targetFile.existsSync(), isFalse);
+
+          testBrick.watchBrick();
+
+          expect(targetFile.existsSync(), isTrue);
+          expect(targetFile.readAsStringSync(), content);
+
+          expect(testBrick.source.watcher?.isRunning, isNull);
+        });
+      });
+
+      group('#stopWatching', () {
+        test('stops watching files for updates', () {
+          final testBrick = brick(mockWatch: true);
+
+          final sourceFile = fs.file(join(localPath, filePath));
+
+          const content = '// content';
+
+          sourceFile
+            ..createSync(recursive: true)
+            ..writeAsStringSync(content);
+
+          final targetFile = fs.file(join(brickPath, filePath));
+
+          expect(targetFile.existsSync(), isFalse);
+
+          testBrick.watchBrick();
+
+          expect(targetFile.existsSync(), isTrue);
+          expect(targetFile.readAsStringSync(), content);
+
+          when(() => mockWatcher.isRunning).thenReturn(true);
+
+          expect(testBrick.source.watcher?.isRunning, isTrue);
+
+          reset(mockWatcher);
+
+          when(mockWatcher.stop).thenReturn(voidCallback());
+
+          testBrick.stopWatching();
+
+          when(() => mockWatcher.isRunning).thenReturn(false);
+
+          expect(testBrick.source.watcher?.isRunning, isFalse);
+        });
+      });
+    },
+  );
 
   group('#writeBrick', () {
     late FileSystem fs;
@@ -350,4 +409,4 @@ void main() {
   });
 }
 
-class MockBrickSource extends Mock implements BrickSource {}
+class MockBrickWatcher extends Mock implements BrickWatcher {}
