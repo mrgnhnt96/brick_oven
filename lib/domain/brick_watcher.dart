@@ -48,11 +48,6 @@ class BrickWatcher {
 
       logger.info('\nWatching local files...\n');
     });
-
-    // TODO(mrgnhnt96):
-    // - add listener to yaml file
-    // - update bricks when yaml is updated? Or stop whole process?
-    // - refactor listener, and add tests
   }
 
   /// resets the watcher by stopping it and restarting it
