@@ -114,7 +114,7 @@ class BrickConfig {
       brick.watchBrick(arguments.outputDir);
     }
 
-    if (!bricks.any((brick) => brick.hasRunningWatcher)) {
+    if (!bricks.any((brick) => brick.source.watcher?.isRunning ?? false)) {
       logger.err(
         'There are no bricks currently watching local files, ending',
       );
