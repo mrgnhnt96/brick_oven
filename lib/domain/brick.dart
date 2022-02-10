@@ -100,9 +100,6 @@ class Brick extends Equatable {
 
   final FileSystem _fileSystem;
 
-  /// whether the brick has a running watcher
-  bool get hasRunningWatcher => source.hasRunningWatcher;
-
   /// watches the local files and updates the brick on events
   void watchBrick([String? path]) {
     final watcher = source.watcher;

@@ -71,9 +71,6 @@ class BrickSource extends Equatable {
   /// Watches the local files, and updates on events
   final BrickWatcher? watcher;
 
-  /// the source of the content that the brick will create
-  bool get hasRunningWatcher => watcher?.isRunning ?? false;
-
   /// retrieves the files from the source path
   Iterable<BrickFile> files() sync* {
     if (localPath != null) {
@@ -107,9 +104,6 @@ class BrickSource extends Equatable {
 
   Iterable<BrickFile> _fromDir() sync* {
     final localPath = this.localPath;
-    if (localPath == null) {
-      throw Exception('path is null');
-    }
 
     final dir = _fileSystem.directory(localPath);
 
