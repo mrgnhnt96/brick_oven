@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:brick_oven/brick_oven.dart';
 import 'package:test/test.dart';
 
@@ -25,6 +27,16 @@ void main() {
         final instance = BrickArguments.from([arg, outDir]);
 
         expect(instance.outputDir, outDir);
+      }
+    });
+
+    test('parses help', () {
+      const args = ['-h', '--help'];
+
+      for (final arg in args) {
+        BrickArguments.from([arg]);
+
+        expect(exitCode, equals(0));
       }
     });
 
