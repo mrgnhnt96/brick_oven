@@ -1,3 +1,4 @@
+import 'package:brick_oven/brick_oven.dart';
 import 'package:brick_oven/domain/brick_config.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -32,7 +33,17 @@ void main() {
   }
 
   test('throws error when ${BrickConfig.file} does not exist', () {
-    expect(BrickConfig.new, throwsA(isA<Exception>()));
+    expect(
+      () => BrickConfig(BrickArguments.from([])),
+      throwsA(isA<Exception>()),
+    );
+  });
+
+  test('#config throws error when ${BrickConfig.file} does not exist', () {
+    expect(
+      () => BrickConfig.config(MemoryFileSystem()),
+      throwsA(isA<Exception>()),
+    );
   });
 
   test('throws error when extra keys are provided', () {
