@@ -6,6 +6,7 @@ import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
@@ -54,7 +55,7 @@ void main() {
     });
   });
 
-  group('#writeBrick', () {
+  group('#watchBrick', () {
     late FileSystem fs;
 
     setUp(() {
@@ -81,9 +82,113 @@ void main() {
       );
     }
 
-    test('should not create the bricks folder when no files are provided', () {
-      brick().writeBrick();
+    test(
+        'uses default directory bricks/{name}/__brick__ when path not provided',
+        () {
+      final testBrick = brick(createFile: true);
+
+      final fakeSourcePath = fs.file(
+        testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
+      );
+
+      final targetFile = fs.file(join(brickPath, filePath));
+
+      expect(targetFile.existsSync(), isFalse);
+
+      fs.file(fakeSourcePath).createSync(recursive: true);
+
+      testBrick.watchBrick();
+
+      expect(targetFile.existsSync(), isTrue);
     });
+
+    test('uses provided path for output when provided', () {
+      final testBrick = brick(createFile: true);
+
+      final fakeSourcePath = fs.file(
+        testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
+      );
+
+      const output = 'out';
+
+      final targetFile = fs.file(
+        join(output, brickName, '__brick__', filePath),
+      );
+
+      expect(targetFile.existsSync(), isFalse);
+
+      fs.file(fakeSourcePath).createSync(recursive: true);
+
+      testBrick.watchBrick(output);
+
+      expect(targetFile.existsSync(), isTrue);
+    });
+
+    test('is running watcher', () async {
+      final testBrick = brick(createFile: true);
+
+      final sourceFile = fs.file(
+        testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
+      );
+
+      const content = '// content';
+
+      sourceFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(content);
+
+      final targetFile = fs.file(
+        join(brickPath, filePath),
+      );
+
+      expect(targetFile.existsSync(), isFalse);
+
+      testBrick.watchBrick();
+
+      expect(targetFile.existsSync(), isTrue);
+      expect(targetFile.readAsStringSync(), content);
+
+      // Because MemoryFileSystem doesn't support watching,
+      // We are just checking if watcher is running.
+      //
+      // const newContent = '// new content';
+      // sourceFile.writeAsStringSync(newContent);
+      // expect(targetFile.readAsStringSync(), newContent);
+
+      expect(testBrick.source.watcher?.isRunning, isTrue);
+    });
+  });
+
+  group('#stopWatching', () {
+    test('stops watching files for updates', () {});
+  });
+
+  group('#writeBrick', () {
+    late FileSystem fs;
+
+    setUp(() {
+      fs = MemoryFileSystem();
+    });
+
+    Brick brick({
+      bool createFile = false,
+      bool createDir = false,
+      List<String>? fileNames,
+    }) {
+      return Brick.memory(
+        name: brickName,
+        source: BrickSource(localPath: localPath),
+        configuredDirs: [
+          if (createDir) BrickPath(name: newDirName, path: dirPath),
+        ],
+        configuredFiles: [
+          if (createFile && fileNames == null) BrickFile(filePath),
+          if (fileNames != null)
+            for (final name in fileNames) BrickFile(join(dirPath, name)),
+        ],
+        fileSystem: fs,
+      );
+    }
 
     test(
         'uses default directory bricks/{name}/__brick__ when path not provided',
@@ -243,6 +348,6 @@ void main() {
       }
     });
   });
-
-  group('#watchBrick', () {});
 }
+
+class MockBrickSource extends Mock implements BrickSource {}
