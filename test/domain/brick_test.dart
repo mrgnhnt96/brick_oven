@@ -85,7 +85,9 @@ void main() {
       brick().writeBrick();
     });
 
-    test('checks for directory bricks/{name}/__brick__', () {
+    test(
+        'uses default directory bricks/{name}/__brick__ when path not provided',
+        () {
       final testBrick = brick(createFile: true);
 
       final fakeSourcePath = fs.file(
@@ -99,6 +101,28 @@ void main() {
       fs.file(fakeSourcePath).createSync(recursive: true);
 
       testBrick.writeBrick();
+
+      expect(targetFile.existsSync(), isTrue);
+    });
+
+    test('uses provided path for output when provided', () {
+      final testBrick = brick(createFile: true);
+
+      final fakeSourcePath = fs.file(
+        testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
+      );
+
+      const output = 'out';
+
+      final targetFile = fs.file(
+        join(output, brickName, '__brick__', filePath),
+      );
+
+      expect(targetFile.existsSync(), isFalse);
+
+      fs.file(fakeSourcePath).createSync(recursive: true);
+
+      testBrick.writeBrick(output);
 
       expect(targetFile.existsSync(), isTrue);
     });
@@ -219,4 +243,6 @@ void main() {
       }
     });
   });
+
+  group('#watchBrick', () {});
 }
