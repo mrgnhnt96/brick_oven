@@ -59,9 +59,7 @@ extension on List<String> {
     final flagIndex = indexOf(flag);
 
     String get(int index) {
-      if (index == -1) {
-        throw ArgumentError('$flag is not found');
-      }
+      assert(index >= 0, 'index must be greater than 0');
 
       removeAt(index);
       final result = removeAt(index);
