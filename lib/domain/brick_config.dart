@@ -37,6 +37,14 @@ class BrickConfig {
         arguments: arguments ?? const BrickArguments(),
       );
 
+  /// Allows passing a list of bricks to support testing
+  @visibleForTesting
+  BrickConfig.create({
+    BrickArguments? arguments,
+    List<Brick>? bricks,
+  })  : arguments = arguments ?? const BrickArguments(),
+        bricks = bricks ?? [];
+
   factory BrickConfig._create(
     FileSystem fileSystem, {
     required BrickArguments arguments,
