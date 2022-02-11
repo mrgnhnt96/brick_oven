@@ -1,12 +1,11 @@
 name: brick_oven
-description: A sample command-line application.
-version: 1.0.0
-publish_to: none
-# homepage: https://www.example.com
+description: A generator to create & format bricks for mason
+version: 0.1.0
+homepage: https://github.com/mrgnhnt96/brick_oven
+repository: https://github.com/mrgnhnt96/brick_oven
 
 environment:
   sdk: '>=2.15.1 <3.0.0'
-
 
 dependencies:
   equatable: ^2.0.3
@@ -29,3 +28,6 @@ executables:
     dart: bin/brick_oven.dart
 
 scripts: derry.yaml
+
+import_sorter:
+  comments: false
