@@ -5,6 +5,10 @@ coverage:
   - curl -Os https://uploader.codecov.io/latest/macos/codecov
   - chmod +x codecov
 
+upload_coverage:
+  - curl -Os https://uploader.codecov.io/latest/macos/codecov
+  - coverageKey=$(cat .codecov_secret); ./codecov -t "$coverageKey"
+
 runtests:
   - dart run test --coverage coverage -r expanded --test-randomize-ordering-seed random --timeout 60s
   - $coverage
