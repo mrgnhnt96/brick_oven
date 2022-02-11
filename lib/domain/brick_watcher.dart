@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:brick_oven/domain/brick_config.dart';
+import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
 /// the function that happens on the file event
@@ -18,7 +19,15 @@ class BrickWatcher {
 
   StreamSubscription<WatchEvent>? _listener;
 
+  /// the stream subscription for the watcher
+  @visibleForTesting
+  StreamSubscription<WatchEvent>? get listener => _listener;
+
   final _events = <OnEvent>[];
+
+  /// the list of events to be called on
+  @visibleForTesting
+  List<OnEvent> get events => List.from(_events);
 
   /// whether the watcher has run
   bool get hasRun => _hasRun;
