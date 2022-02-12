@@ -34,10 +34,10 @@ class ListCommand extends BrickOvenCommand {
   @override
   Future<int> run() async {
     logger.info('\nBricks in the oven:');
-    const tab = '   ';
+    const tab = '  ';
 
     String varString(Variable variable) {
-      return '${tab * 3}- '
+      return '${tab * 4}- '
           '${variable.placeholder} ${green.wrap('->')} {${variable.name}}';
     }
 
@@ -46,7 +46,7 @@ class ListCommand extends BrickOvenCommand {
       final originalName = segments.removeLast();
       final dir = segments.join(separator) + separator;
 
-      final vars = tab * 2 +
+      final vars = tab * 3 +
           cyan.wrap('vars')! +
           ':\n' +
           file.variables.map(varString).join('\n');
