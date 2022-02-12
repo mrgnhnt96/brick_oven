@@ -124,6 +124,22 @@ class BrickFile extends Equatable {
   /// using mustache
   final String? name;
 
+  /// if the name of the file has been configured
+  bool get hasConfiguredName => name != null;
+
+  /// gets the name of the file without formatting to mustache
+  String get nonformattedFileName {
+    if (name == null) {
+      return basename(path);
+    }
+    final prefix = this.prefix ?? '';
+    final suffix = this.suffix ?? '';
+
+    final formattedName = '$prefix{$name}$suffix';
+
+    return '$formattedName$extension';
+  }
+
   /// the name of file with extension
   ///
   /// If a [name] is provided, it will be formatted with mustache,
