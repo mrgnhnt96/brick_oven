@@ -10,5 +10,6 @@ upload_coverage:
   - coverageKey=$(cat .codecov_secret); ./codecov -t "$coverageKey"
 
 runtests:
+  - rm -rf coverage
   - dart run test --coverage coverage -r expanded --test-randomize-ordering-seed random --timeout 60s
   - $coverage
