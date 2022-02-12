@@ -1,4 +1,3 @@
-import 'package:brick_oven/domain/brick_config.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
@@ -7,6 +6,7 @@ import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
@@ -16,29 +16,34 @@ import 'package:yaml/yaml.dart';
 /// {@endtemplate}
 class Brick extends Equatable {
   /// {@macro brick}
-  const Brick({
+  Brick({
     required this.name,
     required this.source,
     required this.configuredDirs,
     required this.configuredFiles,
-  }) : _fileSystem = const LocalFileSystem();
+    Logger? logger,
+  })  : _fileSystem = const LocalFileSystem(),
+        logger = logger ?? Logger();
 
   /// provide
   @visibleForTesting
-  const Brick.memory({
+  Brick.memory({
     required this.name,
     required this.source,
     required this.configuredDirs,
     required this.configuredFiles,
     required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem;
+    Logger? logger,
+  })  : _fileSystem = fileSystem,
+        logger = logger ?? Logger();
 
-  const Brick._fromYaml({
+  Brick._fromYaml({
     required this.name,
     required this.source,
     required this.configuredFiles,
     required this.configuredDirs,
-  }) : _fileSystem = const LocalFileSystem();
+  })  : _fileSystem = const LocalFileSystem(),
+        logger = Logger();
 
   /// parses [yaml]
   factory Brick.fromYaml(String name, YamlMap? yaml) {
@@ -99,22 +104,8 @@ class Brick extends Equatable {
 
   final FileSystem _fileSystem;
 
-  /// watches the local files and updates the brick on events
-  void watchBrick([String? path]) {
-    final watcher = source.watcher;
-
-    if (watcher != null) {
-      watcher
-        ..addEvent(() => writeBrick(path))
-        ..start();
-
-      if (!watcher.hasRun) {
-        writeBrick(path);
-      }
-    } else {
-      writeBrick(path);
-    }
-  }
+  /// the logger
+  final Logger logger;
 
   /// stops watching the directories that impact the brick
   void stopWatching() {
@@ -124,33 +115,49 @@ class Brick extends Equatable {
   /// writes the brick's files, from the [source]'s files.
   ///
   /// targets: bricks -> [name] -> __brick__
-  void writeBrick([String? path]) {
+  void cook({String output = 'bricks', bool watch = false}) {
     final done = logger.progress('Writing Brick: $name');
 
-    final targetDir = join(
-      path ?? 'bricks',
-      name,
-      '__brick__',
-    );
-
-    final directory = _fileSystem.directory(targetDir);
-    if (directory.existsSync()) {
-      directory.deleteSync(recursive: true);
-    }
-
-    final files = source.mergeFilesAndConfig(configuredFiles);
-    final count = files.length;
-
-    for (final file in files) {
-      file.writeTargetFile(
-        targetDir: targetDir,
-        sourceFile: _fileSystem.file(source.fromSourcePath(file)),
-        configuredDirs: configuredDirs,
-        fileSystem: _fileSystem,
+    void putInTheOven() {
+      final targetDir = join(
+        output,
+        name,
+        '__brick__',
       );
+
+      final directory = _fileSystem.directory(targetDir);
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+
+      final files = source.mergeFilesAndConfig(configuredFiles);
+      final count = files.length;
+
+      for (final file in files) {
+        file.writeTargetFile(
+          targetDir: targetDir,
+          sourceFile: _fileSystem.file(source.fromSourcePath(file)),
+          configuredDirs: configuredDirs,
+          fileSystem: _fileSystem,
+        );
+      }
+
+      done('$name: $count file${count == 1 ? '' : 's'}');
     }
 
-    done('$name: $count file${count == 1 ? '' : 's'}');
+    final watcher = source.watcher;
+
+    if (watch && watcher != null) {
+      watcher
+        ..addEvent(() => cook(output: output))
+        ..start();
+
+      if (watcher.hasRun) {
+        return;
+      }
+    }
+
+    putInTheOven();
   }
 
   @override
