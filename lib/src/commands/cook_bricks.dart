@@ -67,6 +67,8 @@ class _CookAllBricks extends BrickOvenCommand {
 
   @override
   Future<int> run() async {
+    final bricks = this.bricks;
+
     if (!isWatch) {
       for (final brick in bricks) {
         brick.cook(output: outputDir);
@@ -79,13 +81,13 @@ class _CookAllBricks extends BrickOvenCommand {
       brick.cook(output: outputDir, watch: true);
     }
 
-    // if (!bricks.any((brick) => brick.source.watcher?.isRunning ?? false)) {
-    //   logger.err(
-    //     'There are no bricks currently watching local files, ending',
-    //   );
+    if (!bricks.any((brick) => brick.source.watcher?.isRunning ?? false)) {
+      logger.err(
+        'There are no bricks currently watching local files, ending',
+      );
 
-    //   return ExitCode.ioError.code;
-    // }
+      return ExitCode.ioError.code;
+    }
 
     final ovenNeedsReset = await BrickOvenYaml.watchForChanges(
       onChange: () {
@@ -134,31 +136,21 @@ class _CookSingleBrick extends BrickOvenCommand {
 
   @override
   Future<int> run() async {
-    final brickToCook = bricks.firstWhere(
-      (b) => b == brick,
-      orElse: () {
-        throw ArgumentError('Brick "$brick" not found.');
-      },
-    );
-
     if (!isWatch) {
-      for (final brick in bricks) {
-        brick.cook(output: outputDir);
-      }
+      brick.cook(output: outputDir);
 
       return ExitCode.success.code;
     }
 
     brick.cook(output: outputDir, watch: true);
 
-    // it seems as though when [watch] is false, this check will pass...
-    // if (!(brickToCook.source.watcher?.isRunning ?? false)) {
-    //   logger.err(
-    //     'There are no bricks currently watching local files, ending',
-    //   );
+    if (!(brick.source.watcher?.isRunning ?? false)) {
+      logger.err(
+        'There are no bricks currently watching local files, ending',
+      );
 
-    //   return ExitCode.ioError.code;
-    // }
+      return ExitCode.ioError.code;
+    }
 
     final ovenNeedsReset = await BrickOvenYaml.watchForChanges(
       onChange: () {
