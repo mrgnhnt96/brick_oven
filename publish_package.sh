@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source package_functions.sh
+source ~/package_functions.sh
 
 runDry
 
