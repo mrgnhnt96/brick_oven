@@ -88,7 +88,7 @@ void main() {
         );
       }
 
-      group('#watchBrick', () {
+      group('#cook', () {
         test(
             'uses default directory bricks/{name}/__brick__ when path not provided',
             () {
@@ -102,7 +102,7 @@ void main() {
 
           fs.file(fakeSourcePath).createSync(recursive: true);
 
-          testBrick.watchBrick();
+          testBrick.cook(watch: true);
 
           expect(targetFile.existsSync(), isTrue);
         });
@@ -122,7 +122,7 @@ void main() {
 
           fs.file(fakeSourcePath).createSync(recursive: true);
 
-          testBrick.watchBrick(output);
+          testBrick.cook(watch: true, output: output);
 
           expect(targetFile.existsSync(), isTrue);
         });
@@ -142,7 +142,7 @@ void main() {
 
           expect(targetFile.existsSync(), isFalse);
 
-          testBrick.watchBrick();
+          testBrick.cook(watch: true);
 
           expect(targetFile.existsSync(), isTrue);
           expect(targetFile.readAsStringSync(), content);
@@ -174,7 +174,7 @@ void main() {
 
           expect(targetFile.existsSync(), isFalse);
 
-          testBrick.watchBrick();
+          testBrick.cook(watch: true);
 
           expect(targetFile.existsSync(), isTrue);
           expect(targetFile.readAsStringSync(), content);
@@ -199,7 +199,7 @@ void main() {
 
           expect(targetFile.existsSync(), isFalse);
 
-          testBrick.watchBrick();
+          testBrick.cook(watch: true);
 
           expect(targetFile.existsSync(), isTrue);
           expect(targetFile.readAsStringSync(), content);
@@ -264,7 +264,7 @@ void main() {
 
       fs.file(fakeSourcePath).createSync(recursive: true);
 
-      testBrick.writeBrick();
+      testBrick.cook();
 
       expect(targetFile.existsSync(), isTrue);
     });
@@ -286,7 +286,7 @@ void main() {
 
       fs.file(fakeSourcePath).createSync(recursive: true);
 
-      testBrick.writeBrick(output);
+      testBrick.cook(output: output);
 
       expect(targetFile.existsSync(), isTrue);
     });
@@ -308,7 +308,7 @@ void main() {
 
       fs.file(fakeSourcePath).createSync(recursive: true);
 
-      testBrick.writeBrick();
+      testBrick.cook();
 
       expect(fakeUnneededFile.existsSync(), isFalse);
     });
@@ -330,7 +330,7 @@ void main() {
         expect(fs.file(join(brickPath, file.path)).existsSync(), isFalse);
       }
 
-      testBrick.writeBrick();
+      testBrick.cook();
 
       for (final file in testBrick.configuredFiles) {
         expect(fs.file(join(brickPath, file.path)).existsSync(), isTrue);
