@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:brick_oven/domain/brick_config.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
@@ -12,7 +12,12 @@ typedef OnEvent = void Function();
 /// {@endtemplate}
 class BrickWatcher {
   /// {@macro brick_watcher}
-  BrickWatcher(String dir) : watcher = DirectoryWatcher(dir);
+  BrickWatcher(String dir, {Logger? logger})
+      : watcher = DirectoryWatcher(dir),
+        logger = logger ?? Logger();
+
+  /// The logger
+  final Logger logger;
 
   /// the source directory of the brick, which will be watched
   final DirectoryWatcher watcher;
