@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
@@ -53,14 +54,15 @@ class BrickWatcher {
     }
 
     _listener = watcher.events.listen((watchEvent) {
+      // finishes the watcher
       _hasRun = true;
 
-      logger.info('Running brick_oven...');
+      logger.cooking();
       for (final event in _events) {
         event();
       }
 
-      logger.info('\nWatching local files...\n');
+      logger.watching();
     });
   }
 

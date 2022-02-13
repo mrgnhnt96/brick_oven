@@ -4,6 +4,7 @@ import 'package:args/args.dart';
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 
@@ -67,12 +68,15 @@ class _CookAllBricks extends BrickOvenCommand {
 
   @override
   Future<int> run() async {
+    logger.cooking();
+
     final bricks = this.bricks;
 
     if (!isWatch) {
       for (final brick in bricks) {
         brick.cook(output: outputDir);
       }
+      logger.info('');
 
       return ExitCode.success.code;
     }
@@ -80,6 +84,8 @@ class _CookAllBricks extends BrickOvenCommand {
     for (final brick in bricks) {
       brick.cook(output: outputDir, watch: true);
     }
+
+    logger.watching();
 
     if (!bricks.any((brick) => brick.source.watcher?.isRunning ?? false)) {
       logger.err(
@@ -136,6 +142,8 @@ class _CookSingleBrick extends BrickOvenCommand {
 
   @override
   Future<int> run() async {
+    logger.cooking();
+
     if (!isWatch) {
       brick.cook(output: outputDir);
 
@@ -143,6 +151,8 @@ class _CookSingleBrick extends BrickOvenCommand {
     }
 
     brick.cook(output: outputDir, watch: true);
+
+    logger.watching();
 
     if (!(brick.source.watcher?.isRunning ?? false)) {
       logger.err(
