@@ -254,6 +254,54 @@ void main() {
     });
   });
 
+  group('#hasConfiguredName', () {
+    test('returns true when a name is provided', () {
+      const file = BrickFile.config('path/to/file.dart', name: 'name');
+
+      expect(file.hasConfiguredName, isTrue);
+    });
+
+    test('returns false when no name is provided', () {
+      const file = BrickFile.config('path/to/file.dart');
+
+      expect(file.hasConfiguredName, isFalse);
+    });
+  });
+
+  group('#nonformattedName', () {
+    test('returns the basename when no name is provided', () {
+      const file = BrickFile.config('path/to/file.dart');
+
+      expect(file.nonformattedFileName, 'file.dart');
+    });
+
+    test('returns the provided name', () {
+      const file = BrickFile.config('path/to/file.dart', name: 'name');
+
+      expect(file.nonformattedFileName, '{name}.dart');
+    });
+
+    test('returns the provided name with prefix', () {
+      const file = BrickFile.config(
+        'path/to/file.dart',
+        name: 'name',
+        prefix: 'prefix_',
+      );
+
+      expect(file.nonformattedFileName, 'prefix_{name}.dart');
+    });
+
+    test('returns the provided name with suffix', () {
+      const file = BrickFile.config(
+        'path/to/file.dart',
+        name: 'name',
+        suffix: '_suffix',
+      );
+
+      expect(file.nonformattedFileName, '{name}_suffix.dart');
+    });
+  });
+
   group('#writeTargetFiles', () {
     late FileSystem fileSystem;
     late File sourceFile;
