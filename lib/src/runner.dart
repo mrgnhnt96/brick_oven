@@ -20,7 +20,7 @@ class BrickOvenRunner extends CommandRunner<int> {
     required PubUpdater pubUpdater,
   })  : _pubUpdater = pubUpdater,
         _logger = logger,
-        super('brick_oven', 'Generate your bricks 🧱 with this oven 🍳') {
+        super('brick_oven', 'Generate your bricks 🧱 with this oven 🎛') {
     argParser.addFlag(
       'version',
       negatable: false,
@@ -80,7 +80,7 @@ class BrickOvenRunner extends CommandRunner<int> {
     try {
       final latestVersion = await _pubUpdater.getLatestVersion(packageName);
       final isUpToDate = packageVersion == latestVersion;
-      if (isUpToDate) {
+      if (!isUpToDate) {
         _logger
           ..info('')
           ..info(
