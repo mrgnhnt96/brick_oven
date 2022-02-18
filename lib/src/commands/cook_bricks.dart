@@ -20,7 +20,7 @@ class CookBricksCommand extends BrickOvenCommand {
     argParser.addFlagsAndOptions();
 
     addSubcommand(
-      _CookAllBricks(
+      CookAllBricks(
         fileSystem: fileSystem,
         logger: logger,
       ),
@@ -28,7 +28,7 @@ class CookBricksCommand extends BrickOvenCommand {
 
     for (final brick in bricks) {
       addSubcommand(
-        _CookSingleBrick(
+        CookSingleBrick(
           brick,
           fileSystem: fileSystem,
           logger: logger,
@@ -44,8 +44,12 @@ class CookBricksCommand extends BrickOvenCommand {
   String get name => 'cook';
 }
 
-class _CookAllBricks extends BrickOvenCommand {
-  _CookAllBricks({
+/// {@template cook_all_bricks_command}
+/// Writes all bricks from the configuration file
+/// {@endtemplate}
+class CookAllBricks extends BrickOvenCommand {
+  /// {@macro cook_all_bricks_command}
+  CookAllBricks({
     FileSystem? fileSystem,
     Logger? logger,
   }) : super(fileSystem: fileSystem, logger: logger) {
@@ -115,8 +119,12 @@ class _CookAllBricks extends BrickOvenCommand {
   }
 }
 
-class _CookSingleBrick extends BrickOvenCommand {
-  _CookSingleBrick(
+/// {@template cook_single_brick_command}
+/// Writes a single brick from the configuration file
+/// {@endtemplate}
+class CookSingleBrick extends BrickOvenCommand {
+  /// {@macro cook_single_brick_command}
+  CookSingleBrick(
     this.brick, {
     FileSystem? fileSystem,
     Logger? logger,
@@ -126,6 +134,7 @@ class _CookSingleBrick extends BrickOvenCommand {
       ..addSeparator('${'-' * 79}\n');
   }
 
+  /// The brick to cook
   final Brick brick;
 
   /// whether to watch for file changes
