@@ -13,10 +13,10 @@ import 'package:pub_updater/pub_updater.dart';
 class BrickOvenRunner extends CommandRunner<int> {
   /// {@macro brick_oven_runner}
   BrickOvenRunner({
-    required Logger logger,
-    required PubUpdater pubUpdater,
-  })  : _pubUpdater = pubUpdater,
-        _logger = logger,
+    Logger? logger,
+    PubUpdater? pubUpdater,
+  })  : _pubUpdater = pubUpdater ?? PubUpdater(),
+        _logger = logger ?? Logger(),
         super('brick_oven', 'Generate your bricks 🧱 with this oven 🎛') {
     argParser.addFlag(
       'version',
@@ -24,9 +24,9 @@ class BrickOvenRunner extends CommandRunner<int> {
       help: 'Print the current version',
     );
 
-    addCommand(CookBricksCommand(logger: logger));
-    addCommand(ListCommand(logger: logger));
-    addCommand(UpdateCommand(pubUpdater: pubUpdater, logger: logger));
+    addCommand(CookBricksCommand(logger: _logger));
+    addCommand(ListCommand(logger: _logger));
+    addCommand(UpdateCommand(pubUpdater: _pubUpdater, logger: _logger));
   }
 
   /// the logger for the application
@@ -77,20 +77,19 @@ class BrickOvenRunner extends CommandRunner<int> {
     try {
       final latestVersion = await _pubUpdater.getLatestVersion(packageName);
       final isUpToDate = packageVersion == latestVersion;
+      final updateMessage = '''
+
++------------------------------------------------------------------------------------+
+|                                                                                    |
+|                   ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}                                  |
+|  ${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/mrgnhnt96/brick_oven/releases/tag/brick_oven-v$latestVersion')} |
+|                             Run ${cyan.wrap('brick_oven update')} to update                        |
+|                                                                                    |
++------------------------------------------------------------------------------------+
+''';
+
       if (!isUpToDate) {
-        _logger
-          ..info('')
-          ..info(
-            '''
-+------------------------------------------------------------------------------------+
-|                                                                                    |
-|                   ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}                      |
-|  ${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/mrgnhnt96/brick_oven/releases/tag/brick_oven-v$latestVersion')}  |
-|                             Run ${cyan.wrap('brick_oven update')} to update                       |
-|                                                                                    |
-+------------------------------------------------------------------------------------+
-''',
-          );
+        _logger.info(updateMessage);
       }
     } catch (_) {}
   }
