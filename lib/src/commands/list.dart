@@ -88,6 +88,7 @@ class ListCommand extends BrickOvenCommand {
         logger.info(
           '''
 ${lightYellow.wrap(brick.name)}
+${tab}Source: ${brick.source.sourceDir}
 $tab${cyan.wrap('files')}: ${brick.configuredFiles.length}
 $tab${cyan.wrap('dirs')}: ${brick.configuredDirs.length}\n''',
         );
