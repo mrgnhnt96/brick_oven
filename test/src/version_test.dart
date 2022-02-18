@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:brick_oven/src/version.dart';
+import 'package:brick_oven/src/package_details.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 

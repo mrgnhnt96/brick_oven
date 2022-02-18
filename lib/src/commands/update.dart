@@ -1,6 +1,6 @@
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/runner.dart';
-import 'package:brick_oven/src/version.dart';
+import 'package:brick_oven/src/package_details.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 import 'package:pub_updater/pub_updater.dart';
