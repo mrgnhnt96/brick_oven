@@ -7,9 +7,6 @@ import 'package:brick_oven/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
 
-/// the name of the package
-const packageName = 'brick_oven';
-
 /// {@template brick_oven_runner}
 /// Runs the brick_oven commands
 /// {@endtemplate}
