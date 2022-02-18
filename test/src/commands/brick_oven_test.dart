@@ -43,6 +43,7 @@ bricks:
       });
 
       test(
+        // ignore: lines_longer_than_80_chars
         'throws $BrickOvenNotFoundException when ${BrickOvenYaml.file} does not exist',
         () {
           expect(
