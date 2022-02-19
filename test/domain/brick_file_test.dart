@@ -420,29 +420,137 @@ void main() {
       expect(newFile.readAsStringSync(), content);
     });
 
-    test('replaces variable placeholders with name', () {
-      const newName = 'new-name';
-      const placeholder = 'MEEEEE';
-      const content = 'replace: $placeholder';
+    group('#variables', () {
+      test('replaces variable placeholders with name', () {
+        const newName = 'new-name';
+        const placeholder = 'MEEEEE';
+        const content = 'replace: $placeholder';
 
-      const variable = Variable(name: newName, placeholder: placeholder);
-      const instance = BrickFile.config(defaultFile, variables: [variable]);
+        const variable = Variable(name: newName, placeholder: placeholder);
+        const instance = BrickFile.config(defaultFile, variables: [variable]);
 
-      sourceFile.writeAsStringSync(content);
+        sourceFile.writeAsStringSync(content);
 
-      instance.writeTargetFile(
-        sourceFile: sourceFile,
-        configuredDirs: [],
-        targetDir: '',
-        fileSystem: fileSystem,
-      );
+        instance.writeTargetFile(
+          sourceFile: sourceFile,
+          configuredDirs: [],
+          targetDir: '',
+          fileSystem: fileSystem,
+        );
 
-      final newFile = fileSystem.file(defaultFile);
+        final newFile = fileSystem.file(defaultFile);
 
-      expect(
-        newFile.readAsStringSync(),
-        'replace: {{#camelCase}}{{{$newName}}}{{/camelCase}}',
-      );
+        expect(
+          newFile.readAsStringSync(),
+          'replace: {{#camelCase}}{{{$newName}}}{{/camelCase}}',
+        );
+      });
+
+      const formats = [
+        'camel',
+        'constant',
+        'dot',
+        'header',
+        'lower',
+        'pascal',
+        'param',
+        'path',
+        'sentence',
+        'snake',
+        'title',
+        'upper',
+      ];
+
+      for (final format in formats) {
+        test('replaces variable placeholder with name and format ($format)',
+            () {
+          const newName = 'new-name';
+          const placeholder = 'MEEEEE';
+          final content = 'replace: $placeholder$format';
+
+          const variable = Variable(name: newName, placeholder: placeholder);
+          const instance = BrickFile.config(defaultFile, variables: [variable]);
+
+          sourceFile.writeAsStringSync(content);
+
+          instance.writeTargetFile(
+            sourceFile: sourceFile,
+            configuredDirs: [],
+            targetDir: '',
+            fileSystem: fileSystem,
+          );
+
+          final newFile = fileSystem.file(defaultFile);
+
+          expect(
+            newFile.readAsStringSync(),
+            'replace: {{#${format}Case}}{{{$newName}}}{{/${format}Case}}',
+          );
+        });
+      }
+
+      for (final format in formats) {
+        test('replaces variable placeholder with name and format ($format)',
+            () {
+          const newName = 'new-name';
+          const placeholder = 'MEEEEE';
+          final content = 'replace: $placeholder${format}Case';
+
+          const variable = Variable(name: newName, placeholder: placeholder);
+          const instance = BrickFile.config(defaultFile, variables: [variable]);
+
+          sourceFile.writeAsStringSync(content);
+
+          instance.writeTargetFile(
+            sourceFile: sourceFile,
+            configuredDirs: [],
+            targetDir: '',
+            fileSystem: fileSystem,
+          );
+
+          final newFile = fileSystem.file(defaultFile);
+
+          expect(
+            newFile.readAsStringSync(),
+            'replace: {{#${format}Case}}{{{$newName}}}{{/${format}Case}}',
+          );
+        });
+      }
+
+      const badFormats = [
+        'sanke',
+        'sank',
+        'some',
+      ];
+
+      for (final format in badFormats) {
+        test(
+            'replaces variable placeholder with name ignoring bad format ($format)',
+            () {
+          const newName = 'new-name';
+          const placeholder = 'MEEEEE';
+          final content = 'replace: $placeholder${format}Case';
+
+          const variable = Variable(name: newName, placeholder: placeholder);
+          const instance = BrickFile.config(defaultFile, variables: [variable]);
+
+          sourceFile.writeAsStringSync(content);
+
+          instance.writeTargetFile(
+            sourceFile: sourceFile,
+            configuredDirs: [],
+            targetDir: '',
+            fileSystem: fileSystem,
+          );
+
+          final newFile = fileSystem.file(defaultFile);
+
+          expect(
+            newFile.readAsStringSync(),
+            'replace: {{#camelCase}}{{{$newName}}}{{/camelCase}}',
+          );
+        });
+      }
     });
 
     test('replaces mustache loop comment', () {
