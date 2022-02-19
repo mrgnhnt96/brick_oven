@@ -114,7 +114,7 @@ class Brick extends Equatable {
 
   /// writes the brick's files, from the [source]'s files.
   ///
-  /// targets: bricks -> [name] -> __brick__
+  /// targets: [output] (bricks) -> [name] -> __brick__
   void cook({String output = 'bricks', bool watch = false}) {
     final done = logger.progress('Writing Brick: $name');
 
@@ -149,7 +149,7 @@ class Brick extends Equatable {
 
     if (watch && watcher != null) {
       watcher
-        ..addEvent(() => cook(output: output))
+        ..addEvent(putInTheOven)
         ..start();
 
       if (watcher.hasRun) {
