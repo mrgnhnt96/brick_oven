@@ -1,16 +1,19 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
+import 'package:brick_oven/src/key_listener.dart';
 import 'package:brick_oven/utils/extensions.dart';
+import 'package:brick_oven/utils/mixins.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// {@template cook_all_bricks_command}
 /// Writes all bricks from the configuration file
 /// {@endtemplate}
-class CookAllBricks extends BrickOvenCommand {
+class CookAllBricks extends BrickOvenCommand with QuitAfterMixin {
   /// {@macro cook_all_bricks_command}
   CookAllBricks({
     FileSystem? fileSystem,
@@ -49,6 +52,14 @@ class CookAllBricks extends BrickOvenCommand {
     }
 
     for (final brick in bricks) {
+      if (bricks.first == brick) {
+        brick.source.watcher?.addEvent(logger.cooking, runBefore: true);
+      } else if (bricks.last == brick) {
+        brick.source.watcher?.addEvent(logger.watching, runAfter: true);
+        brick.source.watcher?.addEvent(logger.qToQuit, runAfter: true);
+      }
+
+      brick.source.watcher?.addEvent(() => fileChanged(logger: logger));
       brick.cook(output: outputDir, watch: true);
     }
 
@@ -60,6 +71,10 @@ class CookAllBricks extends BrickOvenCommand {
       );
 
       return ExitCode.ioError.code;
+    }
+
+    if (stdin.hasTerminal) {
+      qToQuit(logger: logger);
     }
 
     final ovenNeedsReset = await BrickOvenYaml.watchForChanges(
@@ -84,20 +99,10 @@ class CookAllBricks extends BrickOvenCommand {
 
 extension on ArgParser {
   void addFlagsAndOptions() {
-    addOption(
-      'output',
-      abbr: 'o',
-      help: 'Sets the output directory',
-      valueHelp: 'path',
-      defaultsTo: 'bricks',
-    );
+    output();
 
-    addFlag(
-      'watch',
-      abbr: 'w',
-      negatable: false,
-      help: 'Watch the configuration file for changes and '
-          're-cook the bricks as they change.',
-    );
+    watch();
+
+    quitAfter();
   }
 }
