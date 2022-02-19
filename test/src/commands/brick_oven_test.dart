@@ -1,9 +1,13 @@
+import 'package:args/args.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
+
+import '../../utils/fakes.dart';
 
 void main() {
   late FileSystem fs;
@@ -71,6 +75,11 @@ bricks:
         expect(cwd.path, fs.currentDirectory.path);
       });
     });
+
+    test('#argResults returns the argResults', () {
+      expect(brickOvenCommand.argResults, isNotNull);
+      expect(brickOvenCommand.argResults, isA<ArgResults>());
+    });
   });
 }
 
@@ -81,4 +90,7 @@ class TestBrickOvenCommand extends BrickOvenCommand {
 
   @override
   String get name => throw UnimplementedError();
+
+  @override
+  ArgResults get argResults => FakeArgResults(data: <String, dynamic>{});
 }
