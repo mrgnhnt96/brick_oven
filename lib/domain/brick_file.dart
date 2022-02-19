@@ -201,7 +201,7 @@ class BrickFile extends Equatable {
     var content = sourceFile.readAsStringSync();
 
     for (final variable in variables) {
-      final pattern = RegExp('(.*)${variable.placeholder}' r'(\w*!?)(.*)');
+      final pattern = RegExp('(.*)${variable.placeholder}' r'(\w*)(.*)');
       content = content.replaceAllMapped(pattern, (match) {
         final value = match.group(2);
 
@@ -210,7 +210,8 @@ class BrickFile extends Equatable {
           return MustacheLoops.toMustache(variable.name, () => loop);
         }
 
-        final format = MustacheFormat.values.retrieve('${value}Case');
+        final format = MustacheFormat.values.retrieve(value) ??
+            MustacheFormat.values.retrieve('${value}Case');
 
         String result;
         if (format == null) {
