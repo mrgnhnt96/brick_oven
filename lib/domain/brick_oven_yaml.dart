@@ -19,10 +19,10 @@ class BrickOvenYaml {
     var dir = cwd;
 
     while (prev?.path != dir.path) {
-      final brickOvenConfig = dir.fileSystem.file(join(dir.path, file));
+      final configFile = dir.fileSystem.file(join(dir.path, file));
 
-      if (brickOvenConfig.existsSync()) {
-        return brickOvenConfig;
+      if (configFile.existsSync()) {
+        return configFile;
       }
 
       prev = dir;
