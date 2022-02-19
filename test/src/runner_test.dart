@@ -134,6 +134,24 @@ void main() {
         verify(() => logger.info(commandRunner.usage)).called(1);
       });
 
+      test('handles other exceptions', () async {
+        final exception = Exception('oops!');
+        var isFirstInvocation = true;
+
+        when(() => logger.alert(any())).thenAnswer((_) {
+          if (isFirstInvocation) {
+            isFirstInvocation = false;
+            throw exception;
+          }
+        });
+
+        final result = await commandRunner.run(['--version']);
+
+        expect(result, equals(ExitCode.software.code));
+
+        verify(() => logger.err('$exception')).called(1);
+      });
+
       test(
         'handles no command',
         overridePrint(() async {
