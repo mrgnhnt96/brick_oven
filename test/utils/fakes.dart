@@ -1,3 +1,5 @@
+import 'package:args/args.dart';
+import 'package:brick_oven/domain/brick.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:yaml/yaml.dart';
 
@@ -13,3 +15,13 @@ class FakeYamlMap extends Fake implements YamlMap {
   @override
   Iterable<MapEntry> get entries => _map.entries;
 }
+
+class FakeArgResults extends Fake implements ArgResults {
+  FakeArgResults({required this.data});
+  final Map<String, dynamic> data;
+
+  @override
+  dynamic operator [](String key) => data[key];
+}
+
+class FakeBrick extends Fake implements Brick {}
