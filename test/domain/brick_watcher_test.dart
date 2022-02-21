@@ -1,16 +1,72 @@
 import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:file/file.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
+import 'package:watcher/watcher.dart';
+
+import '../utils/testing_env.dart';
 
 void main() {
-  late BrickWatcher watcher;
-
   group('$BrickWatcher', () {
+    late FileSystem fs;
+    late BrickWatcher watcher, brickWatcher;
+    late File file;
+
     setUp(() {
-      watcher = BrickWatcher('dir');
+      fs = setUpTestingEnvironment();
+
+      watcher = BrickWatcher(fs.currentDirectory.path);
+
+      file = fs.file(p.join(fs.currentDirectory.path, 'file.txt'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('sah dude');
+
+      final mockDirWatcher = MockDirectoryWatcher();
+
+      brickWatcher = BrickWatcher.config(
+        dirPath: fs.currentDirectory.path,
+        watcher: mockDirWatcher,
+      );
+
+      when(() => mockDirWatcher.ready)
+          .thenAnswer((_) => Future<bool>.value(true));
+
+      when(() => mockDirWatcher.events).thenAnswer(
+        (_) => Stream.value(WatchEvent(ChangeType.MODIFY, file.path)),
+      );
+    });
+
+    tearDown(() {
+      tearDownTestingEnvironment(fs);
+    });
+
+    group('#config', () {
+      test('should create an instance without explicit logger', () {
+        expect(
+          () => BrickWatcher.config(
+            dirPath: fs.currentDirectory.path,
+            watcher: MockDirectoryWatcher(),
+          ),
+          returnsNormally,
+        );
+      });
+
+      test('should create an instance with explicit logger', () {
+        expect(
+          () => BrickWatcher.config(
+            dirPath: fs.currentDirectory.path,
+            watcher: MockDirectoryWatcher(),
+            logger: Logger(),
+          ),
+          returnsNormally,
+        );
+      });
     });
 
     test('can be initiated', () {
-      expect(() => BrickWatcher('dir'), returnsNormally);
+      expect(() => BrickWatcher(''), returnsNormally);
     });
 
     group('#isRunning', () {
@@ -24,102 +80,151 @@ void main() {
 
       test(
         'is false when there are no events',
-        () {
+        () async {
           expect(watcher.isRunning, isFalse);
 
-          watcher.start();
+          await watcher.start();
 
           expect(watcher.isRunning, isFalse);
         },
-        skip: true,
       );
 
       test(
         'is true when there are events and a listener',
-        () {
+        () async {
           expect(watcher.isRunning, isFalse);
 
-          watcher
-            ..addEvent(() {})
-            ..start();
+          watcher.addEvent(() {});
+
+          await watcher.start();
 
           expect(watcher.isRunning, isTrue);
         },
-        skip: true,
       );
     });
 
     group('#addEvent', () {
       test('adds an event', () {
-        final watcher = BrickWatcher('dir');
-
         expect(() => watcher.addEvent(() {}), returnsNormally);
 
         expect(watcher.events.length, 1);
+      });
+
+      test('adds a pre event', () {
+        expect(() => watcher.addEvent(() {}, runBefore: true), returnsNormally);
+
+        expect(watcher.beforeEvents.length, 1);
+      });
+
+      test('adds a post event', () {
+        expect(() => watcher.addEvent(() {}, runAfter: true), returnsNormally);
+
+        expect(watcher.afterEvents.length, 1);
       });
     });
 
     group(
       '#start',
       () {
-        test('creates a listener', () {
-          expect(() => watcher.start(), returnsNormally);
+        test('creates a listener', () async {
+          expect(watcher.listener, isNull);
+
+          await watcher.start();
 
           expect(watcher.listener, isNotNull);
         });
 
-        test('calls reset when listener is not null', () {
-          expect(() => watcher.start(), returnsNormally);
+        test('calls reset when listener is not null', () async {
+          await watcher.start();
+
+          final listener1 = watcher.listener;
 
           expect(watcher.listener, isNotNull);
 
-          expect(() => watcher.start(), returnsNormally);
+          await watcher.start();
+
+          final listener2 = watcher.listener;
 
           expect(watcher.listener, isNotNull);
+
+          expect(listener1, isNot(equals(listener2)));
         });
 
-        test('sets has run to true', () {
-          expect(watcher.hasRun, isFalse);
+        test('sets has run to true', () async {
+          expect(brickWatcher.hasRun, isFalse);
 
-          watcher.start();
+          await brickWatcher.start();
 
-          // expectLater(watcher.hasRun, isTrue);
+          await expectLater(brickWatcher.hasRun, isTrue);
         });
 
-        test('calls all the events', () {
-          // ignore: unused_local_variable
+        test('calls all the events', () async {
           var hasRunEvent = false;
 
-          watcher
-            ..addEvent(() {
-              hasRunEvent = true;
-            })
-            ..start();
+          brickWatcher.addEvent(() {
+            hasRunEvent = true;
+          });
 
-          // expect(hasRunEvent, isTrue);
+          await brickWatcher.start();
+
+          expect(hasRunEvent, isTrue);
+        });
+
+        test('calls all the before events', () async {
+          var hasRunEvent = false;
+
+          brickWatcher.addEvent(
+            () {
+              hasRunEvent = true;
+            },
+            runBefore: true,
+          );
+
+          await brickWatcher.start();
+
+          expect(hasRunEvent, isTrue);
+        });
+
+        test('calls all the after events', () async {
+          var hasRunEvent = false;
+
+          brickWatcher.addEvent(
+            () {
+              hasRunEvent = true;
+            },
+            runAfter: true,
+          );
+
+          await brickWatcher.start();
+
+          expect(hasRunEvent, isTrue);
         });
       },
-      skip: true,
     );
 
     group(
       '#reset',
       () {
-        test('calls stop then start', () {
-          expect(() => watcher.reset(), returnsNormally);
+        test('calls stop then start', () async {
+          await watcher.reset();
 
           expect(watcher.listener, isNotNull);
         });
       },
-      skip: true,
     );
 
     group('#stop', () {
-      test('sets listener to null', () {
-        expect(() => watcher.stop(), returnsNormally);
+      test('sets listener to null', () async {
+        await watcher.start();
+
+        expect(watcher.listener, isNotNull);
+
+        await watcher.stop();
 
         expect(watcher.listener, isNull);
       });
     });
   });
 }
+
+class MockDirectoryWatcher extends Mock implements DirectoryWatcher {}
