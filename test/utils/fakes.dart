@@ -25,3 +25,6 @@ class FakeArgResults extends Fake implements ArgResults {
 }
 
 class FakeBrick extends Fake implements Brick {}
+
+// ignore: prefer_function_declarations_over_variables
+final void Function() voidCallback = () {};

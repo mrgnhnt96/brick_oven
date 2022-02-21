@@ -63,14 +63,13 @@ void main() {
       late FileSystem fs;
       late BrickWatcher mockWatcher;
       // ignore: prefer_function_declarations_over_variables, omit_local_variable_types
-      final void Function() voidCallback = () {};
 
       setUp(() {
         fs = MemoryFileSystem();
         mockWatcher = MockBrickWatcher();
 
         when(() => mockWatcher.addEvent(any())).thenReturn(voidCallback());
-        when(mockWatcher.start).thenReturn(voidCallback());
+        when(mockWatcher.start).thenAnswer((_) => Future.value());
         when(() => mockWatcher.hasRun).thenReturn(false);
       });
 
@@ -88,6 +87,18 @@ void main() {
         );
       }
 
+      test('#stopWatching calls stop on the watcher', () async {
+        final testBrick = brick(mockWatch: true);
+
+        when(mockWatcher.stop).thenAnswer((_) => Future.value());
+
+        verifyNever(mockWatcher.stop);
+
+        await testBrick.stopWatching();
+
+        verify(mockWatcher.stop).called(1);
+      });
+
       group('#cook', () {
         test(
             'uses default directory bricks/{name}/__brick__ when path not provided',
@@ -102,7 +113,7 @@ void main() {
 
           fs.file(fakeSourcePath).createSync(recursive: true);
 
-          testBrick.cook(watch: true);
+          testBrick.cook();
 
           expect(targetFile.existsSync(), isTrue);
         });
@@ -210,7 +221,7 @@ void main() {
 
           reset(mockWatcher);
 
-          when(mockWatcher.stop).thenReturn(voidCallback());
+          when(mockWatcher.stop).thenAnswer((_) => Future.value());
 
           testBrick.stopWatching();
 
