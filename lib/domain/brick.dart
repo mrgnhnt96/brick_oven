@@ -108,8 +108,8 @@ class Brick extends Equatable {
   final Logger logger;
 
   /// stops watching the directories that impact the brick
-  void stopWatching() {
-    source.watcher?.stop();
+  Future<void> stopWatching() async {
+    await source.watcher?.stop();
   }
 
   /// writes the brick's files, from the [source]'s files.

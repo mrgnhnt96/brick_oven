@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:brick_oven/utils/extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
@@ -13,15 +12,27 @@ typedef OnEvent = void Function();
 /// {@endtemplate}
 class BrickWatcher {
   /// {@macro brick_watcher}
-  BrickWatcher(String dir, {Logger? logger})
-      : watcher = DirectoryWatcher(dir),
+  BrickWatcher(this.dirPath, {Logger? logger})
+      : watcher = DirectoryWatcher(dirPath),
         logger = logger ?? Logger();
+
+  /// allows to set the watcher
+  /// to be used only for testing
+  @visibleForTesting
+  BrickWatcher.config({
+    required this.dirPath,
+    required this.watcher,
+    Logger? logger,
+  }) : logger = logger ?? Logger();
 
   /// The logger
   final Logger logger;
 
   /// the source directory of the brick, which will be watched
   final DirectoryWatcher watcher;
+
+  /// the source directory of the brick, which will be watched
+  final String dirPath;
 
   StreamSubscription<WatchEvent>? _listener;
 
@@ -68,7 +79,7 @@ class BrickWatcher {
   }
 
   /// starts the watcher
-  void start() {
+  Future<void> start() async {
     if (_listener != null) {
       return reset();
     }
@@ -89,18 +100,20 @@ class BrickWatcher {
         event();
       }
     });
+
+    await watcher.ready;
   }
 
   /// resets the watcher by stopping it and restarting it
-  void reset() {
-    stop();
+  Future<void> reset() async {
+    await stop();
 
-    start();
+    await start();
   }
 
   /// stops the watcher
-  void stop() {
-    _listener?.cancel();
+  Future<void> stop() async {
+    await _listener?.cancel();
     _listener = null;
   }
 }
