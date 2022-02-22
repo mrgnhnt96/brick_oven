@@ -9,15 +9,15 @@ import 'package:pub_updater/pub_updater.dart';
 class UpdateCommand extends BrickOvenCommand {
   /// {@macro update_command}
   UpdateCommand({
-    required PubUpdater pubUpdater,
+    PubUpdater? pubUpdater,
     Logger? logger,
-  })  : _pubUpdater = pubUpdater,
+  })  : _pubUpdater = pubUpdater ?? PubUpdater(),
         super(logger: logger ?? Logger());
 
   final PubUpdater _pubUpdater;
 
   @override
-  final String description = 'Update brick_oven.';
+  final String description = 'Updates brick_oven to the latest version.';
 
   @override
   final String name = 'update';

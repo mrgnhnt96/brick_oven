@@ -25,7 +25,7 @@ const expectedUsage = [
   'Available commands:\n',
   '  cook     Cook 👨‍🍳 bricks from the config file.\n',
   '  list     Lists all configured bricks from brick_oven.yaml.\n',
-  '  update   Update brick_oven.\n',
+  '  update   Updates brick_oven to the latest version.\n',
   '\n',
   'Run "brick_oven help <command>" for more information about a command.',
 ];
