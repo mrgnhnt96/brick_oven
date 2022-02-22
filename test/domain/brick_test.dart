@@ -241,6 +241,8 @@ void main() {
     setUp(() {
       fs = MemoryFileSystem();
       mockLogger = MockLogger();
+
+      when(() => mockLogger.progress(any())).thenReturn(([_]) => (String _) {});
     });
 
     Brick brick({
