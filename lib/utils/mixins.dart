@@ -15,7 +15,7 @@ mixin QuitAfterMixin on Command<int> {
     if (shouldQuit) {
       logger?.info('Quitting after $updates updates');
 
-      throw const MaxUpdateException();
+      throw MaxUpdateException(quitAfter!);
     }
   }
 

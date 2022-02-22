@@ -36,8 +36,8 @@ void main() {
 
   test('$MaxUpdateException has the correct message', () {
     expect(
-      const MaxUpdateException().message,
-      'Updated has reached the maximum number of updates allowed.',
+      const MaxUpdateException(1).message,
+      'Reached the maximum number of updates (1) allowed.',
     );
   });
 }

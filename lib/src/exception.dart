@@ -54,8 +54,6 @@ class UnknownKeysException extends BrickOvenException {
 /// {@endtemplate}
 class MaxUpdateException extends BrickOvenException {
   /// {@macro max_update_exception}
-  const MaxUpdateException()
-      : super(
-          'Updated has reached the maximum number of updates allowed.',
-        );
+  const MaxUpdateException(int updates)
+      : super('Reached the maximum number of updates ($updates) allowed.');
 }
