@@ -3,19 +3,28 @@ import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 import '../../../utils/fakes.dart';
+import '../../../utils/mocks.dart';
 
 void main() {
   late FileSystem fs;
   late CookSingleBrick brickOvenCommand;
   late Brick brick;
+  late Logger mockLogger;
 
   setUp(() {
     fs = MemoryFileSystem();
+    mockLogger = MockLogger();
+
+    when(() => mockLogger.progress(any())).thenReturn(([_]) => (String _) {});
+
     fs.file(BrickOvenYaml.file)
       ..createSync()
       ..writeAsStringSync(
@@ -35,6 +44,7 @@ bricks:
       configuredDirs: const [],
       configuredFiles: const [],
       name: 'first',
+      logger: mockLogger,
     );
 
     brickOvenCommand = CookSingleBrick(brick, fileSystem: fs);
@@ -88,15 +98,114 @@ bricks:
       });
     });
   });
+
+  group('brick_oven cook', () {
+    late Brick mockBrick;
+
+    late MockBrickWatcher mockBrickWatcher;
+
+    setUp(() {
+      mockBrick = MockBrick();
+      mockBrickWatcher = MockBrickWatcher();
+      final mockSource = FakeBrickSource(mockBrickWatcher);
+
+      when(() => mockBrickWatcher.isRunning).thenReturn(true);
+
+      when(() => mockBrick.source).thenReturn(mockSource);
+    });
+
+    CookSingleBrick command({
+      bool? watch,
+      bool allowConfigChanges = false,
+      bool fakeBrick = false,
+    }) {
+      return TestCookSingleBrick(
+        logger: mockLogger,
+        brick: fakeBrick ? FakeBrick() : mockBrick,
+        argResults: <String, dynamic>{
+          'output': 'output/dir',
+          if (watch == true) 'watch': true,
+        },
+      );
+    }
+
+    test('#run calls cook with output and exit with code 0', () async {
+      final result = await command().run();
+
+      verify(mockLogger.cooking).called(1);
+
+      verify(() => mockBrick.cook(output: 'output/dir')).called(1);
+
+      expect(result, ExitCode.success.code);
+    });
+
+    group(
+      '#run --watch',
+      () {
+        test('gracefully runs with watcher', () async {
+          final result = await command(watch: true).run();
+
+          verify(mockLogger.cooking).called(1);
+          verify(mockLogger.watching).called(1);
+
+          verify(() => mockBrick.cook(output: 'output/dir', watch: true))
+              .called(1);
+
+          expect(result, ExitCode.success.code);
+        });
+
+        test('returns code 74 when watcher is not running', () async {
+          reset(mockBrickWatcher);
+          when(() => mockBrickWatcher.isRunning).thenReturn(false);
+
+          final result =
+              await command(watch: true, allowConfigChanges: true).run();
+
+          verify(mockLogger.cooking).called(1);
+          verify(
+            () => mockLogger.err(
+              'There are no bricks currently watching local files, ending',
+            ),
+          ).called(1);
+
+          verify(() => mockBrick.cook(output: 'output/dir', watch: true))
+              .called(1);
+
+          expect(result, ExitCode.ioError.code);
+        });
+      },
+    );
+  });
 }
 
 class TestCookSingleBrick extends CookSingleBrick {
-  TestCookSingleBrick({required Map<String, dynamic> argResults})
-      : _argResults = argResults,
-        super(FakeBrick());
+  TestCookSingleBrick({
+    required Map<String, dynamic> argResults,
+    Logger? logger,
+    Brick? brick,
+    this.allowConfigChanges = false,
+  })  : _argResults = argResults,
+        super(
+          brick ?? FakeBrick(),
+          logger: logger,
+        );
 
   final Map<String, dynamic> _argResults;
 
   @override
   ArgResults get argResults => FakeArgResults(data: _argResults);
+
+  final bool allowConfigChanges;
+
+  var _hasWatchedConfigChanges = false;
+
+  @override
+  Future<bool> watchForConfigChanges({void Function()? onChange}) async {
+    if (allowConfigChanges && !_hasWatchedConfigChanges) {
+      _hasWatchedConfigChanges = true;
+      return true;
+    }
+
+    return false;
+  }
 }
