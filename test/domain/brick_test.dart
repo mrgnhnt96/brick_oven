@@ -11,6 +11,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import '../src/runner_test.dart';
 import '../utils/fakes.dart';
 import '../utils/to_yaml.dart';
 
@@ -235,9 +236,11 @@ void main() {
 
   group('#writeBrick', () {
     late FileSystem fs;
+    late MockLogger mockLogger;
 
     setUp(() {
       fs = MemoryFileSystem();
+      mockLogger = MockLogger();
     });
 
     Brick brick({
@@ -247,6 +250,7 @@ void main() {
     }) {
       return Brick.memory(
         name: brickName,
+        logger: mockLogger,
         source: BrickSource(localPath: localPath),
         configuredDirs: [
           if (createDir) BrickPath(name: newDirName, path: dirPath),
@@ -261,24 +265,25 @@ void main() {
     }
 
     test(
-        'uses default directory bricks/{name}/__brick__ when path not provided',
-        () {
-      final testBrick = brick(createFile: true);
+      'uses default directory bricks/{name}/__brick__ when path not provided',
+      () {
+        final testBrick = brick(createFile: true);
 
-      final fakeSourcePath = fs.file(
-        testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
-      );
+        final fakeSourcePath = fs.file(
+          testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
+        );
 
-      final targetFile = fs.file(join(brickPath, filePath));
+        final targetFile = fs.file(join(brickPath, filePath));
 
-      expect(targetFile.existsSync(), isFalse);
+        expect(targetFile.existsSync(), isFalse);
 
-      fs.file(fakeSourcePath).createSync(recursive: true);
+        fs.file(fakeSourcePath).createSync(recursive: true);
 
-      testBrick.cook();
+        testBrick.cook();
 
-      expect(targetFile.existsSync(), isTrue);
-    });
+        expect(targetFile.existsSync(), isTrue);
+      },
+    );
 
     test('uses provided path for output when provided', () {
       final testBrick = brick(createFile: true);
