@@ -1,4 +1,5 @@
 import 'package:args/command_runner.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/package_details.dart';
 import 'package:brick_oven/src/runner.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -96,7 +97,25 @@ void main() {
         verifyNever(() => logger.info(updateMessage));
       });
 
-      test('handles FormatException', () async {
+      test('handles $MaxUpdateException', () async {
+        const exception = MaxUpdateException(1);
+        var isFirstInvocation = true;
+
+        when(() => logger.alert(any())).thenAnswer((_) {
+          if (isFirstInvocation) {
+            isFirstInvocation = false;
+            throw exception;
+          }
+        });
+
+        final result = await commandRunner.run(['--version']);
+
+        expect(result, equals(ExitCode.success.code));
+
+        verify(() => logger.err(exception.message)).called(1);
+      });
+
+      test('handles $FormatException', () async {
         const exception = FormatException('oops!');
         var isFirstInvocation = true;
 
@@ -115,7 +134,7 @@ void main() {
         verify(() => logger.info(commandRunner.usage)).called(1);
       });
 
-      test('handles UsageException', () async {
+      test('handles $UsageException', () async {
         final exception = UsageException('oops!', commandRunner.usage);
         var isFirstInvocation = true;
 
