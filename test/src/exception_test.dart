@@ -33,4 +33,11 @@ void main() {
       'Unknown keys: ${keys.join(', ')}, in $location',
     );
   });
+
+  test('$MaxUpdateException has the correct message', () {
+    expect(
+      const MaxUpdateException().message,
+      'Updated has reached the maximum number of updates allowed.',
+    );
+  });
 }
