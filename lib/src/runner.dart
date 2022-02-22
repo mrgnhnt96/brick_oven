@@ -3,6 +3,7 @@ import 'package:args/command_runner.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_bricks.dart';
 import 'package:brick_oven/src/commands/list.dart';
 import 'package:brick_oven/src/commands/update.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/package_details.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -39,6 +40,9 @@ class BrickOvenRunner extends CommandRunner<int> {
   Future<int?> run(Iterable<String> args) async {
     try {
       return await runCommand(parse(args)) ?? ExitCode.success.code;
+    } on MaxUpdateException catch (e) {
+      _logger.err(e.message);
+      return ExitCode.success.code;
     } on FormatException catch (e) {
       _logger
         ..err(e.message)

@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:args/command_runner.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// the variables for quit after flag
@@ -15,7 +14,8 @@ mixin QuitAfterMixin on Command<int> {
     _updates++;
     if (shouldQuit) {
       logger?.info('Quitting after $updates updates');
-      exit(ExitCode.success.code);
+
+      throw const MaxUpdateException();
     }
   }
 
