@@ -1,3 +1,5 @@
+// ignore_for_file: overridden_fields
+
 import 'dart:async';
 import 'dart:io';
 
@@ -10,17 +12,21 @@ import 'package:brick_oven/utils/extensions.dart';
 import 'package:brick_oven/utils/mixins.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:watcher/watcher.dart';
 
 /// {@template cook_single_brick_command}
 /// Writes a single brick from the configuration file
 /// {@endtemplate}
-class CookSingleBrick extends BrickOvenCommand with QuitAfterMixin {
+class CookSingleBrick extends BrickOvenCommand
+    with QuitAfterMixin, ConfigWatcherMixin {
   /// {@macro cook_single_brick_command}
   CookSingleBrick(
     this.brick, {
     FileSystem? fileSystem,
     Logger? logger,
-  }) : super(fileSystem: fileSystem, logger: logger) {
+    FileWatcher? configWatcher,
+  })  : configWatcher = configWatcher ?? FileWatcher(BrickOvenYaml.file),
+        super(fileSystem: fileSystem, logger: logger) {
     argParser
       ..addFlagsAndOptions()
       ..addSeparator('${'-' * 79}\n');
@@ -34,6 +40,9 @@ class CookSingleBrick extends BrickOvenCommand with QuitAfterMixin {
 
   /// The output directory
   String get outputDir => argResults['output'] as String? ?? 'bricks';
+
+  @override
+  final FileWatcher configWatcher;
 
   @override
   String get description => 'Cook the brick: $name.';
@@ -72,7 +81,7 @@ class CookSingleBrick extends BrickOvenCommand with QuitAfterMixin {
       qToQuit(logger: logger);
     }
 
-    final ovenNeedsReset = await BrickOvenYaml.watchForChanges(
+    final ovenNeedsReset = await watchForConfigChanges(
       onChange: () {
         logger.alert(
           '${BrickOvenYaml.file} changed, updating bricks configuration',
