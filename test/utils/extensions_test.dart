@@ -3,7 +3,7 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import '../src/runner_test.dart';
+import 'mocks.dart';
 import 'print_override.dart';
 
 void main() {

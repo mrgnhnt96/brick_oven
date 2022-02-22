@@ -9,8 +9,8 @@ import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:watcher/watcher.dart';
 
-import '../src/runner_test.dart';
 import 'fakes.dart';
+import 'mocks.dart';
 import 'print_override.dart';
 import 'testing_env.dart';
 

@@ -9,8 +9,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 import '../../utils/fakes.dart';
+import '../../utils/mocks.dart';
 import '../../utils/print_override.dart';
-import '../runner_test.dart';
 
 void main() {
   group('$ListCommand', () {
