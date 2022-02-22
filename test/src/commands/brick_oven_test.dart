@@ -75,11 +75,6 @@ bricks:
         expect(cwd.path, fs.currentDirectory.path);
       });
     });
-
-    test('#argResults returns the argResults', () {
-      expect(brickOvenCommand.argResults, isNotNull);
-      expect(brickOvenCommand.argResults, isA<ArgResults>());
-    });
   });
 }
 
@@ -94,3 +89,5 @@ class TestBrickOvenCommand extends BrickOvenCommand {
   @override
   ArgResults get argResults => FakeArgResults(data: <String, dynamic>{});
 }
+
+class MockBrickOvenCommand extends Mock implements BrickOvenCommand {}
