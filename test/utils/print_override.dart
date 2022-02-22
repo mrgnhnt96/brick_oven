@@ -9,6 +9,7 @@ void Function() overridePrint(void Function() fn) {
         printLogs.add(msg);
       },
     );
+
     return Zone.current.fork(specification: spec).run<void>(fn);
   };
 }
