@@ -54,5 +54,25 @@ void main() {
         ).called(1);
       });
     });
+
+    group('#qToQuit', () {
+      test('prints', () {
+        overridePrint(() {
+          logger.qToQuit();
+
+          expect(printLogs, ['Press q to quit...']);
+        });
+      });
+
+      test('calls info', () {
+        verifyNever(() => mockLogger.info(any()));
+
+        mockLogger.qToQuit();
+
+        verify(
+          () => mockLogger.info(darkGray.wrap('Press q to quit...')),
+        ).called(1);
+      });
+    });
   });
 }
