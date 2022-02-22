@@ -1,13 +1,18 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/mixins.dart';
+import 'package:file/file.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:path/path.dart';
 import 'package:test/test.dart';
+import 'package:watcher/watcher.dart';
 
 import '../src/runner_test.dart';
 import 'fakes.dart';
 import 'print_override.dart';
+import 'testing_env.dart';
 
 void main() {
   setUp(() {
@@ -107,6 +112,50 @@ void main() {
       );
     });
   });
+
+  group('$ConfigWatcherMixin', () {
+    late FileSystem fs;
+    late File configFile;
+
+    setUp(() async {
+      fs = setUpTestingEnvironment();
+
+      final configPath = join(fs.currentDirectory.path, BrickOvenYaml.file);
+
+      configFile = fs.file(configPath);
+
+      await configFile.create(recursive: true);
+    });
+
+    tearDown(() {
+      tearDownTestingEnvironment(fs);
+    });
+
+    test('#configWatcher is a file watcher for ${BrickOvenYaml.file}', () {
+      final configWatcherMixin = TestConfigWatcher();
+
+      expect(configWatcherMixin.configWatcher, isA<FileWatcher>());
+      expect(
+        configWatcherMixin.configWatcher.path,
+        basename(BrickOvenYaml.file),
+      );
+    });
+
+    test('#watchForChanges should return true when file changes', () async {
+      var hasChanged = false;
+      final testConfigWatcher = TestConfigWatcher();
+
+      final listener = testConfigWatcher.watchForConfigChanges(
+        onChange: () => hasChanged = true,
+      );
+
+      configFile.writeAsStringSync('update');
+
+      await listener;
+
+      expect(hasChanged, isTrue);
+    });
+  });
 }
 
 class TestQuitAfterMixin extends Command<int> with QuitAfterMixin {
@@ -129,3 +178,5 @@ class TestQuitAfterMixin extends Command<int> with QuitAfterMixin {
         },
       );
 }
+
+class TestConfigWatcher with ConfigWatcherMixin {}

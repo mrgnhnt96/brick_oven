@@ -45,20 +45,5 @@ void main() {
         expect(brickOvenYaml?.path, configFile.path);
       }
     });
-
-    test('#overWatcher runs normally', () {});
-
-    test('#watchForChanges should return true when file changes', () async {
-      var hasChanged = false;
-
-      final listener =
-          BrickOvenYaml.watchForChanges(onChange: () => hasChanged = true);
-
-      configFile.writeAsStringSync('update');
-
-      await listener;
-
-      expect(hasChanged, isTrue);
-    });
   });
 }
