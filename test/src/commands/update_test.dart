@@ -7,9 +7,7 @@ import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
 
-class MockLogger extends Mock implements Logger {}
-
-class MockPubUpdater extends Mock implements PubUpdater {}
+import '../../utils/mocks.dart';
 
 class FakeProcessResult extends Fake implements ProcessResult {}
 

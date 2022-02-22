@@ -1,16 +1,13 @@
 import 'package:args/args.dart';
 import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import '../../../domain/brick_test.dart';
 import '../../../utils/fakes.dart';
-import '../../runner_test.dart';
+import '../../../utils/mocks.dart';
 
 void main() {
   late CookAllBricks command;
@@ -62,7 +59,7 @@ void main() {
   });
 
   group('brick_oven cook all', () {
-    late Brick mockBrick, fakeBrick;
+    late Brick mockBrick;
     late Logger mockLogger;
     late MockBrickWatcher mockBrickWatcher;
 
@@ -223,13 +220,4 @@ class TestCookAllBricks extends CookAllBricks {
 
     return false;
   }
-}
-
-class MockBrick extends Mock implements Brick {}
-
-class FakeBrickSource extends Fake implements BrickSource {
-  FakeBrickSource(this.watcher);
-
-  @override
-  final BrickWatcher watcher;
 }

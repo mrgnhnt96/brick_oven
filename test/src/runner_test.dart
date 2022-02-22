@@ -7,11 +7,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 
+import '../utils/mocks.dart';
 import '../utils/print_override.dart';
-
-class MockLogger extends Mock implements Logger {}
-
-class MockPubUpdater extends Mock implements PubUpdater {}
 
 const expectedUsage = [
   'Generate your bricks 🧱 with this oven 🎛\n',

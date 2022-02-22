@@ -11,8 +11,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
-import '../src/runner_test.dart';
 import '../utils/fakes.dart';
+import '../utils/mocks.dart';
 import '../utils/to_yaml.dart';
 
 void main() {
@@ -426,5 +426,3 @@ void main() {
     });
   });
 }
-
-class MockBrickWatcher extends Mock implements BrickWatcher {}
