@@ -47,3 +47,15 @@ class UnknownKeysException extends BrickOvenException {
     String location,
   ) : super('Unknown keys: ${keys.join(', ')}, in $location');
 }
+
+/// {@template max_update_exception}
+/// An exception thrown when the maximum number of updates
+/// on any file is reached.
+/// {@endtemplate}
+class MaxUpdateException extends BrickOvenException {
+  /// {@macro max_update_exception}
+  const MaxUpdateException()
+      : super(
+          'Updated has reached the maximum number of updates allowed.',
+        );
+}
