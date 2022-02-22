@@ -5,6 +5,7 @@ import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
+import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart';
 
@@ -13,7 +14,13 @@ import 'package:path/path.dart';
 /// {@endtemplate}
 class ListCommand extends BrickOvenCommand {
   /// {@macro lists_command}
-  ListCommand({Logger? logger}) : super(logger: logger) {
+  ListCommand({
+    Logger? logger,
+    FileSystem? fileSystem,
+  }) : super(
+          logger: logger,
+          fileSystem: fileSystem,
+        ) {
     argParser.addFlag(
       'verbose',
       abbr: 'v',
@@ -29,7 +36,7 @@ class ListCommand extends BrickOvenCommand {
   String get name => 'list';
 
   /// whether to list the output in verbose mode
-  bool get isVerbose => argResults['verbose'] as bool;
+  bool get isVerbose => argResults['verbose'] as bool? ?? false;
 
   @override
   Future<int> run() async {
@@ -83,12 +90,17 @@ class ListCommand extends BrickOvenCommand {
             : '\n$tab${cyan.wrap('dirs')}:'
                 '\n${configDirs.map(dirString).join('\n')}';
 
-        logger.info('${lightYellow.wrap(brick.name)}$files$dirs\n');
+        logger.info(
+          '${lightYellow.wrap(brick.name)}'
+          '\n${tab}source: ${brick.source.sourceDir}'
+          '$files'
+          '$dirs\n',
+        );
       } else {
         logger.info(
           '''
 ${lightYellow.wrap(brick.name)}
-${tab}Source: ${brick.source.sourceDir}
+${tab}source: ${brick.source.sourceDir}
 $tab${cyan.wrap('files')}: ${brick.configuredFiles.length}
 $tab${cyan.wrap('dirs')}: ${brick.configuredDirs.length}\n''',
         );

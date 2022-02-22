@@ -28,7 +28,7 @@ class BrickOvenRunner extends CommandRunner<int> {
     );
 
     addCommand(CookBricksCommand(logger: _logger, fileSystem: fileSystem));
-    addCommand(ListCommand(logger: _logger));
+    addCommand(ListCommand(logger: _logger, fileSystem: fileSystem));
     addCommand(UpdateCommand(pubUpdater: _pubUpdater, logger: _logger));
   }
 
