@@ -1,16 +1,17 @@
+import 'package:equatable/equatable.dart';
+import 'package:file/file.dart';
+import 'package:file/local.dart';
+import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p show extension;
+import 'package:path/path.dart' hide extension;
+import 'package:yaml/yaml.dart';
+
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:brick_oven/utils/extensions.dart';
-import 'package:equatable/equatable.dart';
-import 'package:file/file.dart';
-import 'package:file/local.dart';
-import 'package:meta/meta.dart';
-import 'package:path/path.dart' hide extension;
-import 'package:path/path.dart' as p show extension;
-import 'package:yaml/yaml.dart';
 
 /// {@template brick_file}
 /// Represents the file from the `brick_oven.yaml` file

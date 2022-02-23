@@ -1,7 +1,8 @@
-import 'package:brick_oven/enums/mustache_format.dart';
-import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:yaml/yaml.dart';
+
+import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/utils/extensions.dart';
 
 /// {@template variable}
 /// Represents the variable values provided in the `brick_oven.yaml` file

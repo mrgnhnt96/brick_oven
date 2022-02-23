@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:brick_oven/utils/extensions.dart';
-
 import 'package:mason_logger/mason_logger.dart';
+
+import 'package:brick_oven/utils/extensions.dart';
 
 /// quits running the program after `q` is pressed
 void qToQuit({Logger? logger}) {

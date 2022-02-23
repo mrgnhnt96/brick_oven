@@ -4,15 +4,16 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:file/file.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:watcher/watcher.dart';
+
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/key_listener.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:brick_oven/utils/mixins.dart';
-import 'package:file/file.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:watcher/watcher.dart';
 
 /// {@template cook_single_brick_command}
 /// Writes a single brick from the configuration file
@@ -82,14 +83,12 @@ class CookSingleBrick extends BrickOvenCommand
     }
 
     final ovenNeedsReset = await watchForConfigChanges(
-      onChange: () {
+      onChange: () async {
         logger.alert(
           '${BrickOvenYaml.file} changed, updating bricks configuration',
         );
 
-        for (final brick in bricks) {
-          brick.stopWatching();
-        }
+        await brick.source.watcher?.stop();
       },
     );
 

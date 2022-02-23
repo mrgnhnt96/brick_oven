@@ -1,8 +1,3 @@
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_path.dart';
-import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -10,6 +5,12 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
+
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_source.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/utils/extensions.dart';
 
 /// {@template brick}
 /// Represents the brick configured in the `brick_oven.yaml` file
@@ -106,11 +107,6 @@ class Brick extends Equatable {
 
   /// the logger
   final Logger logger;
-
-  /// stops watching the directories that impact the brick
-  Future<void> stopWatching() async {
-    await source.watcher?.stop();
-  }
 
   /// writes the brick's files, from the [source]'s files.
   ///

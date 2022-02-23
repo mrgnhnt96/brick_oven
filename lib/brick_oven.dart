@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:brick_oven/src/runner.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
+
+import 'package:brick_oven/src/runner.dart';
 
 /// runs the brick oven, generating bricks
 Future<void> runBrickOven(List<String> arguments) async {

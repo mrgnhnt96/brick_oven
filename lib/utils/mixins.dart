@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/src/exception.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:watcher/watcher.dart';
+
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/src/exception.dart';
 
 /// the variables for quit after flag
 mixin QuitAfterMixin on Command<int> {
@@ -41,11 +42,13 @@ mixin ConfigWatcherMixin {
   FileWatcher configWatcher = FileWatcher(BrickOvenYaml.file);
 
   /// the watcher for the [BrickOvenYaml.file]
-  Future<bool> watchForConfigChanges({void Function()? onChange}) async {
+  Future<bool> watchForConfigChanges({
+    FutureOr<void> Function()? onChange,
+  }) async {
     final watchCompleter = Completer<void>();
 
-    final _yamlListener = configWatcher.events.listen((event) {
-      onChange?.call();
+    final _yamlListener = configWatcher.events.listen((event) async {
+      await onChange?.call();
 
       watchCompleter.complete();
     });

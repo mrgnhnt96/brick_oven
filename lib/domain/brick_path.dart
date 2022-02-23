@@ -1,9 +1,10 @@
-import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/enums/mustache_format.dart';
-import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
+
+import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/utils/extensions.dart';
 
 /// {@template brick_path}
 /// The configuration of the path that will be updated to mustache

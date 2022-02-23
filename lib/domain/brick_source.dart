@@ -1,7 +1,3 @@
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_watcher.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -9,6 +5,11 @@ import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
+
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/utils/extensions.dart';
 
 /// {@template brick_source}
 /// The brick's source, where the files are retrived, copied &/or altered

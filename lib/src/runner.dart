@@ -1,13 +1,14 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:pub_updater/pub_updater.dart';
+
 import 'package:brick_oven/src/commands/cook_bricks/cook_bricks.dart';
 import 'package:brick_oven/src/commands/list.dart';
 import 'package:brick_oven/src/commands/update.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/package_details.dart';
-import 'package:file/file.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:pub_updater/pub_updater.dart';
 
 /// {@template brick_oven_runner}
 /// Runs the brick_oven commands

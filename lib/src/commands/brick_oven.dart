@@ -1,13 +1,14 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/extensions.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:yaml/yaml.dart';
+
+import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/extensions.dart';
 
 /// {@template brick_oven_command}
 /// The base command for all brick oven commands

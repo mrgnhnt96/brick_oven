@@ -1,7 +1,8 @@
-import 'package:brick_oven/src/commands/brick_oven.dart';
-import 'package:brick_oven/src/package_details.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
+
+import 'package:brick_oven/src/commands/brick_oven.dart';
+import 'package:brick_oven/src/package_details.dart';
 
 /// {@template update_command}
 /// `mason update` command which updates mason.
