@@ -8,3 +8,4 @@ build/
 # code coverage
 .codecov_secret
 codecov
+publish_package.sh
