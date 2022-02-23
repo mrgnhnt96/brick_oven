@@ -1,8 +1,8 @@
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:file/file.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import '../utils/testing_env.dart';
 
 void main() {

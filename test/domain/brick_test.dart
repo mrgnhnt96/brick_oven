@@ -1,16 +1,16 @@
 // ignore_for_file: unnecessary_cast
 
-import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_path.dart';
-import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_source.dart';
+import 'package:brick_oven/domain/brick_watcher.dart';
 import '../utils/fakes.dart';
 import '../utils/mocks.dart';
 import '../utils/to_yaml.dart';
@@ -95,7 +95,7 @@ void main() {
 
         verifyNever(mockWatcher.stop);
 
-        await testBrick.stopWatching();
+        await testBrick.source.watcher?.stop();
 
         verify(mockWatcher.stop).called(1);
       });
@@ -224,7 +224,7 @@ void main() {
 
           when(mockWatcher.stop).thenAnswer((_) => Future.value());
 
-          testBrick.stopWatching();
+          testBrick.source.watcher?.stop();
 
           when(() => mockWatcher.isRunning).thenReturn(false);
 

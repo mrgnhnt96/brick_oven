@@ -1,8 +1,8 @@
-import 'package:brick_oven/domain/brick_path.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
 import '../utils/fakes.dart';
 
 void main() {

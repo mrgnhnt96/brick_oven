@@ -1,5 +1,6 @@
-import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:test/test.dart';
+
+import 'package:brick_oven/enums/mustache_loops.dart';
 
 void main() {
   group('$MustacheLoops', () {

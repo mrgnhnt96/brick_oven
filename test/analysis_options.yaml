@@ -1,0 +1,7 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  errors:
+    unused_element: ignore
+    directives_ordering: ignore
+    lines_longer_than_80_chars: ignore

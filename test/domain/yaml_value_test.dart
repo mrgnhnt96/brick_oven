@@ -1,8 +1,8 @@
 // ignore_for_file: prefer_void_to_null
 
-import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/domain/yaml_value.dart';
 import '../utils/fakes.dart';
 
 void main() {

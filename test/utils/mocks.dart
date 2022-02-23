@@ -1,8 +1,9 @@
-import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
+
+import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/brick_watcher.dart';
 
 class MockBrick extends Mock implements Brick {}
 

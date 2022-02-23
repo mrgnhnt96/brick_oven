@@ -1,4 +1,3 @@
-import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
@@ -6,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 import 'package:watcher/watcher.dart';
 
+import 'package:brick_oven/domain/brick_watcher.dart';
 import '../utils/testing_env.dart';
 
 void main() {

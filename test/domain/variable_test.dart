@@ -1,7 +1,7 @@
-import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/domain/variable.dart';
+import 'package:brick_oven/enums/mustache_format.dart';
 import '../utils/fakes.dart';
 import '../utils/to_yaml.dart';
 

@@ -1,5 +1,6 @@
-import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:test/test.dart';
+
+import 'package:brick_oven/enums/mustache_format.dart';
 
 void main() {
   group('MustacheFormatX', () {

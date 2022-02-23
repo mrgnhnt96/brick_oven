@@ -1,15 +1,17 @@
+import 'dart:async';
+
 import 'package:args/args.dart';
-import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
-import 'package:brick_oven/utils/extensions.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/domain/brick_source.dart';
+import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import '../../../utils/fakes.dart';
 import '../../../utils/mocks.dart';
 
@@ -101,31 +103,29 @@ bricks:
 
   group('brick_oven cook', () {
     late Brick mockBrick;
-
     late MockBrickWatcher mockBrickWatcher;
 
     setUp(() {
       mockBrick = MockBrick();
       mockBrickWatcher = MockBrickWatcher();
-      final mockSource = FakeBrickSource(mockBrickWatcher);
+      final fakeSource = FakeBrickSource(mockBrickWatcher);
 
+      when(() => mockBrick.source).thenReturn(fakeSource);
       when(() => mockBrickWatcher.isRunning).thenReturn(true);
-
-      when(() => mockBrick.source).thenReturn(mockSource);
     });
 
     CookSingleBrick command({
       bool? watch,
       bool allowConfigChanges = false,
-      bool fakeBrick = false,
     }) {
       return TestCookSingleBrick(
         logger: mockLogger,
-        brick: fakeBrick ? FakeBrick() : mockBrick,
+        brick: mockBrick,
         argResults: <String, dynamic>{
           'output': 'output/dir',
           if (watch == true) 'watch': true,
         },
+        allowConfigChanges: allowConfigChanges,
       );
     }
 
@@ -154,12 +154,34 @@ bricks:
           expect(result, ExitCode.success.code);
         });
 
+        test('listens to config changes and returns code 75', () async {
+          when(mockBrickWatcher.stop).thenAnswer((_) => Future.value());
+
+          final runner = command(watch: true, allowConfigChanges: true);
+          final result = await runner.run();
+
+          verify(mockLogger.cooking).called(1);
+          verify(mockLogger.watching).called(1);
+
+          verify(() => mockBrick.cook(output: 'output/dir', watch: true))
+              .called(1);
+
+          verify(
+            () => mockLogger.alert(
+              '${BrickOvenYaml.file} changed, updating bricks configuration',
+            ),
+          );
+
+          verify(mockBrickWatcher.stop).called(1);
+
+          expect(result, ExitCode.tempFail.code);
+        });
+
         test('returns code 74 when watcher is not running', () async {
           reset(mockBrickWatcher);
           when(() => mockBrickWatcher.isRunning).thenReturn(false);
 
-          final result =
-              await command(watch: true, allowConfigChanges: true).run();
+          final result = await command(watch: true).run();
 
           verify(mockLogger.cooking).called(1);
           verify(
@@ -200,9 +222,12 @@ class TestCookSingleBrick extends CookSingleBrick {
   var _hasWatchedConfigChanges = false;
 
   @override
-  Future<bool> watchForConfigChanges({void Function()? onChange}) async {
+  Future<bool> watchForConfigChanges({
+    FutureOr<void> Function()? onChange,
+  }) async {
     if (allowConfigChanges && !_hasWatchedConfigChanges) {
       _hasWatchedConfigChanges = true;
+      await onChange?.call();
       return true;
     }
 

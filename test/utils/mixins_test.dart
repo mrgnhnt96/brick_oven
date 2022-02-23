@@ -1,14 +1,14 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/mixins.dart';
 import 'package:file/file.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:watcher/watcher.dart';
 
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/mixins.dart';
 import 'fakes.dart';
 import 'mocks.dart';
 import 'print_override.dart';

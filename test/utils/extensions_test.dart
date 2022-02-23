@@ -1,8 +1,8 @@
-import 'package:brick_oven/utils/extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/utils/extensions.dart';
 import 'mocks.dart';
 import 'print_override.dart';
 

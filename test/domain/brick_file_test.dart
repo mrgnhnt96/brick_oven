@@ -1,14 +1,14 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_path.dart';
-import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/variable.dart';
+import 'package:brick_oven/enums/mustache_loops.dart';
 import '../utils/fakes.dart';
 
 void main() {

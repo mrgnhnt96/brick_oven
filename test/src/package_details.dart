@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:brick_oven/src/package_details.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
+
+import 'package:brick_oven/src/package_details.dart';
 
 void main() {
   test('version matches the pubspec version', () {
