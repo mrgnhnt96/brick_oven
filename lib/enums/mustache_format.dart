@@ -1,7 +1,5 @@
 // ignore_for_file: parameter_assignments
 
-// TODO:(mrgnhnt96): verify that the doc comments display the correct formats
-
 /// the formats that Mustache supports
 enum MustacheFormat {
   /// camelCase
