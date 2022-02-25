@@ -7,6 +7,7 @@ import 'package:path/path.dart' hide extension;
 import 'package:yaml/yaml.dart';
 
 import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
@@ -18,17 +19,11 @@ import 'package:brick_oven/utils/extensions.dart';
 /// {@endtemplate}
 class BrickFile extends Equatable {
   /// {macro brick_file}
-  const BrickFile(this.path)
-      : variables = const [],
-        prefix = null,
-        suffix = null,
-        name = null;
+  const BrickFile(this.path, {this.name}) : variables = const [];
 
   const BrickFile._fromYaml(
     this.path, {
     required this.variables,
-    required this.prefix,
-    required this.suffix,
     required this.name,
   });
 
@@ -38,8 +33,6 @@ class BrickFile extends Equatable {
   const BrickFile.config(
     this.path, {
     this.variables = const [],
-    this.prefix,
-    this.suffix,
     this.name,
   });
 
@@ -66,32 +59,17 @@ class BrickFile extends Equatable {
 
       for (final entry in variablesData.entries) {
         final name = entry.key as String;
-        final value = entry.value as YamlMap?;
-
-        yield Variable.fromYaml(name, value);
+        yield Variable.from(name, entry.value);
       }
     }
 
-    final nameConfigYaml = YamlValue.from(data.remove('name'));
+    final nameYaml = YamlValue.from(data.remove('name'));
 
-    String? name, prefix, suffix;
+    Name? name;
 
-    if (nameConfigYaml.isYaml()) {
-      final nameConfig = nameConfigYaml.asYaml().value.data;
-
-      name = nameConfig.remove('value') as String?;
-      prefix = nameConfig.remove('prefix') as String?;
-      suffix = nameConfig.remove('suffix') as String?;
-
-      if (nameConfig.isNotEmpty == true) {
-        throw ArgumentError(
-          'Unrecognized keys in file config: ${nameConfig.keys}',
-        );
-      }
-    } else if (nameConfigYaml.isString()) {
-      name = nameConfigYaml.asString().value;
-    } else if (nameConfigYaml.isNone() && yaml.value.containsKey('name')) {
-      name = basenameWithoutExtension(path);
+    // name's value can be omitted
+    if (!nameYaml.isNone() || yaml.value.containsKey('name')) {
+      name = Name.fromYamlValue(nameYaml, basenameWithoutExtension(path));
     }
 
     if (data.isNotEmpty) {
@@ -101,8 +79,6 @@ class BrickFile extends Equatable {
     return BrickFile._fromYaml(
       path,
       variables: variables(),
-      prefix: prefix,
-      suffix: suffix,
       name: name,
     );
   }
@@ -113,52 +89,34 @@ class BrickFile extends Equatable {
   /// All variables that the content contains and will be updated with
   final Iterable<Variable> variables;
 
-  /// the prefix to the [fileName]
-  final String? prefix;
-
-  /// the suffix to the [fileName]
-  final String? suffix;
-
   /// the name of the file
   ///
   /// if provided, [fileName] will format the name
   /// using mustache
-  final String? name;
+  final Name? name;
 
   /// if the name of the file has been configured
   bool get hasConfiguredName => name != null;
 
   /// gets the name of the file without formatting to mustache
-  String get nonformattedFileName {
-    if (name == null) {
+  String get simpleName {
+    if (!hasConfiguredName) {
       return basename(path);
     }
-    final prefix = this.prefix ?? '';
-    final suffix = this.suffix ?? '';
 
-    final formattedName = '$prefix{$name}$suffix';
-
-    return '$formattedName$extension';
+    return '${name!.simple}$extension';
   }
 
   /// the name of file with extension
   ///
-  /// If a [name] is provided, it will be formatted with mustache,
-  /// prepended with [prefix],
-  /// and appended with [suffix]
-  ///
-  /// Otherwise returns the file's name and its extension
+  /// If [hasConfiguredName], then the name will be formatted with mustache,
+  /// prepended with prefix, and appended with suffix
   String get fileName {
-    if (name == null) {
+    if (!hasConfiguredName) {
       return basename(path);
     }
-    final prefix = this.prefix ?? '';
-    final suffix = this.suffix ?? '';
 
-    final formattedName = '$prefix{{{$name}}}$suffix';
-    final mustacheName = MustacheFormat.snakeCase.toMustache(formattedName);
-
-    return '$mustacheName$extension';
+    return '${name!.format(MustacheFormat.snakeCase)}$extension';
   }
 
   /// all of the extensions of the file
@@ -235,8 +193,6 @@ class BrickFile extends Equatable {
   List<Object?> get props => [
         path,
         variables.toList(),
-        prefix,
-        suffix,
         name,
       ];
 }

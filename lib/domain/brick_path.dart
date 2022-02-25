@@ -1,10 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
-import 'package:yaml/yaml.dart';
 
+import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
-import 'package:brick_oven/utils/extensions.dart';
 
 /// {@template brick_path}
 /// The configuration of the path that will be updated to mustache
@@ -12,7 +11,7 @@ import 'package:brick_oven/utils/extensions.dart';
 class BrickPath extends Equatable {
   /// {@macro brick_path}
   factory BrickPath({
-    required String name,
+    required Name name,
     required String path,
   }) {
     final _path = cleanPath(path);
@@ -42,33 +41,10 @@ class BrickPath extends Equatable {
       );
     }
 
-    String? handleYaml(YamlMap yaml) {
-      final data = yaml.data;
-
-      final name = data.remove('name') as String?;
-
-      if (data.isNotEmpty) {
-        throw ArgumentError.value(
-          data.keys,
-          'Unknown keys',
-          'Remove all unknown keys from path $path',
-        );
-      }
-
-      return name;
-    }
-
-    String? name;
-
-    if (yaml.isYaml()) {
-      name = handleYaml(yaml.asYaml().value);
-    } else if (yaml.isString()) {
-      name = yaml.asString().value;
-    }
-
-    name ??= basename(path);
-
-    return BrickPath(path: path, name: name);
+    return BrickPath(
+      path: path,
+      name: Name.fromYamlValue(yaml, basename(path)),
+    );
   }
 
   /// the placeholder of the [path] that will be replaced with [name]
@@ -77,7 +53,7 @@ class BrickPath extends Equatable {
   final String placeholder;
 
   /// the name that will replace the [placeholder] within the [path]
-  final String name;
+  final Name name;
 
   /// the path that will be updated using [name]
   ///
@@ -129,7 +105,8 @@ class BrickPath extends Equatable {
     // ignore: parameter_assignments
     path = normalize(path).replaceAll(slashPattern, '');
 
-    final replacement = MustacheFormat.snakeCase.toMustache('{{{$name}}}');
+    final replacement =
+        MustacheFormat.snakeCase.toMustache('{{{${name.value}}}}');
 
     final pathParts = path.split(separatorPattern);
 

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:yaml/yaml.dart';
 
+import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/utils/extensions.dart';
 
@@ -48,6 +49,19 @@ class Variable extends Equatable {
       suffix: suffix,
       prefix: prefix,
     );
+  }
+
+  /// parses the [value] to [YamlValue]
+  factory Variable.from(String name, dynamic value) {
+    final yamlValue = YamlValue.from(value);
+
+    if (yamlValue.isYaml()) {
+      return Variable.fromYaml(name, yamlValue.asYaml().value);
+    } else if (yamlValue.isString()) {
+      return Variable(name: name, placeholder: yamlValue.asString().value);
+    } else {
+      return Variable(name: name, placeholder: name);
+    }
   }
 
   /// the placeholder that currently lives in a file

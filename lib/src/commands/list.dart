@@ -61,7 +61,7 @@ class ListCommand extends BrickOvenCommand {
 
       return '${tab * 2}- ${darkGray.wrap(dir)}$originalName'
           // ignore: lines_longer_than_80_chars
-          '${file.hasConfiguredName ? ' ${green.wrap('->')} ${file.nonformattedFileName}' : ''}'
+          '${file.hasConfiguredName ? ' ${green.wrap('->')} ${file.simpleName}' : ''}'
           '${file.variables.isNotEmpty ? '\n$vars' : ''}';
     }
 
@@ -71,7 +71,7 @@ class ListCommand extends BrickOvenCommand {
 
       final pathWithoutName = darkGray.wrap(parts.join(separator) + separator);
       return '${tab * 2}- $pathWithoutName$originalDir '
-          '${green.wrap('->')} ${dir.name}';
+          '${green.wrap('->')} ${dir.name.simple}';
     }
 
     for (final brick in bricks) {
