@@ -10,14 +10,10 @@ import 'package:brick_oven/utils/extensions.dart';
 void qToQuit({Logger? logger}) {
   logger?.qToQuit();
 
-  StreamSubscription? listener;
-
-  listener = keyListener(
+  keyListener(
     keys: <dynamic, void Function()>{
       'q': () async {
         logger?.info('\nExiting...\n');
-
-        await listener?.cancel();
 
         exit(ExitCode.success.code);
       },
@@ -31,7 +27,7 @@ void qToQuit({Logger? logger}) {
 }
 
 /// Returns a stream of keypresses.
-StreamSubscription? keyListener({
+void keyListener({
   required Map<dynamic, FutureOr<void> Function()> keys,
   Logger? logger,
 }) {
@@ -41,17 +37,20 @@ StreamSubscription? keyListener({
 
   stdin
     ..lineMode = false
-    ..echoMode = false;
+    ..echoMode = false
+    ..asBroadcastStream(
+      onListen: (listener) {
+        listener.onData((codes) {
+          final key = utf8.decode(codes);
 
-  return stdin.listen((List<int> codes) {
-    final key = utf8.decode(codes);
-
-    if (keys.containsKey(key)) {
-      keys[key]?.call();
-    } else if (keys.containsKey(codes)) {
-      keys[codes]?.call();
-    } else if (codes.length == 1 && keys.containsKey(codes[0])) {
-      keys[codes[0]]?.call();
-    }
-  });
+          if (keys.containsKey(key)) {
+            keys[key]?.call();
+          } else if (keys.containsKey(codes)) {
+            keys[codes]?.call();
+          } else if (codes.length == 1 && keys.containsKey(codes[0])) {
+            keys[codes[0]]?.call();
+          }
+        });
+      },
+    );
 }
