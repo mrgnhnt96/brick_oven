@@ -48,7 +48,7 @@ extension ArgParserX on ArgParser {
       'watch',
       abbr: 'w',
       negatable: false,
-      help: 'Watch the configuration file for changes and '
+      help: 'Watch for file changes and '
           're-cook the bricks as they change.',
     );
   }
