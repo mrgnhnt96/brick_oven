@@ -126,6 +126,26 @@ void main() {
     });
   });
 
+  group('#from', () {
+    test('can parse null when provided', () {
+      expect(() => Variable.from('', null), returnsNormally);
+    });
+
+    test('can parse String when provided', () {
+      expect(() => Variable.from('', 'value'), returnsNormally);
+    });
+
+    test('can parse yamlMap when provided', () {
+      expect(
+        () => Variable.from(
+          '',
+          FakeYamlMap(<String, dynamic>{'placeholder': 'name'}),
+        ),
+        returnsNormally,
+      );
+    });
+  });
+
   group('#prefix', () {
     test('returns the prefix', () {
       final variable = variableWithFixes(prefix: 'prefix');

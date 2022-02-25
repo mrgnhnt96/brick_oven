@@ -1,9 +1,12 @@
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/package_details.dart';
 import 'package:brick_oven/src/runner.dart';
@@ -45,11 +48,17 @@ void main() {
     late Logger logger;
     late PubUpdater pubUpdater;
     late BrickOvenRunner commandRunner;
+    late FileSystem fs;
 
     setUp(() {
       printLogs = [];
       logger = MockLogger();
       pubUpdater = MockPubUpdater();
+      fs = MemoryFileSystem();
+
+      fs.file(BrickOvenYaml.file)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('bricks:');
 
       when(
         () => pubUpdater.getLatestVersion(any()),
@@ -58,13 +67,14 @@ void main() {
       commandRunner = BrickOvenRunner(
         logger: logger,
         pubUpdater: pubUpdater,
+        fileSystem: fs,
       );
     });
 
     test(
       'can be instantiated without an explicit logger & pub updater instance',
       () {
-        final commandRunner = BrickOvenRunner();
+        final commandRunner = BrickOvenRunner(fileSystem: fs);
         expect(commandRunner, isNotNull);
       },
     );

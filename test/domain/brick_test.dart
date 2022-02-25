@@ -11,6 +11,7 @@ import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:brick_oven/domain/name.dart';
 import '../utils/fakes.dart';
 import '../utils/mocks.dart';
 import '../utils/to_yaml.dart';
@@ -28,8 +29,12 @@ void main() {
   group('#fromYaml', () {
     test('parses when provided', () {
       final brick = Brick(
-        configuredDirs: [BrickPath(name: 'name', path: 'path/to/dir')],
-        configuredFiles: const [BrickFile('file/path/name.dart')],
+        configuredDirs: [
+          BrickPath(name: const Name('name'), path: 'path/to/dir')
+        ],
+        configuredFiles: const [
+          BrickFile('file/path/name.dart', name: Name('name'))
+        ],
         name: 'brick',
         source: BrickSource(localPath: 'localPath'),
       );
@@ -43,7 +48,9 @@ void main() {
 
     test('throws argument error when extra keys are provided', () {
       final brick = Brick(
-        configuredDirs: [BrickPath(name: 'name', path: 'path/to/dir')],
+        configuredDirs: [
+          BrickPath(name: const Name('name'), path: 'path/to/dir')
+        ],
         configuredFiles: const [BrickFile('file/path/name.dart')],
         name: 'brick',
         source: BrickSource(localPath: 'localPath'),
@@ -255,7 +262,7 @@ void main() {
         logger: mockLogger,
         source: BrickSource(localPath: localPath),
         configuredDirs: [
-          if (createDir) BrickPath(name: newDirName, path: dirPath),
+          if (createDir) BrickPath(name: const Name(newDirName), path: dirPath),
         ],
         configuredFiles: [
           if (createFile && fileNames == null) BrickFile(filePath),
@@ -360,7 +367,7 @@ void main() {
     const fileNames = ['file1.dart', 'file2.dart', 'file3.dart'];
 
     final source = BrickSource(localPath: localPath);
-    final dir = [BrickPath(name: newDirName, path: dirPath)];
+    final dir = [BrickPath(name: const Name(newDirName), path: dirPath)];
     final files = fileNames.map(BrickFile.new);
 
     Brick brick({

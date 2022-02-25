@@ -59,11 +59,19 @@ extension BrickPathX on BrickPath {
       };
     } else if (asKey == true) {
       return <String, dynamic>{
-        path: FakeYamlMap(<String, dynamic>{'name': name}),
+        path: FakeYamlMap(<String, dynamic>{
+          'name': FakeYamlMap(
+            <String, dynamic>{
+              'value': name.value,
+              'prefix': name.prefix,
+              'suffix': name.suffix,
+            },
+          )
+        }),
       };
     } else {
       return <String, dynamic>{
-        path: name,
+        path: name.value,
       };
     }
   }
@@ -83,9 +91,9 @@ extension BrickFileX on BrickFile {
       path: FakeYamlMap(<String, dynamic>{
         'vars': FakeYamlMap(variablesData),
         'name': FakeYamlMap(<String, dynamic>{
-          'value': name,
-          'prefix': prefix,
-          'suffix': suffix,
+          'value': name?.value,
+          'prefix': name?.prefix,
+          'suffix': name?.suffix,
         })
       }),
     };

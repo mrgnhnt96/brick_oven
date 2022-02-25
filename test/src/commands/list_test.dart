@@ -138,7 +138,7 @@ ${lightYellow.wrap('package_1')}
       ${cyan.wrap('vars')}:
         - some_value ${green.wrap('->')} {some_var}
   ${cyan.wrap('dirs')}:
-    - ${darkGray.wrap('lib/')}nested ${green.wrap('->')} nested
+    - ${darkGray.wrap('lib/')}nested ${green.wrap('->')} {nested}
 ''',
         ),
       ).called(1);
@@ -153,7 +153,7 @@ ${lightYellow.wrap('package_2')}
       ${cyan.wrap('vars')}:
         - some_value ${green.wrap('->')} {some_var}
   ${cyan.wrap('dirs')}:
-    - ${darkGray.wrap('lib/')}nested ${green.wrap('->')} nested
+    - ${darkGray.wrap('lib/')}nested ${green.wrap('->')} {nested}
 ''',
         ),
       ).called(1);

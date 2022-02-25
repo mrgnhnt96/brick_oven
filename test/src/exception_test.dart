@@ -19,7 +19,7 @@ void main() {
       expect(
         const BrickOvenNotFoundException().message,
         'Cannot find ${BrickOvenYaml.file}.'
-        '\nDid you forget to run brick_oven init?',
+        '\nCreate the file and try again.',
       );
     });
   });

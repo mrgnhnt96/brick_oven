@@ -1,9 +1,11 @@
+import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
 
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/update.dart';
 import 'package:brick_oven/src/package_details.dart';
 import 'package:brick_oven/src/runner.dart';
@@ -35,6 +37,11 @@ void main() {
     setUp(() {
       logger = MockLogger();
       pubUpdater = MockPubUpdater();
+      final fs = MemoryFileSystem();
+
+      fs.file(BrickOvenYaml.file)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('bricks:');
 
       when(() => logger.progress(any())).thenReturn(([String? _]) {});
       when(
@@ -48,6 +55,7 @@ void main() {
       commandRunner = BrickOvenRunner(
         logger: logger,
         pubUpdater: pubUpdater,
+        fileSystem: fs,
       );
     });
 

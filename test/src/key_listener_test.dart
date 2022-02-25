@@ -21,6 +21,13 @@ void main() {
     reset(stdout);
     reset(stdin);
     mockLogger = MockLogger();
+
+    when(
+      () => stdin.asBroadcastStream(
+        onListen: any(named: 'onListen'),
+        onCancel: any(named: 'onCancel'),
+      ),
+    ).thenAnswer((_) => const Stream.empty());
   });
 
   test(
@@ -40,9 +47,6 @@ void main() {
     'sets up key listener',
     overrideIO(
       () {
-        when(() => stdin.listen(any()))
-            .thenReturn(const Stream<List<int>>.empty().listen((_) {}));
-
         qToQuit(logger: mockLogger);
 
         verify(mockLogger.qToQuit).called(1);
@@ -50,7 +54,12 @@ void main() {
         verify(() => stdin.lineMode = false).called(1);
         verify(() => stdin.echoMode = false).called(1);
 
-        verify(() => stdin.listen(any())).called(1);
+        verify(
+          () => stdin.asBroadcastStream(
+            onListen: any(named: 'onListen'),
+            onCancel: any(named: 'onCancel'),
+          ),
+        ).called(1);
       },
       stdin: stdin,
       stdout: stdout,

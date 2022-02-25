@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
 import '../utils/fakes.dart';
@@ -35,15 +36,15 @@ void main() {
     });
 
     test('prefix is null', () {
-      expect(instance.prefix, isNull);
+      expect(instance.name?.prefix, isNull);
     });
 
     test('suffix is null', () {
-      expect(instance.suffix, isNull);
+      expect(instance.name?.suffix, isNull);
     });
 
     test('providedName is null', () {
-      expect(instance.name, isNull);
+      expect(instance.name?.value, isNull);
     });
   });
 
@@ -128,9 +129,9 @@ void main() {
 
       expect(instance.variables, hasLength(1));
       expect(instance.path, defaultPath);
-      expect(instance.prefix, prefix);
-      expect(instance.suffix, suffix);
-      expect(instance.name, name);
+      expect(instance.name?.prefix, prefix);
+      expect(instance.name?.suffix, suffix);
+      expect(instance.name?.value, name);
     });
 
     test('can parse empty variables', () {
@@ -153,7 +154,7 @@ void main() {
       test('can parse when string provided', () {
         final instance = brickFromYaml(yaml(useNameString: true));
 
-        expect(instance.name, name);
+        expect(instance.name?.value, name);
       });
 
       test('can parse when value is not provided', () {
@@ -162,7 +163,7 @@ void main() {
           join('path', 'to', 'some', 'file.dart'),
         );
 
-        expect(instance.name, 'file');
+        expect(instance.name?.value, 'file');
       });
     });
 
@@ -182,8 +183,6 @@ void main() {
   });
 
   group('#fileName', () {
-    const name = 'name';
-
     test('return the file name formatted when no provided name', () {
       final instance = BrickFile(defaultPath);
 
@@ -191,33 +190,34 @@ void main() {
     });
 
     test('return the provided name', () {
+      const name = Name('name');
       final instance = BrickFile.config(defaultPath, name: name);
 
-      expect(instance.fileName, contains(name));
+      expect(instance.fileName, contains(name.value));
     });
 
     test('prepends the prefix', () {
-      const prefix = 'prefix';
-      final instance =
-          BrickFile.config(defaultPath, name: name, prefix: prefix);
+      const name = Name('name', prefix: 'prefix');
+      final instance = BrickFile.config(defaultPath, name: name);
 
-      expect(instance.fileName, contains('$prefix{{{$name}}}'));
+      expect(instance.fileName, contains('${name.prefix}{{{${name.value}}}}'));
     });
 
     test('appends the suffix', () {
-      const suffix = 'suffix';
-      final instance =
-          BrickFile.config(defaultPath, name: name, suffix: suffix);
+      const name = Name('name', suffix: 'suffix');
+      final instance = BrickFile.config(defaultPath, name: name);
 
-      expect(instance.fileName, contains('{{{$name}}}$suffix'));
+      expect(instance.fileName, contains('{{{${name.value}}}}${name.suffix}'));
     });
 
     test('formats the name to mustache', () {
+      const name = Name('name');
+
       final instance = BrickFile.config(defaultPath, name: name);
 
       expect(
         instance.fileName,
-        contains('{{#snakeCase}}{{{$name}}}{{/snakeCase}}'),
+        contains('{{#snakeCase}}{{{${name.value}}}}{{/snakeCase}}'),
       );
     });
 
@@ -256,7 +256,7 @@ void main() {
 
   group('#hasConfiguredName', () {
     test('returns true when a name is provided', () {
-      const file = BrickFile.config('path/to/file.dart', name: 'name');
+      const file = BrickFile.config('path/to/file.dart', name: Name('name'));
 
       expect(file.hasConfiguredName, isTrue);
     });
@@ -272,33 +272,37 @@ void main() {
     test('returns the basename when no name is provided', () {
       const file = BrickFile.config('path/to/file.dart');
 
-      expect(file.nonformattedFileName, 'file.dart');
+      expect(file.simpleName, 'file.dart');
     });
 
     test('returns the provided name', () {
-      const file = BrickFile.config('path/to/file.dart', name: 'name');
+      const file = BrickFile.config('path/to/file.dart', name: Name('name'));
 
-      expect(file.nonformattedFileName, '{name}.dart');
+      expect(file.simpleName, '{name}.dart');
     });
 
     test('returns the provided name with prefix', () {
       const file = BrickFile.config(
         'path/to/file.dart',
-        name: 'name',
-        prefix: 'prefix_',
+        name: Name(
+          'name',
+          prefix: 'prefix_',
+        ),
       );
 
-      expect(file.nonformattedFileName, 'prefix_{name}.dart');
+      expect(file.simpleName, 'prefix_{name}.dart');
     });
 
     test('returns the provided name with suffix', () {
       const file = BrickFile.config(
         'path/to/file.dart',
-        name: 'name',
-        suffix: '_suffix',
+        name: Name(
+          'name',
+          suffix: '_suffix',
+        ),
       );
 
-      expect(file.nonformattedFileName, '{name}_suffix.dart');
+      expect(file.simpleName, '{name}_suffix.dart');
     });
   });
 
@@ -313,7 +317,7 @@ void main() {
       String? path,
     }) {
       return BrickPath(
-        name: name ?? 'name',
+        name: Name(name ?? 'name'),
         path: path ?? defaultPath,
       );
     }
@@ -385,7 +389,8 @@ void main() {
 
     test('updates file name when provided', () {
       const replacement = 'something';
-      final instance = BrickFile.config(defaultPath, name: replacement);
+      final instance =
+          BrickFile.config(defaultPath, name: const Name(replacement));
 
       instance.writeTargetFile(
         sourceFile: sourceFile,
@@ -600,21 +605,21 @@ void main() {
   });
 
   group('props', () {
-    const name = 'something';
-    const prefix = 'prefix';
-    const suffix = 'suffix';
+    const name = Name(
+      'name',
+      prefix: 'prefix',
+      suffix: 'suffix',
+    );
     const variables = [Variable(placeholder: 'placeholder', name: 'name')];
 
     const instance = BrickFile.config(
       defaultFile,
       name: name,
-      prefix: prefix,
-      suffix: suffix,
       variables: variables,
     );
 
-    test('length should be 5', () {
-      expect(instance.props.length, 5);
+    test('length should be 3', () {
+      expect(instance.props.length, 3);
     });
 
     test('contains path', () {
@@ -630,14 +635,6 @@ void main() {
       for (final variable in vars!) {
         expect(instance.variables, contains(variable));
       }
-    });
-
-    test('contains prefix', () {
-      expect(instance.props, contains(prefix));
-    });
-
-    test('contains suffix', () {
-      expect(instance.props, contains(suffix));
     });
 
     test('contains name', () {

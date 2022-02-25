@@ -33,7 +33,7 @@ bricks:
 
   group('$CookBricksCommand', () {
     test('instanciate without an explicit file system or logger', () {
-      expect(CookBricksCommand.new, returnsNormally);
+      expect(() => CookBricksCommand(fileSystem: fs), returnsNormally);
     });
 
     test('cook all', () {

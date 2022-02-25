@@ -163,16 +163,12 @@ void main() {
 
       final configFiles = <BrickFile>[];
 
-      const prefix = 'prefix';
-      const suffix = 'suffix';
       const variables = [Variable(name: 'name', placeholder: 'placeholder')];
 
       for (final path in fakePaths) {
         configFiles.add(
           BrickFile.config(
             path.substring('$localPath.'.length),
-            prefix: prefix,
-            suffix: suffix,
             variables: variables,
           ),
         );
@@ -184,8 +180,8 @@ void main() {
 
       for (final file in mergedFiles) {
         expect(fakePaths, contains('$localPath$separator${file.path}'));
-        expect(file.prefix, prefix);
-        expect(file.suffix, suffix);
+        // expect(file.prefix, prefix);
+        // expect(file.suffix, suffix);
         expect(file.variables.single, variables.single);
       }
     });

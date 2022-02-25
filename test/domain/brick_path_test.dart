@@ -2,6 +2,7 @@ import 'package:path/path.dart';
 import 'package:test/test.dart';
 
 import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import '../utils/fakes.dart';
 
@@ -12,23 +13,23 @@ void main() {
   group('$BrickPath unnamed ctor', () {
     test('can be instanciated', () {
       expect(
-        () => BrickPath(name: highestLevel, path: dirPath),
+        () => BrickPath(name: const Name(highestLevel), path: dirPath),
         returnsNormally,
       );
     });
 
     test('removes leading and trailing slashes from path', () {
-      final brickPath = BrickPath(name: 'name', path: '/$dirPath');
+      final brickPath = BrickPath(name: const Name('name'), path: '/$dirPath');
 
       expect(brickPath.path, dirPath);
 
-      final brickPath2 = BrickPath(name: 'name', path: '$dirPath/');
+      final brickPath2 = BrickPath(name: const Name('name'), path: '$dirPath/');
 
       expect(brickPath2.path, dirPath);
     });
 
     test('placeholder is the highest level from path', () {
-      final brickPath = BrickPath(name: 'name', path: '/$dirPath');
+      final brickPath = BrickPath(name: const Name('name'), path: '/$dirPath');
 
       expect(brickPath.placeholder, highestLevel);
     });
@@ -59,7 +60,7 @@ void main() {
     test('name is the highest level from path when null is provided', () {
       final brickPath = BrickPath.fromYaml(dirPath, const YamlValue.none());
 
-      expect(brickPath.name, highestLevel);
+      expect(brickPath.name.value, highestLevel);
     });
   });
 
@@ -119,7 +120,7 @@ void main() {
   test('#configuredParts returns segmented path', () {
     for (final path in paths.keys) {
       final segments = paths[path];
-      final brickPath = BrickPath(name: 'name', path: path);
+      final brickPath = BrickPath(name: const Name('name'), path: path);
 
       expect(brickPath.configuredParts.length, segments);
     }
@@ -131,7 +132,7 @@ void main() {
     BrickPath brickPath(String path, [String replacement = replacement]) {
       return BrickPath(
         path: path,
-        name: replacement,
+        name: Name(replacement),
       );
     }
 
@@ -343,14 +344,14 @@ void main() {
   });
 
   group('#props', () {
-    final brick = BrickPath(name: 'foo', path: 'bar/baz');
+    final brick = BrickPath(name: const Name('foo'), path: 'bar/baz');
 
     test('length should be 3', () {
       expect(brick.props.length, 3);
     });
 
     test('should contain name', () {
-      expect(brick.props.contains('foo'), isTrue);
+      expect(brick.props.contains(const Name('foo')), isTrue);
     });
 
     test('should contain path', () {
