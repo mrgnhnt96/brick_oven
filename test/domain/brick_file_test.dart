@@ -447,7 +447,7 @@ void main() {
 
         expect(
           newFile.readAsStringSync(),
-          'replace: {{#camelCase}}{{{$newName}}}{{/camelCase}}',
+          'replace: $newName',
         );
       });
 
@@ -552,7 +552,7 @@ void main() {
 
           expect(
             newFile.readAsStringSync(),
-            'replace: {{#camelCase}}{{{$newName}}}{{/camelCase}}',
+            'replace: $newName',
           );
         });
       }

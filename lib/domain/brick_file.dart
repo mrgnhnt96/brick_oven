@@ -174,7 +174,7 @@ class BrickFile extends Equatable {
 
         String result;
         if (format == null) {
-          result = variable.formattedName;
+          result = variable.name;
         } else {
           result = variable.formatName(format);
         }

@@ -42,7 +42,6 @@ void main() {
     }) {
       return <String, dynamic>{
         'placeholder': placeholder,
-        'format': format?.name,
         'suffix': suffix,
         'prefix': prefix,
       };
@@ -52,7 +51,6 @@ void main() {
       const variable = Variable(
         name: name,
         placeholder: 'placeholder',
-        format: MustacheFormat.camelCase,
         suffix: 'suffix',
         prefix: 'prefix',
       );
@@ -62,18 +60,6 @@ void main() {
       final result = variableFromJson(yaml);
 
       expect(result, variable);
-    });
-
-    test('parses everything except for format', () {
-      final map = json(
-        placeholder: 'placeholder',
-        suffix: 'suffix',
-        prefix: 'prefix',
-      );
-
-      final variable = variableFromJson(map);
-
-      expect(variable.format, MustacheFormat.camelCase);
     });
 
     test('parses everything except for suffix', () {
@@ -183,7 +169,6 @@ void main() {
         'placeholder': name,
         'suffix': suffix,
         'prefix': prefix,
-        'format': MustacheFormat.camelCase.name,
       };
 
       return variableFromJson(map);
@@ -219,11 +204,5 @@ void main() {
         endsWith('$suffix{{/camelCase}}'),
       );
     });
-  });
-
-  test('#formattedName return the name with the provided format', () {
-    final variable = variableWithFixes();
-
-    expect(variable.formattedName, '{{#camelCase}}{{{$name}}}{{/camelCase}}');
   });
 }

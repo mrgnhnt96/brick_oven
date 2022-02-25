@@ -13,18 +13,16 @@ class Variable extends Equatable {
   const Variable({
     required this.placeholder,
     required this.name,
-    MustacheFormat? format,
     this.suffix,
     this.prefix,
-  }) : format = format ?? MustacheFormat.camelCase;
+  }) ;
 
   const Variable._fromYaml({
     required this.placeholder,
     required this.name,
     required this.suffix,
     required this.prefix,
-    MustacheFormat? format,
-  }) : format = format ?? MustacheFormat.camelCase;
+  }) ;
 
   /// Parses the [yaml] into a variable
   ///
@@ -32,8 +30,6 @@ class Variable extends Equatable {
   factory Variable.fromYaml(String name, YamlMap? yaml) {
     final map = yaml?.data ?? <String, dynamic>{};
 
-    final formatString = map.remove('format') as String?;
-    final format = MustacheFormat.values.retrieve(formatString);
     final placeholder = map.remove('placeholder') as String?;
     final suffix = map.remove('suffix') as String?;
     final prefix = map.remove('prefix') as String?;
@@ -45,7 +41,6 @@ class Variable extends Equatable {
     return Variable._fromYaml(
       placeholder: placeholder ?? name,
       name: name,
-      format: format,
       suffix: suffix,
       prefix: prefix,
     );
@@ -79,8 +74,6 @@ class Variable extends Equatable {
   /// the value to be appended to the [formatName]
   final String? suffix;
 
-  /// the format in which [name] will be wrapped
-  final MustacheFormat format;
 
   /// formats [name] by wrapping it with mustache
   ///
@@ -93,8 +86,6 @@ class Variable extends Equatable {
     return format.toMustache('${prefix ?? ''}{{{$name}}}${suffix ?? ''}');
   }
 
-  /// wraps [name] with mustache using [format]
-  String get formattedName => formatName(format);
 
   @override
   List<Object?> get props => [
@@ -102,6 +93,5 @@ class Variable extends Equatable {
         name,
         prefix,
         suffix,
-        format,
       ];
 }

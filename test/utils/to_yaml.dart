@@ -108,7 +108,6 @@ extension VariableX on Variable {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'placeholder': placeholder,
-      'format': format.name,
       'prefix': prefix,
       'suffix': suffix,
     };
