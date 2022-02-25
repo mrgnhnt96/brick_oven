@@ -19,7 +19,7 @@ class BrickOvenNotFoundException extends BrickOvenException {
   const BrickOvenNotFoundException()
       : super(
           'Cannot find ${BrickOvenYaml.file}.'
-          '\nDid you forget to run brick_oven init?',
+          '\nCreate the file and try again.',
         );
 }
 
