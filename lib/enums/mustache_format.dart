@@ -77,3 +77,35 @@ extension ListX<T> on List<T> {
     return null;
   }
 }
+
+/// extension on [List<MustacheFormat>]
+extension ListMustacheX on List<MustacheFormat> {
+  /// loops through looking for a matched [value], return null if not found
+  MustacheFormat? getMustacheValue(String? value) {
+    for (final e in this) {
+      if ('$value'.toLowerCase().startsWith(e.name.toLowerCase())) {
+        return e;
+      } else if ('$value'
+          .toLowerCase()
+          .startsWith(e.name.replaceAll('Case', '').toLowerCase())) {
+        return e;
+      }
+    }
+    return null;
+  }
+
+  /// returns the suffix of the [value] by removing the [MustacheFormat]
+  String? getSuffix(String? value) {
+    String? withoutCase;
+    for (final e in this) {
+      if ('$value'.toLowerCase().startsWith(e.name.toLowerCase())) {
+        return value?.substring(e.name.length);
+      } else if ('$value'.toLowerCase().startsWith(
+            (withoutCase = e.name.replaceAll('Case', '')).toLowerCase(),
+          )) {
+        return value?.substring(withoutCase.length);
+      }
+    }
+    return null;
+  }
+}
