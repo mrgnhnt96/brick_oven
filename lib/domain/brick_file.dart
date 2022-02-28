@@ -159,30 +159,43 @@ class BrickFile extends Equatable {
 
     var content = sourceFile.readAsStringSync();
 
+    final negationMatcher = RegExp(r'((?!\w)(\s))?n$');
     for (final variable in variables) {
       final pattern = RegExp('(.*)${variable.placeholder}' r'(\w*)(.*)');
       content = content.replaceAllMapped(pattern, (match) {
-        final value = match.group(2);
+        final invert = match.group(1)?.contains(negationMatcher) ?? false;
+        final possibleLoop = match.group(2);
 
-        final loop = MustacheLoops.values.retrieve(value);
+        String? possibleFormat;
+
+        final loop = MustacheLoops.values.retrieve(possibleLoop);
         if (loop != null) {
-          return MustacheLoops.toMustache(variable.name, () => loop);
+          final formattedLoop = MustacheLoops.toMustache(variable.name, loop);
+
+          return formattedLoop;
+        } else {
+          possibleFormat = possibleLoop;
         }
 
-        final format = MustacheFormat.values.retrieve(value) ??
-            MustacheFormat.values.retrieve('${value}Case');
+        final format = MustacheFormat.values.getMustacheValue(possibleFormat);
 
-        String result;
+        String result, suffix = '';
         if (format == null) {
           result = variable.name;
         } else {
-          result = variable.formatName(format);
+          suffix = MustacheFormat.values.getSuffix(possibleFormat) ?? '';
+          result = variable.formatName(format, invert: invert);
         }
 
-        final beforeMatch = match.group(1) ?? '';
+        final beforeMatch =
+            match.group(1)?.replaceAllMapped(negationMatcher, (match) {
+                  // the white space used before the negation
+                  return match.group(2) ?? '';
+                }) ??
+                '';
         final afterMatch = match.group(3) ?? '';
 
-        return '$beforeMatch$result$afterMatch';
+        return '$beforeMatch$result$suffix$afterMatch';
       });
     }
 
