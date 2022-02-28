@@ -1,3 +1,5 @@
+import 'package:brick_oven/enums/mustache_format.dart';
+
 /// The loops from Mustache
 class MustacheLoops {
   /// the start of the loop
@@ -19,8 +21,8 @@ class MustacheLoops {
   static const values = [start, end, startInvert];
 
   /// formats the [name] to be wrapped as mustache
-  static String toMustache(String name, String Function() loop) {
-    return loop().getloop(name);
+  static String toMustache(String name, String loop, [MustacheFormat? format]) {
+    return loop.getloop(name);
   }
 }
 
