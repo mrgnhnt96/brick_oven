@@ -21,28 +21,28 @@ void main() {
 
       test('returns the correct value for start', () {
         expect(
-          MustacheLoops.toMustache(key, () => MustacheLoops.start),
+          MustacheLoops.toMustache(key, MustacheLoops.start),
           '{{#$key}}',
         );
       });
 
       test('returns the correct value for end', () {
         expect(
-          MustacheLoops.toMustache(key, () => MustacheLoops.startInvert),
+          MustacheLoops.toMustache(key, MustacheLoops.startInvert),
           '{{^$key}}',
         );
       });
 
       test('returns the correct value for startInvert', () {
         expect(
-          MustacheLoops.toMustache(key, () => MustacheLoops.end),
+          MustacheLoops.toMustache(key, MustacheLoops.end),
           '{{/$key}}',
         );
       });
 
       test('throws when given an invalid value', () {
         expect(
-          () => MustacheLoops.toMustache(key, () => 'invalid'),
+          () => MustacheLoops.toMustache(key, 'invalid'),
           throwsA(isA<ArgumentError>()),
         );
       });
