@@ -15,14 +15,14 @@ class Variable extends Equatable {
     required this.name,
     this.suffix,
     this.prefix,
-  }) ;
+  });
 
   const Variable._fromYaml({
     required this.placeholder,
     required this.name,
     required this.suffix,
     required this.prefix,
-  }) ;
+  });
 
   /// Parses the [yaml] into a variable
   ///
@@ -74,7 +74,6 @@ class Variable extends Equatable {
   /// the value to be appended to the [formatName]
   final String? suffix;
 
-
   /// formats [name] by wrapping it with mustache
   ///
   /// [prefix] & [suffix] will be applied but
@@ -82,10 +81,12 @@ class Variable extends Equatable {
   /// eg: `{{#someCase}}prefix{{{name}}}suffix{{/someCase}}`
   ///
   /// [format] determines which case to wrap the values
-  String formatName(MustacheFormat format) {
-    return format.toMustache('${prefix ?? ''}{{{$name}}}${suffix ?? ''}');
+  String formatName(MustacheFormat format, {bool invert = false}) {
+    return format.toMustache(
+      '${prefix ?? ''}{{{$name}}}${suffix ?? ''}',
+      invert: invert,
+    );
   }
-
 
   @override
   List<Object?> get props => [
