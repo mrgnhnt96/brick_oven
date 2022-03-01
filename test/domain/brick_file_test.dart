@@ -445,7 +445,7 @@ void main() {
 
         final newFile = fileSystem.file(defaultFile);
 
-        expect(newFile.readAsStringSync(), content);
+        expect(newFile.readAsStringSync(), 'replace: {{$newName}}');
       });
 
       const formats = [
@@ -463,14 +463,18 @@ void main() {
         'upper',
       ];
 
-      test('variable does not replace sub string', () {
+      test('replaces sub string', () {
         const newName = 'new-name';
-        const placeholder = 'name';
-        const contents = ['xname', 'names'];
+        const placeholder = '_name_';
+        const contents = {
+          'x$placeholder': 'x{{$newName}}',
+          '${placeholder}s': '{{$newName}}s'
+        };
         const variable = Variable(name: newName, placeholder: placeholder);
         const instance = BrickFile.config(defaultFile, variables: [variable]);
-        for (final content in contents) {
-          sourceFile.writeAsStringSync(content);
+
+        for (final content in contents.entries) {
+          sourceFile.writeAsStringSync(content.key);
           instance.writeTargetFile(
             sourceFile: sourceFile,
             configuredDirs: [],
@@ -480,13 +484,61 @@ void main() {
 
           final newFile = fileSystem.file(defaultFile);
 
-          expect(newFile.readAsStringSync(), content);
+          expect(newFile.readAsStringSync(), content.value);
         }
+      });
+
+      test('replaces all occurrences when found in the same line', () {
+        const newName = 'new-name';
+        const placeholder = 'name';
+
+        const variable = Variable(name: newName, placeholder: placeholder);
+        const instance = BrickFile.config(defaultFile, variables: [variable]);
+
+        const content = '$placeholder 1 $placeholder 2 $placeholder 3';
+
+        sourceFile.writeAsStringSync(content);
+        instance.writeTargetFile(
+          sourceFile: sourceFile,
+          configuredDirs: [],
+          targetDir: '',
+          fileSystem: fileSystem,
+        );
+
+        final newFile = fileSystem.file(defaultFile);
+
+        expect(
+          newFile.readAsStringSync(),
+          '{{$newName}} 1 {{$newName}} 2 {{$newName}} 3',
+        );
+      });
+
+      test('replaces loops & vars when found in the same line', () {
+        const newName = 'new-name';
+        const placeholder = 'name';
+
+        const variable = Variable(name: newName, placeholder: placeholder);
+        const instance = BrickFile.config(defaultFile, variables: [variable]);
+
+        const content =
+            '\n\n\n\nstart$placeholder 1 $placeholder 2 $placeholder 3\n\n\n\n';
+
+        sourceFile.writeAsStringSync(content);
+        instance.writeTargetFile(
+          sourceFile: sourceFile,
+          configuredDirs: [],
+          targetDir: '',
+          fileSystem: fileSystem,
+        );
+
+        final newFile = fileSystem.file(defaultFile);
+
+        expect(newFile.readAsStringSync(), '\n{{#$newName}}\n');
       });
 
       group('formats', () {
         const newName = 'new-name';
-        const placeholder = 'MEEEEE';
+        const placeholder = '_SCREEN_';
         const variable = Variable(name: newName, placeholder: placeholder);
         const instance = BrickFile.config(defaultFile, variables: [variable]);
 
@@ -613,6 +665,33 @@ void main() {
                 );
               }
             });
+
+            test(
+                'replaces variable placeholder with name, maintaining pre/post text and prefix/suffix',
+                () {
+              final contents = getContents(
+                format: format,
+                before: 'some text before ',
+                after: ' some text after',
+              );
+
+              for (final content in contents.entries) {
+                sourceFile.writeAsStringSync(content.key);
+                instance.writeTargetFile(
+                  sourceFile: sourceFile,
+                  configuredDirs: [],
+                  targetDir: '',
+                  fileSystem: fileSystem,
+                );
+
+                final newFile = fileSystem.file(defaultFile);
+
+                expect(
+                  newFile.readAsStringSync(),
+                  content.value,
+                );
+              }
+            });
           });
         }
       });
@@ -684,38 +763,6 @@ void main() {
           expect(newFile.readAsStringSync(), 'replace: {{^$newName}}');
         },
       );
-
-      const badFormats = [
-        'sanke',
-        'sank',
-        'some',
-      ];
-
-      for (final format in badFormats) {
-        test(
-            'ignores variable placeholder with name ignoring bad format ($format)',
-            () {
-          const newName = 'new-name';
-          const placeholder = 'MEEEEE';
-          final content = 'replace: $placeholder${format}Case';
-
-          const variable = Variable(name: newName, placeholder: placeholder);
-          const instance = BrickFile.config(defaultFile, variables: [variable]);
-
-          sourceFile.writeAsStringSync(content);
-
-          instance.writeTargetFile(
-            sourceFile: sourceFile,
-            configuredDirs: [],
-            targetDir: '',
-            fileSystem: fileSystem,
-          );
-
-          final newFile = fileSystem.file(defaultFile);
-
-          expect(newFile.readAsStringSync(), content);
-        });
-      }
     });
 
     test('replaces mustache loop comment', () {

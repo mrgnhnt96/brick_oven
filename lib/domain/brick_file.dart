@@ -160,65 +160,104 @@ class BrickFile extends Equatable {
 
     var content = sourceFile.readAsStringSync();
 
+    const loopSetUp = '---set-up-loop---';
+
     for (final variable in variables) {
-      final pattern = RegExp('(.*)${variable.placeholder}' r'(\w*)(.*)');
+      final loopPattern = RegExp('.*$loopSetUp' r'({{.[\w-+$\.]+}}).*');
+      final variablePattern =
+          RegExp(r'([\w-{#^/]*)' '${variable.placeholder}' r'([\w}]*)');
 
-      // formats the content
-      content = content.replaceAllMapped(pattern, (match) {
-        final possibleSection = match.group(1);
-        MustacheSections? section;
+      String checkForLoops(String content) {
+        final setUpLoops = content.replaceAllMapped(variablePattern, (match) {
+          final possibleLoop = match.group(1);
+          final loop = MustacheLoops.values.from(possibleLoop);
 
-        // check for section or loop
-        if (possibleSection != null && possibleSection.isNotEmpty) {
-          section = MustacheSections.values.from(possibleSection);
+          // if loop is found, then replace the content
+          if (loop == null) {
+            return match.group(0)!;
+          }
 
-          // check for loop
-          if (section == null) {
-            final loop = MustacheLoops.values.from(possibleSection);
+          final formattedLoop = loop.format(variable.name);
 
-            // if loop is found, then replace the content
-            if (loop != null) {
-              final formattedLoop = loop.format(variable.name);
+          return '$loopSetUp$formattedLoop';
+        });
 
-              return formattedLoop;
+        // remove the loop setup and all pre/post content
+        final looped = setUpLoops.replaceAllMapped(loopPattern, (match) {
+          return match.group(1)!;
+        });
+
+        // remove all extra linebreaks before & after the loop
+        final clean = looped.replaceAllMapped(
+          RegExp(r'(\n*)({{[#^/][\w-]+}})$(\n*)', multiLine: true),
+          (match) {
+            var before = '', after = '';
+
+            final beforeMatch = match.group(1);
+            if (beforeMatch != null && beforeMatch.isNotEmpty) {
+              before = '\n';
+            }
+
+            final afterMatch = match.group(3);
+            if (afterMatch != null && afterMatch.isNotEmpty) {
+              after = '\n';
+            }
+
+            return '$before${match.group(2)!}$after';
+          },
+        );
+
+        return clean;
+      }
+
+      String checkForVariables(String content) {
+        return content.replaceAllMapped(variablePattern, (match) {
+          final possibleSection = match.group(1);
+          MustacheSections? section;
+          String result, suffix = '', prefix = '';
+
+          // check for section or loop
+          if (possibleSection != null && possibleSection.isNotEmpty) {
+            section = MustacheSections.values.from(possibleSection);
+
+            if (section == null) {
+              prefix = possibleSection;
+            } else {
+              prefix = prefix.replaceAll(section.matcher, '');
             }
           }
-        }
 
-        final possibleFormat = match.group(2);
+          final possibleFormat = match.group(2);
 
-        final format = MustacheFormat.values.getMustacheValue(possibleFormat);
+          final format = MustacheFormat.values.getMustacheValue(possibleFormat);
 
-        String result, suffix = '';
-        if (format == null) {
-          // If the format is not found, and there is no loop,
-          // then the match is a false positive
-          if ((possibleFormat?.isNotEmpty ?? false) || section == null) {
-            return match.group(0) ?? '';
+          if (format == null) {
+            if (possibleFormat != null && possibleFormat.isNotEmpty) {
+              suffix = possibleFormat;
+            }
+
+            if (section == null) {
+              result = '{{${variable.name}}}';
+            } else {
+              result = section.format(variable.name);
+            }
           } else {
-            result = section.format(variable.name);
+            // format the variable
+            suffix = MustacheFormat.values.getSuffix(possibleFormat) ?? '';
+            result = variable.formatName(format);
           }
-        } else {
-          // format the variable
-          suffix = MustacheFormat.values.getSuffix(possibleFormat) ?? '';
-          result = variable.formatName(format);
-        }
 
-        var before = match.group(1) ?? '';
+          if (prefix.startsWith(RegExp('{{[#^/]')) || suffix.endsWith('}}')) {
+            return match.group(0)!;
+          }
 
-        // remove the section if it was provided
-        if (section != null) {
-          before = before.replaceAllMapped(section.matcher, (match) {
-            // the white space used before the negation
-            return match.group(2) ?? '';
-          });
-        }
+          return '$prefix$result$suffix';
+        });
+      }
 
-        // all content after the match
-        final after = match.group(3) ?? '';
-
-        return '$before$result$suffix$after';
-      });
+      // formats the content
+      content = checkForLoops(content);
+      content = checkForVariables(content);
     }
 
     file.writeAsStringSync(content);
