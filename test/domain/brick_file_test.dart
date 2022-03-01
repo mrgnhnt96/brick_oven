@@ -9,7 +9,6 @@ import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
 import '../utils/fakes.dart';
 
@@ -86,7 +85,7 @@ void main() {
         if (includeVariables)
           'vars': emptyVariables
               ? FakeYamlMap.empty()
-              : FakeYamlMap(<String, dynamic>{name: FakeYamlMap.empty()}),
+              : FakeYamlMap(<String, dynamic>{name: 'value'}),
         if (extraKeys) 'extra': 'extra',
       });
     }
