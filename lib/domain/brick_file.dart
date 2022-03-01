@@ -162,26 +162,30 @@ class BrickFile extends Equatable {
 
     for (final variable in variables) {
       final pattern = RegExp('(.*)${variable.placeholder}' r'(\w*)(.*)');
+
+      // formats the content
       content = content.replaceAllMapped(pattern, (match) {
         final possibleSection = match.group(1);
         MustacheSections? section;
 
-        if (possibleSection?.isNotEmpty ?? false) {
+        // check for section or loop
+        if (possibleSection != null && possibleSection.isNotEmpty) {
           section = MustacheSections.values.from(possibleSection);
+
+          // check for loop
+          if (section == null) {
+            final loop = MustacheLoops.values.from(possibleSection);
+
+            // if loop is found, then replace the content
+            if (loop != null) {
+              final formattedLoop = loop.format(variable.name);
+
+              return formattedLoop;
+            }
+          }
         }
 
-        final possibleLoop = match.group(2);
-
-        String? possibleFormat;
-
-        final loop = MustacheLoops.values.retrieve(possibleLoop);
-        if (loop != null) {
-          final formattedLoop = MustacheLoops.toMustache(variable.name, loop);
-
-          return formattedLoop;
-        } else {
-          possibleFormat = possibleLoop;
-        }
+        final possibleFormat = match.group(2);
 
         final format = MustacheFormat.values.getMustacheValue(possibleFormat);
 
@@ -195,21 +199,25 @@ class BrickFile extends Equatable {
             result = section.format(variable.name);
           }
         } else {
+          // format the variable
           suffix = MustacheFormat.values.getSuffix(possibleFormat) ?? '';
           result = variable.formatName(format);
         }
 
-        var beforeMatch = match.group(1) ?? '';
+        var before = match.group(1) ?? '';
 
+        // remove the section if it was provided
         if (section != null) {
-          beforeMatch = beforeMatch.replaceAllMapped(section.matcher, (match) {
+          before = before.replaceAllMapped(section.matcher, (match) {
             // the white space used before the negation
             return match.group(2) ?? '';
           });
         }
-        final afterMatch = match.group(3) ?? '';
 
-        return '$beforeMatch$result$suffix$afterMatch';
+        // all content after the match
+        final after = match.group(3) ?? '';
+
+        return '$before$result$suffix$after';
       });
     }
 
