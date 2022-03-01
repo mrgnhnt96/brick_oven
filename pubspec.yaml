@@ -22,6 +22,7 @@ dev_dependencies:
   derry: ^1.4.3
   mocktail: ^0.2.0
   test: ^1.16.0
+  universal_io: ^2.0.4
   very_good_analysis: ^2.4.0
 
 executables:
