@@ -1,6 +1,6 @@
 name: brick_oven
 description:  Easily create & format brick templates with the brick_oven cli generator for mason
-version: 0.1.0
+version: 0.1.0-dev
 homepage: https://github.com/mrgnhnt96/brick_oven
 repository: https://github.com/mrgnhnt96/brick_oven
 
@@ -26,9 +26,7 @@ dev_dependencies:
   very_good_analysis: ^2.4.0
 
 executables:
-  brick_oven:
-    path: bin/brick_oven.dart
-    dart: bin/brick_oven.dart
+  brick_oven: brick_oven
 
 scripts: derry.yaml
 
