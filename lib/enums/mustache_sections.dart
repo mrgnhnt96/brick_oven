@@ -67,7 +67,7 @@ extension MustacheSectionListX on List<MustacheSections> {
   MustacheSections? from(String? str) {
     if (str == null) return null;
 
-    final pattern = RegExp(r'((?!\w)(\s))?(\w)$');
+    final pattern = _matcher();
 
     final matches = pattern.allMatches(str);
 
