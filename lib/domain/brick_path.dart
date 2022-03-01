@@ -1,3 +1,4 @@
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
 
@@ -41,9 +42,26 @@ class BrickPath extends Equatable {
       );
     }
 
+    Name name;
+
+    if (yaml.isYaml()) {
+      final data = yaml.asYaml().value.data;
+      final nameData = YamlValue.from(data.remove('name'));
+
+      if (data.keys.isNotEmpty) {
+        throw ArgumentError('Unknown keys in directory: $path');
+      }
+
+      name = Name.fromYamlValue(nameData, basename(path));
+    } else if (yaml.isString()) {
+      name = Name(yaml.asString().value);
+    } else {
+      name = Name(basename(path));
+    }
+
     return BrickPath(
       path: path,
-      name: Name.fromYamlValue(yaml, basename(path)),
+      name: name,
     );
   }
 
