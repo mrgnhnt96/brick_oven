@@ -65,6 +65,16 @@ void main() {
         returnsNormally,
       );
     });
+
+    test('throws when yaml is map', () {
+      expect(
+        () => Variable.from(
+          '',
+          FakeYamlMap(<String, dynamic>{'key': 'value'}),
+        ),
+        throwsArgumentError,
+      );
+    });
   });
 
   group('#formatName', () {
