@@ -497,11 +497,7 @@ void main() {
           String suffix = '',
           String before = '',
           String after = '',
-          MustacheSections? section,
         }) {
-          final sectionConfig = section?.configName ?? '';
-          final sectionSymbol = (section?.isInvert ?? false) ? '^' : '#';
-
           final caseFormats = [
             format,
             '${format}Case',
@@ -510,12 +506,11 @@ void main() {
           ];
 
           final value =
-              '$before$prefix{{$sectionSymbol${format}Case}}{{{$newName}}}{{/${format}Case}}$suffix$after';
+              '$before$prefix{{#${format}Case}}{{{$newName}}}{{/${format}Case}}$suffix$after';
 
           return caseFormats.fold(<String, String>{}, (p, caseFormat) {
             final key = '$before'
                 '$prefix'
-                '$sectionConfig'
                 '$placeholder'
                 '$caseFormat'
                 '$suffix'
@@ -619,100 +614,6 @@ void main() {
                 );
               }
             });
-
-            for (final section in MustacheSections.values) {
-              group('(${section.name})', () {
-                test('replaces variable placeholder with name', () {
-                  final contents =
-                      getContents(format: format, section: section);
-
-                  for (final content in contents.entries) {
-                    sourceFile.writeAsStringSync(content.key);
-                    instance.writeTargetFile(
-                      sourceFile: sourceFile,
-                      configuredDirs: [],
-                      targetDir: '',
-                      fileSystem: fileSystem,
-                    );
-
-                    final newFile = fileSystem.file(defaultFile);
-
-                    expect(
-                      newFile.readAsStringSync(),
-                      content.value,
-                    );
-                  }
-                });
-
-                test('replaces variable placeholder with name and prefix', () {
-                  final contents = getContents(
-                    format: format,
-                    section: section,
-                    prefix: 'prefix_',
-                  );
-
-                  for (final content in contents.entries) {
-                    sourceFile.writeAsStringSync(content.key);
-                    instance.writeTargetFile(
-                      sourceFile: sourceFile,
-                      configuredDirs: [],
-                      targetDir: '',
-                      fileSystem: fileSystem,
-                    );
-
-                    final newFile = fileSystem.file(defaultFile);
-
-                    expect(
-                      newFile.readAsStringSync(),
-                      content.value,
-                    );
-                  }
-                });
-
-                test(
-                    'replaces variable placeholder with name and preceeding text',
-                    () {
-                  final contents = getContents(
-                    format: format,
-                    section: section,
-                    before: 'some text with spaces ',
-                  );
-
-                  contents
-                    ..addAll(
-                      getContents(
-                        format: format,
-                        section: section,
-                        before: 'some text with line breaks\n',
-                      ),
-                    )
-                    ..addAll(
-                      getContents(
-                        format: format,
-                        section: section,
-                        before: 'some text with tabs\t',
-                      ),
-                    );
-
-                  for (final content in contents.entries) {
-                    sourceFile.writeAsStringSync(content.key);
-                    instance.writeTargetFile(
-                      sourceFile: sourceFile,
-                      configuredDirs: [],
-                      targetDir: '',
-                      fileSystem: fileSystem,
-                    );
-
-                    final newFile = fileSystem.file(defaultFile);
-
-                    expect(
-                      newFile.readAsStringSync(),
-                      content.value,
-                    );
-                  }
-                });
-              });
-            }
           });
         }
       });
@@ -822,8 +723,8 @@ void main() {
       const placeholder = '_HELLO_';
       const replacement = 'hello';
 
-      Map<String, String> lines(String loop) {
-        final expected = MustacheLoops.toMustache(replacement, loop);
+      Map<String, String> lines(String configName, String symbol) {
+        final expected = '{{$symbol$replacement}}';
         return {
           '//': expected,
           '#': expected,
@@ -832,22 +733,20 @@ void main() {
           '/*': expected,
           '*/': expected,
         }.map((key, value) {
-          return MapEntry('$key$placeholder$loop', value);
+          return MapEntry('$key $configName$placeholder', value);
         });
       }
 
       final loops = {
-        ...lines(MustacheLoops.start),
-        ...lines(MustacheLoops.end),
-        ...lines(MustacheLoops.startInvert),
+        ...lines('start', '#'),
+        ...lines('end', '/'),
+        ...lines('nstart', '^'),
       };
 
       const variable = Variable(placeholder: placeholder, name: replacement);
       const instance = BrickFile.config(defaultFile, variables: [variable]);
 
       for (final loop in loops.keys) {
-        final expected = loops[loop]!;
-
         final newFile = fileSystem.file(defaultFile);
 
         sourceFile.writeAsStringSync(loop);
@@ -859,7 +758,7 @@ void main() {
           fileSystem: fileSystem,
         );
 
-        expect(newFile.readAsStringSync(), expected);
+        expect(newFile.readAsStringSync(), loops[loop]);
       }
     });
   });
