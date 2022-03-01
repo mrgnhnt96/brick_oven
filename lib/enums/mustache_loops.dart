@@ -1,42 +1,96 @@
-import 'package:brick_oven/enums/mustache_format.dart';
+Pattern _matcher([String? char]) {
+  final str = char ?? r'\w+';
+  return RegExp(r'((?!\w)(\s))?(' '$str' r')$');
+}
 
 /// The loops from Mustache
-class MustacheLoops {
-  /// the start of the loop
-  ///
-  /// Format: {{#snakeCase}}
-  static const start = 'start';
+enum MustacheLoops {
+  /// the start of a loop
+  start,
 
-  /// the end of the loop
-  ///
-  /// Format: {{/snakeCase}}
-  static const end = 'end';
+  /// the end of a loop
+  end,
 
-  /// the intverted start of the loop
-  ///
-  /// Format: {{^snakeCase}}
-  static const startInvert = 'nstart';
+  /// the inverted start of a loop
+  invert,
+}
 
-  /// all the loop values of [MustacheLoops]
-  static const values = [start, end, startInvert];
+/// extensions on lists of [MustacheLoops]
+extension ListMustacheLoopX on List<MustacheLoops> {
+  /// checks [str] if it contains any of the [MustacheLoops]
+  MustacheLoops? from(String? str) {
+    if (str == null) return null;
 
-  /// formats the [name] to be wrapped as mustache
-  static String toMustache(String name, String loop, [MustacheFormat? format]) {
-    return loop.getloop(name);
+    final pattern = _matcher();
+
+    final matches = pattern.allMatches(str);
+
+    if (matches.isEmpty) {
+      return null;
+    }
+
+    final section = matches.first.group(3);
+
+    if (configNames.contains(section)) {
+      return this.section(section!);
+    }
+
+    return null;
+  }
+
+  /// gets the configName of the [MustacheLoops]
+  List<String> get configNames {
+    return map((section) => section.configName).toList();
+  }
+
+  /// retrieves the [MustacheLoops] from the [char]
+  MustacheLoops section(String char) {
+    return firstWhere((section) => section.configName == char);
   }
 }
 
-extension on String {
-  String getloop(String key) {
+/// extension on mustache loops
+extension MustacheLoopX on MustacheLoops {
+  /// the letter(s) of the section
+  String get configName {
     switch (this) {
       case MustacheLoops.start:
-        return '{{#$key}}';
-      case MustacheLoops.startInvert:
-        return '{{^$key}}';
+        return 'start';
       case MustacheLoops.end:
-        return '{{/$key}}';
-      default:
-        throw ArgumentError('Invalid loop type');
+        return 'end';
+      case MustacheLoops.invert:
+        return 'nstart';
     }
+  }
+
+  /// whether this section is the start
+  bool get isStart => this == MustacheLoops.start;
+
+  /// whether this section is the end
+  bool get isEnd => this == MustacheLoops.end;
+
+  /// whether this section is inverted
+  bool get isInvert => this == MustacheLoops.invert;
+
+  /// the symbol of the section
+  String get symbol {
+    switch (this) {
+      case MustacheLoops.start:
+        return '#';
+      case MustacheLoops.end:
+        return '/';
+      case MustacheLoops.invert:
+        return '^';
+    }
+  }
+
+  /// the matcher for the section
+  Pattern get matcher {
+    return _matcher(configName);
+  }
+
+  /// formats the [str] using [symbol]
+  String format(String str) {
+    return '{{$symbol$str}}';
   }
 }
