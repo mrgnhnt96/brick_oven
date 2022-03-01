@@ -29,6 +29,13 @@ void main() {
       expect(result, const Variable(name: name));
     });
 
+    test('throws arguement error when name is missing', () {
+      expect(
+        () => Variable.fromYaml(name, const YamlValue.none()),
+        throwsArgumentError,
+      );
+    });
+
     test('throws argument error when extra keys are provided', () {
       expect(
         () => Variable.fromYaml(
@@ -68,6 +75,21 @@ void main() {
         variable.formatName(MustacheFormat.camelCase),
         '{{#camelCase}}{{{$name}}}{{/camelCase}}',
       );
+    });
+  });
+
+  group('#props', () {
+    test('length should be 2', () {
+      const variable = Variable(name: name, placeholder: placeholder);
+
+      expect(variable.props.length, 2);
+    });
+
+    test('should contain props', () {
+      const variable = Variable(name: name, placeholder: placeholder);
+
+      expect(variable.props, contains(name));
+      expect(variable.props, contains(placeholder));
     });
   });
 }
