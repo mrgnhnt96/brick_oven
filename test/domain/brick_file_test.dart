@@ -10,6 +10,7 @@ import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
+import 'package:brick_oven/enums/mustache_sections.dart';
 import '../utils/fakes.dart';
 
 void main() {
@@ -445,10 +446,7 @@ void main() {
 
         final newFile = fileSystem.file(defaultFile);
 
-        expect(
-          newFile.readAsStringSync(),
-          'replace: $newName',
-        );
+        expect(newFile.readAsStringSync(), content);
       });
 
       const formats = [
@@ -466,7 +464,28 @@ void main() {
         'upper',
       ];
 
-      for (final format in formats) {
+      test('variable does not replace sub string', () {
+        const newName = 'new-name';
+        const placeholder = 'name';
+        const contents = ['xname', 'names'];
+        const variable = Variable(name: newName, placeholder: placeholder);
+        const instance = BrickFile.config(defaultFile, variables: [variable]);
+        for (final content in contents) {
+          sourceFile.writeAsStringSync(content);
+          instance.writeTargetFile(
+            sourceFile: sourceFile,
+            configuredDirs: [],
+            targetDir: '',
+            fileSystem: fileSystem,
+          );
+
+          final newFile = fileSystem.file(defaultFile);
+
+          expect(newFile.readAsStringSync(), content);
+        }
+      });
+
+      group('formats', () {
         const newName = 'new-name';
         const placeholder = 'MEEEEE';
         const variable = Variable(name: newName, placeholder: placeholder);
@@ -478,12 +497,12 @@ void main() {
           String suffix = '',
           String before = '',
           String after = '',
-          bool negate = false,
+          MustacheSections? section,
         }) {
-          final negation = negate ? 'n' : '';
-          final symbol = negate ? '^' : '#';
+          final sectionConfig = section?.configName ?? '';
+          final sectionSymbol = (section?.isInvert ?? false) ? '^' : '#';
 
-          final caseFormat = [
+          final caseFormats = [
             format,
             '${format}Case',
             '${format}CASE'.toUpperCase(),
@@ -491,201 +510,280 @@ void main() {
           ];
 
           final value =
-              '$before$prefix{{$symbol${format}Case}}{{{$newName}}}{{/${format}Case}}$suffix$after';
+              '$before$prefix{{$sectionSymbol${format}Case}}{{{$newName}}}{{/${format}Case}}$suffix$after';
 
-          return caseFormat.fold(<String, String>{}, (p, e) {
-            final key = '$before$prefix$negation$placeholder$e$suffix$after';
+          return caseFormats.fold(<String, String>{}, (p, caseFormat) {
+            final key = '$before'
+                '$prefix'
+                '$sectionConfig'
+                '$placeholder'
+                '$caseFormat'
+                '$suffix'
+                '$after';
             p[key] = value;
 
             return p;
           });
         }
 
-        test('replaces variable placeholder with name and format ($format)',
-            () {
-          final contents = getContents(format: format);
+        for (final format in formats) {
+          group('($format)', () {
+            test('replaces variable placeholder with name', () {
+              final contents = getContents(format: format);
 
-          for (final content in contents.entries) {
-            sourceFile.writeAsStringSync(content.key);
-            instance.writeTargetFile(
-              sourceFile: sourceFile,
-              configuredDirs: [],
-              targetDir: '',
-              fileSystem: fileSystem,
-            );
+              for (final content in contents.entries) {
+                sourceFile.writeAsStringSync(content.key);
+                instance.writeTargetFile(
+                  sourceFile: sourceFile,
+                  configuredDirs: [],
+                  targetDir: '',
+                  fileSystem: fileSystem,
+                );
 
-            final newFile = fileSystem.file(defaultFile);
+                final newFile = fileSystem.file(defaultFile);
 
-            expect(
-              newFile.readAsStringSync(),
-              content.value,
-            );
+                expect(
+                  newFile.readAsStringSync(),
+                  content.value,
+                );
+              }
+            });
+
+            test('replaces variable placeholder with name, maintaining prefix',
+                () {
+              final contents = getContents(format: format, prefix: 'prefix_');
+
+              for (final content in contents.entries) {
+                sourceFile.writeAsStringSync(content.key);
+                instance.writeTargetFile(
+                  sourceFile: sourceFile,
+                  configuredDirs: [],
+                  targetDir: '',
+                  fileSystem: fileSystem,
+                );
+
+                final newFile = fileSystem.file(defaultFile);
+
+                expect(
+                  newFile.readAsStringSync(),
+                  content.value,
+                );
+              }
+            });
+
+            test('replaces variable placeholder with name, maintaining suffix',
+                () {
+              final contents = getContents(format: format, suffix: '_suffix');
+
+              for (final content in contents.entries) {
+                sourceFile.writeAsStringSync(content.key);
+                instance.writeTargetFile(
+                  sourceFile: sourceFile,
+                  configuredDirs: [],
+                  targetDir: '',
+                  fileSystem: fileSystem,
+                );
+
+                final newFile = fileSystem.file(defaultFile);
+
+                expect(
+                  newFile.readAsStringSync(),
+                  content.value,
+                );
+              }
+            });
+
+            test(
+                'replaces variable placeholder with name, maintaining pre/post text',
+                () {
+              final contents = getContents(
+                format: format,
+                before: 'some text before ',
+                after: ' some text after',
+              );
+
+              for (final content in contents.entries) {
+                sourceFile.writeAsStringSync(content.key);
+                instance.writeTargetFile(
+                  sourceFile: sourceFile,
+                  configuredDirs: [],
+                  targetDir: '',
+                  fileSystem: fileSystem,
+                );
+
+                final newFile = fileSystem.file(defaultFile);
+
+                expect(
+                  newFile.readAsStringSync(),
+                  content.value,
+                );
+              }
+            });
+
+            for (final section in MustacheSections.values) {
+              group('(${section.name})', () {
+                test('replaces variable placeholder with name', () {
+                  final contents =
+                      getContents(format: format, section: section);
+
+                  for (final content in contents.entries) {
+                    sourceFile.writeAsStringSync(content.key);
+                    instance.writeTargetFile(
+                      sourceFile: sourceFile,
+                      configuredDirs: [],
+                      targetDir: '',
+                      fileSystem: fileSystem,
+                    );
+
+                    final newFile = fileSystem.file(defaultFile);
+
+                    expect(
+                      newFile.readAsStringSync(),
+                      content.value,
+                    );
+                  }
+                });
+
+                test('replaces variable placeholder with name and prefix', () {
+                  final contents = getContents(
+                    format: format,
+                    section: section,
+                    prefix: 'prefix_',
+                  );
+
+                  for (final content in contents.entries) {
+                    sourceFile.writeAsStringSync(content.key);
+                    instance.writeTargetFile(
+                      sourceFile: sourceFile,
+                      configuredDirs: [],
+                      targetDir: '',
+                      fileSystem: fileSystem,
+                    );
+
+                    final newFile = fileSystem.file(defaultFile);
+
+                    expect(
+                      newFile.readAsStringSync(),
+                      content.value,
+                    );
+                  }
+                });
+
+                test(
+                    'replaces variable placeholder with name and preceeding text',
+                    () {
+                  final contents = getContents(
+                    format: format,
+                    section: section,
+                    before: 'some text with spaces ',
+                  );
+
+                  contents
+                    ..addAll(
+                      getContents(
+                        format: format,
+                        section: section,
+                        before: 'some text with line breaks\n',
+                      ),
+                    )
+                    ..addAll(
+                      getContents(
+                        format: format,
+                        section: section,
+                        before: 'some text with tabs\t',
+                      ),
+                    );
+
+                  for (final content in contents.entries) {
+                    sourceFile.writeAsStringSync(content.key);
+                    instance.writeTargetFile(
+                      sourceFile: sourceFile,
+                      configuredDirs: [],
+                      targetDir: '',
+                      fileSystem: fileSystem,
+                    );
+
+                    final newFile = fileSystem.file(defaultFile);
+
+                    expect(
+                      newFile.readAsStringSync(),
+                      content.value,
+                    );
+                  }
+                });
+              });
+            }
+          });
+        }
+      });
+
+      group('sections', () {
+        const newName = 'new-name';
+        const placeholder = 'MEEEEE';
+
+        for (final section in MustacheSections.values) {
+          Map<String, String> getContent() {
+            return {
+              '${section.configName}$placeholder':
+                  '{{${section.symbol}$newName}}',
+            };
           }
-        });
 
-        test(
-            'replaces variable placeholder with name and format ($format), maintaining prefix',
-            () {
-          final contents = getContents(format: format, prefix: 'prefix_');
+          group('(${section.name})', () {
+            test(
+              'replaces variable placeholder',
+              () {
+                final contents = getContent();
 
-          for (final content in contents.entries) {
-            sourceFile.writeAsStringSync(content.key);
-            instance.writeTargetFile(
-              sourceFile: sourceFile,
-              configuredDirs: [],
-              targetDir: '',
-              fileSystem: fileSystem,
+                for (final content in contents.entries) {
+                  const variable =
+                      Variable(name: newName, placeholder: placeholder);
+                  const instance =
+                      BrickFile.config(defaultFile, variables: [variable]);
+
+                  sourceFile.writeAsStringSync(content.key);
+
+                  instance.writeTargetFile(
+                    sourceFile: sourceFile,
+                    configuredDirs: [],
+                    targetDir: '',
+                    fileSystem: fileSystem,
+                  );
+
+                  final newFile = fileSystem.file(defaultFile);
+
+                  expect(newFile.readAsStringSync(), content.value);
+                }
+              },
             );
+          });
+        }
+      });
 
-            final newFile = fileSystem.file(defaultFile);
+      test(
+        'replaces variable placeholder with section end syntax',
+        () {
+          const newName = 'new-name';
+          const placeholder = 'MEEEEE';
+          const content = 'replace: n$placeholder';
 
-            expect(
-              newFile.readAsStringSync(),
-              content.value,
-            );
-          }
-        });
+          const variable = Variable(name: newName, placeholder: placeholder);
+          const instance = BrickFile.config(defaultFile, variables: [variable]);
 
-        test(
-            'replaces variable placeholder with name and format ($format), maintaining suffix',
-            () {
-          final contents = getContents(format: format, suffix: '_suffix');
+          sourceFile.writeAsStringSync(content);
 
-          for (final content in contents.entries) {
-            sourceFile.writeAsStringSync(content.key);
-            instance.writeTargetFile(
-              sourceFile: sourceFile,
-              configuredDirs: [],
-              targetDir: '',
-              fileSystem: fileSystem,
-            );
-
-            final newFile = fileSystem.file(defaultFile);
-
-            expect(
-              newFile.readAsStringSync(),
-              content.value,
-            );
-          }
-        });
-
-        test(
-            'replaces variable placeholder with name and format ($format), maintaining pre/post text',
-            () {
-          final contents = getContents(
-            format: format,
-            before: 'some text before ',
-            after: ' some text after',
+          instance.writeTargetFile(
+            sourceFile: sourceFile,
+            configuredDirs: [],
+            targetDir: '',
+            fileSystem: fileSystem,
           );
 
-          for (final content in contents.entries) {
-            sourceFile.writeAsStringSync(content.key);
-            instance.writeTargetFile(
-              sourceFile: sourceFile,
-              configuredDirs: [],
-              targetDir: '',
-              fileSystem: fileSystem,
-            );
+          final newFile = fileSystem.file(defaultFile);
 
-            final newFile = fileSystem.file(defaultFile);
-
-            expect(
-              newFile.readAsStringSync(),
-              content.value,
-            );
-          }
-        });
-
-        test(
-            'replaces variable placeholder with name and format ($format), with negation',
-            () {
-          final contents = getContents(format: format, negate: true);
-
-          for (final content in contents.entries) {
-            sourceFile.writeAsStringSync(content.key);
-            instance.writeTargetFile(
-              sourceFile: sourceFile,
-              configuredDirs: [],
-              targetDir: '',
-              fileSystem: fileSystem,
-            );
-
-            final newFile = fileSystem.file(defaultFile);
-
-            expect(
-              newFile.readAsStringSync(),
-              content.value,
-            );
-          }
-        });
-
-        test(
-            'replaces variable placeholder with name and format ($format), with negation and prefix',
-            () {
-          final contents =
-              getContents(format: format, negate: true, prefix: 'prefix_');
-
-          for (final content in contents.entries) {
-            sourceFile.writeAsStringSync(content.key);
-            instance.writeTargetFile(
-              sourceFile: sourceFile,
-              configuredDirs: [],
-              targetDir: '',
-              fileSystem: fileSystem,
-            );
-
-            final newFile = fileSystem.file(defaultFile);
-
-            expect(
-              newFile.readAsStringSync(),
-              content.value,
-            );
-          }
-        });
-
-        test(
-            'replaces variable placeholder with name and format ($format), with negation and preceeding text',
-            () {
-          final contents = getContents(
-            format: format,
-            negate: true,
-            before: 'some text with spaces ',
-          );
-
-          contents
-            ..addAll(
-              getContents(
-                format: format,
-                negate: true,
-                before: 'some text with line breaks\n',
-              ),
-            )
-            ..addAll(
-              getContents(
-                format: format,
-                negate: true,
-                before: 'some text with tabs\t',
-              ),
-            );
-
-          for (final content in contents.entries) {
-            sourceFile.writeAsStringSync(content.key);
-            instance.writeTargetFile(
-              sourceFile: sourceFile,
-              configuredDirs: [],
-              targetDir: '',
-              fileSystem: fileSystem,
-            );
-
-            final newFile = fileSystem.file(defaultFile);
-
-            expect(
-              newFile.readAsStringSync(),
-              content.value,
-            );
-          }
-        });
-      }
+          expect(newFile.readAsStringSync(), 'replace: {{^$newName}}');
+        },
+      );
 
       const badFormats = [
         'sanke',
@@ -695,7 +793,7 @@ void main() {
 
       for (final format in badFormats) {
         test(
-            'replaces variable placeholder with name ignoring bad format ($format)',
+            'ignores variable placeholder with name ignoring bad format ($format)',
             () {
           const newName = 'new-name';
           const placeholder = 'MEEEEE';
@@ -715,10 +813,7 @@ void main() {
 
           final newFile = fileSystem.file(defaultFile);
 
-          expect(
-            newFile.readAsStringSync(),
-            'replace: $newName',
-          );
+          expect(newFile.readAsStringSync(), content);
         });
       }
     });
