@@ -196,8 +196,7 @@ class BrickFile extends Equatable {
           }
         } else {
           suffix = MustacheFormat.values.getSuffix(possibleFormat) ?? '';
-          result =
-              variable.formatName(format, invert: section?.isInvert ?? false);
+          result = variable.formatName(format);
         }
 
         var beforeMatch = match.group(1) ?? '';

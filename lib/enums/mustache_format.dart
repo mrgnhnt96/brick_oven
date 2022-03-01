@@ -44,13 +44,8 @@ extension MustacheFormatX on MustacheFormat {
   /// Wraps the [content] with mustache
   ///
   /// eg: {{#snakeCase}}This is the content{{/snakeCase}}
-  String toMustache(
-    String content, {
-    bool invert = false,
-  }) {
-    final entry = invert ? '^' : '#';
-
-    return '{{$entry$name}}$content{{/$name}}';
+  String toMustache(String content) {
+    return '{{#$name}}$content{{/$name}}';
   }
 }
 

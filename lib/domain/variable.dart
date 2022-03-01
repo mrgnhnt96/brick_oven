@@ -81,10 +81,9 @@ class Variable extends Equatable {
   /// eg: `{{#someCase}}prefix{{{name}}}suffix{{/someCase}}`
   ///
   /// [format] determines which case to wrap the values
-  String formatName(MustacheFormat format, {bool invert = false}) {
+  String formatName(MustacheFormat format) {
     return format.toMustache(
       '${prefix ?? ''}{{{$name}}}${suffix ?? ''}',
-      invert: invert,
     );
   }
 

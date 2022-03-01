@@ -14,16 +14,6 @@ void main() {
           '{{#camelCase}}$content{{/camelCase}}',
         );
       });
-
-      test('uses invert when provided', () {
-        const format = MustacheFormat.camelCase;
-        const content = 'sup_dude';
-
-        expect(
-          format.toMustache(content, invert: true),
-          '{{^camelCase}}$content{{/camelCase}}',
-        );
-      });
     });
   });
 
