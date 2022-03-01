@@ -106,7 +106,7 @@ There are some formatting options that are available within the contents of a fi
 
 `var: _FOO_`
 
-| Syntax | Example | Outout | Description |
+| Syntax | Example | Output | Description |
 | --- | --- | --- | --- |
 | start* | start_FOO_ | {{#\_FOO_}} | The start of a loop |
 | end* | end_FOO_ | {{/\_FOO_}} | The end of a loop |
