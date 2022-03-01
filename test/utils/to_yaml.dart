@@ -4,7 +4,6 @@ import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/variable.dart';
 import '../utils/fakes.dart';
 
 extension BrickX on Brick {
@@ -83,33 +82,20 @@ extension BrickFileX on BrickFile {
   }
 
   Map<String, dynamic> toJson() {
-    final variablesData = variables.fold(
-      <String, dynamic>{},
-      (Map<String, dynamic> p, e) => p..addAll(e.toJson()),
-    );
+    final variableData = <String, dynamic>{};
+    for (final variable in variables) {
+      variableData[variable.name] = variable.placeholder;
+    }
+
     return <String, dynamic>{
       path: FakeYamlMap(<String, dynamic>{
-        'vars': FakeYamlMap(variablesData),
+        'vars': FakeYamlMap(variableData),
         'name': FakeYamlMap(<String, dynamic>{
           'value': name?.value,
           'prefix': name?.prefix,
           'suffix': name?.suffix,
         })
       }),
-    };
-  }
-}
-
-extension VariableX on Variable {
-  YamlMap toYaml() {
-    return FakeYamlMap(toJson());
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'placeholder': placeholder,
-      'prefix': prefix,
-      'suffix': suffix,
     };
   }
 }
