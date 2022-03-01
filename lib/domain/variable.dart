@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:yaml/yaml.dart';
 
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
@@ -11,38 +10,45 @@ import 'package:brick_oven/utils/extensions.dart';
 class Variable extends Equatable {
   /// {@macro variable}
   const Variable({
-    required this.placeholder,
     required this.name,
-    this.suffix,
-    this.prefix,
-  });
+    String? placeholder,
+  }) : placeholder = placeholder ?? name;
 
   const Variable._fromYaml({
     required this.placeholder,
     required this.name,
-    required this.suffix,
-    required this.prefix,
   });
 
   /// Parses the [yaml] into a variable
   ///
   /// The [name] is the replacement value for [placeholder]
-  factory Variable.fromYaml(String name, YamlMap? yaml) {
-    final map = yaml?.data ?? <String, dynamic>{};
+  factory Variable.fromYaml(String name, YamlValue? yaml) {
+    if (yaml == null) {
+      return Variable._fromYaml(
+        placeholder: name,
+        name: name,
+      );
+    }
 
-    final placeholder = map.remove('placeholder') as String?;
-    final suffix = map.remove('suffix') as String?;
-    final prefix = map.remove('prefix') as String?;
+    String placeholder;
 
-    if (map.isNotEmpty) {
-      throw ArgumentError('Unknown keys in variable: ${map.keys}');
+    if (yaml.isString()) {
+      placeholder = yaml.asString().value;
+    } else if (yaml.isYaml()) {
+      final map = yaml.asYaml().value.data;
+
+      if (map.isEmpty) {
+        placeholder = name;
+      } else {
+        throw ArgumentError('Unknown keys in variable: ${map.keys}');
+      }
+    } else {
+      throw ArgumentError('Missing value for variable: $name');
     }
 
     return Variable._fromYaml(
-      placeholder: placeholder ?? name,
       name: name,
-      suffix: suffix,
-      prefix: prefix,
+      placeholder: placeholder,
     );
   }
 
@@ -51,7 +57,7 @@ class Variable extends Equatable {
     final yamlValue = YamlValue.from(value);
 
     if (yamlValue.isYaml()) {
-      return Variable.fromYaml(name, yamlValue.asYaml().value);
+      throw ArgumentError('Variable $name cannot be a map');
     } else if (yamlValue.isString()) {
       return Variable(name: name, placeholder: yamlValue.asString().value);
     } else {
@@ -68,30 +74,15 @@ class Variable extends Equatable {
   /// Will be wrapped as `{{#someCase}}{{{name}}}{{/someCase}}`
   final String name;
 
-  /// the value to be prepended to the [formatName]
-  final String? prefix;
-
-  /// the value to be appended to the [formatName]
-  final String? suffix;
-
   /// formats [name] by wrapping it with mustache
-  ///
-  /// [prefix] & [suffix] will be applied but
-  /// not included within the [name] mustache variable
-  /// eg: `{{#someCase}}prefix{{{name}}}suffix{{/someCase}}`
   ///
   /// [format] determines which case to wrap the values
   String formatName(MustacheFormat format) {
     return format.toMustache(
-      '${prefix ?? ''}{{{$name}}}${suffix ?? ''}',
+      '{{{$name}}}',
     );
   }
 
   @override
-  List<Object?> get props => [
-        placeholder,
-        name,
-        prefix,
-        suffix,
-      ];
+  List<Object?> get props => [placeholder, name];
 }
