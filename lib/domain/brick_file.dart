@@ -1,3 +1,4 @@
+import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -159,11 +160,16 @@ class BrickFile extends Equatable {
 
     var content = sourceFile.readAsStringSync();
 
-    final negationMatcher = RegExp(r'((?!\w)(\s))?n$');
     for (final variable in variables) {
       final pattern = RegExp('(.*)${variable.placeholder}' r'(\w*)(.*)');
       content = content.replaceAllMapped(pattern, (match) {
-        final invert = match.group(1)?.contains(negationMatcher) ?? false;
+        final possibleSection = match.group(1);
+        MustacheSections? section;
+
+        if (possibleSection?.isNotEmpty ?? false) {
+          section = MustacheSections.values.from(possibleSection);
+        }
+
         final possibleLoop = match.group(2);
 
         String? possibleFormat;
@@ -181,18 +187,27 @@ class BrickFile extends Equatable {
 
         String result, suffix = '';
         if (format == null) {
-          result = variable.name;
+          // If the format is not found, and there is no loop,
+          // then the match is a false positive
+          if ((possibleFormat?.isNotEmpty ?? false) || section == null) {
+            return match.group(0) ?? '';
+          } else {
+            result = section.format(variable.name);
+          }
         } else {
           suffix = MustacheFormat.values.getSuffix(possibleFormat) ?? '';
-          result = variable.formatName(format, invert: invert);
+          result =
+              variable.formatName(format, invert: section?.isInvert ?? false);
         }
 
-        final beforeMatch =
-            match.group(1)?.replaceAllMapped(negationMatcher, (match) {
-                  // the white space used before the negation
-                  return match.group(2) ?? '';
-                }) ??
-                '';
+        var beforeMatch = match.group(1) ?? '';
+
+        if (section != null) {
+          beforeMatch = beforeMatch.replaceAllMapped(section.matcher, (match) {
+            // the white space used before the negation
+            return match.group(2) ?? '';
+          });
+        }
         final afterMatch = match.group(3) ?? '';
 
         return '$beforeMatch$result$suffix$afterMatch';
