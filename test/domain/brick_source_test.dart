@@ -185,6 +185,42 @@ void main() {
         expect(file.variables.single, variables.single);
       }
     });
+
+    test(
+      'should exclude files that match or are children of excluded paths',
+      () {
+        final excludedPaths = [
+          'excluded',
+          'other/file.dart',
+        ];
+
+        final files = [
+          'file1.dart',
+          'file2.dart',
+          'excluded/file1.dart',
+          'excluded/file2.dart',
+          'other/file.dart',
+        ];
+
+        final fs = MemoryFileSystem();
+
+        for (final file in files) {
+          fs.file(file).createSync(recursive: true);
+        }
+
+        final source = BrickSource.memory(
+          localPath: '.',
+          fileSystem: fs,
+        );
+
+        final brickFiles = source
+            .mergeFilesAndConfig([], excludedPaths: excludedPaths).toList();
+
+        expect(brickFiles.length, 2);
+        expect(brickFiles[0].path, 'file1.dart');
+        expect(brickFiles[1].path, 'file2.dart');
+      },
+    );
   });
 
   group('#fromSourcePath', () {
@@ -194,7 +230,10 @@ void main() {
 
       const file = BrickFile(fileName);
 
-      expect(source.fromSourcePath(file), join(localPath, fileName));
+      expect(
+        source.fromSourcePath(file),
+        join(localPath, fileName),
+      );
     });
   });
 

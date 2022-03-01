@@ -27,6 +27,7 @@ extension BrickX on Brick {
       'source': source.sourceDir,
       'dirs': FakeYamlMap(dirsData),
       'files': FakeYamlMap(filesData),
+      'exclude': FakeYamlList(excludePaths.toList()),
     };
   }
 }

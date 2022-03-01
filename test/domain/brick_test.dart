@@ -35,6 +35,7 @@ void main() {
         configuredFiles: const [
           BrickFile('file/path/name.dart', name: Name('name'))
         ],
+        excludePaths: const ['path/to/excluded/dir'],
         name: 'brick',
         source: BrickSource(localPath: 'localPath'),
       );

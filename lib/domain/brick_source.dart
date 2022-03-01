@@ -91,7 +91,10 @@ class BrickSource extends Equatable {
 
   /// merges the [configFiles] onto [files], which copies all
   /// variables & configurations
-  Iterable<BrickFile> mergeFilesAndConfig(Iterable<BrickFile> configFiles) {
+  Iterable<BrickFile> mergeFilesAndConfig(
+    Iterable<BrickFile> configFiles, {
+    Iterable<String> excludedPaths = const [],
+  }) {
     final configs = configFiles.toMap();
 
     final sourceFiles = files().toMap();
@@ -100,7 +103,34 @@ class BrickSource extends Equatable {
       ..addAll(sourceFiles)
       ..addAll(configs);
 
-    return result.values;
+    final excludedDirs = <String>[];
+    final excludedFiles = <String>[];
+
+    for (final e in excludedPaths) {
+      final path = normalize(e);
+
+      if (extension(path).isNotEmpty) {
+        excludedFiles.add(path);
+      } else {
+        excludedDirs.add(path);
+      }
+    }
+
+    final brickFiles = <BrickFile>[];
+
+    for (final key in result.keys) {
+      final path = normalize(key);
+
+      if (excludedFiles.contains(path)) {
+        break;
+      } else if (excludedDirs.any(path.startsWith)) {
+        break;
+      }
+
+      brickFiles.add(result[key]!);
+    }
+
+    return brickFiles;
   }
 
   Iterable<BrickFile> _fromDir() sync* {

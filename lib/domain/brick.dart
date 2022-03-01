@@ -22,6 +22,7 @@ class Brick extends Equatable {
     required this.source,
     required this.configuredDirs,
     required this.configuredFiles,
+    this.excludePaths = const [],
     Logger? logger,
   })  : _fileSystem = const LocalFileSystem(),
         logger = logger ?? Logger();
@@ -34,6 +35,7 @@ class Brick extends Equatable {
     required this.configuredDirs,
     required this.configuredFiles,
     required FileSystem fileSystem,
+    this.excludePaths = const [],
     Logger? logger,
   })  : _fileSystem = fileSystem,
         logger = logger ?? Logger();
@@ -43,6 +45,7 @@ class Brick extends Equatable {
     required this.source,
     required this.configuredFiles,
     required this.configuredDirs,
+    this.excludePaths = const [],
   })  : _fileSystem = const LocalFileSystem(),
         logger = Logger();
 
@@ -79,6 +82,28 @@ class Brick extends Equatable {
       }
     }
 
+    final excludedPaths = data.remove('exclude') as YamlList?;
+
+    Iterable<String> exclude() sync* {
+      if (excludedPaths == null) {
+        return;
+      }
+
+      for (final entry in excludedPaths) {
+        final path = YamlValue.from(entry);
+
+        if (path.isString()) {
+          yield path.asString().value;
+        } else {
+          throw ArgumentError(
+            'Expected string in exclude list, '
+            // ignore: avoid_dynamic_calls
+            'got ${path.value} (${path.value.runtimeType})',
+          );
+        }
+      }
+    }
+
     if (data.isNotEmpty) {
       throw ArgumentError('Unknown keys in brick: ${data.keys}');
     }
@@ -88,6 +113,7 @@ class Brick extends Equatable {
       source: source,
       name: name,
       configuredDirs: paths(),
+      excludePaths: exclude(),
     );
   }
 
@@ -102,6 +128,9 @@ class Brick extends Equatable {
 
   /// the configured directories that will alter/update the paths of the [source] files
   final Iterable<BrickPath> configuredDirs;
+
+  /// paths to be excluded from the [source]
+  final Iterable<String> excludePaths;
 
   final FileSystem _fileSystem;
 
@@ -126,7 +155,10 @@ class Brick extends Equatable {
         directory.deleteSync(recursive: true);
       }
 
-      final files = source.mergeFilesAndConfig(configuredFiles);
+      final files = source.mergeFilesAndConfig(
+        configuredFiles,
+        excludedPaths: excludePaths,
+      );
       final count = files.length;
 
       for (final file in files) {
