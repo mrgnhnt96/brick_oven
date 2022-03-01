@@ -9,21 +9,16 @@ bricks:
     files:
       lib/readme.md:
         vars:
-          optional:
-            placeholder: _OPTIONAL_
+          optional: _OPTIONAL_
       lib/main.dart:
-        vars:
-          masonry:
-            placeholder: _CLASS_NAME_
-            format: pascalCase
-            prefix: some_prefix_
-            suffix: _some_suffix
         name: my_main
+        vars:
+          masonry: _CLASS_NAME_
       lib/nested/nested_file.dart:
         name:
           value: other
-          prefix: some_prefix_
-          suffix: _some_suffix
+          prefix: prefix_
+          suffix: _suffix
       lib/nested/nested_file.g.dart:
         name:
           value: other_generated
@@ -45,6 +40,4 @@ bricks:
           prefix: some_prefix_
           suffix: _some_suffix
         vars:
-          something:
-            placeholder: otta hand
-            format: pascalCase
+          something: otta hand
