@@ -62,6 +62,14 @@ void main() {
 
       expect(brickPath.name.value, highestLevel);
     });
+
+    test('returns name from yaml map', () {
+      final yaml = FakeYamlMap(<String, dynamic>{'name': 'name'});
+
+      final brickPath = BrickPath.fromYaml(dirPath, YamlValue.yaml(yaml));
+
+      expect(brickPath.name.value, 'name');
+    });
   });
 
   const paths = {
