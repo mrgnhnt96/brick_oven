@@ -63,8 +63,7 @@ bricks:
     files:
       readme.md:
         vars:
-          some_var:
-            placeholder: some_value
+          some_var: some_value
   package_2:
     source: example/lib
     dirs:
@@ -72,8 +71,7 @@ bricks:
     files:
       readme.md:
         vars:
-          some_var:
-            placeholder: some_value
+          some_var: some_value
 ''';
 
       brickConfigFile.writeAsStringSync(contents);
