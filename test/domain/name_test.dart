@@ -1,9 +1,10 @@
-import 'package:test/test.dart';
-
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:test/test.dart';
+
 import '../utils/fakes.dart';
+import '../utils/reflect_properties.dart';
 
 void main() {
   group('$Name', () {
@@ -55,6 +56,7 @@ void main() {
           const Name('name'),
         );
       });
+
       test('throws $ArgumentError when null is provided without backup name',
           () {
         expect(
@@ -85,6 +87,25 @@ void main() {
         );
       });
 
+      test('can parse format when provided', () {
+        expect(
+          Name.fromYamlValue(
+            YamlValue.yaml(
+              FakeYamlMap(<String, dynamic>{
+                'value': 'name',
+                'format': 'snake',
+              }),
+            ),
+          ),
+          equals(
+            const Name(
+              'name',
+              format: MustacheFormat.snakeCase,
+            ),
+          ),
+        );
+      });
+
       test('throws $ArgumentError when name is null', () {
         expect(
           () => Name.from(
@@ -112,7 +133,7 @@ void main() {
       test('prepends the prefix and appends the suffix', () {
         expect(
           const Name('name', prefix: 'prefix', suffix: 'suffix')
-              .format(MustacheFormat.camelCase),
+              .formatWith(MustacheFormat.camelCase),
           contains('prefix{{{name}}}suffix'),
         );
       });
@@ -120,7 +141,7 @@ void main() {
       test('formats the with the mustache format', () {
         expect(
           const Name('name', prefix: 'prefix', suffix: 'suffix')
-              .format(MustacheFormat.snakeCase),
+              .formatWith(MustacheFormat.snakeCase),
           equals('{{#snakeCase}}prefix{{{name}}}suffix{{/snakeCase}}'),
         );
       });
@@ -134,11 +155,12 @@ void main() {
           'name',
           prefix: 'prefix',
           suffix: 'suffix',
+          format: MustacheFormat.snakeCase,
         );
       });
 
-      test('length should be 3', () {
-        expect(name.props.length, equals(3));
+      test('should return the correct property length', () {
+        expect(reflectProperties(name).length, name.props.length);
       });
 
       test('should contain value', () {
@@ -151,6 +173,10 @@ void main() {
 
       test('should contain suffix', () {
         expect(name.props.contains('suffix'), isTrue);
+      });
+
+      test('should contain format', () {
+        expect(name.props.contains(MustacheFormat.snakeCase), isTrue);
       });
     });
   });
