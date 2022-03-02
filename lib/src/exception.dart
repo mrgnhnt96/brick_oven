@@ -17,7 +17,9 @@ class BrickOvenException implements Exception {
 class BrickOvenNotFoundException extends BrickOvenException {
   /// {@macro brick_oven_not_found_exception}
   const BrickOvenNotFoundException()
+      // coverage:ignore-start
       : super(
+          // coverage:ignore-end
           'Cannot find ${BrickOvenYaml.file}.'
           '\nCreate the file and try again.',
         );
@@ -29,7 +31,9 @@ class BrickOvenNotFoundException extends BrickOvenException {
 class BrickNotFoundException extends BrickOvenException {
   /// {@macro brick_oven_not_found_exception}
   const BrickNotFoundException(String brick)
+      // coverage:ignore-start
       : super(
+          // coverage:ignore-end
           'Cannot find $brick.\n'
           'Make sure to provide a valid brick name '
           'from the ${BrickOvenYaml.file}.',
