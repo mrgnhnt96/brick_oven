@@ -52,12 +52,14 @@ bricks:
       <path_to_dir>: <replacement_name> # optional
         name: <replacement_name> # optional
           value: <replacement_name>
+          format: <format> #optional
           prefix: <prefix> # optional
           suffix: <suffix> # optional
     files: # optional
       <path_to_file>:
         name: <replacement_name> # optional
           value: <replacement_name>
+          format: <format> #optional
           prefix: <prefix> # optional
           suffix: <suffix> # optional
         vars:
@@ -81,13 +83,15 @@ In general, **paths are relative** to the directory of the brick_oven.yaml file
     - **\<path_to_dir\>**: Must point to a _directory_. Will be replaced with the `name` value, if provided.
       - **name**: The name that will replace the directory's current name.
         - **value**: \*\*same as name\*\*
+        - **format**: wraps the name with the provided format.
         - **prefix**: Will be prepended to the name (before mustache formatting).
         - **suffix**: Will be appended to the name (after mustache formatting).
 
   - **files**: A list of file paths that will be formatted (path and/or contents) to mustache syntax.
-    - **\<path_to_file\>**: Must point to a _file_. Will be replaced with the `name` value, if provided. File names will automatically include `snake_case` formatting upon generation.
+    - **\<path_to_file\>**: Must point to a _file_. Will be replaced with the `name` value, if provided.
       - **name**: The name that will format the file's current name.
         - **value**: \*\*same as name\*\*
+        - **format**: wraps the name with the provided format.
         - **prefix**: Will be prepended to the name (before mustache formatting).
         - **suffix**: Will be appended to the name (after mustache formatting).
       - **vars**: Variables found within the contents of the file to be formatted to mustache syntax.
@@ -96,11 +100,15 @@ In general, **paths are relative** to the directory of the brick_oven.yaml file
           - **prefix**: Will be prepended to the name (before mustache formatting).
           - **suffix**: Will be appended to the name (after mustache formatting).
 
+**_Note for formats and subdirectory variables_**: When the name is formatted (to snake_case for example), all subdirectories will be converted **to the name of the dir/file**. which may be undesirable. `{{#snakeCase}}{{{path}}}{{/snakeCase}}` with `path='some/path/to/dir'` will result in `some_path_to_dir`.
+
 # Content Configuration
 
 This is where brick_oven really shines! Because it is a "Search & Replace" tool, you're able to format the "placeholders" within the contents of a file however you'd like. This is in the hopes that a random piece of content doesn't get formatted unintentionally.
 
-There are some formatting options that are available within the contents of a file.
+**_Note for variable names_**: Because brick_oven is a "Search & Replace" tool, it will replace ALL found occurrences. The var `name` is found in `rename, name, something_name`. To avoid this, its recommended to set up your placeholders with a prefix and/or suffix (such as "`_`") and some sort of case formatting (such as UPPERCASE). Example: `_NAME_`.
+
+**_Note for placholder replacements_**: The order of replacing placeholders with their mustache sytax formatted values is: `loops`, `sections`, followed by `vars`. Which means that you can have a looped/sectioned variable (`_NAMES_`) and a general variable (`_NAME_`) without conflict.
 
 ## Loops
 
@@ -113,7 +121,7 @@ There are some formatting options that are available within the contents of a fi
 | nstart* | nstart_FOO_ | {{^\_FOO_}} | The start of an **inverted** loop |
 
 **Note**: Loops consume the **entire** contents of the **line**. Make sure that they are on _their own line._\
-**Note**: Loops do not get [formatted](#case-formatting). Do not append any formatting to the end of the loop.
+**Note**: Loops do not get [formatted](#case-formatting). So don't try to format them...
 
 ## Sections
 
@@ -125,7 +133,7 @@ There are some formatting options that are available within the contents of a fi
 
 ## Case Formatting
 
-Syntax is **not** case sensitive.
+Case Formatting Syntax is **not** case sensitive. Use this to your advantage! Especially when you have repeated objects are conditionally formatted and the linter is yelling at you saying, "you already have `foo`, you can't have another!" 🙄
 
 | Syntax | Example | Output |  Description |
 | --- | --- | --- | --- |
@@ -153,8 +161,8 @@ Available Formats
 
 | Fix | Syntax | Example | Description |
 | --- | --- | --- | --- |
-| prefix | *(any)* | bar__FOO_ | Goes before ALL configs (loops/sections) |
-| suffix | *(any)* | _FOO__bar | Goes after ALL configs (case) |
+| prefix | (any) | bar__FOO_ | Must be before loops/sections const (ex: `bar_start_FOO_`) |
+| suffix | (any) | _FOO__bar | Must be after case format (ex: `_FOO_snake_bar`) |
 
 ## Basic Example
 
@@ -168,22 +176,23 @@ bricks:
       lib/main:
         vars:
           names: _NAMES_
-          name: _name_
-          emoji: _emoji_
+          name: _NAME_
+          emoji: _EMOJI_
+          import: _IMPORT_
 ```
 
 ```dart
 // lib/main.dart
 
-import 'example.g.dart';
+import '_IMPORT_snake.dart';
 
 void main(){
   // start_NAMES_
-  print('Hello _name_upper! s_emoji_😎e_emoji_');
+  print('Hello _NAME_upper! s_EMOJI_ 😎 e_EMOJI_');
   // end_NAMES_
 
   // nstart_NAMES_
-  print('Theres no one to greet! 😭');
+  print("There's no one to greet! 😭");
   // end_NAMES_
 }
 ```
@@ -193,15 +202,15 @@ output:
 ```dart
 // bricks/example/__bricks__/lib/main.dart
 
-import 'example.g.dart';
+import '{{#snakeCase}}{{import}}{{/snakeCase}}.dart';
 
 void main(){
   {{#names}}
-  print('Hello {{#upperCase}}{{name}}{{/upperCase}}! {{#emoji}}😎{{/emoji}}');
+  print('Hello {{#upperCase}}{{name}}{{/upperCase}}! {{#emoji}} 😎 {{/emoji}}');
   {{/names}}
 
   {{^names}}
-  print('Theres no one to greet! 😭');
+  print("There's no one to greet! 😭");
   {{/names}}
 }
 ```
