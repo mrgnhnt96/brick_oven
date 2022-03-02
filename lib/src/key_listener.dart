@@ -52,7 +52,7 @@ class KeyPressListener {
     keyListener(keys: keyPresses);
   }
 
-  Stream<List<int>>? _stream;
+  static Stream<List<int>>? _stream;
 
   /// listens for keypresses
   @visibleForTesting
