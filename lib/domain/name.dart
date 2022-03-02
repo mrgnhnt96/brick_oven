@@ -11,9 +11,11 @@ class Name extends Equatable {
   /// {@macro name}
   const Name(
     this.value, {
-    this.prefix,
-    this.suffix,
-  });
+    String? prefix,
+    String? suffix,
+    this.format,
+  })  : prefix = prefix ?? '',
+        suffix = suffix ?? '';
 
   /// {@macro name}
   ///
@@ -29,6 +31,7 @@ class Name extends Equatable {
   /// Parses from [value] from [YamlValue]
   factory Name.fromYamlValue(YamlValue value, [String? backup]) {
     String? name, prefix, suffix;
+    MustacheFormat? format;
 
     if (value.isYaml()) {
       final nameConfig = value.asYaml().value.data;
@@ -36,6 +39,8 @@ class Name extends Equatable {
       name = nameConfig.remove('value') as String? ?? backup;
       prefix = nameConfig.remove('prefix') as String?;
       suffix = nameConfig.remove('suffix') as String?;
+      format = MustacheFormat.values
+          .getMustacheValue(nameConfig.remove('format') as String?);
 
       if (name == null) {
         throw ArgumentError('The name was not provided');
@@ -47,7 +52,7 @@ class Name extends Equatable {
         );
       }
 
-      return Name(name, prefix: prefix, suffix: suffix);
+      return Name(name, prefix: prefix, suffix: suffix, format: format);
     } else if (value.isString()) {
       name = value.asString().value;
 
@@ -63,32 +68,39 @@ class Name extends Equatable {
   final String value;
 
   /// the prefix of the name
-  final String? prefix;
+  final String prefix;
 
   /// the suffix of the name
-  final String? suffix;
+  final String suffix;
+
+  /// the format of the name
+  final MustacheFormat? format;
 
   /// gets the name of the file without formatting to mustache
   ///
   /// eg: `prefix{name}suffix`
   String get simple {
-    final prefix = this.prefix ?? '';
-    final suffix = this.suffix ?? '';
-
     return '$prefix{$value}$suffix';
   }
 
-  /// formats the [value] to a mustache [format]
-  String format(MustacheFormat format) {
-    final prefix = this.prefix ?? '';
-    final suffix = this.suffix ?? '';
+  /// gets the name of the file with formatting to mustache
+  String get formatted {
+    if (format != null) {
+      return format!.toMustache(_toVariable);
+    }
 
-    final formattedName = '$prefix{{{$value}}}$suffix';
-    final mustacheName = format.toMustache(formattedName);
+    return _toVariable;
+  }
 
-    return mustacheName;
+  String get _toVariable {
+    return '$prefix{{{$value}}}$suffix';
+  }
+
+  /// gets the name of the file with formatting to mustache from [format]
+  String formatWith(MustacheFormat format) {
+    return format.toMustache(_toVariable);
   }
 
   @override
-  List<Object?> get props => [value, prefix, suffix];
+  List<Object?> get props => [value, prefix, suffix, format];
 }
