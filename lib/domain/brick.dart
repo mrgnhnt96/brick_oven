@@ -25,7 +25,7 @@ class Brick extends Equatable {
     this.excludePaths = const [],
     Logger? logger,
   })  : _fileSystem = const LocalFileSystem(),
-        logger = logger ?? Logger();
+        _logger = logger ?? Logger();
 
   /// provide
   @visibleForTesting
@@ -38,7 +38,7 @@ class Brick extends Equatable {
     this.excludePaths = const [],
     Logger? logger,
   })  : _fileSystem = fileSystem,
-        logger = logger ?? Logger();
+        _logger = logger ?? Logger();
 
   Brick._fromYaml({
     required this.name,
@@ -47,7 +47,7 @@ class Brick extends Equatable {
     required this.configuredDirs,
     this.excludePaths = const [],
   })  : _fileSystem = const LocalFileSystem(),
-        logger = Logger();
+        _logger = Logger();
 
   /// parses [yaml]
   factory Brick.fromYaml(String name, YamlMap? yaml) {
@@ -134,14 +134,13 @@ class Brick extends Equatable {
 
   final FileSystem _fileSystem;
 
-  /// the logger
-  final Logger logger;
+  final Logger _logger;
 
   /// writes the brick's files, from the [source]'s files.
   ///
   /// targets: [output] (bricks) -> [name] -> __brick__
   void cook({String output = 'bricks', bool watch = false}) {
-    final done = logger.progress('Writing Brick: $name');
+    final done = _logger.progress('Writing Brick: $name');
 
     void putInTheOven() {
       final targetDir = join(
@@ -194,5 +193,6 @@ class Brick extends Equatable {
         source,
         configuredFiles.toList(growable: false),
         configuredDirs.toList(growable: false),
+        excludePaths.toList(growable: false),
       ];
 }
