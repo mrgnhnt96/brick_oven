@@ -1,5 +1,6 @@
 // ignore_for_file: cascade_invocations
 
+import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart';
@@ -11,6 +12,7 @@ import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
 import '../utils/fakes.dart';
+import '../utils/reflect_properties.dart';
 
 void main() {
   const defaultFile = 'file.dart';
@@ -119,7 +121,7 @@ void main() {
 
         expect(
           file.fileName,
-          '{{#snakeCase}}{{{$fileName}}}{{/snakeCase}}$ext',
+          '{{{$fileName}}}$ext',
         );
       }
     });
@@ -183,41 +185,60 @@ void main() {
   });
 
   group('#fileName', () {
-    test('return the file name formatted when no provided name', () {
-      final instance = BrickFile(defaultPath);
+    const defaultFile = 'file.dart';
+    const defaultPath = defaultFile;
+    const name = 'name';
+    const prefix = 'prefix';
+    const suffix = 'suffix';
 
-      expect(instance.fileName, contains(defaultFile));
+    test('return the file name formatted when no provided name', () {
+      const instance = BrickFile(defaultFile);
+
+      expect(instance.fileName, defaultFile);
     });
 
     test('return the provided name', () {
-      const name = Name('name');
-      final instance = BrickFile.config(defaultPath, name: name);
+      const instance = BrickFile.config(defaultPath, name: Name(name));
 
-      expect(instance.fileName, contains(name.value));
+      expect(instance.fileName, '{{{$name}}}.dart');
     });
 
     test('prepends the prefix', () {
-      const name = Name('name', prefix: 'prefix');
-      final instance = BrickFile.config(defaultPath, name: name);
+      const instance = BrickFile.config(
+        defaultPath,
+        name: Name(name, prefix: prefix),
+      );
 
-      expect(instance.fileName, contains('${name.prefix}{{{${name.value}}}}'));
+      expect(instance.fileName, '$prefix{{{$name}}}.dart');
     });
 
     test('appends the suffix', () {
-      const name = Name('name', suffix: 'suffix');
-      final instance = BrickFile.config(defaultPath, name: name);
+      const instance = BrickFile.config(
+        defaultPath,
+        name: Name(name, suffix: suffix),
+      );
 
-      expect(instance.fileName, contains('{{{${name.value}}}}${name.suffix}'));
+      expect(instance.fileName, contains('{{{$name}}}$suffix'));
     });
 
-    test('formats the name to mustache', () {
-      const name = Name('name');
-
-      final instance = BrickFile.config(defaultPath, name: name);
+    test('formats the name to mustache format when provided', () {
+      const instance = BrickFile.config(
+        defaultPath,
+        name: Name(name, format: MustacheFormat.snakeCase),
+      );
 
       expect(
         instance.fileName,
-        contains('{{#snakeCase}}{{{${name.value}}}}{{/snakeCase}}'),
+        contains('{{#snakeCase}}{{{$name}}}{{/snakeCase}}'),
+      );
+    });
+
+    test('does not format the name to mustache format when not provided', () {
+      const instance = BrickFile.config(defaultPath, name: Name(name));
+
+      expect(
+        instance.fileName,
+        contains('{{{$name}}}'),
       );
     });
 
@@ -403,7 +424,7 @@ void main() {
         join(
           'path',
           'to',
-          '{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}.dart',
+          '{{{$replacement}}}.dart',
         ),
       );
 
@@ -809,7 +830,7 @@ void main() {
     });
   });
 
-  group('props', () {
+  group('#props', () {
     const name = Name(
       'name',
       prefix: 'prefix',
@@ -823,8 +844,8 @@ void main() {
       variables: variables,
     );
 
-    test('length should be 3', () {
-      expect(instance.props.length, 3);
+    test('should return the correct property length', () {
+      expect(reflectProperties(instance).length, instance.props.length);
     });
 
     test('contains path', () {

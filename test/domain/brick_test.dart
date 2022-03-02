@@ -14,6 +14,7 @@ import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/name.dart';
 import '../utils/fakes.dart';
 import '../utils/mocks.dart';
+import '../utils/reflect_properties.dart';
 import '../utils/to_yaml.dart';
 
 void main() {
@@ -374,6 +375,7 @@ void main() {
     Brick brick({
       bool createFile = false,
       bool createDir = false,
+      bool addExclude = false,
     }) {
       return Brick(
         name: brickName,
@@ -384,13 +386,16 @@ void main() {
         configuredFiles: [
           if (createFile) ...files,
         ],
+        excludePaths: [
+          if (addExclude) ...fileNames,
+        ],
       );
     }
 
-    test('should return length 4', () {
+    test('should return the correct property length', () {
       final testBrick = brick();
 
-      expect(testBrick.props.length, 4);
+      expect(reflectProperties(testBrick).length, testBrick.props.length);
     });
 
     test('should contain name', () {
@@ -430,6 +435,20 @@ void main() {
 
       for (final dir in propDirs!) {
         expect(testBrick.configuredDirs, contains(dir));
+      }
+    });
+
+    test('should contain list of exclude paths', () {
+      final testBrick = brick(createDir: true);
+
+      final propDirs =
+          testBrick.props.firstWhere((prop) => prop is List<String>);
+
+      expect(propDirs, isA<List<String>>());
+      propDirs as List<String>?;
+
+      for (final dir in propDirs!) {
+        expect(testBrick.excludePaths, contains(dir));
       }
     });
   });

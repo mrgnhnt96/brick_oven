@@ -1,3 +1,4 @@
+import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart';
@@ -8,6 +9,7 @@ import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import '../utils/fakes.dart';
+import '../utils/reflect_properties.dart';
 import '../utils/to_yaml.dart';
 
 void main() {
@@ -238,16 +240,22 @@ void main() {
   });
 
   group('#props', () {
-    test('length should be 1', () {
-      final source = BrickSource(localPath: localPath);
+    late BrickSource source;
 
-      expect(source.props, hasLength(1));
+    setUp(() {
+      source = BrickSource(localPath: localPath);
+    });
+
+    test('should return the correct property length', () {
+      expect(reflectProperties(source).length, source.props.length);
     });
 
     test('should contain local path', () {
-      final source = BrickSource(localPath: localPath);
+      expect(source.props, contains(localPath));
+    });
 
-      expect(source.props.single, localPath);
+    test('should contain watcher', () {
+      expect(source.props.any((e) => e is BrickWatcher), isTrue);
     });
   });
 }

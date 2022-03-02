@@ -1,3 +1,4 @@
+import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
@@ -5,6 +6,7 @@ import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import '../utils/fakes.dart';
+import '../utils/reflect_properties.dart';
 
 void main() {
   const highestLevel = 'dir';
@@ -137,12 +139,25 @@ void main() {
   group('#apply', () {
     const replacement = 'batman';
 
-    BrickPath brickPath(String path, [String replacement = replacement]) {
+    BrickPath brickPath(String path, {MustacheFormat? format, String? name}) {
       return BrickPath(
         path: path,
-        name: Name(replacement),
+        name: Name(name ?? replacement, format: format),
       );
     }
+
+    test('formats the path when provided', () {
+      const original = '/path/to/other/file.png';
+      final brick = brickPath(
+        'path',
+        format: MustacheFormat.snakeCase,
+      );
+
+      expect(
+        brick.apply(original, originalPath: original),
+        '{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}/to/other/file.png',
+      );
+    });
 
     group('return original path when', () {
       test('parts do not match', () {
@@ -324,7 +339,7 @@ void main() {
         final brick = brickPath('foo');
         path = brick.apply(path, originalPath: originalPath);
 
-        final brick2 = brickPath('foo/bar/baz/foo', replacement2);
+        final brick2 = brickPath('foo/bar/baz/foo', name: replacement2);
         path = brick2.apply(path, originalPath: originalPath);
 
         expect(
@@ -340,7 +355,7 @@ void main() {
         final brick = brickPath('foo');
         path = brick.apply(path, originalPath: originalPath);
 
-        final brick2 = brickPath('foo/bar', replacement2);
+        final brick2 = brickPath('foo/bar', name: replacement2);
         path = brick2.apply(path, originalPath: originalPath);
 
         expect(
@@ -352,10 +367,13 @@ void main() {
   });
 
   group('#props', () {
-    final brick = BrickPath(name: const Name('foo'), path: 'bar/baz');
+    final brick = BrickPath(
+      name: const Name('foo'),
+      path: 'bar/baz',
+    );
 
-    test('length should be 3', () {
-      expect(brick.props.length, 3);
+    test('should return the correct property length', () {
+      expect(reflectProperties(brick).length, brick.props.length);
     });
 
     test('should contain name', () {
@@ -363,6 +381,10 @@ void main() {
     });
 
     test('should contain path', () {
+      expect(brick.props.contains('bar/baz'), isTrue);
+    });
+
+    test('should contain originalPath', () {
       expect(brick.props.contains('bar/baz'), isTrue);
     });
 

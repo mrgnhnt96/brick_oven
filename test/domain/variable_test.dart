@@ -4,6 +4,7 @@ import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:test/test.dart';
 
 import '../utils/fakes.dart';
+import '../utils/reflect_properties.dart';
 
 void main() {
   const name = 'scooby-doo';
@@ -89,15 +90,17 @@ void main() {
   });
 
   group('#props', () {
-    test('length should be 2', () {
-      const variable = Variable(name: name, placeholder: placeholder);
+    late Variable variable;
 
-      expect(variable.props.length, 2);
+    setUp(() {
+      variable = const Variable(name: name, placeholder: placeholder);
+    });
+
+    test('should return the correct property length', () {
+      expect(reflectProperties(variable).length, variable.props.length);
     });
 
     test('should contain props', () {
-      const variable = Variable(name: name, placeholder: placeholder);
-
       expect(variable.props, contains(name));
       expect(variable.props, contains(placeholder));
     });
