@@ -78,14 +78,14 @@ In general, **paths are relative** to the directory of the brick_oven.yaml file
 
   - **dirs**: Directory paths that will be formatted to mustache syntax.
 
-    - **\<path_to_dir\>**: Must point to a _directory_. Will be replaced with the `name` value, if provided. Paths will automatically include `snake_case` formatting upon generation.
+    - **\<path_to_dir\>**: Must point to a _directory_. Will be replaced with the `name` value, if provided.
       - **name**: The name that will replace the directory's current name.
         - **value**: \*\*same as name\*\*
         - **prefix**: Will be prepended to the name (before mustache formatting).
         - **suffix**: Will be appended to the name (after mustache formatting).
 
   - **files**: A list of file paths that will be formatted (path and/or contents) to mustache syntax.
-    - **\<path_to_file\>**: Must point to a _file_. Will be replaced with the `name` value, if provided. Paths will automatically include `snake_case` formatting upon generation.
+    - **\<path_to_file\>**: Must point to a _file_. Will be replaced with the `name` value, if provided. File names will automatically include `snake_case` formatting upon generation.
       - **name**: The name that will format the file's current name.
         - **value**: \*\*same as name\*\*
         - **prefix**: Will be prepended to the name (before mustache formatting).

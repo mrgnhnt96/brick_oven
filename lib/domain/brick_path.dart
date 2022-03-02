@@ -123,8 +123,7 @@ class BrickPath extends Equatable {
     // ignore: parameter_assignments
     path = normalize(path).replaceAll(slashPattern, '');
 
-    final replacement =
-        MustacheFormat.snakeCase.toMustache('{{{${name.value}}}}');
+    final replacement = '{{{${name.value}}}}';
 
     final pathParts = path.split(separatorPattern);
 

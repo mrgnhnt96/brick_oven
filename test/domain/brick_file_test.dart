@@ -379,7 +379,7 @@ void main() {
       final newFile = fileSystem.file(
         join(
           'path',
-          '{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}',
+          '{{{$replacement}}}',
           defaultFile,
         ),
       );

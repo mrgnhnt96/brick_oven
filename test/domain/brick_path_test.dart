@@ -161,8 +161,8 @@ void main() {
       });
 
       group('brick path is not more than 1 level', () {
-        String toSnake(String name) {
-          return '{{#snakeCase}}{{{$name}}}{{/snakeCase}}';
+        String toFormat(String name) {
+          return '{{{$name}}}';
         }
 
         group('without slashes', () {
@@ -175,7 +175,7 @@ void main() {
 
             final result = path.apply(original, originalPath: original);
 
-            expect(result, '${toSnake(replacement)}$filePath');
+            expect(result, '${toFormat(replacement)}$filePath');
           });
 
           test('as non starting position', () {
@@ -197,7 +197,7 @@ void main() {
 
             final result = path.apply(original, originalPath: original);
 
-            expect(result, '${toSnake(replacement)}$filePath');
+            expect(result, '${toFormat(replacement)}$filePath');
           });
 
           test('as non starting position', () {
@@ -219,7 +219,7 @@ void main() {
 
             final result = path.apply(original, originalPath: original);
 
-            expect(result, '${toSnake(replacement)}$filePath');
+            expect(result, '${toFormat(replacement)}$filePath');
           });
 
           test('as non starting position', () {
@@ -243,7 +243,7 @@ void main() {
 
         expect(
           path,
-          '{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}/bar/baz/foo',
+          '{{{$replacement}}}/bar/baz/foo',
         );
       });
 
@@ -256,7 +256,7 @@ void main() {
 
         expect(
           path,
-          'foo/{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}/baz/foo/bar',
+          'foo/{{{$replacement}}}/baz/foo/bar',
         );
       });
 
@@ -269,7 +269,7 @@ void main() {
 
         expect(
           path,
-          'foo/bar/{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}/foo/bar/baz',
+          'foo/bar/{{{$replacement}}}/foo/bar/baz',
         );
       });
     });
@@ -284,7 +284,7 @@ void main() {
 
         expect(
           path,
-          'foo/bar/baz/{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}',
+          'foo/bar/baz/{{{$replacement}}}',
         );
       });
 
@@ -297,7 +297,7 @@ void main() {
 
         expect(
           path,
-          'foo/bar/baz/foo/{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}',
+          'foo/bar/baz/foo/{{{$replacement}}}',
         );
       });
 
@@ -310,7 +310,7 @@ void main() {
 
         expect(
           path,
-          'foo/bar/baz/foo/bar/{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}',
+          'foo/bar/baz/foo/bar/{{{$replacement}}}',
         );
       });
     });
@@ -329,7 +329,7 @@ void main() {
 
         expect(
           path,
-          '{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}/bar/baz/{{#snakeCase}}{{{$replacement2}}}{{/snakeCase}}',
+          '{{{$replacement}}}/bar/baz/{{{$replacement2}}}',
         );
       });
 
@@ -345,7 +345,7 @@ void main() {
 
         expect(
           path,
-          '{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}/{{#snakeCase}}{{{$replacement2}}}{{/snakeCase}}/baz/foo/bar',
+          '{{{$replacement}}}/{{{$replacement2}}}/baz/foo/bar',
         );
       });
     });
