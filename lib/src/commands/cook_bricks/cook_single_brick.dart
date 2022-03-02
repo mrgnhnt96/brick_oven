@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:brick_oven/src/key_listener.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:watcher/watcher.dart';
@@ -11,7 +12,6 @@ import 'package:watcher/watcher.dart';
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
-import 'package:brick_oven/src/key_listener.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:brick_oven/utils/mixins.dart';
 
@@ -26,12 +26,22 @@ class CookSingleBrick extends BrickOvenCommand
     FileSystem? fileSystem,
     Logger? logger,
     FileWatcher? configWatcher,
-  })  : configWatcher = configWatcher ?? FileWatcher(BrickOvenYaml.file),
+    KeyPressListener? keyPressListener,
+  })  : keyPressListener = keyPressListener ??
+            KeyPressListener(
+              stdin: stdin,
+              logger: logger,
+              toExit: exit,
+            ),
+        configWatcher = configWatcher ?? FileWatcher(BrickOvenYaml.file),
         super(fileSystem: fileSystem, logger: logger) {
     argParser
       ..addFlagsAndOptions()
       ..addSeparator('${'-' * 79}\n');
   }
+
+  /// {@macro key_press_listener}
+  final KeyPressListener keyPressListener;
 
   /// The brick to cook
   final Brick brick;
@@ -78,9 +88,7 @@ class CookSingleBrick extends BrickOvenCommand
       return ExitCode.ioError.code;
     }
 
-    if (stdin.hasTerminal) {
-      qToQuit(logger: logger);
-    }
+    keyPressListener.qToQuit();
 
     final ovenNeedsReset = await watchForConfigChanges(
       onChange: () async {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import 'package:brick_oven/src/key_listener.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -14,16 +15,19 @@ import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import '../../../utils/fakes.dart';
 import '../../../utils/mocks.dart';
+import 'cook_all_bricks_test.dart';
 
 void main() {
   late FileSystem fs;
   late CookSingleBrick brickOvenCommand;
   late Brick brick;
   late Logger mockLogger;
+  late KeyPressListener mockKeyPressListener;
 
   setUp(() {
     fs = MemoryFileSystem();
     mockLogger = MockLogger();
+    mockKeyPressListener = MockKeyPressListener();
 
     when(() => mockLogger.progress(any())).thenReturn(([_]) => (String _) {});
 
@@ -126,6 +130,7 @@ bricks:
           if (watch == true) 'watch': true,
         },
         allowConfigChanges: allowConfigChanges,
+        keyPressListener: mockKeyPressListener,
       );
     }
 
@@ -147,6 +152,7 @@ bricks:
 
           verify(mockLogger.cooking).called(1);
           verify(mockLogger.watching).called(1);
+          verify(mockKeyPressListener.qToQuit).called(1);
 
           verify(() => mockBrick.cook(output: 'output/dir', watch: true))
               .called(1);
@@ -206,10 +212,12 @@ class TestCookSingleBrick extends CookSingleBrick {
     Logger? logger,
     Brick? brick,
     this.allowConfigChanges = false,
+    KeyPressListener? keyPressListener,
   })  : _argResults = argResults,
         super(
           brick ?? FakeBrick(),
           logger: logger,
+          keyPressListener: keyPressListener,
         );
 
   final Map<String, dynamic> _argResults;

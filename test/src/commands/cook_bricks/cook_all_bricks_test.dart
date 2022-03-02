@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import 'package:brick_oven/src/key_listener.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -12,11 +13,21 @@ import 'package:brick_oven/utils/extensions.dart';
 import '../../../utils/fakes.dart';
 import '../../../utils/mocks.dart';
 
+class MockKeyPressListener extends Mock implements KeyPressListener {}
+
 void main() {
   late CookAllBricks command;
+  late MockLogger mockLogger;
+  late MockKeyPressListener mockKeyPressListener;
 
   setUp(() {
-    command = CookAllBricks();
+    mockLogger = MockLogger();
+    mockKeyPressListener = MockKeyPressListener();
+
+    command = CookAllBricks(
+      logger: mockLogger,
+      keyPressListener: mockKeyPressListener,
+    );
   });
 
   group('$CookAllBricks', () {
@@ -88,6 +99,7 @@ void main() {
           if (watch == true) 'watch': true,
         },
         allowConfigChanges: allowConfigChanges,
+        keyPressListener: mockKeyPressListener,
       );
     }
 
@@ -110,6 +122,7 @@ void main() {
 
           verify(mockLogger.cooking).called(1);
           verify(mockLogger.watching).called(1);
+          verify(mockKeyPressListener.qToQuit).called(1);
 
           verify(() => mockBrick.cook(output: 'output/dir', watch: true))
               .called(1);
@@ -195,8 +208,12 @@ class TestCookAllBricks extends CookAllBricks {
     this.bricks = const {},
     Logger? logger,
     this.allowConfigChanges = false,
+    KeyPressListener? keyPressListener,
   })  : _argResults = argResults ?? <String, dynamic>{},
-        super(logger: logger);
+        super(
+          logger: logger,
+          keyPressListener: keyPressListener,
+        );
 
   final Map<String, dynamic> _argResults;
 

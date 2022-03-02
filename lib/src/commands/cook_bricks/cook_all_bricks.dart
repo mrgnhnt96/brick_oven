@@ -24,12 +24,22 @@ class CookAllBricks extends BrickOvenCommand
     FileSystem? fileSystem,
     Logger? logger,
     FileWatcher? configWatcher,
-  })  : configWatcher = configWatcher ?? FileWatcher(BrickOvenYaml.file),
+    KeyPressListener? keyPressListener,
+  })  : keyPressListener = keyPressListener ??
+            KeyPressListener(
+              stdin: stdin,
+              logger: logger,
+              toExit: exit,
+            ),
+        configWatcher = configWatcher ?? FileWatcher(BrickOvenYaml.file),
         super(fileSystem: fileSystem, logger: logger) {
     argParser
       ..addFlagsAndOptions()
       ..addSeparator('${'-' * 79}\n');
   }
+
+  /// {@macro key_press_listener}
+  final KeyPressListener keyPressListener;
 
   @override
   final FileWatcher configWatcher;
@@ -87,9 +97,7 @@ class CookAllBricks extends BrickOvenCommand
 
     logger.watching();
 
-    if (stdin.hasTerminal) {
-      qToQuit(logger: logger);
-    }
+    keyPressListener.qToQuit();
 
     final ovenNeedsReset = await watchForConfigChanges(
       onChange: () async {
