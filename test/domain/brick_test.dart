@@ -48,6 +48,25 @@ void main() {
       expectLater(result, brick);
     });
 
+    test('throws argument error non strings are provided to excluded paths',
+        () {
+      final brick = Brick(
+        configuredDirs: [
+          BrickPath(name: const Name('name'), path: 'path/to/dir')
+        ],
+        configuredFiles: const [BrickFile('file/path/name.dart')],
+        name: 'brick',
+        source: BrickSource(localPath: 'localPath'),
+      );
+
+      final data = brick.toJson();
+      data['exclude'] =
+          FakeYamlList(<dynamic>['list', FakeYamlMap(<String, dynamic>{})]);
+      final yaml = FakeYamlMap(data);
+
+      expect(() => Brick.fromYaml(brick.name, yaml), throwsArgumentError);
+    });
+
     test('throws argument error when extra keys are provided', () {
       final brick = Brick(
         configuredDirs: [

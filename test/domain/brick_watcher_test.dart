@@ -1,11 +1,11 @@
+import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:file/file.dart';
-import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 import 'package:watcher/watcher.dart';
 
-import 'package:brick_oven/domain/brick_watcher.dart';
+import '../utils/reflect_properties.dart';
 import '../utils/testing_env.dart';
 
 void main() {
@@ -48,17 +48,6 @@ void main() {
           () => BrickWatcher.config(
             dirPath: fs.currentDirectory.path,
             watcher: MockDirectoryWatcher(),
-          ),
-          returnsNormally,
-        );
-      });
-
-      test('should create an instance with explicit logger', () {
-        expect(
-          () => BrickWatcher.config(
-            dirPath: fs.currentDirectory.path,
-            watcher: MockDirectoryWatcher(),
-            logger: Logger(),
           ),
           returnsNormally,
         );
@@ -222,6 +211,22 @@ void main() {
         await watcher.stop();
 
         expect(watcher.listener, isNull);
+      });
+    });
+
+    group('#props', () {
+      late BrickWatcher watcher;
+
+      setUp(() {
+        watcher = BrickWatcher('dirPath');
+      });
+
+      test('should return the correct length in props', () {
+        expect(reflectProperties(watcher).length, watcher.props.length);
+      });
+
+      test('should contain dir path', () {
+        expect(watcher.props, contains('dirPath'));
       });
     });
   });
