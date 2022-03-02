@@ -156,7 +156,7 @@ class BrickSource extends Equatable {
   }
 
   @override
-  List<Object?> get props => [localPath];
+  List<Object?> get props => [localPath, watcher];
 }
 
 extension on Iterable<BrickFile> {
