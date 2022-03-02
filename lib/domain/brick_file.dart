@@ -157,8 +157,12 @@ class BrickFile extends Equatable {
 
       return;
     }
-
-    var content = sourceFile.readAsStringSync();
+    String content;
+    try {
+      content = sourceFile.readAsStringSync();
+    } catch (e) {
+      return;
+    }
 
     const loopSetUp = '---set-up-loop---';
 
