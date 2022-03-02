@@ -52,7 +52,9 @@ class KeyPressListener {
     keyListener(keys: keyPresses);
   }
 
-  static Stream<List<int>>? _stream;
+  /// the stream of key presses
+  @visibleForTesting
+  static Stream<List<int>>? stream;
 
   /// listens for keypresses
   @visibleForTesting
@@ -76,9 +78,9 @@ class KeyPressListener {
       ..lineMode = false
       ..echoMode = false;
 
-    _stream ??= _stdin.asBroadcastStream();
+    stream ??= _stdin.asBroadcastStream();
 
-    _stream!.listen((codes) {
+    stream!.listen((codes) {
       onListen(codes, keys);
     });
   }

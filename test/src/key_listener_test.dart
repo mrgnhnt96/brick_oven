@@ -26,6 +26,8 @@ void main() {
       reset(mockStdout);
       reset(mockStdin);
 
+      KeyPressListener.stream = null;
+
       when(() => mockStdin.hasTerminal).thenReturn(true);
       when(() => mockStdout.supportsAnsiEscapes).thenReturn(true);
       mockLogger = MockLogger();
@@ -51,13 +53,15 @@ void main() {
 
     test(
       'sets up key listener',
-      () {
+      () async {
         keyPressListener.qToQuit();
 
         verify(mockLogger.qToQuit).called(1);
 
         verify(() => mockStdin.lineMode = false).called(1);
         verify(() => mockStdin.echoMode = false).called(1);
+
+        await Future<void>.delayed(const Duration(milliseconds: 200));
 
         verify(
           mockStdin.asBroadcastStream,
@@ -91,6 +95,7 @@ void main() {
             [0x1b]
           ]),
         );
+
         var qPressed = false, escPressed = false;
         keyPressListener.keyListener(
           keys: {
@@ -103,7 +108,7 @@ void main() {
           } as KeyMap,
         );
 
-        await Future<void>.delayed(const Duration(milliseconds: 100));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
 
         expect(qPressed, isTrue);
         expect(escPressed, isTrue);
