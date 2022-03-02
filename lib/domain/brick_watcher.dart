@@ -1,6 +1,8 @@
+// ignore_for_file: must_be_immutable
+
 import 'dart:async';
 
-import 'package:mason_logger/mason_logger.dart';
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
@@ -10,26 +12,20 @@ typedef OnEvent = void Function();
 /// {@template brick_watcher}
 /// Watches the local files, and updates on events
 /// {@endtemplate}
-class BrickWatcher {
+class BrickWatcher extends Equatable {
   /// {@macro brick_watcher}
-  BrickWatcher(this.dirPath, {Logger? logger})
-      : watcher = DirectoryWatcher(dirPath),
-        logger = logger ?? Logger();
+  BrickWatcher(this.dirPath) : _watcher = DirectoryWatcher(dirPath);
 
   /// allows to set the watcher
   /// to be used only for testing
   @visibleForTesting
   BrickWatcher.config({
     required this.dirPath,
-    required this.watcher,
-    Logger? logger,
-  }) : logger = logger ?? Logger();
-
-  /// The logger
-  final Logger logger;
+    required DirectoryWatcher watcher,
+  }) : _watcher = watcher;
 
   /// the source directory of the brick, which will be watched
-  final DirectoryWatcher watcher;
+  final DirectoryWatcher _watcher;
 
   /// the source directory of the brick, which will be watched
   final String dirPath;
@@ -84,7 +80,7 @@ class BrickWatcher {
       return reset();
     }
 
-    _listener = watcher.events.listen((watchEvent) {
+    _listener = _watcher.events.listen((watchEvent) {
       // finishes the watcher
       _hasRun = true;
 
@@ -101,7 +97,7 @@ class BrickWatcher {
       }
     });
 
-    await watcher.ready;
+    await _watcher.ready;
   }
 
   /// resets the watcher by stopping it and restarting it
@@ -116,4 +112,7 @@ class BrickWatcher {
     await _listener?.cancel();
     _listener = null;
   }
+
+  @override
+  List<Object?> get props => [dirPath];
 }
