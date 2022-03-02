@@ -117,7 +117,7 @@ class BrickFile extends Equatable {
       return basename(path);
     }
 
-    return '${name!.format(MustacheFormat.snakeCase)}$extension';
+    return '${name!.formatted}$extension';
   }
 
   /// all of the extensions of the file

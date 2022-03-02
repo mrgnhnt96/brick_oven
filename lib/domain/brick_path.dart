@@ -4,7 +4,6 @@ import 'package:path/path.dart';
 
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/enums/mustache_format.dart';
 
 /// {@template brick_path}
 /// The configuration of the path that will be updated to mustache
@@ -123,7 +122,7 @@ class BrickPath extends Equatable {
     // ignore: parameter_assignments
     path = normalize(path).replaceAll(slashPattern, '');
 
-    final replacement = '{{{${name.value}}}}';
+    final replacement = name.formatted;
 
     final pathParts = path.split(separatorPattern);
 
@@ -139,5 +138,5 @@ class BrickPath extends Equatable {
   }
 
   @override
-  List<Object?> get props => [name, path, placeholder];
+  List<Object?> get props => [name, path, placeholder, originalPath];
 }
