@@ -5,52 +5,81 @@ import 'dart:io';
 import 'package:mason_logger/mason_logger.dart';
 
 import 'package:brick_oven/utils/extensions.dart';
+import 'package:meta/meta.dart';
 
-/// quits running the program after `q` is pressed
-void qToQuit({Logger? logger}) {
-  logger?.qToQuit();
+/// Type of Map<dynamic, void Function()>
+typedef KeyMap = Map<dynamic, FutureOr<void> Function()>;
 
-  keyListener(
-    keys: <dynamic, void Function()>{
-      'q': () async {
-        logger?.info('\nExiting...\n');
+/// {@template key_press_listener}
+/// A class that listens for key presses from [stdin]
+/// and emits the key presses to the stream.
+/// {@endtemplate}
+class KeyPressListener {
+  /// {@macro key_press_listener}
+  KeyPressListener({
+    required Stdin stdin,
+    required void Function(int) toExit,
+    Logger? logger,
+  })  : _stdin = stdin,
+        _toExit = toExit,
+        _logger = logger ?? Logger();
 
-        exit(ExitCode.success.code);
-      },
-      // escape key
-      0x1b: () {
-        logger?.qToQuit();
-      },
-    },
-    logger: logger,
-  );
-}
+  final Logger _logger;
+  final Stdin _stdin;
+  final void Function(int) _toExit;
 
-/// Returns a stream of keypresses.
-void keyListener({
-  required Map<dynamic, FutureOr<void> Function()> keys,
-  Logger? logger,
-}) {
-  if (!stdin.hasTerminal) {
-    throw StateError('stdin is not a terminal');
+  /// The key presses that can be detected.
+  @visibleForTesting
+  // ignore: unnecessary_cast
+  KeyMap get keyPresses => {
+        'q': () {
+          _logger.info('\nExiting...\n');
+
+          _toExit(ExitCode.success.code);
+        },
+        // escape key
+        0x1b: _logger.qToQuit,
+      } as KeyMap;
+
+  /// quits running the program after `q` is pressed
+  void qToQuit() {
+    if (!_stdin.hasTerminal) {
+      return;
+    }
+
+    _logger.qToQuit();
+
+    keyListener(keys: keyPresses);
   }
 
-  stdin
-    ..lineMode = false
-    ..echoMode = false
-    ..asBroadcastStream(
-      onListen: (listener) {
-        listener.onData((codes) {
-          final key = utf8.decode(codes);
+  Stream<List<int>>? _stream;
 
-          if (keys.containsKey(key)) {
-            keys[key]?.call();
-          } else if (keys.containsKey(codes)) {
-            keys[codes]?.call();
-          } else if (codes.length == 1 && keys.containsKey(codes[0])) {
-            keys[codes[0]]?.call();
-          }
-        });
-      },
-    );
+  /// listens for keypresses
+  @visibleForTesting
+  void onListen(List<int> codes, Map<dynamic, FutureOr<void> Function()> keys) {
+    final key = utf8.decode(codes);
+
+    if (keys.containsKey(key)) {
+      keys[key]?.call();
+    } else if (codes.length == 1 && keys.containsKey(codes[0])) {
+      keys[codes[0]]?.call();
+    }
+  }
+
+  /// Returns a stream of keypresses.
+  void keyListener({required KeyMap keys}) {
+    if (!_stdin.hasTerminal) {
+      throw StateError('stdin does not have terminal');
+    }
+
+    _stdin
+      ..lineMode = false
+      ..echoMode = false;
+
+    _stream ??= _stdin.asBroadcastStream();
+
+    _stream!.listen((codes) {
+      onListen(codes, keys);
+    });
+  }
 }
