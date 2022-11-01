@@ -9,7 +9,7 @@ upload_coverage:
   - curl -Os https://uploader.codecov.io/latest/macos/codecov
   - coverageKey=$(cat .codecov_secret); ./codecov -t "$coverageKey"
 
-runtests:
+test:
   - rm -rf coverage
   - dart run test -j 1 --coverage coverage -r expanded --test-randomize-ordering-seed random --timeout 60s
   - $coverage
@@ -18,3 +18,6 @@ prep:
   - dart analyze lib test
   - dart format lib test
   - dart pub global run import_sorter:main
+
+install:
+  - dart pub global activate --source path . --overwrite
