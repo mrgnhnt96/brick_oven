@@ -195,7 +195,8 @@ class BrickFile extends Equatable {
         final clean = looped.replaceAllMapped(
           RegExp(r'(\n*)({{[#^/][\w-]+}})$(\n*)', multiLine: true),
           (match) {
-            var before = '', after = '';
+            var before = '';
+            var after = '';
 
             final beforeMatch = match.group(1);
             if (beforeMatch != null && beforeMatch.isNotEmpty) {
@@ -218,7 +219,9 @@ class BrickFile extends Equatable {
         return content.replaceAllMapped(variablePattern, (match) {
           final possibleSection = match.group(1);
           MustacheSections? section;
-          String result, suffix = '', prefix = '';
+          String result;
+          var suffix = '';
+          var prefix = '';
 
           // check for section or loop
           if (possibleSection != null && possibleSection.isNotEmpty) {

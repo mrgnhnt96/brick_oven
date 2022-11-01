@@ -169,7 +169,7 @@ class Brick extends Equatable {
         );
       }
 
-      done('$name: $count file${count == 1 ? '' : 's'}');
+      done.complete('$name: $count file${count == 1 ? '' : 's'}');
     }
 
     final watcher = source.watcher;

@@ -30,7 +30,9 @@ class Name extends Equatable {
   ///
   /// Parses from [value] from [YamlValue]
   factory Name.fromYamlValue(YamlValue value, [String? backup]) {
-    String? name, prefix, suffix;
+    String? name;
+    String? prefix;
+    String? suffix;
     MustacheFormat? format;
 
     if (value.isYaml()) {

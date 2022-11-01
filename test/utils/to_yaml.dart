@@ -53,11 +53,16 @@ extension BrickPathX on BrickPath {
     bool? inferred,
     bool? asKey,
   }) {
-    if (inferred == true) {
+    inferred ??= false;
+    asKey ??= false;
+
+    if (inferred) {
       return <String, dynamic>{
         path: null,
       };
-    } else if (asKey == true) {
+    }
+
+    if (asKey) {
       return <String, dynamic>{
         path: FakeYamlMap(<String, dynamic>{
           'name': FakeYamlMap(
@@ -69,11 +74,11 @@ extension BrickPathX on BrickPath {
           )
         }),
       };
-    } else {
-      return <String, dynamic>{
-        path: name.value,
-      };
     }
+
+    return <String, dynamic>{
+      path: name.value,
+    };
   }
 }
 

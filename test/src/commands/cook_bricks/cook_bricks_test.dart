@@ -10,7 +10,7 @@ import 'package:brick_oven/src/runner.dart';
 void main() {
   late FileSystem fs;
   late CookBricksCommand brickOvenCommand;
-  late CommandRunner runner;
+  late CommandRunner<void> runner;
 
   setUp(() {
     fs = MemoryFileSystem();

@@ -91,12 +91,13 @@ void main() {
       bool? watch,
       bool allowConfigChanges = false,
     }) {
+      watch ??= false;
       return TestCookAllBricks(
         logger: mockLogger,
         bricks: {mockBrick},
         argResults: <String, dynamic>{
           'output': 'output/dir',
-          if (watch == true) 'watch': true,
+          if (watch) 'watch': true,
         },
         allowConfigChanges: allowConfigChanges,
         keyPressListener: mockKeyPressListener,

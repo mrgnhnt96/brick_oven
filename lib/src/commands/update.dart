@@ -31,34 +31,32 @@ class UpdateCommand extends BrickOvenCommand {
     try {
       latestVersion = await _pubUpdater.getLatestVersion(packageName);
     } catch (error) {
-      updateCheckDone();
+      updateCheckDone.complete();
       logger.err('$error');
 
       return ExitCode.software.code;
     }
 
-    updateCheckDone('Checked for updates');
+    updateCheckDone.update('Successfully checked for updates');
 
     final isUpToDate = packageVersion == latestVersion;
 
     if (isUpToDate) {
-      logger.info('brick_oven is already at the latest version.');
+      updateCheckDone.complete('brick_oven is already at the latest version.');
 
       return ExitCode.success.code;
     }
 
-    final updateDone = logger.progress('Updating to $latestVersion');
-
     try {
       await _pubUpdater.update(packageName: packageName);
     } catch (error) {
-      updateDone();
+      updateCheckDone.fail('Failed to update brick_oven');
       logger.err('$error');
 
       return ExitCode.software.code;
     }
 
-    updateDone('Updated to $latestVersion');
+    updateCheckDone.complete('Updated to $latestVersion');
 
     return ExitCode.success.code;
   }

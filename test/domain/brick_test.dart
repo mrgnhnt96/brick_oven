@@ -1,17 +1,17 @@
 // ignore_for_file: unnecessary_cast
 
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:path/path.dart';
-import 'package:test/test.dart';
-
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/name.dart';
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:path/path.dart';
+import 'package:test/test.dart';
+
 import '../utils/fakes.dart';
 import '../utils/mocks.dart';
 import '../utils/reflect_properties.dart';
@@ -270,7 +270,7 @@ void main() {
       fs = MemoryFileSystem();
       mockLogger = MockLogger();
 
-      when(() => mockLogger.progress(any())).thenReturn(([_]) => (String _) {});
+      when(() => mockLogger.progress(any())).thenReturn(FakeProgress());
     });
 
     Brick brick({

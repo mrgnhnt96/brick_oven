@@ -47,14 +47,14 @@ mixin ConfigWatcherMixin {
   }) async {
     final watchCompleter = Completer<void>();
 
-    final _yamlListener = configWatcher.events.listen((event) async {
+    final yamlListener = configWatcher.events.listen((event) async {
       await onChange?.call();
 
       watchCompleter.complete();
     });
 
     await watchCompleter.future;
-    await _yamlListener.cancel();
+    await yamlListener.cancel();
 
     return true;
   }

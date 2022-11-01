@@ -9,6 +9,7 @@ import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/update.dart';
 import 'package:brick_oven/src/package_details.dart';
 import 'package:brick_oven/src/runner.dart';
+import '../../utils/fakes.dart';
 import '../../utils/mocks.dart';
 
 class FakeProcessResult extends Fake implements ProcessResult {}
@@ -43,7 +44,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('bricks:');
 
-      when(() => logger.progress(any())).thenReturn(([String? _]) {});
+      when(() => logger.progress(any())).thenReturn(FakeProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -100,7 +101,7 @@ void main() {
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => latestVersion);
 
-      when(() => logger.progress(any())).thenReturn(([String? message]) {});
+      when(() => logger.progress(any())).thenReturn(FakeProgress());
 
       final result = await commandRunner.run(['update']);
 
@@ -116,7 +117,7 @@ void main() {
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
 
-      when(() => logger.progress(any())).thenReturn(([String? message]) {});
+      when(() => logger.progress(any())).thenReturn(FakeProgress());
 
       final result = await commandRunner.run(['update']);
 

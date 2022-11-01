@@ -14,13 +14,13 @@ class BrickPath extends Equatable {
     required Name name,
     required String path,
   }) {
-    final _path = cleanPath(path);
+    final cleanPath = BrickPath.cleanPath(path);
 
     return BrickPath._(
       name: name,
       originalPath: path,
-      path: _path,
-      placeholder: basename(_path),
+      path: cleanPath,
+      placeholder: basename(cleanPath),
     );
   }
 

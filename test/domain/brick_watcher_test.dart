@@ -11,7 +11,8 @@ import '../utils/testing_env.dart';
 void main() {
   group('$BrickWatcher', () {
     late FileSystem fs;
-    late BrickWatcher watcher, brickWatcher;
+    late BrickWatcher watcher;
+    late BrickWatcher brickWatcher;
     late File file;
 
     setUp(() {

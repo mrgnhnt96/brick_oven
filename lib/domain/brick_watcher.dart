@@ -36,9 +36,9 @@ class BrickWatcher extends Equatable {
   @visibleForTesting
   StreamSubscription<WatchEvent>? get listener => _listener;
 
-  final _beforeEvents = <OnEvent>[],
-      _afterEvents = <OnEvent>[],
-      _events = <OnEvent>[];
+  final _beforeEvents = <OnEvent>[];
+  final _afterEvents = <OnEvent>[];
+  final _events = <OnEvent>[];
 
   /// events to be called for each brick that gets cooked
   @visibleForTesting

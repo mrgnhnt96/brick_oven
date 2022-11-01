@@ -96,7 +96,8 @@ void main() {
           ]),
         );
 
-        var qPressed = false, escPressed = false;
+        var qPressed = false;
+        var escPressed = false;
         keyPressListener.keyListener(
           keys: {
             'q': () {
