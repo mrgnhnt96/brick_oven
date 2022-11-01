@@ -12,3 +12,5 @@ class MockLogger extends Mock implements Logger {}
 class MockPubUpdater extends Mock implements PubUpdater {}
 
 class MockBrickWatcher extends Mock implements BrickWatcher {}
+
+class MockProgress extends Mock implements Progress {}

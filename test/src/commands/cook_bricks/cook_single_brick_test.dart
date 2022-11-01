@@ -23,13 +23,19 @@ void main() {
   late Brick brick;
   late Logger mockLogger;
   late KeyPressListener mockKeyPressListener;
+  late Progress mockProgress;
 
   setUp(() {
     fs = MemoryFileSystem();
     mockLogger = MockLogger();
     mockKeyPressListener = MockKeyPressListener();
+    mockProgress = MockProgress();
 
-    when(() => mockLogger.progress(any())).thenReturn(FakeProgress());
+    when(() => mockProgress.complete(any())).thenReturn(voidCallback());
+    when(() => mockProgress.fail(any())).thenReturn(voidCallback());
+    when(() => mockProgress.update(any())).thenReturn(voidCallback());
+
+    when(() => mockLogger.progress(any())).thenReturn(mockProgress);
 
     fs.file(BrickOvenYaml.file)
       ..createSync()

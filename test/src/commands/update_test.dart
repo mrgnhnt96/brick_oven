@@ -34,17 +34,24 @@ void main() {
     late Logger logger;
     late PubUpdater pubUpdater;
     late BrickOvenRunner commandRunner;
+    late Progress mockProgress;
 
     setUp(() {
       logger = MockLogger();
       pubUpdater = MockPubUpdater();
+      mockProgress = MockProgress();
+
       final fs = MemoryFileSystem();
 
       fs.file(BrickOvenYaml.file)
         ..createSync(recursive: true)
         ..writeAsStringSync('bricks:');
 
-      when(() => logger.progress(any())).thenReturn(FakeProgress());
+      when(() => mockProgress.complete(any())).thenReturn(voidCallback());
+      when(() => mockProgress.fail(any())).thenReturn(voidCallback());
+      when(() => mockProgress.update(any())).thenReturn(voidCallback());
+
+      when(() => logger.progress(any())).thenReturn(mockProgress);
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -70,7 +77,7 @@ void main() {
       expect(result, equals(ExitCode.software.code));
 
       verify(() => logger.progress('Checking for updates')).called(1);
-      verify(() => logger.err('Exception: oops'));
+      verify(() => mockProgress.fail('Failed to get latest version'));
       verifyNever(
         () => pubUpdater.update(packageName: any(named: 'packageName')),
       );
@@ -90,7 +97,7 @@ void main() {
       expect(result, equals(ExitCode.software.code));
 
       verify(() => logger.progress('Checking for updates')).called(1);
-      verify(() => logger.err('Exception: oops'));
+      verify(() => mockProgress.fail('Failed to update brick_oven'));
       verify(
         () => pubUpdater.update(packageName: any(named: 'packageName')),
       ).called(1);
@@ -101,15 +108,22 @@ void main() {
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => latestVersion);
 
-      when(() => logger.progress(any())).thenReturn(FakeProgress());
+      when(() => logger.progress(any())).thenReturn(mockProgress);
 
       final result = await commandRunner.run(['update']);
 
       expect(result, equals(ExitCode.success.code));
 
       verify(() => logger.progress('Checking for updates')).called(1);
-      verify(() => logger.progress('Updating to $latestVersion')).called(1);
+      verify(() => mockProgress.update('Successfully checked for updates'))
+          .called(1);
+      verify(() => mockProgress.update('Updating to $latestVersion')).called(1);
       verify(() => pubUpdater.update(packageName: packageName)).called(1);
+      verify(
+        () => mockProgress.complete(
+          'Successfully updated brick_oven to $latestVersion',
+        ),
+      ).called(1);
     });
 
     test('does not update when already on latest version', () async {
@@ -117,14 +131,15 @@ void main() {
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
 
-      when(() => logger.progress(any())).thenReturn(FakeProgress());
+      when(() => logger.progress(any())).thenReturn(mockProgress);
 
       final result = await commandRunner.run(['update']);
 
       expect(result, equals(ExitCode.success.code));
 
       verify(
-        () => logger.info('brick_oven is already at the latest version.'),
+        () => mockProgress
+            .complete('brick_oven is already at the latest version.'),
       ).called(1);
       verifyNever(() => logger.progress('Updating to $latestVersion'));
       verifyNever(() => pubUpdater.update(packageName: packageName));

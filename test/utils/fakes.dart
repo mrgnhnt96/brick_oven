@@ -1,13 +1,11 @@
 import 'dart:collection';
 
 import 'package:args/args.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:yaml/yaml.dart';
-
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:yaml/yaml.dart';
 
 class FakeYamlList extends Fake with ListMixin<dynamic> implements YamlList {
   FakeYamlList(List<dynamic> list) : _value = list;
@@ -56,5 +54,3 @@ class FakeBrickSource extends Fake implements BrickSource {
   @override
   final BrickWatcher watcher;
 }
-
-class FakeProgress extends Fake implements Progress {}

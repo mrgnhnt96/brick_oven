@@ -8,6 +8,7 @@ import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
@@ -91,7 +92,8 @@ void main() {
     () {
       late FileSystem fs;
       late BrickWatcher mockWatcher;
-      // ignore: prefer_function_declarations_over_variables, omit_local_variable_types
+      late Logger mockLogger;
+      late Progress mockProgress;
 
       setUp(() {
         fs = MemoryFileSystem();
@@ -100,6 +102,17 @@ void main() {
         when(() => mockWatcher.addEvent(any())).thenReturn(voidCallback());
         when(mockWatcher.start).thenAnswer((_) => Future.value());
         when(() => mockWatcher.hasRun).thenReturn(false);
+
+        mockProgress = MockProgress();
+
+        when(() => mockProgress.complete(any())).thenReturn(voidCallback());
+        when(() => mockProgress.fail(any())).thenReturn(voidCallback());
+        when(() => mockProgress.update(any())).thenReturn(voidCallback());
+
+        mockLogger = MockLogger();
+
+        when(() => mockLogger.progress(any())).thenReturn(mockProgress);
+        when(() => mockLogger.success(any())).thenReturn(null);
       });
 
       Brick brick({bool mockWatch = false}) {
@@ -113,6 +126,7 @@ void main() {
           configuredDirs: const [],
           configuredFiles: const [],
           fileSystem: fs,
+          logger: mockLogger,
         );
       }
 
@@ -264,13 +278,20 @@ void main() {
 
   group('#writeBrick', () {
     late FileSystem fs;
-    late MockLogger mockLogger;
+    late Logger mockLogger;
+    late Progress mockProgress;
 
     setUp(() {
       fs = MemoryFileSystem();
       mockLogger = MockLogger();
+      mockProgress = MockProgress();
 
-      when(() => mockLogger.progress(any())).thenReturn(FakeProgress());
+      when(() => mockProgress.complete(any())).thenReturn(voidCallback());
+      when(() => mockProgress.fail(any())).thenReturn(voidCallback());
+      when(() => mockProgress.update(any())).thenReturn(voidCallback());
+
+      when(() => mockLogger.progress(any())).thenReturn(mockProgress);
+      when(() => mockLogger.success(any())).thenReturn(null);
     });
 
     Brick brick({
