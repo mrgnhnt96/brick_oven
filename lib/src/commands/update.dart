@@ -31,8 +31,7 @@ class UpdateCommand extends BrickOvenCommand {
     try {
       latestVersion = await _pubUpdater.getLatestVersion(packageName);
     } catch (error) {
-      updateCheckDone.complete();
-      logger.err('$error');
+      updateCheckDone.fail('Failed to get latest version');
 
       return ExitCode.software.code;
     }
@@ -48,15 +47,16 @@ class UpdateCommand extends BrickOvenCommand {
     }
 
     try {
+      updateCheckDone.update('Updating to $latestVersion');
       await _pubUpdater.update(packageName: packageName);
     } catch (error) {
       updateCheckDone.fail('Failed to update brick_oven');
-      logger.err('$error');
 
       return ExitCode.software.code;
     }
 
-    updateCheckDone.complete('Updated to $latestVersion');
+    updateCheckDone
+        .complete('Successfully updated brick_oven to $latestVersion');
 
     return ExitCode.success.code;
   }
