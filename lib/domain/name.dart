@@ -1,9 +1,9 @@
 import 'package:autoequal/autoequal.dart';
-import 'package:equatable/equatable.dart';
-
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions.dart';
+import 'package:equatable/equatable.dart';
 
 part 'name.g.dart';
 
@@ -25,7 +25,7 @@ class Name extends Equatable {
   /// {@macro name}
   ///
   /// Parses from [value] to [YamlValue]
-  factory Name.from(dynamic value, [String? backup]) {
+  factory Name.from(dynamic value, String backup) {
     final nameConfigYaml = YamlValue.from(value);
 
     return Name.fromYamlValue(nameConfigYaml, backup);
@@ -34,7 +34,7 @@ class Name extends Equatable {
   /// {@macro name}
   ///
   /// Parses from [value] from [YamlValue]
-  factory Name.fromYamlValue(YamlValue value, [String? backup]) {
+  factory Name.fromYamlValue(YamlValue value, String backup) {
     String? name;
     String? prefix;
     String? suffix;
@@ -49,13 +49,10 @@ class Name extends Equatable {
       format = MustacheFormat.values
           .getMustacheValue(nameConfig.remove('format') as String?);
 
-      if (name == null) {
-        throw ArgumentError('The name was not provided');
-      }
-
       if (nameConfig.isNotEmpty == true) {
-        throw ArgumentError(
-          'Unrecognized keys in file config: ${nameConfig.keys}',
+        throw VariableException(
+          variable: name,
+          reason: 'Unknown keys: "${nameConfig.keys.join('", "')}"',
         );
       }
 
@@ -64,10 +61,8 @@ class Name extends Equatable {
       name = value.asString().value;
 
       return Name(name);
-    } else if (backup != null) {
-      return Name(backup);
     } else {
-      throw ArgumentError('The name was not provided');
+      return Name(backup);
     }
   }
 
