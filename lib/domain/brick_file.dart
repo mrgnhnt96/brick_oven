@@ -6,6 +6,7 @@ import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
@@ -46,9 +47,10 @@ class BrickFile extends Equatable {
     required String path,
   }) {
     if (yaml == null) {
-      throw ArgumentError(
-        'There are not any configurations for $path, '
-        'please remove it or add congfiguration',
+      throw FileException(
+        file: path,
+        reason: 'Missing configuration, please remove this '
+            'file or add configuration',
       );
     }
 
@@ -63,7 +65,13 @@ class BrickFile extends Equatable {
 
       for (final entry in variablesData.entries) {
         final name = entry.key as String;
-        yield Variable.from(name, entry.value);
+        try {
+          yield Variable.from(name, entry.value);
+        } on VariableException catch (e) {
+          throw FileException(file: path, reason: e.message);
+        } catch (_) {
+          rethrow;
+        }
       }
     }
 
@@ -73,16 +81,25 @@ class BrickFile extends Equatable {
 
     // name's value can be omitted
     if (!nameYaml.isNone() || yaml.value.containsKey('name')) {
-      name = Name.fromYamlValue(nameYaml, basenameWithoutExtension(path));
+      try {
+        name = Name.fromYamlValue(nameYaml, basenameWithoutExtension(path));
+      } on VariableException catch (e) {
+        throw FileException(file: path, reason: e.message);
+      } catch (_) {
+        rethrow;
+      }
     }
 
     if (data.isNotEmpty) {
-      throw ArgumentError('Unrecognized keys in file config: ${data.keys}');
+      throw FileException(
+        file: path,
+        reason: 'Unknown keys: "${data.keys.join('", "')}"',
+      );
     }
 
     return BrickFile._fromYaml(
       path,
-      variables: variables(),
+      variables: variables().toList(),
       name: name,
     );
   }
@@ -91,8 +108,7 @@ class BrickFile extends Equatable {
   final String path;
 
   /// All variables that the content contains and will be updated with
-  @ignoreAutoequal
-  final Iterable<Variable> variables;
+  final List<Variable> variables;
 
   @includeAutoequal
   List<Variable> get _variableForProps => variables.toList();
@@ -225,20 +241,6 @@ class BrickFile extends Equatable {
 
       String checkForVariables(String content) {
         return content.replaceAllMapped(variablePattern, (match) {
-          final completeMatch = match.group(0);
-
-          if (completeMatch != null && completeMatch.isNotEmpty) {
-            if (completeMatch.startsWith('{') || completeMatch.endsWith('}')) {
-              throw ArgumentError(
-                'Please remove curly braces from variable `$completeMatch` '
-                    'found in ${sourceFile.path}\n'
-                    'This will cause unexpected behavior '
-                    'when creating the brick',
-                'Symbol `{` or `}` found in variable',
-              );
-            }
-          }
-
           final possibleSection = match.group(1);
           MustacheSections? section;
           String result;
@@ -253,6 +255,29 @@ class BrickFile extends Equatable {
               prefix = possibleSection;
             } else {
               prefix = prefix.replaceAll(section.matcher, '');
+            }
+          }
+
+          if (section == null &&
+              possibleSection?.startsWith(RegExp(r'{{[\^#\\]')) == false) {
+            final completeMatch = match.group(0);
+
+            if (completeMatch != null && completeMatch.isNotEmpty) {
+              if (completeMatch.startsWith('{') ||
+                  completeMatch.endsWith('}')) {
+                final variableError = VariableException(
+                  variable: completeMatch,
+                  reason: 'Please remove curly braces from variable '
+                      '`$completeMatch` '
+                      'This will cause unexpected behavior '
+                      'when creating the brick',
+                );
+
+                throw FileException(
+                  file: sourceFile.path,
+                  reason: variableError.message,
+                );
+              }
             }
           }
 
