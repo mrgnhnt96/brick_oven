@@ -47,25 +47,26 @@ void main() {
       () {
         when(() => mockStdin.hasTerminal).thenReturn(false);
 
-        expect(() => keyPressListener.qToQuit(), returnsNormally);
+        expect(() => keyPressListener.listenToKeystrokes(), returnsNormally);
       },
     );
 
     test(
       'sets up key listener',
       () async {
-        keyPressListener.qToQuit();
+        verifyNever(mockStdin.asBroadcastStream);
+        verifyNever(() => mockLogger.info(any()));
 
-        verify(mockLogger.qToQuit).called(1);
+        keyPressListener.listenToKeystrokes();
+
+        verify(() => mockLogger.info(any())).called(2);
 
         verify(() => mockStdin.lineMode = false).called(1);
         verify(() => mockStdin.echoMode = false).called(1);
 
         await Future<void>.delayed(const Duration(milliseconds: 200));
 
-        verify(
-          mockStdin.asBroadcastStream,
-        ).called(1);
+        verify(mockStdin.asBroadcastStream).called(1);
       },
     );
 
@@ -132,25 +133,45 @@ void main() {
         expect(() => action, isNotNull);
         expect(() => action, isA<Function>());
 
-        action!;
-        action();
+        action!.call();
 
         expect(hasExited, isTrue);
         expect(exitCode, 0);
         verify(() => mockLogger.info('\nExiting...\n')).called(1);
       });
-    });
 
-    test('"esc" logs', () {
-      final action = keyPressListener.keyPresses[0x1b];
+      test('"r" logs and exits with code 75', () {
+        var hasExited = false;
+        var exitCode = 1;
+        final action = KeyPressListener(
+          stdin: mockStdin,
+          logger: mockLogger,
+          toExit: (code) {
+            hasExited = true;
+            exitCode = code;
+          },
+        ).keyPresses['r'];
 
-      expect(() => action, isNotNull);
-      expect(() => action, isA<Function>());
+        expect(() => action, isNotNull);
+        expect(() => action, isA<Function>());
 
-      action!;
-      action();
+        action!.call();
 
-      verify(mockLogger.qToQuit).called(1);
+        expect(hasExited, isTrue);
+        expect(exitCode, 75);
+        verify(() => mockLogger.info('\nRestarting...\n')).called(1);
+      });
+
+      test('"esc" logs', () {
+        final action = keyPressListener.keyPresses[0x1b];
+
+        expect(() => action, isNotNull);
+        expect(() => action, isA<Function>());
+
+        action!.call();
+
+        verify(() => mockLogger.info(any())).called(2);
+      });
     });
   });
 }
