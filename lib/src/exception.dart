@@ -9,6 +9,9 @@ class BrickOvenException implements Exception {
 
   /// The error message which will be displayed to the user via stderr.
   final String message;
+
+  @override
+  String toString() => message;
 }
 
 /// {@template brick_oven_not_found_exception}
@@ -60,4 +63,93 @@ class MaxUpdateException extends BrickOvenException {
   /// {@macro max_update_exception}
   const MaxUpdateException(int updates)
       : super('Reached the maximum number of updates ($updates) allowed.');
+}
+
+/// {@template config_exception}
+/// An exception thrown when a configuration is invalid.
+/// {@endtemplate}
+abstract class ConfigException implements BrickOvenException {
+  @override
+  String toString() => message;
+}
+
+/// {@template variable_exception}
+/// An exception thrown when a variable is not configured correctly.
+/// {@endtemplate}
+class VariableException implements ConfigException {
+  /// {@macro variable_exception}
+  const VariableException({
+    required this.variable,
+    required this.reason,
+  });
+
+  /// the variable that is not configured correctly
+  final String variable;
+
+  /// the reason the variable is not configured correctly
+  final String reason;
+
+  @override
+  String get message => 'Variable "$variable" is invalid -- $reason';
+}
+
+/// {@template directory_exception}
+/// An exception thrown when a directory is not configured correctly.
+/// {@endtemplate}
+class DirectoryException implements ConfigException {
+  /// {@macro directory_exception}
+  const DirectoryException({
+    required this.directory,
+    required this.reason,
+  });
+
+  /// the directory that is not configured correctly
+  final String directory;
+
+  /// the reason the directory is not configured correctly
+  final String reason;
+
+  @override
+  String get message =>
+      'Invalid directory config: "$directory"\nReason: $reason';
+}
+
+/// {@template directory_exception}
+/// An exception thrown when a brick is not configured correctly.
+/// {@endtemplate}
+class BrickException implements ConfigException {
+  /// {@macro directory_exception}
+  const BrickException({
+    required this.brick,
+    required this.reason,
+  });
+
+  /// the directory that is not configured correctly
+  final String brick;
+
+  /// the reason the directory is not configured correctly
+  final String reason;
+
+  @override
+  String get message => 'Invalid brick config: "$brick"\nReason: $reason';
+}
+
+/// {@template config_exception}
+/// An exception thrown when a configuration is setup incorrectly.
+/// {@endtemplate}
+class FileException implements ConfigException {
+  /// {@macro config_exception}
+  const FileException({
+    required this.file,
+    required this.reason,
+  });
+
+  /// the file that is not configured correctly
+  final String file;
+
+  /// the reason the file is not configured correctly
+  final String reason;
+
+  @override
+  String get message => 'Invalid file config: "$file"\nReason: $reason';
 }
