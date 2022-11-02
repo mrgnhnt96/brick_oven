@@ -57,7 +57,14 @@ class Brick extends Equatable {
   /// parses [yaml]
   factory Brick.fromYaml(String name, YamlMap? yaml) {
     final data = yaml?.data ?? <String, dynamic>{};
-    final source = BrickSource.fromYaml(YamlValue.from(data.remove('source')));
+    late final BrickSource source;
+    try {
+      source = BrickSource.fromYaml(YamlValue.from(data.remove('source')));
+    } on DirectoryException catch (e) {
+      throw BrickException(brick: name, reason: e.message);
+    } catch (_) {
+      rethrow;
+    }
 
     final filesData = data.remove('files') as YamlMap?;
     Iterable<BrickFile> files() sync* {

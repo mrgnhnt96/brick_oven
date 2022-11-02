@@ -54,16 +54,27 @@ class BrickSource extends Equatable {
     BrickSource handleYaml(YamlMap yaml) {
       final data = yaml.data;
 
-      final localPath = data.remove('path') as String?;
+      final localPath = YamlValue.from(data.remove('path'));
+
+      if (localPath.isNone()) {
+        return const BrickSource.none();
+      }
+
+      if (!localPath.isString()) {
+        throw const DirectoryException(
+          directory: '??',
+          reason: 'Source must contain a `path` key with a string value',
+        );
+      }
 
       if (data.isNotEmpty) {
         throw DirectoryException(
-          directory: localPath ?? '',
+          directory: localPath.asString().value,
           reason: 'Unknown keys: "${data.keys.join('", "')}"',
         );
       }
 
-      return BrickSource(localPath: localPath);
+      return BrickSource(localPath: localPath.asString().value);
     }
 
     if (yaml.isYaml()) {
