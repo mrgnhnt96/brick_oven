@@ -370,31 +370,20 @@ exclude:
       when(() => mockLogger.success(any())).thenReturn(null);
     });
 
-    Brick brick({
-      bool createFile = false,
-      bool createDir = false,
-      List<String>? fileNames,
-    }) {
-      return Brick.memory(
-        name: brickName,
-        logger: mockLogger,
-        source: BrickSource(localPath: localPath),
-        configuredDirs: [
-          if (createDir) BrickPath(name: const Name(newDirName), path: dirPath),
-        ],
-        configuredFiles: [
-          if (createFile && fileNames == null) BrickFile(filePath),
-          if (fileNames != null)
-            for (final name in fileNames) BrickFile(join(dirPath, name)),
-        ],
-        fileSystem: fs,
-      );
-    }
-
     test(
       'uses default directory bricks/{name}/__brick__ when path not provided',
       () {
-        final testBrick = brick(createFile: true);
+        final testBrick = Brick.memory(
+          name: brickName,
+          logger: mockLogger,
+          source: BrickSource.memory(
+            localPath: localPath,
+            fileSystem: fs,
+          ),
+          configuredDirs: const [],
+          configuredFiles: [BrickFile(filePath)],
+          fileSystem: fs,
+        );
 
         final fakeSourcePath = fs.file(
           testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
@@ -413,7 +402,17 @@ exclude:
     );
 
     test('uses provided path for output when provided', () {
-      final testBrick = brick(createFile: true);
+      final testBrick = Brick.memory(
+        name: brickName,
+        logger: mockLogger,
+        source: BrickSource.memory(
+          localPath: localPath,
+          fileSystem: fs,
+        ),
+        configuredDirs: const [],
+        configuredFiles: [BrickFile(filePath)],
+        fileSystem: fs,
+      );
 
       final fakeSourcePath = fs.file(
         testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
@@ -435,7 +434,17 @@ exclude:
     });
 
     test('deletes directory if exists', () {
-      final testBrick = brick(createFile: true);
+      final testBrick = Brick.memory(
+        name: brickName,
+        logger: mockLogger,
+        source: BrickSource.memory(
+          localPath: localPath,
+          fileSystem: fs,
+        ),
+        configuredDirs: const [],
+        configuredFiles: [BrickFile(filePath)],
+        fileSystem: fs,
+      );
 
       final fakeSourcePath = fs.file(
         testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
@@ -459,15 +468,23 @@ exclude:
     test('loops through files to write', () {
       const files = ['file1.dart', 'file2.dart', 'file3.dart'];
 
-      final testBrick = brick(createFile: true, fileNames: files);
-
-      for (final file in testBrick.configuredFiles) {
-        final fakeSourcePath = fs.file(
-          testBrick.source.fromSourcePath(file),
-        );
+      for (final file in files) {
+        final fakeSourcePath = fs.file(join(localPath, file));
 
         fs.file(fakeSourcePath).createSync(recursive: true);
       }
+
+      final testBrick = Brick.memory(
+        name: brickName,
+        logger: mockLogger,
+        source: BrickSource.memory(
+          localPath: localPath,
+          fileSystem: fs,
+        ),
+        configuredDirs: const [],
+        configuredFiles: [for (final file in files) BrickFile(file)],
+        fileSystem: fs,
+      );
 
       for (final file in testBrick.configuredFiles) {
         expect(fs.file(join(brickPath, file.path)).existsSync(), isFalse);
