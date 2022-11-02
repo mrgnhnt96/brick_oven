@@ -53,7 +53,7 @@ bricks:
         createFile(BrickOvenYaml.file, content);
 
         expect(
-          () => brickOvenCommand.bricks,
+          brickOvenCommand.bricks,
           throwsA(isA<BrickOvenException>()),
         );
       });
@@ -66,7 +66,7 @@ bricks: Not YAML
         createFile(BrickOvenYaml.file, content);
 
         expect(
-          () => brickOvenCommand.bricks,
+          brickOvenCommand.bricks,
           throwsA(isA<BrickOvenException>()),
         );
       });
@@ -75,7 +75,7 @@ bricks: Not YAML
         'throws $BrickOvenNotFoundException when ${BrickOvenYaml.file} does not exist',
         () {
           expect(
-            () => brickOvenCommand.bricks,
+            brickOvenCommand.bricks,
             throwsA(isA<BrickOvenNotFoundException>()),
           );
         },
@@ -95,7 +95,7 @@ second:
         expect(brickOvenCommand.bricks().isError, isTrue);
         expect(
           brickOvenCommand.bricks().error,
-          'Unknown keys: extra, in brick_oven.yaml',
+          'Unknown keys: second, in brick_oven.yaml',
         );
       });
 
