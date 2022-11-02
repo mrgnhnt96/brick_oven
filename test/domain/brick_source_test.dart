@@ -73,14 +73,16 @@ $path
       });
 
       test(
-          'should return when relative path when configPath is provided without source path',
+          'should throw $ConfigException when source is null and configPath is provided',
           () {
-        final instance = BrickSource.fromYaml(
-          YamlValue.from(null),
-          configPath: 'path/to/config.yaml',
-        );
+        BrickSource instance() {
+          return BrickSource.fromYaml(
+            YamlValue.from(null),
+            configPath: 'path/to/config.yaml',
+          );
+        }
 
-        expect(instance.localPath, 'path/to');
+        expect(instance, throwsA(isA<ConfigException>()));
       });
 
       test('should return when yaml map provided', () {

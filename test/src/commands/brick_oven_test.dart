@@ -1,8 +1,6 @@
 import 'package:args/args.dart';
-import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
@@ -99,7 +97,8 @@ second:
         );
       });
 
-      test('return $BrickOrError with brick provided path to config file', () {
+      test('return $BrickOrError error when source is null in sub config file',
+          () {
         const path = 'path/to';
         const file = 'file';
         const content = '''
@@ -114,17 +113,13 @@ source:
         createFile(BrickOvenYaml.file, content);
         createFile('$path/$file.yaml', content2);
 
-        final brick = brickOvenCommand.bricks().bricks.first;
+        final result = brickOvenCommand.bricks();
 
-        final expected = Brick(
-          configuredDirs: const [],
-          configuredFiles: const [],
-          name: file,
-          source: BrickSource(localPath: path),
-          configPath: '$path/$file.yaml',
+        expect(result.isError, isTrue);
+        expect(
+          result.error,
+          contains('`source` is required in sub config files'),
         );
-
-        expect(brick, expected);
       });
 
       test('return $BrickOrError error when config file does not exist', () {

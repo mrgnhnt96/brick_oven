@@ -69,7 +69,10 @@ class BrickSource extends Equatable {
           return const BrickSource.none();
         }
 
-        return BrickSource.fromString(path);
+        throw DirectoryException(
+          directory: path,
+          reason: '`source` is required in sub config files',
+        );
       }
 
       if (!localPath.isString()) {
@@ -105,7 +108,10 @@ class BrickSource extends Equatable {
       return const BrickSource.none();
     }
 
-    return BrickSource.fromString(path);
+    throw DirectoryException(
+      directory: path,
+      reason: '`source` is required in sub config files',
+    );
   }
 
   /// the local path of the source files
