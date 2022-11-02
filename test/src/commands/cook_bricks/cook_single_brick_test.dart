@@ -235,7 +235,8 @@ class TestCookSingleBrick extends CookSingleBrick {
   var _hasWatchedConfigChanges = false;
 
   @override
-  Future<bool> watchForConfigChanges({
+  Future<bool> watchForConfigChanges(
+    String path, {
     FutureOr<void> Function()? onChange,
   }) async {
     if (allowConfigChanges && !_hasWatchedConfigChanges) {
