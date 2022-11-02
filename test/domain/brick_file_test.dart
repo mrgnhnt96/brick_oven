@@ -12,10 +12,11 @@ import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
-import '../utils/fakes.dart';
+import 'package:yaml/yaml.dart';
 
 void main() {
-  const defaultFile = 'file.dart';
+  const defaultFileName = 'file';
+  const defaultFile = '$defaultFileName.dart';
   final defaultPath = join('path', 'to', defaultFile);
 
   const fileExtensions = {
@@ -55,47 +56,6 @@ void main() {
     const suffix = 'suffix';
     const name = 'name';
 
-    FakeYamlMap yaml({
-      bool includePrefix = true,
-      bool includeSuffix = true,
-      bool includeNameProp = true,
-      bool includeName = true,
-      bool includeVariables = true,
-      bool emptyVariables = false,
-      bool extraKeys = false,
-      bool extraFileKeys = false,
-      bool useNameString = false,
-      bool useInferredName = false,
-    }) {
-      dynamic nameValue;
-
-      if (useNameString) {
-        nameValue = name;
-      } else if (useInferredName) {
-        nameValue = null;
-      } else {
-        nameValue = FakeYamlMap(<String, dynamic>{
-          if (includePrefix) 'prefix': prefix,
-          if (includeSuffix) 'suffix': suffix,
-          if (includeNameProp) 'value': name,
-          if (extraFileKeys) 'extra': 'extra',
-        });
-      }
-
-      return FakeYamlMap(<String, dynamic>{
-        if (includeName) 'name': nameValue,
-        if (includeVariables)
-          'vars': emptyVariables
-              ? FakeYamlMap.empty()
-              : FakeYamlMap(<String, dynamic>{name: 'value'}),
-        if (extraKeys) 'extra': 'extra',
-      });
-    }
-
-    BrickFile brickFromYaml(FakeYamlMap yaml, [String? path]) {
-      return BrickFile.fromYaml(yaml, path: path ?? defaultPath);
-    }
-
     test('throws exception on null value', () {
       expect(
         () => BrickFile.fromYaml(null, path: 'path'),
@@ -114,9 +74,10 @@ void main() {
       ];
 
       for (final path in paths) {
-        final yaml = FakeYamlMap(<String, dynamic>{
-          'name': null,
-        });
+        final yaml = loadYaml('''
+name:
+''') as YamlMap;
+
         final file = BrickFile.fromYaml(yaml, path: path);
 
         expect(
@@ -127,7 +88,17 @@ void main() {
     });
 
     test('can parse all provided values', () {
-      final instance = brickFromYaml(yaml());
+      final yaml = loadYaml('''
+name:
+  value: $name
+  prefix: $prefix
+  suffix: $suffix
+
+vars:
+  name: value
+''') as YamlMap;
+
+      final instance = BrickFile.fromYaml(yaml, path: defaultPath);
 
       expect(instance.variables, hasLength(1));
       expect(instance.path, defaultPath);
@@ -137,48 +108,75 @@ void main() {
     });
 
     test('can parse empty variables', () {
-      final instance = brickFromYaml(yaml(includeVariables: false));
+      final yaml = loadYaml('''
+name:
+''') as YamlMap;
+
+      final instance = BrickFile.fromYaml(yaml, path: defaultPath);
 
       expect(instance.variables, isEmpty);
 
-      final instance2 = brickFromYaml(yaml(emptyVariables: true));
+      final yaml2 = loadYaml('''
+vars:
+''') as YamlMap;
+
+      final instance2 = BrickFile.fromYaml(yaml2, path: defaultPath);
 
       expect(instance2.variables, isEmpty);
     });
 
     group('name', () {
       test('can parse when key is not provided', () {
-        final instance = brickFromYaml(yaml(includeName: false));
+        final yaml = loadYaml('''
+vars:
+''') as YamlMap;
+
+        final instance = BrickFile.fromYaml(yaml, path: defaultPath);
 
         expect(instance.name, isNull);
       });
 
       test('can parse when string provided', () {
-        final instance = brickFromYaml(yaml(useNameString: true));
+        final yaml = loadYaml('''
+name: $name
+''') as YamlMap;
+
+        final instance = BrickFile.fromYaml(yaml, path: defaultPath);
 
         expect(instance.name?.value, name);
       });
 
       test('can parse when value is not provided', () {
-        final instance = brickFromYaml(
-          yaml(useInferredName: true),
-          join('path', 'to', 'some', 'file.dart'),
-        );
+        final yaml = loadYaml('''
+name:
+''') as YamlMap;
 
-        expect(instance.name?.value, 'file');
+        final instance = BrickFile.fromYaml(yaml, path: defaultPath);
+
+        expect(instance.name?.value, defaultFileName);
       });
     });
 
     test('throws if extra keys are provided', () {
+      final yaml = loadYaml('''
+yooooo:
+''') as YamlMap;
+
       expect(
-        () => brickFromYaml(yaml(extraKeys: true)),
+        () => BrickFile.fromYaml(yaml, path: defaultPath),
         throwsA(isA<ConfigException>()),
       );
     });
 
     test('throws if extra keys are provided to file config', () {
+      final yaml = loadYaml('''
+files:
+  $defaultFile:
+    yooooo:
+''') as YamlMap;
+
       expect(
-        () => brickFromYaml(yaml(extraFileKeys: true)),
+        () => BrickFile.fromYaml(yaml, path: defaultPath),
         throwsA(isA<ConfigException>()),
       );
     });
