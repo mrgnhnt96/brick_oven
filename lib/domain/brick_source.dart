@@ -71,7 +71,7 @@ class BrickSource extends Equatable {
 
         throw SourceException(
           source: path,
-          reason: 'Source path is required in sub config files',
+          reason: '`source` value is required in sub config files',
         );
       }
 
@@ -110,7 +110,7 @@ class BrickSource extends Equatable {
 
     throw SourceException(
       source: path,
-      reason: 'Source path is required in sub config files',
+      reason: '`source` value is required in sub config files',
     );
   }
 
@@ -123,7 +123,7 @@ class BrickSource extends Equatable {
   /// Watches the local files, and updates on events
   final BrickWatcher? watcher;
 
-  /// retrieves the files from the source path
+  /// retrieves the files from the `source` value
   Iterable<BrickFile> files() sync* {
     if (localPath != null) {
       yield* _fromDir();
