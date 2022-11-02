@@ -1,5 +1,6 @@
 // ignore_for_file: cascade_invocations
 
+import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
@@ -58,7 +59,7 @@ void main() {
 
     test('throws exception on null value', () {
       expect(
-        () => BrickFile.fromYaml(null, path: 'path'),
+        () => BrickFile.fromYaml(const YamlValue.none(), path: 'path'),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -78,7 +79,7 @@ void main() {
 name:
 ''') as YamlMap;
 
-        final file = BrickFile.fromYaml(yaml, path: path);
+        final file = BrickFile.fromYaml(YamlValue.from(yaml), path: path);
 
         expect(
           file.fileName,
@@ -98,7 +99,8 @@ vars:
   name: value
 ''') as YamlMap;
 
-      final instance = BrickFile.fromYaml(yaml, path: defaultPath);
+      final instance =
+          BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
 
       expect(instance.variables, hasLength(1));
       expect(instance.path, defaultPath);
@@ -112,7 +114,8 @@ vars:
 name:
 ''') as YamlMap;
 
-      final instance = BrickFile.fromYaml(yaml, path: defaultPath);
+      final instance =
+          BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
 
       expect(instance.variables, isEmpty);
 
@@ -120,7 +123,8 @@ name:
 vars:
 ''') as YamlMap;
 
-      final instance2 = BrickFile.fromYaml(yaml2, path: defaultPath);
+      final instance2 =
+          BrickFile.fromYaml(YamlValue.from(yaml2), path: defaultPath);
 
       expect(instance2.variables, isEmpty);
     });
@@ -131,7 +135,8 @@ vars:
 vars:
 ''') as YamlMap;
 
-        final instance = BrickFile.fromYaml(yaml, path: defaultPath);
+        final instance =
+            BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
 
         expect(instance.name, isNull);
       });
@@ -141,7 +146,8 @@ vars:
 name: $name
 ''') as YamlMap;
 
-        final instance = BrickFile.fromYaml(yaml, path: defaultPath);
+        final instance =
+            BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
 
         expect(instance.name?.value, name);
       });
@@ -151,35 +157,54 @@ name: $name
 name:
 ''') as YamlMap;
 
-        final instance = BrickFile.fromYaml(yaml, path: defaultPath);
+        final instance =
+            BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
 
         expect(instance.name?.value, defaultFileName);
       });
     });
 
-    test('throws if extra keys are provided', () {
-      final yaml = loadYaml('''
-yooooo:
-''') as YamlMap;
-
-      expect(
-        () => BrickFile.fromYaml(yaml, path: defaultPath),
-        throwsA(isA<ConfigException>()),
-      );
-    });
-
-    test('throws if extra keys are provided to file config', () {
-      final yaml = loadYaml('''
+    group('files', () {
+      test('throws if extra keys are provided', () {
+        final yaml = loadYaml('''
 files:
   $defaultFile:
     yooooo:
 ''') as YamlMap;
 
-      expect(
-        () => BrickFile.fromYaml(yaml, path: defaultPath),
-        throwsA(isA<ConfigException>()),
-      );
+        expect(
+          () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+          throwsA(isA<ConfigException>()),
+        );
+      });
     });
+
+    group('variables', () {
+      test('throws if value is not of map', () {
+        final yaml = loadYaml('''
+files:
+  $defaultFile:
+    vars:
+      - name
+''') as YamlMap;
+
+        expect(
+          () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+    });
+  });
+
+  test('throws if extra keys are provided', () {
+    final yaml = loadYaml('''
+yooooo:
+''') as YamlMap;
+
+    expect(
+      () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+      throwsA(isA<ConfigException>()),
+    );
   });
 
   group('#fileName', () {

@@ -7,14 +7,12 @@ import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p show extension;
 import 'package:path/path.dart' hide extension;
-import 'package:yaml/yaml.dart';
 
 part 'brick_file.g.dart';
 
@@ -43,10 +41,10 @@ class BrickFile extends Equatable {
 
   /// parses the [yaml]
   factory BrickFile.fromYaml(
-    YamlMap? yaml, {
+    YamlValue yaml, {
     required String path,
   }) {
-    if (yaml == null) {
+    if (yaml.isNone()) {
       throw FileException(
         file: path,
         reason: 'Missing configuration, please remove this '
@@ -54,16 +52,27 @@ class BrickFile extends Equatable {
       );
     }
 
-    final data = yaml.data;
+    if (yaml.isString()) {
+      // get contents from yaml file
+    }
 
-    final variablesData = data.remove('vars') as YamlMap?;
+    final data = Map<String, dynamic>.from(yaml.asYaml().value);
+
+    final variablesData = YamlValue.from(data.remove('vars'));
 
     Iterable<Variable> variables() sync* {
-      if (variablesData == null) {
+      if (variablesData.isNone()) {
         return;
       }
 
-      for (final entry in variablesData.entries) {
+      if (!variablesData.isYaml()) {
+        throw FileException(
+          file: path,
+          reason: '`vars` must be of type `Map`',
+        );
+      }
+
+      for (final entry in variablesData.asYaml().value.entries) {
         final name = entry.key as String;
         try {
           yield Variable.from(name, entry.value);
@@ -75,12 +84,13 @@ class BrickFile extends Equatable {
       }
     }
 
+    // name's value can be omitted
+    final hasNameKey = data.containsKey('name');
     final nameYaml = YamlValue.from(data.remove('name'));
 
     Name? name;
 
-    // name's value can be omitted
-    if (!nameYaml.isNone() || yaml.value.containsKey('name')) {
+    if (!nameYaml.isNone() || hasNameKey) {
       try {
         name = Name.fromYamlValue(nameYaml, basenameWithoutExtension(path));
       } on VariableException catch (e) {
