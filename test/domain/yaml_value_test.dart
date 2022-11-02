@@ -160,6 +160,20 @@ void main() {
     });
   });
 
+  group('#asError', () {
+    test('should return as $YamlError when value is error', () {
+      const value = YamlValue.error('test');
+
+      expect(value.asError(), isA<YamlError>());
+    });
+
+    test('should throw when value is not error', () {
+      final value = YamlValue.from(YamlMap());
+
+      expect(value.asError, throwsA(isA<ArgumentError>()));
+    });
+  });
+
   group('#asList', () {
     test('should return as $YamlListValue when value is list', () {
       final value = YamlValue.from(YamlList());

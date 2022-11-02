@@ -59,6 +59,15 @@ abstract class YamlValue {
     return this as YamlListValue;
   }
 
+  /// converts to a `YamlError`
+  YamlError asError() {
+    if (!isError()) {
+      throw ArgumentError('$this is not a $YamlError');
+    }
+
+    return this as YamlError;
+  }
+
   /// converts to a `null`
   YamlNone asNone() {
     if (!isNone()) {
