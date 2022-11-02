@@ -252,7 +252,11 @@ class BrickFile extends Equatable {
             section = MustacheSections.values.from(possibleSection);
 
             if (section == null) {
-              prefix = possibleSection;
+              if (possibleSection.isNotEmpty) {
+                final additionalVariables = checkForVariables(possibleSection);
+
+                prefix = additionalVariables;
+              }
             } else {
               prefix = prefix.replaceAll(section.matcher, '');
             }

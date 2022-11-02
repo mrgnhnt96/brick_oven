@@ -516,7 +516,8 @@ void main() {
         const variable = Variable(name: newName, placeholder: placeholder);
         const instance = BrickFile.config(defaultFile, variables: [variable]);
 
-        const content = '$placeholder 1 $placeholder 2 $placeholder 3';
+        const content =
+            '$placeholder 1 $placeholder 2 $placeholder 3 $placeholder/$placeholder.dart';
 
         sourceFile.writeAsStringSync(content);
         instance.writeTargetFile(
@@ -530,7 +531,7 @@ void main() {
 
         expect(
           newFile.readAsStringSync(),
-          '{{$newName}} 1 {{$newName}} 2 {{$newName}} 3',
+          '{{$newName}} 1 {{$newName}} 2 {{$newName}} 3 {{$newName}}/{{$newName}}.dart',
         );
       });
 
