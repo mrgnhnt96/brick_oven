@@ -74,7 +74,7 @@ class CookSingleBrick extends BrickOvenCommand
     brick.source.watcher
       ?..addEvent(logger.cooking, runBefore: true)
       ..addEvent(logger.watching, runAfter: true)
-      ..addEvent(logger.qToQuit, runAfter: true)
+      ..addEvent(logger.keyStrokes, runAfter: true)
       ..addEvent(() => fileChanged(logger: logger));
 
     brick.cook(output: outputDir, watch: true);
@@ -89,7 +89,7 @@ class CookSingleBrick extends BrickOvenCommand
       return ExitCode.ioError.code;
     }
 
-    keyPressListener.qToQuit();
+    keyPressListener.listenToKeystrokes();
 
     if (brick.configPath != null) {
       unawaited(
