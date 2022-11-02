@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/brick_or_error.dart';
+import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:brick_oven/src/key_listener.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
-import 'package:brick_oven/utils/extensions.dart';
 import '../../../utils/fakes.dart';
 import '../../../utils/mocks.dart';
 
@@ -41,15 +41,19 @@ void main() {
 
     group('#isWatch', () {
       test('returns true when watch flag is provided', () {
-        final command =
-            TestCookAllBricks(argResults: <String, dynamic>{'watch': true});
+        final command = TestCookAllBricks(
+          argResults: <String, dynamic>{'watch': true},
+          logger: mockLogger,
+        );
 
         expect(command.isWatch, isTrue);
       });
 
       test('returns false when watch flag is not provided', () {
-        final command =
-            TestCookAllBricks(argResults: <String, dynamic>{'watch': false});
+        final command = TestCookAllBricks(
+          argResults: <String, dynamic>{'watch': false},
+          logger: mockLogger,
+        );
 
         expect(command.isWatch, isFalse);
       });
@@ -59,13 +63,17 @@ void main() {
       test('returns the output dir when provided', () {
         final command = TestCookAllBricks(
           argResults: <String, dynamic>{'output': 'output/dir'},
+          logger: mockLogger,
         );
 
         expect(command.outputDir, 'output/dir');
       });
 
       test('returns null when not provided', () {
-        final command = TestCookAllBricks(argResults: <String, dynamic>{});
+        final command = TestCookAllBricks(
+          argResults: <String, dynamic>{},
+          logger: mockLogger,
+        );
 
         expect(command.outputDir, 'bricks');
       });
@@ -94,7 +102,7 @@ void main() {
       watch ??= false;
       return TestCookAllBricks(
         logger: mockLogger,
-        bricks: {mockBrick},
+        bricks: BrickOrError({mockBrick}, null),
         argResults: <String, dynamic>{
           'output': 'output/dir',
           if (watch) 'watch': true,
@@ -108,7 +116,6 @@ void main() {
       final result = await command().run();
 
       verify(mockLogger.cooking).called(1);
-      verify(() => mockLogger.info('')).called(1);
 
       verify(() => mockBrick.cook(output: 'output/dir')).called(1);
 
@@ -144,9 +151,7 @@ void main() {
               .called(1);
 
           verify(
-            () => mockLogger.alert(
-              '${BrickOvenYaml.file} changed, updating bricks configuration',
-            ),
+            () => mockLogger.configChanged(),
           );
 
           verify(mockBrickWatcher.stop).called(1);
@@ -206,8 +211,8 @@ void main() {
 class TestCookAllBricks extends CookAllBricks {
   TestCookAllBricks({
     Map<String, dynamic>? argResults,
-    this.bricks = const {},
-    Logger? logger,
+    this.bricks = const BrickOrError({}, null),
+    required Logger logger,
     this.allowConfigChanges = false,
     KeyPressListener? keyPressListener,
   })  : _argResults = argResults ?? <String, dynamic>{},
@@ -222,7 +227,7 @@ class TestCookAllBricks extends CookAllBricks {
   ArgResults get argResults => FakeArgResults(data: _argResults);
 
   @override
-  final Set<Brick> bricks;
+  final BrickOrError bricks;
 
   final bool allowConfigChanges;
 

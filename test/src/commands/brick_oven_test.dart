@@ -1,12 +1,13 @@
 import 'package:args/args.dart';
+import 'package:brick_oven/domain/brick_or_error.dart';
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/src/commands/brick_oven.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/src/commands/brick_oven.dart';
-import 'package:brick_oven/src/exception.dart';
 import '../../utils/fakes.dart';
 
 void main() {
@@ -41,7 +42,7 @@ bricks:
     group('#bricks', () {
       test('returns a set of bricks', () {
         createBrickOvenFile();
-        final bricks = brickOvenCommand.bricks;
+        final bricks = brickOvenCommand.bricks.bricks;
         expect(bricks, isNotNull);
         expect(bricks.length, 3);
       });
@@ -57,12 +58,13 @@ bricks:
         },
       );
 
-      test('throws when extra keys exist', () {
+      test('return $BrickOrError with error', () {
         createBrickOvenFile('extra:');
 
+        expect(brickOvenCommand.bricks.isError, isTrue);
         expect(
-          () => brickOvenCommand.bricks,
-          throwsA(isA<UnknownKeysException>()),
+          brickOvenCommand.bricks.error,
+          'Unknown keys: extra, in brick_oven.yaml',
         );
       });
     });

@@ -1,3 +1,4 @@
+import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart';
@@ -70,7 +71,7 @@ void main() {
 
         expect(
           () => BrickSource.fromYaml(YamlValue.yaml(yaml)),
-          throwsA(isA<ArgumentError>()),
+          throwsA(isA<ConfigException>()),
         );
       });
 

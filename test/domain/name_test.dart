@@ -12,13 +12,8 @@ void main() {
     });
 
     group('#from', () {
-      test('throws $ArgumentError when null is provided without backup name',
-          () {
-        expect(() => Name.from(null), throwsArgumentError);
-      });
-
       test('can parse string when provided', () {
-        expect(Name.from('name'), equals(const Name('name')));
+        expect(Name.from('name', 'backup'), equals(const Name('name')));
       });
 
       test('can parse yaml map when provided', () {
@@ -29,21 +24,9 @@ void main() {
               'prefix': 'prefix',
               'suffix': 'suffix',
             }),
+            'backup',
           ),
           equals(const Name('name', prefix: 'prefix', suffix: 'suffix')),
-        );
-      });
-
-      test('throws $ArgumentError when name is null', () {
-        expect(
-          () => Name.from(
-            FakeYamlMap(<String, dynamic>{
-              'value': null,
-              'prefix': 'prefix',
-              'suffix': 'suffix',
-            }),
-          ),
-          throwsArgumentError,
         );
       });
     });
@@ -56,17 +39,12 @@ void main() {
         );
       });
 
-      test('throws $ArgumentError when null is provided without backup name',
-          () {
-        expect(
-          () => Name.fromYamlValue(const YamlValue.none()),
-          throwsArgumentError,
-        );
-      });
-
       test('can parse string when provided', () {
         expect(
-          Name.fromYamlValue(const YamlValue.string('name')),
+          Name.fromYamlValue(
+            const YamlValue.string('name'),
+            'backup',
+          ),
           equals(const Name('name')),
         );
       });
@@ -81,6 +59,7 @@ void main() {
                 'suffix': 'suffix',
               }),
             ),
+            'backup',
           ),
           equals(const Name('name', prefix: 'prefix', suffix: 'suffix')),
         );
@@ -95,6 +74,7 @@ void main() {
                 'format': 'snake',
               }),
             ),
+            'backup',
           ),
           equals(
             const Name(
@@ -102,19 +82,6 @@ void main() {
               format: MustacheFormat.snakeCase,
             ),
           ),
-        );
-      });
-
-      test('throws $ArgumentError when name is null', () {
-        expect(
-          () => Name.from(
-            FakeYamlMap(<String, dynamic>{
-              'value': null,
-              'prefix': 'prefix',
-              'suffix': 'suffix',
-            }),
-          ),
-          throwsArgumentError,
         );
       });
     });

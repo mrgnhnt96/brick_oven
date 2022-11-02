@@ -22,7 +22,7 @@ void main() {
         overridePrint(() {
           logger.cooking();
 
-          expect(printLogs, ['\nCooking...']);
+          expect(printLogs, ['\n⏲️  Cooking...']);
         });
       });
 
@@ -31,7 +31,25 @@ void main() {
 
         mockLogger.cooking();
 
-        verify(() => mockLogger.info(cyan.wrap('\nCooking...'))).called(1);
+        verify(() => mockLogger.info(cyan.wrap('\n⏲️  Cooking...'))).called(1);
+      });
+    });
+
+    group('#configChanged', () {
+      test('prints', () {
+        overridePrint(() {
+          logger.configChanged();
+
+          expect(printLogs, ['\n🔧  Configuration changed']);
+        });
+      });
+
+      test('calls info', () {
+        verifyNever(() => mockLogger.info(any()));
+
+        mockLogger.configChanged();
+
+        verify(() => mockLogger.info('\n🔧  Configuration changed')).called(1);
       });
     });
 
@@ -40,7 +58,7 @@ void main() {
         overridePrint(() {
           logger.watching();
 
-          expect(printLogs, ['\nWatching local files...']);
+          expect(printLogs, ['\n👀 Watching local files...']);
         });
       });
 
@@ -50,7 +68,42 @@ void main() {
         mockLogger.watching();
 
         verify(
-          () => mockLogger.info(lightYellow.wrap('\nWatching local files...')),
+          () =>
+              mockLogger.info(lightYellow.wrap('\n👀 Watching local files...')),
+        ).called(1);
+      });
+    });
+
+    group('#cooked', () {
+      test('prints', () {
+        overridePrint(() {
+          final date = DateTime(2021, 1, 1, 12);
+          mockLogger.cooked(date);
+
+          final cooked = lightGreen.wrap('\n🍽️  Cooked! (');
+          final timed = darkGray.wrap(date.formatted);
+          final end = lightGreen.wrap(')');
+
+          final expected = '$cooked$timed$end\n';
+
+          expect(printLogs, [expected]);
+        });
+      });
+
+      test('calls info', () {
+        verifyNever(() => mockLogger.info(any()));
+
+        final date = DateTime(2021, 1, 1, 12);
+        mockLogger.cooked(date);
+
+        final cooked = lightGreen.wrap('\n🍽️  Cooked! (');
+        final timed = darkGray.wrap(date.formatted);
+        final end = lightGreen.wrap(')');
+
+        final expected = '$cooked$timed$end\n';
+
+        verify(
+          () => mockLogger.info(expected),
         ).called(1);
       });
     });

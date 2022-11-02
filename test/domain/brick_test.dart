@@ -6,6 +6,7 @@ import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/name.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -48,7 +49,7 @@ void main() {
       expectLater(result, brick);
     });
 
-    test('throws argument error non strings are provided to excluded paths',
+    test('throws $ConfigException non strings are provided to excluded paths',
         () {
       final brick = Brick(
         configuredDirs: [
@@ -64,10 +65,13 @@ void main() {
           FakeYamlList(<dynamic>['list', FakeYamlMap(<String, dynamic>{})]);
       final yaml = FakeYamlMap(data);
 
-      expect(() => Brick.fromYaml(brick.name, yaml), throwsArgumentError);
+      expect(
+        () => Brick.fromYaml(brick.name, yaml),
+        throwsA(isA<ConfigException>()),
+      );
     });
 
-    test('throws argument error when extra keys are provided', () {
+    test('throws $ConfigException when extra keys are provided', () {
       final brick = Brick(
         configuredDirs: [
           BrickPath(name: const Name('name'), path: 'path/to/dir')
@@ -81,7 +85,10 @@ void main() {
       data['extra'] = 'extra';
       final yaml = FakeYamlMap(data);
 
-      expect(() => Brick.fromYaml(brick.name, yaml), throwsArgumentError);
+      expect(
+        () => Brick.fromYaml(brick.name, yaml),
+        throwsA(isA<ConfigException>()),
+      );
     });
   });
 

@@ -179,11 +179,9 @@ bricks:
           verify(() => mockBrick.cook(output: 'output/dir', watch: true))
               .called(1);
 
-          verify(
-            () => mockLogger.alert(
-              '${BrickOvenYaml.file} changed, updating bricks configuration',
-            ),
-          );
+          await Future<void>.delayed(Duration.zero);
+
+          verify(mockLogger.configChanged).called(1);
 
           verify(mockBrickWatcher.stop).called(1);
 

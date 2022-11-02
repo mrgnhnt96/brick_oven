@@ -1,4 +1,5 @@
 import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
@@ -54,7 +55,7 @@ void main() {
 
       expect(
         () => BrickPath.fromYaml(dirPath, YamlValue.yaml(yaml)),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<ConfigException>()),
       );
     });
 

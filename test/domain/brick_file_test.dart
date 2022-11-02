@@ -1,6 +1,7 @@
 // ignore_for_file: cascade_invocations
 
 import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart';
@@ -98,7 +99,7 @@ void main() {
     test('throws exception on null value', () {
       expect(
         () => BrickFile.fromYaml(null, path: 'path'),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<ConfigException>()),
       );
     });
 
@@ -171,14 +172,14 @@ void main() {
     test('throws if extra keys are provided', () {
       expect(
         () => brickFromYaml(yaml(extraKeys: true)),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<ConfigException>()),
       );
     });
 
     test('throws if extra keys are provided to file config', () {
       expect(
         () => brickFromYaml(yaml(extraFileKeys: true)),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<ConfigException>()),
       );
     });
   });
@@ -805,7 +806,7 @@ void main() {
             );
           }
 
-          expect(writeFile, throwsArgumentError);
+          expect(writeFile, throwsA(isA<FileException>()));
         },
       );
     });

@@ -1,6 +1,7 @@
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:test/test.dart';
 
 import '../utils/fakes.dart';
@@ -32,7 +33,7 @@ void main() {
     test('throws arguement error when name is missing', () {
       expect(
         () => Variable.fromYaml(name, const YamlValue.none()),
-        throwsArgumentError,
+        throwsA(isA<ConfigException>()),
       );
     });
 
@@ -42,7 +43,7 @@ void main() {
           name,
           YamlValue.yaml(FakeYamlMap(<String, dynamic>{'extra': 'key'})),
         ),
-        throwsArgumentError,
+        throwsA(isA<ConfigException>()),
       );
     });
   });
@@ -72,7 +73,7 @@ void main() {
           '',
           FakeYamlMap(<String, dynamic>{'key': 'value'}),
         ),
-        throwsArgumentError,
+        throwsA(isA<ConfigException>()),
       );
     });
   });
