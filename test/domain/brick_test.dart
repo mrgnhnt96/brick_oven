@@ -23,7 +23,6 @@ void main() {
   const localPath = 'localPath';
   final brickPath = join('bricks', brickName, '__brick__');
   const dirName = 'director_of_shield';
-  const newDirName = 'director_of_world';
   const excludeDir = 'exclude_me';
   const fileName = 'nick_fury.dart';
   final dirPath = join('path', 'to', dirName);
