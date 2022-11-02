@@ -37,17 +37,23 @@ class KeyPressListener {
 
           _toExit(ExitCode.success.code);
         },
+        'r': () {
+          _listener?.cancel();
+          _logger.info('\nRestarting...\n');
+
+          _toExit(ExitCode.tempFail.code);
+        },
         // escape key
-        0x1b: _logger.qToQuit,
+        0x1b: _logger.keyStrokes,
       } as KeyMap;
 
-  /// quits running the program after `q` is pressed
-  void qToQuit() {
+  /// listens to keystrokes and handles them with the [keyPresses] map.
+  void listenToKeystrokes() {
     if (!_stdin.hasTerminal) {
       return;
     }
 
-    _logger.qToQuit();
+    _logger.keyStrokes();
 
     keyListener(keys: keyPresses);
   }
@@ -55,6 +61,9 @@ class KeyPressListener {
   /// the stream of key presses
   @visibleForTesting
   static Stream<List<int>>? stream;
+
+  /// the listener of key presses
+  static StreamSubscription<List<int>>? _listener;
 
   /// listens for keypresses
   @visibleForTesting
@@ -80,7 +89,9 @@ class KeyPressListener {
 
     stream ??= _stdin.asBroadcastStream();
 
-    stream!.listen((codes) {
+    _listener?.cancel();
+
+    _listener = stream!.listen((codes) {
       onListen(codes, keys);
     });
   }
