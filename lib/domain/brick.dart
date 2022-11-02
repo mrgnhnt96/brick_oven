@@ -1,4 +1,5 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
@@ -28,6 +29,7 @@ class Brick extends Equatable {
     required this.configuredDirs,
     required this.configuredFiles,
     this.configPath,
+    this.brickYamlConfig,
     this.excludePaths = const [],
     Logger? logger,
   })  : _fileSystem = const LocalFileSystem(),
@@ -44,6 +46,7 @@ class Brick extends Equatable {
     this.excludePaths = const [],
     required Logger logger,
     this.configPath,
+    this.brickYamlConfig,
   })  : _fileSystem = fileSystem,
         _logger = logger;
 
@@ -54,6 +57,7 @@ class Brick extends Equatable {
     required this.configuredDirs,
     required this.excludePaths,
     required this.configPath,
+    required this.brickYamlConfig,
   })  : _fileSystem = const LocalFileSystem(),
         _logger = Logger();
 
@@ -160,6 +164,25 @@ class Brick extends Equatable {
       }
     }
 
+    final brickConfig = YamlValue.from(data.remove('brick_config'));
+    String? brickYamlPath;
+    BrickYamlConfig? brickYamlConfig;
+
+    if (brickConfig.isString()) {
+      brickYamlPath = brickConfig.asString().value;
+    } else if (brickConfig.isNone()) {
+      brickYamlPath = null;
+    } else {
+      throw BrickException(
+        brick: name,
+        reason: '`brick_config` must be a of type `String`',
+      );
+    }
+
+    if (brickYamlPath != null) {
+      brickYamlConfig = BrickYamlConfig(path: brickYamlPath);
+    }
+
     if (data.isNotEmpty) {
       throw BrickException(
         brick: name,
@@ -174,6 +197,7 @@ class Brick extends Equatable {
       configuredDirs: paths().toList(),
       excludePaths: exclude().toList(),
       configPath: configPath,
+      brickYamlConfig: brickYamlConfig,
     );
   }
 
@@ -182,6 +206,12 @@ class Brick extends Equatable {
 
   /// the source of the content that the brick will create
   final BrickSource source;
+
+  /// the config file to the brick.yaml file
+  ///
+  /// When provided, extra checks are performed to ensure the brick.yaml file is
+  /// in sync with the brick_oven.yaml file
+  final BrickYamlConfig? brickYamlConfig;
 
   /// the configured files that will alter/update the [source] files
   final List<BrickFile> configuredFiles;
