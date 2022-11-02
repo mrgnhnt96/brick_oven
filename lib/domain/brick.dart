@@ -1,6 +1,11 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -8,12 +13,6 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
-
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_path.dart';
-import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/utils/extensions.dart';
 
 part 'brick.g.dart';
 
@@ -180,7 +179,8 @@ class Brick extends Equatable {
     }
 
     if (brickYamlPath != null) {
-      brickYamlConfig = BrickYamlConfig(path: brickYamlPath);
+      brickYamlConfig =
+          BrickYamlConfig(path: join(dirname(configPath ?? ''), brickYamlPath));
     }
 
     if (data.isNotEmpty) {
@@ -252,6 +252,7 @@ class Brick extends Equatable {
       final files = source.mergeFilesAndConfig(
         configuredFiles,
         excludedPaths: excludePaths,
+        logger: _logger,
       );
       final count = files.length;
 
@@ -261,17 +262,21 @@ class Brick extends Equatable {
           sourceFile: _fileSystem.file(source.fromSourcePath(file)),
           configuredDirs: configuredDirs,
           fileSystem: _fileSystem,
+          logger: _logger,
         );
       }
 
-      done.complete('$name: $count file${count == 1 ? '' : 's'}');
+      done.complete('$name: $count file${count == 1 ? '' : 's'} cooked');
     }
 
     final watcher = source.watcher;
 
     if (watch && watcher != null) {
       watcher
-        ..addEvent(putInTheOven)
+        ..addEvent(() {
+          putInTheOven();
+          checkBrickYamlConfig();
+        })
         ..start();
 
       if (watcher.hasRun) {
@@ -280,6 +285,72 @@ class Brick extends Equatable {
     }
 
     putInTheOven();
+    checkBrickYamlConfig();
+  }
+
+  /// checks the brick.yaml file to ensure it is in
+  /// sync with the brick_oven.yaml file
+  void checkBrickYamlConfig() {
+    final config = brickYamlConfig;
+    if (config == null) {
+      return;
+    }
+
+    final done = _logger.progress('Checking brick.yaml config');
+
+    final variables = <String>{};
+
+    for (final file in configuredFiles) {
+      final names = file.variables.map((e) => e.name);
+      variables.addAll(names);
+    }
+
+    for (final dir in configuredDirs) {
+      variables.add(dir.name.value);
+    }
+
+    final data = config.data();
+
+    if (data == null) {
+      done.fail("Something went wrong, couldn't read the brick.yaml file");
+      return;
+    }
+
+    if (data.name != name) {
+      _logger.warn(
+        '`name` (${data.name}) in brick.yaml does not '
+        'match the brick name ($name)',
+      );
+    }
+
+    final variablesInBrickYaml = data.vars.toSet();
+
+    var couldUseAttention = false;
+
+    if (variablesInBrickYaml.difference(variables).isNotEmpty) {
+      _logger.warn(
+        '\nThe following variables are defined in brick.yaml but not used in '
+        'brick_oven.yaml: '
+        '"${variablesInBrickYaml.difference(variables).join('", "')}"\n',
+      );
+      couldUseAttention = true;
+    }
+
+    if (variables.difference(variablesInBrickYaml).isNotEmpty) {
+      _logger.warn(
+        'The following variables are defined in '
+        'brick_oven.yaml but not used in '
+        'brick.yaml:\n'
+        '"${variables.difference(variablesInBrickYaml).join('", "')}"',
+      );
+      couldUseAttention = true;
+    }
+
+    if (couldUseAttention) {
+      done.fail('$name: brick.yaml needs attention');
+    } else {
+      done.complete('$name: brick.yaml is in sync');
+    }
   }
 
   @override
