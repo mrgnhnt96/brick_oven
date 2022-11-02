@@ -3,7 +3,7 @@
 import 'package:test/test.dart';
 
 import 'package:brick_oven/domain/yaml_value.dart';
-import '../utils/fakes.dart';
+import 'package:yaml/yaml.dart';
 
 void main() {
   test('#string can be instanciated', () {
@@ -14,7 +14,7 @@ void main() {
   });
 
   test('#yaml can be instanciated', () {
-    final yaml = YamlValue.yaml(FakeYamlMap.empty());
+    final yaml = YamlValue.yaml(YamlMap());
 
     expect(yaml, isA<YamlValue>());
     expect(yaml, isA<YamlMapValue>());
@@ -38,7 +38,7 @@ void main() {
     });
 
     test('can receive a yaml', () {
-      final data = FakeYamlMap(<String, dynamic>{'test': 'test'});
+      final data = loadYaml('data: data');
       final value = YamlValue.from(data);
 
       expect(value, isA<YamlValue>());
@@ -70,7 +70,7 @@ void main() {
     });
 
     test('returns false when provided a non-string', () {
-      final value = YamlValue.from(FakeYamlMap.empty());
+      final value = YamlValue.from(YamlMap());
 
       expect(value.isString(), isFalse);
     });
@@ -78,7 +78,7 @@ void main() {
 
   group('#isYaml', () {
     test('returns true when provided a yaml', () {
-      final value = YamlValue.from(FakeYamlMap.empty());
+      final value = YamlValue.from(YamlMap());
 
       expect(value.isYaml(), isTrue);
     });
@@ -112,7 +112,7 @@ void main() {
     });
 
     test('should throw when value is not string', () {
-      final value = YamlValue.from(FakeYamlMap.empty());
+      final value = YamlValue.from(YamlMap());
 
       expect(value.asString, throwsA(isA<ArgumentError>()));
     });
@@ -120,7 +120,7 @@ void main() {
 
   group('#asYaml', () {
     test('should return as $YamlMapValue when value is yaml', () {
-      final value = YamlValue.from(FakeYamlMap.empty());
+      final value = YamlValue.from(YamlMap());
 
       expect(value.asYaml(), isA<YamlMapValue>());
     });
@@ -168,7 +168,7 @@ void main() {
 
   group('$YamlMapValue', () {
     test('can be instanciated', () {
-      final yaml = FakeYamlMap.empty();
+      final yaml = YamlMap();
 
       final value = YamlMapValue(yaml);
 
@@ -176,7 +176,7 @@ void main() {
     });
 
     test('is type $YamlValue', () {
-      final yaml = FakeYamlMap.empty();
+      final yaml = YamlMap();
 
       final value = YamlMapValue(yaml);
 
@@ -184,11 +184,11 @@ void main() {
     });
 
     test('value is type YamlMap', () {
-      final yaml = FakeYamlMap.empty();
+      final yaml = YamlMap();
 
       final value = YamlMapValue(yaml);
 
-      expect(value.value, isA<FakeYamlMap>());
+      expect(value.value, isA<YamlMap>());
     });
   });
 

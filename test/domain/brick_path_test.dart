@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
-import '../utils/fakes.dart';
+import 'package:yaml/yaml.dart';
 
 void main() {
   const highestLevel = 'dir';
@@ -49,9 +49,10 @@ void main() {
     });
 
     test('throws when extra keys are provided', () {
-      final yaml = FakeYamlMap(
-        <String, dynamic>{'name': 'name', 'path': 'path'},
-      );
+      final yaml = loadYaml('''
+name: name
+path: path
+''') as YamlMap;
 
       expect(
         () => BrickPath.fromYaml(dirPath, YamlValue.yaml(yaml)),
@@ -66,7 +67,9 @@ void main() {
     });
 
     test('returns name from yaml map', () {
-      final yaml = FakeYamlMap(<String, dynamic>{'name': 'name'});
+      final yaml = loadYaml('''
+name: name
+''') as YamlMap;
 
       final brickPath = BrickPath.fromYaml(dirPath, YamlValue.yaml(yaml));
 

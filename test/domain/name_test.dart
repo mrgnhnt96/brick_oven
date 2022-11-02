@@ -2,8 +2,7 @@ import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:test/test.dart';
-
-import '../utils/fakes.dart';
+import 'package:yaml/yaml.dart';
 
 void main() {
   group('$Name', () {
@@ -17,15 +16,14 @@ void main() {
       });
 
       test('can parse yaml map when provided', () {
+        final yaml = loadYaml('''
+value: name
+prefix: prefix
+suffix: suffix
+''') as YamlMap;
+
         expect(
-          Name.from(
-            FakeYamlMap(<String, dynamic>{
-              'value': 'name',
-              'prefix': 'prefix',
-              'suffix': 'suffix',
-            }),
-            'backup',
-          ),
+          Name.from(yaml, 'backup'),
           equals(const Name('name', prefix: 'prefix', suffix: 'suffix')),
         );
       });
@@ -50,32 +48,26 @@ void main() {
       });
 
       test('can parse yaml map when provided', () {
+        final yaml = loadYaml('''
+value: name
+prefix: prefix
+suffix: suffix
+''') as YamlMap;
+
         expect(
-          Name.fromYamlValue(
-            YamlValue.yaml(
-              FakeYamlMap(<String, dynamic>{
-                'value': 'name',
-                'prefix': 'prefix',
-                'suffix': 'suffix',
-              }),
-            ),
-            'backup',
-          ),
+          Name.fromYamlValue(YamlValue.yaml(yaml), 'backup'),
           equals(const Name('name', prefix: 'prefix', suffix: 'suffix')),
         );
       });
 
       test('can parse format when provided', () {
+        final yaml = loadYaml('''
+value: name
+format: snake
+''') as YamlMap;
+
         expect(
-          Name.fromYamlValue(
-            YamlValue.yaml(
-              FakeYamlMap(<String, dynamic>{
-                'value': 'name',
-                'format': 'snake',
-              }),
-            ),
-            'backup',
-          ),
+          Name.fromYamlValue(YamlValue.yaml(yaml), 'backup'),
           equals(
             const Name(
               'name',

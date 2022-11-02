@@ -3,8 +3,7 @@ import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:test/test.dart';
-
-import '../utils/fakes.dart';
+import 'package:yaml/yaml.dart';
 
 void main() {
   const name = 'scooby-doo';
@@ -38,11 +37,12 @@ void main() {
     });
 
     test('throws $ConfigException when extra keys are provided', () {
+      final yaml = loadYaml('''
+extra: key
+''') as YamlMap;
+
       expect(
-        () => Variable.fromYaml(
-          name,
-          YamlValue.yaml(FakeYamlMap(<String, dynamic>{'extra': 'key'})),
-        ),
+        () => Variable.fromYaml(name, YamlValue.yaml(yaml)),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -68,11 +68,12 @@ void main() {
     });
 
     test('throws when yaml is map', () {
+      final yaml = loadYaml('''
+key: value
+''') as YamlMap;
+
       expect(
-        () => Variable.from(
-          '',
-          FakeYamlMap(<String, dynamic>{'key': 'value'}),
-        ),
+        () => Variable.from('', yaml),
         throwsA(isA<ConfigException>()),
       );
     });
