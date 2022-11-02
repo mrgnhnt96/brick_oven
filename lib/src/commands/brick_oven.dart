@@ -1,6 +1,7 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:brick_oven/domain/brick_or_error.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -51,9 +52,25 @@ abstract class BrickOvenCommand extends Command<int> {
       try {
         for (final brick in bricks.entries) {
           final name = brick.key as String;
-          final value = brick.value as YamlMap?;
+          final value = YamlValue.from(brick.value);
 
-          directories.add(Brick.fromYaml(name, value));
+          YamlMap? yaml;
+
+          if (value.isYaml()) {
+            yaml = value.asYaml().value;
+          } else if (value.isString()) {
+            final path = value.asString().value;
+            final file = fileSystem.file(path);
+            yaml = loadYaml(file.readAsStringSync()) as YamlMap;
+          } else {
+            throw BrickException(
+              brick: name,
+              reason: 'Invalid brick configuration -- Expected `Map` or '
+                  '`String` (path to brick configuration file)',
+            );
+          }
+
+          directories.add(Brick.fromYaml(name, yaml));
         }
       } on ConfigException catch (e) {
         return BrickOrError(null, e.message);

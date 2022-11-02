@@ -15,9 +15,12 @@ void main() {
   late File brickOvenYaml;
   late BrickOvenCommand brickOvenCommand;
 
-  void createBrickOvenFile([String? contents]) {
-    final content = contents ??
-        '''
+  void createBrickOvenFile({
+    bool addExtraKey = false,
+    bool addPathForExtraConfig = false,
+    bool createExtraConfig = false,
+  }) {
+    var content = '''
 bricks:
   first:
     source: path/to/first
@@ -27,9 +30,31 @@ bricks:
     source: path/to/third
 ''';
 
+    if (addExtraKey) {
+      content += '''
+extra:
+''';
+    }
+
+    if (addPathForExtraConfig) {
+      content += '''
+  fourth: path/to/fourth.yaml
+''';
+    }
+
     brickOvenYaml
       ..createSync()
       ..writeAsStringSync(content);
+
+    const configForFourth = '''
+source: path/to/fourth
+''';
+
+    if (createExtraConfig) {
+      fs.file('path/to/fourth.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(configForFourth);
+    }
   }
 
   setUp(() {
@@ -59,12 +84,38 @@ bricks:
       );
 
       test('return $BrickOrError with error', () {
-        createBrickOvenFile('extra:');
+        createBrickOvenFile(addExtraKey: true);
 
         expect(brickOvenCommand.bricks.isError, isTrue);
         expect(
           brickOvenCommand.bricks.error,
           'Unknown keys: extra, in brick_oven.yaml',
+        );
+      });
+
+      test(
+          'return $BrickOrError with brick when brick is provided path to config file',
+          () {
+        createBrickOvenFile(
+          addPathForExtraConfig: true,
+          createExtraConfig: true,
+        );
+
+        final bricks = brickOvenCommand.bricks.bricks;
+
+        expect(bricks, isNotNull);
+        expect(bricks.length, 4);
+      });
+
+      test(
+          'return $BrickOrError with brick when brick is provided path to config file',
+          () {
+        createBrickOvenFile(addPathForExtraConfig: true);
+
+        expect(brickOvenCommand.bricks.isError, isTrue);
+        expect(
+          brickOvenCommand.bricks.error,
+          contains('FileSystemException'),
         );
       });
     });

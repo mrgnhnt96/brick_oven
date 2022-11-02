@@ -52,8 +52,11 @@ class BrickFile extends Equatable {
       );
     }
 
-    if (yaml.isString()) {
-      // get contents from yaml file
+    if (!yaml.isYaml()) {
+      throw FileException(
+        file: path,
+        reason: 'Invalid configuration -- Expected type `Map`',
+      );
     }
 
     final data = Map<String, dynamic>.from(yaml.asYaml().value);
