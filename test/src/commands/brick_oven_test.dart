@@ -100,30 +100,31 @@ second:
       });
 
       test('return $BrickOrError with brick provided path to config file', () {
-        const path = 'path/to/first';
+        const path = 'path/to';
+        const file = 'file';
         const content = '''
 bricks:
-  first: $path.yaml
+  $file: $path/$file.yaml
 ''';
 
         const content2 = '''
-source: $path
+source:
 ''';
 
         createFile(BrickOvenYaml.file, content);
-        createFile('$path.yaml', content2);
+        createFile('$path/$file.yaml', content2);
 
         final brick = brickOvenCommand.bricks().bricks.first;
 
-        final result = Brick(
+        final expected = Brick(
           configuredDirs: const [],
           configuredFiles: const [],
-          name: 'first',
+          name: file,
           source: BrickSource(localPath: path),
-          configPath: '$path.yaml',
+          configPath: '$path/$file.yaml',
         );
 
-        expect(brick, result);
+        expect(brick, expected);
       });
 
       test('return $BrickOrError error when config file does not exist', () {

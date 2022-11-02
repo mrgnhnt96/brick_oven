@@ -66,7 +66,10 @@ class Brick extends Equatable {
     final data = yaml.data;
     late final BrickSource source;
     try {
-      source = BrickSource.fromYaml(YamlValue.from(data.remove('source')));
+      source = BrickSource.fromYaml(
+        YamlValue.from(data.remove('source')),
+        configPath: configPath,
+      );
     } on DirectoryException catch (e) {
       throw BrickException(brick: name, reason: e.message);
     } catch (_) {

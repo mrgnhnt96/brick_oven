@@ -46,9 +46,16 @@ class BrickSource extends Equatable {
         watcher = null;
 
   /// parse [yaml] into the source
-  factory BrickSource.fromYaml(YamlValue yaml) {
+  factory BrickSource.fromYaml(
+    YamlValue yaml, {
+    String? configPath,
+  }) {
+    final configDir = dirname(configPath ?? '');
+
     if (yaml.isString()) {
-      return BrickSource.fromString(yaml.asString().value);
+      final path = join(configDir, yaml.asString().value).cleanUpPath();
+
+      return BrickSource.fromString(path);
     }
 
     BrickSource handleYaml(YamlMap yaml) {
@@ -57,7 +64,12 @@ class BrickSource extends Equatable {
       final localPath = YamlValue.from(data.remove('path'));
 
       if (localPath.isNone()) {
-        return const BrickSource.none();
+        final path = configDir.cleanUpPath();
+        if (path.isEmpty) {
+          return const BrickSource.none();
+        }
+
+        return BrickSource.fromString(path);
       }
 
       if (!localPath.isString()) {
@@ -74,14 +86,26 @@ class BrickSource extends Equatable {
         );
       }
 
-      return BrickSource(localPath: localPath.asString().value);
+      final path = join(configDir, localPath.asString().value).cleanUpPath();
+
+      if (path.isEmpty) {
+        return const BrickSource.none();
+      }
+
+      return BrickSource.fromString(path);
     }
 
     if (yaml.isYaml()) {
       return handleYaml(yaml.asYaml().value);
     }
 
-    return const BrickSource.none();
+    final path = configDir.cleanUpPath();
+
+    if (path.isEmpty) {
+      return const BrickSource.none();
+    }
+
+    return BrickSource.fromString(path);
   }
 
   /// the local path of the source files
@@ -185,5 +209,27 @@ class BrickSource extends Equatable {
 extension on Iterable<BrickFile> {
   Map<String, BrickFile> toMap() {
     return {for (final val in this) val.path: val};
+  }
+}
+
+extension _StringX on String {
+  String cleanUpPath() {
+    String removeLast(String path) {
+      if (path.endsWith('/') || path.endsWith('.')) {
+        return removeLast(path.substring(0, path.length - 1));
+      }
+
+      return path;
+    }
+
+    var str = normalize(this);
+
+    if (this == './') {
+      return '';
+    } else if (startsWith('./')) {
+      str = substring(2);
+    }
+
+    return str = removeLast(str);
   }
 }

@@ -58,6 +58,31 @@ $path
         expect(instance.localPath, path);
       });
 
+      test(
+          'should return when relative path when configPath is provided with source path',
+          () {
+        final yaml = loadYaml('''
+.
+''') as String;
+        final instance = BrickSource.fromYaml(
+          YamlValue.from(yaml),
+          configPath: 'path/to/config.yaml',
+        );
+
+        expect(instance.localPath, 'path/to');
+      });
+
+      test(
+          'should return when relative path when configPath is provided without source path',
+          () {
+        final instance = BrickSource.fromYaml(
+          YamlValue.from(null),
+          configPath: 'path/to/config.yaml',
+        );
+
+        expect(instance.localPath, 'path/to');
+      });
+
       test('should return when yaml map provided', () {
         final yaml = loadYaml('''
 path: $path
