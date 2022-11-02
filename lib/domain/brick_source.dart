@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
@@ -149,6 +150,27 @@ class BrickSource extends Equatable {
     final configs = configFiles.toMap();
 
     final sourceFiles = files().toMap();
+
+    final logger = Logger();
+    final keys = configs.keys;
+    final keysToRemove = <String>{};
+    for (final file in keys) {
+      if (sourceFiles.containsKey(file)) {
+        continue;
+      }
+
+      logger
+        ..info('')
+        ..warn(
+          'The configured file "$file" does not exist within $sourceDir',
+        );
+
+      keysToRemove.add(file);
+    }
+
+    for (final key in keysToRemove) {
+      configs.remove(key);
+    }
 
     final result = <String, BrickFile>{}
       ..addAll(sourceFiles)
