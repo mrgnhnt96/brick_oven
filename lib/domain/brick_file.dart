@@ -10,6 +10,7 @@ import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p show extension;
 import 'package:path/path.dart' hide extension;
@@ -123,9 +124,6 @@ class BrickFile extends Equatable {
   /// All variables that the content contains and will be updated with
   final List<Variable> variables;
 
-  @includeAutoequal
-  List<Variable> get _variableForProps => variables.toList();
-
   /// the name of the file
   ///
   /// if provided, [fileName] will format the name
@@ -203,6 +201,9 @@ class BrickFile extends Equatable {
 
     const loopSetUp = '---set-up-loop---';
 
+    /// used to check if variable is used in file
+    final allVariables = [...variables];
+
     for (final variable in variables) {
       final loopPattern = RegExp('.*$loopSetUp' r'({{.[\w-+$\.]+}}).*');
       final variablePattern =
@@ -218,6 +219,7 @@ class BrickFile extends Equatable {
             return match.group(0)!;
           }
 
+          allVariables.remove(variable);
           final formattedLoop = loop.format(variable.name);
 
           return '$loopSetUp$formattedLoop';
@@ -245,7 +247,8 @@ class BrickFile extends Equatable {
               after = '\n';
             }
 
-            return '$before${match.group(2)!}$after';
+            allVariables.remove(variable);
+            return '$before$match.group(2)!$after';
           },
         );
 
@@ -322,6 +325,8 @@ class BrickFile extends Equatable {
             return match.group(0)!;
           }
 
+          allVariables.remove(variable);
+
           return '$prefix$result$suffix';
         });
       }
@@ -329,6 +334,22 @@ class BrickFile extends Equatable {
       // formats the content
       content = checkForLoops(content);
       content = checkForVariables(content);
+    }
+
+    if (allVariables.isNotEmpty) {
+      final logger = Logger();
+
+      for (final variable in allVariables) {
+        logger
+          ..info('')
+          ..warn(
+            'The configured variable '
+            '`${variable.placeholder}` (`${variable.name}`) was not '
+            'used in file `${sourceFile.path}`\n'
+            'Double check the your brick_oven.yaml config and '
+            'delete the unused variable if it is not needed\n',
+          );
+      }
     }
 
     file.writeAsStringSync(content);
