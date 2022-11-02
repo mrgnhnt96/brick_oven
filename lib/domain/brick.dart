@@ -1,4 +1,5 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -99,25 +100,29 @@ class Brick extends Equatable {
         if (path.isString()) {
           yield path.asString().value;
         } else {
-          throw ArgumentError(
-            'Expected string in exclude list, '
-            // ignore: avoid_dynamic_calls
-            'got ${path.value} (${path.value.runtimeType})',
+          throw BrickException(
+            brick: name,
+            reason: 'Expected string in exclude list, '
+                // ignore: avoid_dynamic_calls
+                'got ${path.value} (${path.value.runtimeType})',
           );
         }
       }
     }
 
     if (data.isNotEmpty) {
-      throw ArgumentError('Unknown keys in brick: ${data.keys}');
+      throw BrickException(
+        brick: name,
+        reason: 'Unknown keys: "${data.keys.join('", "')}"',
+      );
     }
 
     return Brick._fromYaml(
-      configuredFiles: files(),
+      configuredFiles: files().toList(),
       source: source,
       name: name,
-      configuredDirs: paths(),
-      excludePaths: exclude(),
+      configuredDirs: paths().toList(),
+      excludePaths: exclude().toList(),
     );
   }
 
@@ -128,23 +133,13 @@ class Brick extends Equatable {
   final BrickSource source;
 
   /// the configured files that will alter/update the [source] files
-  @ignoreAutoequal
-  final Iterable<BrickFile> configuredFiles;
+  final List<BrickFile> configuredFiles;
 
   /// the configured directories that will alter/update the paths of the [source] files
-  @ignoreAutoequal
-  final Iterable<BrickPath> configuredDirs;
+  final List<BrickPath> configuredDirs;
 
   /// paths to be excluded from the [source]
-  @ignoreAutoequal
-  final Iterable<String> excludePaths;
-
-  @includeAutoequal
-  List<BrickFile> get _configuredFilesForProps => configuredFiles.toList();
-  @includeAutoequal
-  List<BrickPath> get _configuredDirsForProps => configuredDirs.toList();
-  @includeAutoequal
-  List<String> get _excludePathsForProps => excludePaths.toList();
+  final List<String> excludePaths;
 
   @ignoreAutoequal
   final FileSystem _fileSystem;
