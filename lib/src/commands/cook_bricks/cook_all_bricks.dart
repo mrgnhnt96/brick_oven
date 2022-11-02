@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:watcher/watcher.dart';
@@ -84,7 +85,15 @@ class CookAllBricks extends BrickOvenCommand
         watcher?.addEvent(() => fileChanged(logger: logger));
       }
 
-      brick.cook(output: outputDir, watch: isWatch);
+      try {
+        brick.cook(output: outputDir, watch: isWatch);
+      } on ConfigException catch (e) {
+        logger.err(e.message);
+        return ExitCode.config.code;
+      } catch (e) {
+        logger.err('$e');
+        return ExitCode.software.code;
+      }
     }
 
     logger.cooked();
