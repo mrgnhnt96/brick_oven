@@ -118,7 +118,7 @@ source:
         expect(result.isError, isTrue);
         expect(
           result.error,
-          contains('`source` is required in sub config files'),
+          contains('`source` value is required in sub config files'),
         );
       });
 

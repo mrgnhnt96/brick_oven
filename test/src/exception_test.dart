@@ -102,7 +102,7 @@ void main() {
 
       expect(
         const DirectoryException(directory: directory, reason: reason).message,
-        'Directory "$directory" is invalid -- $reason',
+        'Invalid directory config: "$directory"\nReason: $reason',
       );
     });
   });
@@ -126,7 +126,7 @@ void main() {
 
       expect(
         const SourceException(source: source, reason: reason).message,
-        'Source "$source" is invalid -- $reason',
+        'Invalid source config: "$source"\nReason: $reason',
       );
     });
   });
@@ -150,7 +150,7 @@ void main() {
 
       expect(
         const BrickException(brick: brick, reason: reason).message,
-        'Brick "$brick" is invalid -- $reason',
+        'Invalid brick config: "$brick"\nReason: $reason',
       );
     });
   });
@@ -174,7 +174,7 @@ void main() {
 
       expect(
         const FileException(file: file, reason: reason).message,
-        'File "$file" is invalid -- $reason',
+        'Invalid file config: "$file"\nReason: $reason',
       );
     });
   });
