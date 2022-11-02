@@ -30,14 +30,14 @@ void main() {
       expect(result, const Variable(name: name));
     });
 
-    test('throws arguement error when name is missing', () {
+    test('throws $ConfigException when name is missing', () {
       expect(
         () => Variable.fromYaml(name, const YamlValue.none()),
         throwsA(isA<ConfigException>()),
       );
     });
 
-    test('throws argument error when extra keys are provided', () {
+    test('throws $ConfigException when extra keys are provided', () {
       expect(
         () => Variable.fromYaml(
           name,
