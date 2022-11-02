@@ -1,15 +1,13 @@
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_source.dart';
+import 'package:brick_oven/domain/variable.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
-
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
-import '../utils/fakes.dart';
-import '../utils/to_yaml.dart';
+import 'package:yaml/yaml.dart';
 
 void main() {
   const localPath = 'local_path';
@@ -52,13 +50,18 @@ void main() {
 
     group('localPath', () {
       test('should return when string provided', () {
-        final instance = BrickSource.fromYaml(const YamlValue.string(path));
+        final yaml = loadYaml('''
+$path
+''') as String;
+        final instance = BrickSource.fromYaml(YamlValue.from(yaml));
 
         expect(instance.localPath, path);
       });
 
       test('should return when yaml map provided', () {
-        final yaml = FakeYamlMap(<String, dynamic>{'path': path});
+        final yaml = loadYaml('''
+path: $path
+''') as YamlMap;
 
         final instance = BrickSource.fromYaml(YamlValue.yaml(yaml));
 
@@ -66,8 +69,32 @@ void main() {
       });
 
       test('should throw when extra keys in yaml map are provided', () {
-        final yaml = BrickSource(localPath: 'test').toYaml();
-        yaml.value['extra'] = 'extra';
+        final yaml = loadYaml('''
+path: $path
+extra: key
+''') as YamlMap;
+
+        expect(
+          () => BrickSource.fromYaml(YamlValue.yaml(yaml)),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+
+      test('should return null when path value is not provided', () {
+        final yaml = loadYaml('''
+path:
+''') as YamlMap;
+
+        final instance = BrickSource.fromYaml(YamlValue.from(yaml));
+
+        expect(instance.localPath, isNull);
+      });
+
+      test('should throw $ConfigException when path is not type string', () {
+        final yaml = loadYaml('''
+path:
+  - $path
+''') as YamlMap;
 
         expect(
           () => BrickSource.fromYaml(YamlValue.yaml(yaml)),
