@@ -15,6 +15,8 @@ import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:yaml/yaml.dart';
 
+import '../utils/mocks.dart';
+
 void main() {
   const defaultFileName = 'file';
   const defaultFile = '$defaultFileName.dart';
@@ -27,6 +29,12 @@ void main() {
     'file.js': '.js',
     'file.md': '.md',
   };
+
+  late MockLogger mockLogger;
+
+  setUp(() {
+    mockLogger = MockLogger();
+  });
 
   group('$BrickFile unnamed ctor', () {
     final instance = BrickFile(defaultPath);
@@ -381,6 +389,7 @@ yooooo:
         configuredDirs: [],
         targetDir: '',
         fileSystem: fileSystem,
+        logger: mockLogger,
       );
 
       final newFile = fileSystem.file(defaultFile);
@@ -396,6 +405,7 @@ yooooo:
         configuredDirs: [],
         targetDir: 'nested',
         fileSystem: fileSystem,
+        logger: mockLogger,
       );
 
       final newFile = fileSystem.file(
@@ -418,6 +428,7 @@ yooooo:
         configuredDirs: [dir],
         targetDir: '',
         fileSystem: fileSystem,
+        logger: mockLogger,
       );
 
       final newFile = fileSystem.file(
@@ -441,6 +452,7 @@ yooooo:
         configuredDirs: [],
         targetDir: '',
         fileSystem: fileSystem,
+        logger: mockLogger,
       );
 
       final newFile = fileSystem.file(
@@ -462,6 +474,7 @@ yooooo:
         configuredDirs: [],
         targetDir: '',
         fileSystem: fileSystem,
+        logger: mockLogger,
       );
 
       final newFile = fileSystem.file(defaultFile);
@@ -485,6 +498,7 @@ yooooo:
           configuredDirs: [],
           targetDir: '',
           fileSystem: fileSystem,
+          logger: mockLogger,
         );
 
         final newFile = fileSystem.file(defaultFile);
@@ -524,6 +538,7 @@ yooooo:
             configuredDirs: [],
             targetDir: '',
             fileSystem: fileSystem,
+            logger: mockLogger,
           );
 
           final newFile = fileSystem.file(defaultFile);
@@ -548,6 +563,7 @@ yooooo:
           configuredDirs: [],
           targetDir: '',
           fileSystem: fileSystem,
+          logger: mockLogger,
         );
 
         final newFile = fileSystem.file(defaultFile);
@@ -574,6 +590,7 @@ yooooo:
           configuredDirs: [],
           targetDir: '',
           fileSystem: fileSystem,
+          logger: mockLogger,
         );
 
         final newFile = fileSystem.file(defaultFile);
@@ -629,6 +646,7 @@ yooooo:
                   configuredDirs: [],
                   targetDir: '',
                   fileSystem: fileSystem,
+                  logger: mockLogger,
                 );
 
                 final newFile = fileSystem.file(defaultFile);
@@ -651,6 +669,7 @@ yooooo:
                   configuredDirs: [],
                   targetDir: '',
                   fileSystem: fileSystem,
+                  logger: mockLogger,
                 );
 
                 final newFile = fileSystem.file(defaultFile);
@@ -673,6 +692,7 @@ yooooo:
                   configuredDirs: [],
                   targetDir: '',
                   fileSystem: fileSystem,
+                  logger: mockLogger,
                 );
 
                 final newFile = fileSystem.file(defaultFile);
@@ -700,6 +720,7 @@ yooooo:
                   configuredDirs: [],
                   targetDir: '',
                   fileSystem: fileSystem,
+                  logger: mockLogger,
                 );
 
                 final newFile = fileSystem.file(defaultFile);
@@ -727,6 +748,7 @@ yooooo:
                   configuredDirs: [],
                   targetDir: '',
                   fileSystem: fileSystem,
+                  logger: mockLogger,
                 );
 
                 final newFile = fileSystem.file(defaultFile);
@@ -772,6 +794,7 @@ yooooo:
                     configuredDirs: [],
                     targetDir: '',
                     fileSystem: fileSystem,
+                    logger: mockLogger,
                   );
 
                   final newFile = fileSystem.file(defaultFile);
@@ -801,6 +824,7 @@ yooooo:
             configuredDirs: [],
             targetDir: '',
             fileSystem: fileSystem,
+            logger: mockLogger,
           );
 
           final newFile = fileSystem.file(defaultFile);
@@ -827,6 +851,7 @@ yooooo:
               configuredDirs: [],
               targetDir: '',
               fileSystem: fileSystem,
+              logger: mockLogger,
             );
           }
 
@@ -872,6 +897,7 @@ yooooo:
           configuredDirs: [],
           targetDir: '',
           fileSystem: fileSystem,
+          logger: mockLogger,
         );
 
         expect(newFile.readAsStringSync(), loops[loop]);
