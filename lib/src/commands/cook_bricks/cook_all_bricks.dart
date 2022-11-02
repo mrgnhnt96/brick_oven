@@ -73,9 +73,11 @@ class CookAllBricks extends BrickOvenCommand
       if (isWatch) {
         final watcher = brick.source.watcher;
 
-        if (bricks.first == brick) {
-          watcher?.addEvent(logger.cooking, runBefore: true);
-        }
+        watcher?.addEvent(
+          () => logger.fileChanged(brick.name),
+          runBefore: true,
+        );
+        watcher?.addEvent(logger.cooking, runBefore: true);
 
         if (bricks.last == brick) {
           watcher?.addEvent(logger.cooked, runAfter: true);

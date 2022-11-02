@@ -53,6 +53,27 @@ void main() {
       });
     });
 
+    group('#fileChanged', () {
+      test('prints', () {
+        overridePrint(() {
+          logger.fileChanged('brick');
+
+          expect(printLogs, ['\n🔧  File changed ${darkGray.wrap('(brick)')}']);
+        });
+      });
+
+      test('calls info', () {
+        verifyNever(() => mockLogger.info(any()));
+
+        mockLogger.fileChanged('brick');
+
+        verify(
+          () =>
+              mockLogger.info('\n🔧  File changed ${darkGray.wrap('(brick)')}'),
+        ).called(1);
+      });
+    });
+
     group('#watching', () {
       test('prints', () {
         overridePrint(() {

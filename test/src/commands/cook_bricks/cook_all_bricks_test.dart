@@ -160,7 +160,7 @@ void main() {
 
           // verify(
           //   () => mockBrickWatcher.addEvent(
-          //     logger.cooking, // any() passes
+          //     mockLogger.cooking, // any() passes
           //     runBefore: true,
           //   ),
           // ).called(1);
