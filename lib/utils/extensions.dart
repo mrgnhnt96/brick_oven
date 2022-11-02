@@ -69,8 +69,9 @@ extension LoggerX on Logger {
   }
 
   /// writes `Press q to quit...`
-  void qToQuit() {
+  void keyStrokes() {
     info(darkGray.wrap('Press q to quit...'));
+    info(darkGray.wrap('Press r to reload...'));
   }
 }
 

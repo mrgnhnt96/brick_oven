@@ -129,22 +129,26 @@ void main() {
       });
     });
 
-    group('#qToQuit', () {
+    group('#keyStrokes', () {
       test('prints', () {
         overridePrint(() {
-          logger.qToQuit();
+          logger.keyStrokes();
 
-          expect(printLogs, ['Press q to quit...']);
+          expect(printLogs, ['Press q to quit...', 'Press r to reload...']);
         });
       });
 
       test('calls info', () {
         verifyNever(() => mockLogger.info(any()));
 
-        mockLogger.qToQuit();
+        mockLogger.keyStrokes();
 
         verify(
           () => mockLogger.info(darkGray.wrap('Press q to quit...')),
+        ).called(1);
+
+        verify(
+          () => mockLogger.info(darkGray.wrap('Press r to reload...')),
         ).called(1);
       });
     });
