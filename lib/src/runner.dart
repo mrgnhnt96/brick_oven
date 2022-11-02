@@ -40,7 +40,9 @@ class BrickOvenRunner extends CommandRunner<int> {
   @override
   Future<int?> run(Iterable<String> args) async {
     try {
-      return await runCommand(parse(args)) ?? ExitCode.success.code;
+      final exitCode = await runCommand(parse(args));
+
+      return exitCode ?? ExitCode.success.code;
     } on MaxUpdateException catch (e) {
       _logger.err(e.message);
       return ExitCode.success.code;
