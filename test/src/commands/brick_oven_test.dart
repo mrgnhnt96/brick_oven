@@ -42,7 +42,7 @@ bricks:
 
         createFile(BrickOvenYaml.file, content);
 
-        final bricks = brickOvenCommand.bricks.bricks;
+        final bricks = brickOvenCommand.bricks().bricks;
         expect(bricks, isNotNull);
         expect(bricks.length, 3);
       });
@@ -92,9 +92,9 @@ second:
 
         createFile(BrickOvenYaml.file, content);
 
-        expect(brickOvenCommand.bricks.isError, isTrue);
+        expect(brickOvenCommand.bricks().isError, isTrue);
         expect(
-          brickOvenCommand.bricks.error,
+          brickOvenCommand.bricks().error,
           'Unknown keys: extra, in brick_oven.yaml',
         );
       });
@@ -113,7 +113,7 @@ source: $path
         createFile(BrickOvenYaml.file, content);
         createFile('$path.yaml', content2);
 
-        final brick = brickOvenCommand.bricks.bricks.first;
+        final brick = brickOvenCommand.bricks().bricks.first;
 
         final result = Brick(
           configuredDirs: const [],
@@ -135,9 +135,9 @@ bricks:
 
         createFile(BrickOvenYaml.file, content);
 
-        expect(brickOvenCommand.bricks.isError, isTrue);
+        expect(brickOvenCommand.bricks().isError, isTrue);
         expect(
-          brickOvenCommand.bricks.error,
+          brickOvenCommand.bricks().error,
           contains('Brick configuration file not found'),
         );
       });
@@ -155,9 +155,9 @@ bricks:
         createFile(BrickOvenYaml.file, content);
         createFile('$path.yaml', content2);
 
-        expect(brickOvenCommand.bricks.isError, isTrue);
+        expect(brickOvenCommand.bricks().isError, isTrue);
         expect(
-          brickOvenCommand.bricks.error,
+          brickOvenCommand.bricks().error,
           contains('Brick configuration file must be of type'),
         );
       });
@@ -170,9 +170,9 @@ bricks:
 
         createFile(BrickOvenYaml.file, content);
 
-        expect(brickOvenCommand.bricks.isError, isTrue);
+        expect(brickOvenCommand.bricks().isError, isTrue);
         expect(
-          brickOvenCommand.bricks.error,
+          brickOvenCommand.bricks().error,
           contains('Invalid brick configuration'),
         );
       });

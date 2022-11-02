@@ -211,11 +211,12 @@ void main() {
 class TestCookAllBricks extends CookAllBricks {
   TestCookAllBricks({
     Map<String, dynamic>? argResults,
-    this.bricks = const BrickOrError({}, null),
+    BrickOrError bricks = const BrickOrError({}, null),
     required Logger logger,
     this.allowConfigChanges = false,
     KeyPressListener? keyPressListener,
-  })  : _argResults = argResults ?? <String, dynamic>{},
+  })  : _bricks = bricks,
+        _argResults = argResults ?? <String, dynamic>{},
         super(
           logger: logger,
           keyPressListener: keyPressListener,
@@ -227,14 +228,16 @@ class TestCookAllBricks extends CookAllBricks {
   ArgResults get argResults => FakeArgResults(data: _argResults);
 
   @override
-  final BrickOrError bricks;
+  BrickOrError bricks() => _bricks;
+  final BrickOrError _bricks;
 
   final bool allowConfigChanges;
 
   var _hasWatchedConfigChanges = false;
 
   @override
-  Future<bool> watchForConfigChanges(String path, {
+  Future<bool> watchForConfigChanges(
+    String path, {
     FutureOr<void> Function()? onChange,
   }) async {
     if (allowConfigChanges && !_hasWatchedConfigChanges) {

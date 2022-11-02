@@ -74,7 +74,7 @@ class ListCommand extends BrickOvenCommand {
           '${green.wrap('->')} ${dir.name.simple}';
     }
 
-    final bricksOrError = this.bricks;
+    final bricksOrError = this.bricks();
     if (bricksOrError.isError) {
       logger.err(bricksOrError.error);
       return ExitCode.config.code;

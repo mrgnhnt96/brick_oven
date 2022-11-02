@@ -31,7 +31,7 @@ abstract class BrickOvenCommand extends Command<int> {
   ArgResults get argResults => super.argResults!;
 
   /// gets the bricks brick oven configuration file
-  BrickOrError get bricks {
+  BrickOrError bricks() {
     final configFile = BrickOvenYaml.findNearest(cwd);
 
     if (configFile == null) {

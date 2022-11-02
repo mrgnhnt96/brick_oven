@@ -24,7 +24,7 @@ class CookBricksCommand extends BrickOvenCommand {
       ),
     );
 
-    final bricksOrError = this.bricks;
+    final bricksOrError = this.bricks();
     if (bricksOrError.isError) {
       super.logger.err('Error reading ${BrickOvenYaml.file}:\n'
           '${bricksOrError.error}');

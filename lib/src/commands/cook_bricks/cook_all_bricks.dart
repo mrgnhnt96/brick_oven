@@ -60,7 +60,7 @@ class CookAllBricks extends BrickOvenCommand
   Future<int> run() async {
     logger.cooking();
 
-    final bricksOrError = this.bricks;
+    final bricksOrError = this.bricks();
     if (bricksOrError.isError) {
       logger.err(bricksOrError.error);
       return ExitCode.config.code;
