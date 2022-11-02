@@ -159,7 +159,7 @@ bricks:
 
           verify(mockLogger.cooking).called(1);
           verify(mockLogger.watching).called(1);
-          verify(mockKeyPressListener.qToQuit).called(1);
+          verify(mockKeyPressListener.listenToKeystrokes).called(1);
 
           verify(() => mockBrick.cook(output: 'output/dir', watch: true))
               .called(1);
