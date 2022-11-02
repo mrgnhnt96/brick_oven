@@ -783,6 +783,31 @@ void main() {
           expect(newFile.readAsStringSync(), 'replace: {{^$newName}}');
         },
       );
+
+      test(
+        'throws error when variable is wrapped with brackets',
+        () {
+          const newName = 'new-name';
+          const placeholder = 'MEEEEE';
+          const content = 'replace: {${placeholder}camel}';
+
+          const variable = Variable(name: newName, placeholder: placeholder);
+          const instance = BrickFile.config(defaultFile, variables: [variable]);
+
+          sourceFile.writeAsStringSync(content);
+
+          void writeFile() {
+            instance.writeTargetFile(
+              sourceFile: sourceFile,
+              configuredDirs: [],
+              targetDir: '',
+              fileSystem: fileSystem,
+            );
+          }
+
+          expect(writeFile, throwsArgumentError);
+        },
+      );
     });
 
     test('replaces mustache loop comment', () {

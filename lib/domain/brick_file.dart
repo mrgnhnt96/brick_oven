@@ -1,5 +1,12 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/name.dart';
+import 'package:brick_oven/domain/variable.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -7,14 +14,6 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p show extension;
 import 'package:path/path.dart' hide extension;
 import 'package:yaml/yaml.dart';
-
-import 'package:brick_oven/domain/brick_path.dart';
-import 'package:brick_oven/domain/name.dart';
-import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/enums/mustache_format.dart';
-import 'package:brick_oven/enums/mustache_loops.dart';
-import 'package:brick_oven/utils/extensions.dart';
 
 part 'brick_file.g.dart';
 
@@ -165,6 +164,7 @@ class BrickFile extends Equatable {
 
       return;
     }
+
     String content;
     try {
       content = sourceFile.readAsStringSync();
@@ -225,6 +225,20 @@ class BrickFile extends Equatable {
 
       String checkForVariables(String content) {
         return content.replaceAllMapped(variablePattern, (match) {
+          final completeMatch = match.group(0);
+
+          if (completeMatch != null && completeMatch.isNotEmpty) {
+            if (completeMatch.startsWith('{') || completeMatch.endsWith('}')) {
+              throw ArgumentError(
+                'Please remove curly braces from variable `$completeMatch` '
+                    'found in ${sourceFile.path}\n'
+                    'This will cause unexpected behavior '
+                    'when creating the brick',
+                'Symbol `{` or `}` found in variable',
+              );
+            }
+          }
+
           final possibleSection = match.group(1);
           MustacheSections? section;
           String result;
