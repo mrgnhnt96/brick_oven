@@ -15,7 +15,6 @@ import 'package:test/test.dart';
 
 import '../utils/fakes.dart';
 import '../utils/mocks.dart';
-import '../utils/reflect_properties.dart';
 import '../utils/to_yaml.dart';
 
 void main() {
@@ -401,94 +400,6 @@ void main() {
 
       for (final file in testBrick.configuredFiles) {
         expect(fs.file(join(brickPath, file.path)).existsSync(), isTrue);
-      }
-    });
-  });
-
-  group('#props', () {
-    const fileNames = ['file1.dart', 'file2.dart', 'file3.dart'];
-
-    final source = BrickSource(localPath: localPath);
-    final dir = [BrickPath(name: const Name(newDirName), path: dirPath)];
-    final files = fileNames.map(BrickFile.new);
-
-    Brick brick({
-      bool createFile = false,
-      bool createDir = false,
-      bool addExclude = false,
-    }) {
-      return Brick(
-        name: brickName,
-        source: source,
-        configuredDirs: [
-          if (createDir) ...dir,
-        ],
-        configuredFiles: [
-          if (createFile) ...files,
-        ],
-        excludePaths: [
-          if (addExclude) ...fileNames,
-        ],
-      );
-    }
-
-    test('should return the correct property length', () {
-      final testBrick = brick();
-
-      expect(reflectProperties(testBrick).length, testBrick.props.length);
-    });
-
-    test('should contain name', () {
-      final testBrick = brick();
-
-      expect(testBrick.props, contains(brickName));
-    });
-
-    test('should contain source', () {
-      final testBrick = brick();
-
-      expect(testBrick.props, contains(source));
-    });
-
-    test('should contain list of config files', () {
-      final testBrick = brick(createFile: true);
-
-      final propFiles =
-          testBrick.props.firstWhere((prop) => prop is List<BrickFile>);
-
-      expect(propFiles, isA<List<BrickFile>>());
-      propFiles as List<BrickFile>?;
-
-      for (final file in propFiles!) {
-        expect(testBrick.configuredFiles, contains(file));
-      }
-    });
-
-    test('should contain list of config dirs', () {
-      final testBrick = brick(createDir: true);
-
-      final propDirs =
-          testBrick.props.firstWhere((prop) => prop is List<BrickPath>);
-
-      expect(propDirs, isA<List<BrickPath>>());
-      propDirs as List<BrickPath>?;
-
-      for (final dir in propDirs!) {
-        expect(testBrick.configuredDirs, contains(dir));
-      }
-    });
-
-    test('should contain list of exclude paths', () {
-      final testBrick = brick(createDir: true);
-
-      final propDirs =
-          testBrick.props.firstWhere((prop) => prop is List<String>);
-
-      expect(propDirs, isA<List<String>>());
-      propDirs as List<String>?;
-
-      for (final dir in propDirs!) {
-        expect(testBrick.excludePaths, contains(dir));
       }
     });
   });

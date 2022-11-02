@@ -1,3 +1,4 @@
+import 'package:autoequal/autoequal.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -12,9 +13,12 @@ import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/utils/extensions.dart';
 
+part 'brick.g.dart';
+
 /// {@template brick}
 /// Represents the brick configured in the `brick_oven.yaml` file
 /// {@endtemplate}
+@autoequal
 class Brick extends Equatable {
   /// {@macro brick}
   Brick({
@@ -124,16 +128,28 @@ class Brick extends Equatable {
   final BrickSource source;
 
   /// the configured files that will alter/update the [source] files
+  @ignoreAutoequal
   final Iterable<BrickFile> configuredFiles;
 
   /// the configured directories that will alter/update the paths of the [source] files
+  @ignoreAutoequal
   final Iterable<BrickPath> configuredDirs;
 
   /// paths to be excluded from the [source]
+  @ignoreAutoequal
   final Iterable<String> excludePaths;
 
+  @includeAutoequal
+  List<BrickFile> get _configuredFilesForProps => configuredFiles.toList();
+  @includeAutoequal
+  List<BrickPath> get _configuredDirsForProps => configuredDirs.toList();
+  @includeAutoequal
+  List<String> get _excludePathsForProps => excludePaths.toList();
+
+  @ignoreAutoequal
   final FileSystem _fileSystem;
 
+  @ignoreAutoequal
   final Logger _logger;
 
   /// writes the brick's files, from the [source]'s files.
@@ -188,11 +204,5 @@ class Brick extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        name,
-        source,
-        configuredFiles.toList(growable: false),
-        configuredDirs.toList(growable: false),
-        excludePaths.toList(growable: false),
-      ];
+  List<Object?> get props => _$props;
 }

@@ -4,7 +4,6 @@ import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:test/test.dart';
 
 import '../utils/fakes.dart';
-import '../utils/reflect_properties.dart';
 
 void main() {
   group('$Name', () {
@@ -144,39 +143,6 @@ void main() {
               .formatWith(MustacheFormat.snakeCase),
           equals('{{#snakeCase}}prefix{{{name}}}suffix{{/snakeCase}}'),
         );
-      });
-    });
-
-    group('#props', () {
-      late Name name;
-
-      setUp(() {
-        name = const Name(
-          'name',
-          prefix: 'prefix',
-          suffix: 'suffix',
-          format: MustacheFormat.snakeCase,
-        );
-      });
-
-      test('should return the correct property length', () {
-        expect(reflectProperties(name).length, name.props.length);
-      });
-
-      test('should contain value', () {
-        expect(name.props.contains('name'), isTrue);
-      });
-
-      test('should contain prefix', () {
-        expect(name.props.contains('prefix'), isTrue);
-      });
-
-      test('should contain suffix', () {
-        expect(name.props.contains('suffix'), isTrue);
-      });
-
-      test('should contain format', () {
-        expect(name.props.contains(MustacheFormat.snakeCase), isTrue);
       });
     });
   });

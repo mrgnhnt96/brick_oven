@@ -5,7 +5,6 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 import 'package:watcher/watcher.dart';
 
-import '../utils/reflect_properties.dart';
 import '../utils/testing_env.dart';
 
 void main() {
@@ -212,22 +211,6 @@ void main() {
         await watcher.stop();
 
         expect(watcher.listener, isNull);
-      });
-    });
-
-    group('#props', () {
-      late BrickWatcher watcher;
-
-      setUp(() {
-        watcher = BrickWatcher('dirPath');
-      });
-
-      test('should return the correct length in props', () {
-        expect(reflectProperties(watcher).length, watcher.props.length);
-      });
-
-      test('should contain dir path', () {
-        expect(watcher.props, contains('dirPath'));
       });
     });
   });

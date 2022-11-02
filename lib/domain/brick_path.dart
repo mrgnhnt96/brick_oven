@@ -1,3 +1,4 @@
+import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
@@ -5,9 +6,12 @@ import 'package:path/path.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 
+part 'brick_path.g.dart';
+
 /// {@template brick_path}
 /// The configuration of the path that will be updated to mustache
 /// {@endtemplate}
+@autoequal
 class BrickPath extends Equatable {
   /// {@macro brick_path}
   factory BrickPath({
@@ -138,5 +142,5 @@ class BrickPath extends Equatable {
   }
 
   @override
-  List<Object?> get props => [name, path, placeholder, originalPath];
+  List<Object?> get props => _$props;
 }

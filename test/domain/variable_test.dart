@@ -4,7 +4,6 @@ import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:test/test.dart';
 
 import '../utils/fakes.dart';
-import '../utils/reflect_properties.dart';
 
 void main() {
   const name = 'scooby-doo';
@@ -86,23 +85,6 @@ void main() {
         variable.formatName(MustacheFormat.camelCase),
         '{{#camelCase}}{{{$name}}}{{/camelCase}}',
       );
-    });
-  });
-
-  group('#props', () {
-    late Variable variable;
-
-    setUp(() {
-      variable = const Variable(name: name, placeholder: placeholder);
-    });
-
-    test('should return the correct property length', () {
-      expect(reflectProperties(variable).length, variable.props.length);
-    });
-
-    test('should contain props', () {
-      expect(variable.props, contains(name));
-      expect(variable.props, contains(placeholder));
     });
   });
 }

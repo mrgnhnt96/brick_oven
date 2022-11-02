@@ -15,12 +15,12 @@ extension BrickX on Brick {
     // ignore: avoid_dynamic_calls, lines_longer_than_80_chars, unused_local_variable
     final dirsData = configuredDirs.fold(
       <String, dynamic>{},
-      (Map<String, dynamic> p, e) => p..addAll(e.toJson()),
+      (Map<String, dynamic> p, e) => {...p}..addAll(e.toJson()),
     );
 
     final filesData = configuredFiles.fold(
       <String, dynamic>{},
-      (Map<String, dynamic> p, e) => p..addAll(e.toJson()),
+      (Map<String, dynamic> p, e) => {...p}..addAll(e.toJson()),
     );
 
     return <String, dynamic>{

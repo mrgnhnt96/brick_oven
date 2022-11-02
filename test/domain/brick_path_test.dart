@@ -6,7 +6,6 @@ import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import '../utils/fakes.dart';
-import '../utils/reflect_properties.dart';
 
 void main() {
   const highestLevel = 'dir';
@@ -363,33 +362,6 @@ void main() {
           '{{{$replacement}}}/{{{$replacement2}}}/baz/foo/bar',
         );
       });
-    });
-  });
-
-  group('#props', () {
-    final brick = BrickPath(
-      name: const Name('foo'),
-      path: 'bar/baz',
-    );
-
-    test('should return the correct property length', () {
-      expect(reflectProperties(brick).length, brick.props.length);
-    });
-
-    test('should contain name', () {
-      expect(brick.props.contains(const Name('foo')), isTrue);
-    });
-
-    test('should contain path', () {
-      expect(brick.props.contains('bar/baz'), isTrue);
-    });
-
-    test('should contain originalPath', () {
-      expect(brick.props.contains('bar/baz'), isTrue);
-    });
-
-    test('should contain placeholder', () {
-      expect(brick.props.contains('baz'), isTrue);
     });
   });
 }

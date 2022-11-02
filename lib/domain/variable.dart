@@ -1,12 +1,16 @@
+import 'package:autoequal/autoequal.dart';
 import 'package:equatable/equatable.dart';
 
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/utils/extensions.dart';
 
+part 'variable.g.dart';
+
 /// {@template variable}
 /// Represents the variable values provided in the `brick_oven.yaml` file
 /// {@endtemplate}
+@autoequal
 class Variable extends Equatable {
   /// {@macro variable}
   const Variable({
@@ -84,5 +88,5 @@ class Variable extends Equatable {
   }
 
   @override
-  List<Object?> get props => [placeholder, name];
+  List<Object?> get props => _$props;
 }

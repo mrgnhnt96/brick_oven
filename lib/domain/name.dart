@@ -1,12 +1,17 @@
+import 'package:autoequal/autoequal.dart';
 import 'package:equatable/equatable.dart';
 
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/utils/extensions.dart';
 
+part 'name.g.dart';
+
 /// {@template name}
 /// Represents the name variable found within the configuration
 /// {@endtemplate}
+
+@autoequal
 class Name extends Equatable {
   /// {@macro name}
   const Name(
@@ -104,5 +109,5 @@ class Name extends Equatable {
   }
 
   @override
-  List<Object?> get props => [value, prefix, suffix, format];
+  List<Object?> get props => _$props;
 }

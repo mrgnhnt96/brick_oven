@@ -2,9 +2,12 @@
 
 import 'dart:async';
 
+import 'package:autoequal/autoequal.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
+
+part 'brick_watcher.g.dart';
 
 /// the function that happens on the file event
 typedef OnEvent = void Function();
@@ -12,6 +15,7 @@ typedef OnEvent = void Function();
 /// {@template brick_watcher}
 /// Watches the local files, and updates on events
 /// {@endtemplate}
+@autoequal
 class BrickWatcher extends Equatable {
   /// {@macro brick_watcher}
   BrickWatcher(this.dirPath) : _watcher = DirectoryWatcher(dirPath);
@@ -25,19 +29,26 @@ class BrickWatcher extends Equatable {
   }) : _watcher = watcher;
 
   /// the source directory of the brick, which will be watched
+  @ignoreAutoequal
   final DirectoryWatcher _watcher;
 
   /// the source directory of the brick, which will be watched
   final String dirPath;
 
+  @ignoreAutoequal
   StreamSubscription<WatchEvent>? _listener;
 
   /// the stream subscription for the watcher
   @visibleForTesting
   StreamSubscription<WatchEvent>? get listener => _listener;
 
+  @ignoreAutoequal
   final _beforeEvents = <OnEvent>[];
+
+  @ignoreAutoequal
   final _afterEvents = <OnEvent>[];
+
+  @ignoreAutoequal
   final _events = <OnEvent>[];
 
   /// events to be called for each brick that gets cooked
@@ -54,6 +65,8 @@ class BrickWatcher extends Equatable {
 
   /// whether the watcher has run
   bool get hasRun => _hasRun;
+
+  @ignoreAutoequal
   var _hasRun = false;
 
   /// whether the watcher is running
@@ -114,5 +127,5 @@ class BrickWatcher extends Equatable {
   }
 
   @override
-  List<Object?> get props => [dirPath];
+  List<Object?> get props => _$props;
 }

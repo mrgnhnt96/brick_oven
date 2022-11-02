@@ -1,3 +1,4 @@
+import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
@@ -15,9 +16,12 @@ import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:brick_oven/utils/extensions.dart';
 
+part 'brick_file.g.dart';
+
 /// {@template brick_file}
 /// Represents the file from the `brick_oven.yaml` file
 /// {@endtemplate}
+@autoequal
 class BrickFile extends Equatable {
   /// {macro brick_file}
   const BrickFile(this.path, {this.name}) : variables = const [];
@@ -88,7 +92,11 @@ class BrickFile extends Equatable {
   final String path;
 
   /// All variables that the content contains and will be updated with
+  @ignoreAutoequal
   final Iterable<Variable> variables;
+
+  @includeAutoequal
+  List<Variable> get _variableForProps => variables.toList();
 
   /// the name of the file
   ///
@@ -271,9 +279,5 @@ class BrickFile extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        path,
-        variables.toList(),
-        name,
-      ];
+  List<Object?> get props => _$props;
 }

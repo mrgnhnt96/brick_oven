@@ -1,3 +1,4 @@
+import 'package:autoequal/autoequal.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -11,9 +12,12 @@ import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/utils/extensions.dart';
 
+part 'brick_source.g.dart';
+
 /// {@template brick_source}
 /// The brick's source, where the files are retrived, copied &/or altered
 /// {@endtemplate}
+@autoequal
 class BrickSource extends Equatable {
   /// {@macro brick_source}
   BrickSource({
@@ -67,6 +71,8 @@ class BrickSource extends Equatable {
 
   /// the local path of the source files
   final String? localPath;
+
+  @ignoreAutoequal
   final FileSystem _fileSystem;
 
   /// Watches the local files, and updates on events
@@ -156,7 +162,7 @@ class BrickSource extends Equatable {
   }
 
   @override
-  List<Object?> get props => [localPath, watcher];
+  List<Object?> get props => _$props;
 }
 
 extension on Iterable<BrickFile> {

@@ -12,7 +12,6 @@ import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
 import '../utils/fakes.dart';
-import '../utils/reflect_properties.dart';
 
 void main() {
   const defaultFile = 'file.dart';
@@ -827,44 +826,6 @@ void main() {
 
         expect(newFile.readAsStringSync(), loops[loop]);
       }
-    });
-  });
-
-  group('#props', () {
-    const name = Name(
-      'name',
-      prefix: 'prefix',
-      suffix: 'suffix',
-    );
-    const variables = [Variable(placeholder: 'placeholder', name: 'name')];
-
-    const instance = BrickFile.config(
-      defaultFile,
-      name: name,
-      variables: variables,
-    );
-
-    test('should return the correct property length', () {
-      expect(reflectProperties(instance).length, instance.props.length);
-    });
-
-    test('contains path', () {
-      expect(instance.props, contains(defaultFile));
-    });
-
-    test('contains variables', () {
-      final vars = instance.props.firstWhere((prop) => prop is List<Variable>);
-
-      expect(vars, isA<List<Variable>>());
-      vars as List<Variable>?;
-
-      for (final variable in vars!) {
-        expect(instance.variables, contains(variable));
-      }
-    });
-
-    test('contains name', () {
-      expect(instance.props, contains(name));
     });
   });
 }
