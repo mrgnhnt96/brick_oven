@@ -69,22 +69,22 @@ class BrickSource extends Equatable {
           return const BrickSource.none();
         }
 
-        throw DirectoryException(
-          directory: path,
-          reason: '`source` is required in sub config files',
+        throw SourceException(
+          source: path,
+          reason: 'Source path is required in sub config files',
         );
       }
 
       if (!localPath.isString()) {
-        throw const DirectoryException(
-          directory: '??',
-          reason: 'Source must contain a `path` key with a string value',
+        throw const SourceException(
+          source: '??',
+          reason: 'Must contain a `path` key with a string value',
         );
       }
 
       if (data.isNotEmpty) {
-        throw DirectoryException(
-          directory: localPath.asString().value,
+        throw SourceException(
+          source: localPath.asString().value,
           reason: 'Unknown keys: "${data.keys.join('", "')}"',
         );
       }
@@ -108,9 +108,9 @@ class BrickSource extends Equatable {
       return const BrickSource.none();
     }
 
-    throw DirectoryException(
-      directory: path,
-      reason: '`source` is required in sub config files',
+    throw SourceException(
+      source: path,
+      reason: 'Source path is required in sub config files',
     );
   }
 

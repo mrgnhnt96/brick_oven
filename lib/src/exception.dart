@@ -114,6 +114,26 @@ class DirectoryException implements ConfigException {
       'Invalid directory config: "$directory"\nReason: $reason';
 }
 
+/// {@template source_exception}
+/// An exception thrown when a source is not configured correctly.
+/// {@endtemplate}
+class SourceException implements ConfigException {
+  /// {@macro source_exception}
+  const SourceException({
+    required this.source,
+    required this.reason,
+  });
+
+  /// the source that is not configured correctly
+  final String source;
+
+  /// the reason the source is not configured correctly
+  final String reason;
+
+  @override
+  String get message => 'Invalid source config: "$source"\nReason: $reason';
+}
+
 /// {@template directory_exception}
 /// An exception thrown when a brick is not configured correctly.
 /// {@endtemplate}
