@@ -58,7 +58,7 @@ void main() {
         overridePrint(() {
           logger.fileChanged('brick');
 
-          expect(printLogs, ['\n🔧  File changed ${darkGray.wrap('(brick)')}']);
+          expect(printLogs, ['\n📁  File changed ${darkGray.wrap('(brick)')}']);
         });
       });
 
@@ -69,7 +69,7 @@ void main() {
 
         verify(
           () =>
-              mockLogger.info('\n🔧  File changed ${darkGray.wrap('(brick)')}'),
+              mockLogger.info('\n📁  File changed ${darkGray.wrap('(brick)')}'),
         ).called(1);
       });
     });

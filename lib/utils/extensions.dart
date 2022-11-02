@@ -58,9 +58,9 @@ extension LoggerX on Logger {
     info('\n🔧  Configuration changed');
   }
 
-  /// writes `🔧  File changed`
+  /// writes `📁  File changed (brickName)`
   void fileChanged(String brickName) {
-    info('\n🔧  File changed ${darkGray.wrap('($brickName)')}');
+    info('\n📁  File changed ${darkGray.wrap('($brickName)')}');
   }
 
   /// writes `\n👀 Watching local files...`
