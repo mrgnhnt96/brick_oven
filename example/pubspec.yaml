@@ -10,5 +10,5 @@ dependencies:
 dev_dependencies:
   brick_oven_test:
     path: ../../brick_oven_test
-  test: ^1.16.0
-  very_good_analysis: ^2.4.0
+  test: ^1.22.0
+  very_good_analysis: ^3.1.0
