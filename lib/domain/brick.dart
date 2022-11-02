@@ -73,7 +73,14 @@ class Brick extends Equatable {
       }
     }
 
-    final pathsData = data.remove('dirs') as YamlMap?;
+    final pathsData = data.remove('dirs');
+
+    if (pathsData is! YamlMap?) {
+      throw BrickException(
+        brick: name,
+        reason: '`dirs` must be a map',
+      );
+    }
 
     Iterable<BrickPath> paths() sync* {
       if (pathsData == null) {

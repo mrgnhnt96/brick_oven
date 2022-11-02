@@ -13,10 +13,10 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
 
 import '../utils/fakes.dart';
 import '../utils/mocks.dart';
-import '../utils/to_yaml.dart';
 
 void main() {
   const brickName = 'super_awesome';
@@ -24,69 +24,75 @@ void main() {
   final brickPath = join('bricks', brickName, '__brick__');
   const dirName = 'director_of_shield';
   const newDirName = 'director_of_world';
+  const excludeDir = 'exclude_me';
   const fileName = 'nick_fury.dart';
   final dirPath = join('path', 'to', dirName);
   final filePath = join(dirPath, fileName);
 
   group('#fromYaml', () {
     test('parses when provided', () {
+      final yaml = loadYaml('''
+source: $localPath
+dirs:
+  $dirPath: $dirName
+files:
+  $filePath:
+    name: $fileName
+exclude:
+  - $excludeDir
+''');
+
+      final result = Brick.fromYaml(brickName, yaml as YamlMap);
+
       final brick = Brick(
-        configuredDirs: [
-          BrickPath(name: const Name('name'), path: 'path/to/dir')
-        ],
-        configuredFiles: const [
-          BrickFile('file/path/name.dart', name: Name('name'))
-        ],
-        excludePaths: const ['path/to/excluded/dir'],
-        name: 'brick',
-        source: BrickSource(localPath: 'localPath'),
+        configuredDirs: [BrickPath(name: const Name(dirName), path: dirPath)],
+        configuredFiles: [BrickFile(filePath, name: const Name(fileName))],
+        excludePaths: const [excludeDir],
+        name: brickName,
+        source: BrickSource(localPath: localPath),
       );
-
-      final data = brick.toYaml();
-
-      final result = Brick.fromYaml(brick.name, data);
 
       expectLater(result, brick);
     });
 
     test('throws $ConfigException non strings are provided to excluded paths',
         () {
-      final brick = Brick(
-        configuredDirs: [
-          BrickPath(name: const Name('name'), path: 'path/to/dir')
-        ],
-        configuredFiles: const [BrickFile('file/path/name.dart')],
-        name: 'brick',
-        source: BrickSource(localPath: 'localPath'),
-      );
-
-      final data = brick.toJson();
-      data['exclude'] =
-          FakeYamlList(<dynamic>['list', FakeYamlMap(<String, dynamic>{})]);
-      final yaml = FakeYamlMap(data);
+      final yaml = loadYaml('''
+source: $localPath
+exclude:
+  - some/path
+  - ${123}
+  - ${true}
+  - ${<String, dynamic>{}}
+''');
 
       expect(
-        () => Brick.fromYaml(brick.name, yaml),
+        () => Brick.fromYaml(brickName, yaml as YamlMap),
         throwsA(isA<ConfigException>()),
       );
     });
 
     test('throws $ConfigException when extra keys are provided', () {
-      final brick = Brick(
-        configuredDirs: [
-          BrickPath(name: const Name('name'), path: 'path/to/dir')
-        ],
-        configuredFiles: const [BrickFile('file/path/name.dart')],
-        name: 'brick',
-        source: BrickSource(localPath: 'localPath'),
-      );
-
-      final data = brick.toJson();
-      data['extra'] = 'extra';
-      final yaml = FakeYamlMap(data);
+      final yaml = loadYaml('''
+source: $localPath
+vars:
+''');
 
       expect(
-        () => Brick.fromYaml(brick.name, yaml),
+        () => Brick.fromYaml(brickName, yaml as YamlMap),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test('throws $ConfigException when dirs is not a map', () {
+      final yaml = loadYaml('''
+source: $localPath
+dirs:
+  $dirPath
+''');
+
+      expect(
+        () => Brick.fromYaml(brickName, yaml as YamlMap),
         throwsA(isA<ConfigException>()),
       );
     });
