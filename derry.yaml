@@ -1,3 +1,8 @@
+build:
+  run: flutter packages pub run build_runner build --delete-conflicting-outputs
+  watch: flutter packages pub run build_runner watch --delete-conflicting-outputs
+  clean: flutter packages pub run build_runner clean build
+
 coverage:
   - format_coverage --lcov --check-ignore --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
   - genhtml coverage/lcov.info -o coverage
