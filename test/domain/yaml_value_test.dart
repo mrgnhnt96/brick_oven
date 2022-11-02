@@ -55,10 +55,10 @@ void main() {
       expect(value.value, data);
     });
 
-    test('should throw when provided non-handled type', () {
+    test('should be type error when parsing is not successful', () {
       final data = <String, dynamic>{};
 
-      expect(() => YamlValue.from(data), throwsA(isA<UnsupportedError>()));
+      expect(YamlValue.from(data), isA<YamlError>());
     });
   });
 

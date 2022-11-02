@@ -24,6 +24,9 @@ abstract class YamlValue {
   /// represents the value as `null`
   const factory YamlValue.none() = YamlNone;
 
+  /// {@macro yaml_error}
+  const factory YamlValue.error(String error) = YamlError;
+
   /// parses the [value], typically a `String`, `YamlMap`, or `null`
   factory YamlValue.from(dynamic value) {
     if (value is String) {
@@ -33,7 +36,7 @@ abstract class YamlValue {
     } else if (value == null) {
       return const YamlValue.none();
     } else {
-      throw UnsupportedError('Unsupported value type: ${value.runtimeType}');
+      return YamlValue.error('Unsupported value type: ${value.runtimeType}');
     }
   }
 
@@ -45,6 +48,9 @@ abstract class YamlValue {
 
   /// whether the value is a `null`
   bool isNone() => this is YamlNone;
+
+  /// whether the value resulted in an error while parsing
+  bool isError() => this is YamlError;
 
   /// converts to a `YamlMap`
   YamlMapValue asYaml() {
@@ -108,4 +114,15 @@ class YamlNone extends YamlValue {
 
   @override
   Null get value => null;
+}
+
+/// {@template yaml_error}
+/// Represents a value that is an error
+/// {@endtemplate}
+class YamlError extends YamlValue {
+  /// {@macro yaml_error}
+  const YamlError(this.value) : super(value);
+
+  @override
+  final String value;
 }
