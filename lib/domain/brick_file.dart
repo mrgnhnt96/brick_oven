@@ -169,6 +169,7 @@ class BrickFile extends Equatable {
     required File sourceFile,
     required Iterable<BrickPath> configuredDirs,
     required FileSystem? fileSystem,
+    required Logger logger,
   }) {
     fileSystem ??= const LocalFileSystem();
     var path = this.path;
@@ -248,7 +249,7 @@ class BrickFile extends Equatable {
             }
 
             allVariables.remove(variable);
-            return '$before$match.group(2)!$after';
+            return '$before${match.group(2)!}$after';
           },
         );
 
@@ -337,19 +338,11 @@ class BrickFile extends Equatable {
     }
 
     if (allVariables.isNotEmpty) {
-      final logger = Logger();
-
-      for (final variable in allVariables) {
-        logger
-          ..info('')
-          ..warn(
-            'The configured variable '
-            '`${variable.placeholder}` (`${variable.name}`) was not '
-            'used in file `${sourceFile.path}`\n'
-            'Double check the your brick_oven.yaml config and '
-            'delete the unused variable if it is not needed\n',
-          );
-      }
+      logger.warn(
+        'The following variables are configured in brick_oven.yaml '
+        'but not used in file `${sourceFile.path}`:\n'
+        '"${allVariables.map((e) => e.name).join('", "')}"',
+      );
     }
 
     file.writeAsStringSync(content);
