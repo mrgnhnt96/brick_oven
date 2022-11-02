@@ -1,4 +1,5 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
 
 import 'package:brick_oven/domain/yaml_value.dart';
@@ -44,10 +45,16 @@ class Variable extends Equatable {
       if (map.isEmpty) {
         placeholder = name;
       } else {
-        throw ArgumentError('Unknown keys in variable: ${map.keys}');
+        throw VariableException(
+          variable: name,
+          reason: 'Unknown keys: "${map.keys.join('", "')}"',
+        );
       }
     } else {
-      throw ArgumentError('Missing value for variable: $name');
+      throw VariableException(
+        variable: name,
+        reason: 'Missing value',
+      );
     }
 
     return Variable._fromYaml(
@@ -61,7 +68,7 @@ class Variable extends Equatable {
     final yamlValue = YamlValue.from(value);
 
     if (yamlValue.isYaml()) {
-      throw ArgumentError('Variable $name cannot be a map');
+      throw VariableException(variable: name, reason: 'Cannot be type `Map`');
     } else if (yamlValue.isString()) {
       return Variable(name: name, placeholder: yamlValue.asString().value);
     } else {
