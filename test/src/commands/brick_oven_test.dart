@@ -1,6 +1,8 @@
 import 'package:args/args.dart';
+import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
@@ -12,15 +14,23 @@ import '../../utils/fakes.dart';
 
 void main() {
   late FileSystem fs;
-  late File brickOvenYaml;
   late BrickOvenCommand brickOvenCommand;
 
-  void createBrickOvenFile({
-    bool addExtraKey = false,
-    bool addPathForExtraConfig = false,
-    bool createExtraConfig = false,
-  }) {
-    var content = '''
+  void createFile(String path, String content) {
+    fs.file(path)
+      ..createSync(recursive: true)
+      ..writeAsStringSync(content);
+  }
+
+  setUp(() {
+    fs = MemoryFileSystem();
+    brickOvenCommand = TestBrickOvenCommand(fs);
+  });
+
+  group('$BrickOvenCommand', () {
+    group('#bricks', () {
+      test('returns a set of bricks', () {
+        const content = '''
 bricks:
   first:
     source: path/to/first
@@ -30,50 +40,38 @@ bricks:
     source: path/to/third
 ''';
 
-    if (addExtraKey) {
-      content += '''
-extra:
-''';
-    }
+        createFile(BrickOvenYaml.file, content);
 
-    if (addPathForExtraConfig) {
-      content += '''
-  fourth: path/to/fourth.yaml
-''';
-    }
-
-    brickOvenYaml
-      ..createSync()
-      ..writeAsStringSync(content);
-
-    const configForFourth = '''
-source: path/to/fourth
-''';
-
-    if (createExtraConfig) {
-      fs.file('path/to/fourth.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(configForFourth);
-    }
-  }
-
-  setUp(() {
-    fs = MemoryFileSystem();
-    brickOvenYaml = fs.file(BrickOvenYaml.file);
-    brickOvenCommand = TestBrickOvenCommand(fs);
-  });
-
-  group('$BrickOvenCommand', () {
-    group('#bricks', () {
-      test('returns a set of bricks', () {
-        createBrickOvenFile();
         final bricks = brickOvenCommand.bricks.bricks;
         expect(bricks, isNotNull);
         expect(bricks.length, 3);
       });
 
+      test('throws $ConfigException when ${BrickOvenYaml.file} is empty', () {
+        const content = '';
+
+        createFile(BrickOvenYaml.file, content);
+
+        expect(
+          () => brickOvenCommand.bricks,
+          throwsA(isA<BrickOvenException>()),
+        );
+      });
+
+      test('throws $ConfigException when bricks is not yaml', () {
+        const content = '''
+bricks: Not YAML
+''';
+
+        createFile(BrickOvenYaml.file, content);
+
+        expect(
+          () => brickOvenCommand.bricks,
+          throwsA(isA<BrickOvenException>()),
+        );
+      });
+
       test(
-        // ignore: lines_longer_than_80_chars
         'throws $BrickOvenNotFoundException when ${BrickOvenYaml.file} does not exist',
         () {
           expect(
@@ -83,8 +81,16 @@ source: path/to/fourth
         },
       );
 
-      test('return $BrickOrError with error', () {
-        createBrickOvenFile(addExtraKey: true);
+      test('return $BrickOrError with error when extra keys are provided', () {
+        const content = '''
+bricks:
+  first:
+    source: path/to/first
+second:
+  source: path/to/second
+''';
+
+        createFile(BrickOvenYaml.file, content);
 
         expect(brickOvenCommand.bricks.isError, isTrue);
         expect(
@@ -93,29 +99,81 @@ source: path/to/fourth
         );
       });
 
-      test(
-          'return $BrickOrError with brick when brick is provided path to config file',
-          () {
-        createBrickOvenFile(
-          addPathForExtraConfig: true,
-          createExtraConfig: true,
+      test('return $BrickOrError with brick provided path to config file', () {
+        const path = 'path/to/first';
+        const content = '''
+bricks:
+  first: $path.yaml
+''';
+
+        const content2 = '''
+source: $path
+''';
+
+        createFile(BrickOvenYaml.file, content);
+        createFile('$path.yaml', content2);
+
+        final brick = brickOvenCommand.bricks.bricks.first;
+
+        final result = Brick(
+          configuredDirs: const [],
+          configuredFiles: const [],
+          name: 'first',
+          source: BrickSource(localPath: path),
+          configPath: '$path.yaml',
         );
 
-        final bricks = brickOvenCommand.bricks.bricks;
-
-        expect(bricks, isNotNull);
-        expect(bricks.length, 4);
+        expect(brick, result);
       });
 
-      test(
-          'return $BrickOrError with brick when brick is provided path to config file',
-          () {
-        createBrickOvenFile(addPathForExtraConfig: true);
+      test('return $BrickOrError error when config file does not exist', () {
+        const path = 'path/to/first';
+        const content = '''
+bricks:
+  first: $path.yaml
+''';
+
+        createFile(BrickOvenYaml.file, content);
 
         expect(brickOvenCommand.bricks.isError, isTrue);
         expect(
           brickOvenCommand.bricks.error,
-          contains('FileSystemException'),
+          contains('Brick configuration file not found'),
+        );
+      });
+
+      test('return $BrickOrError error when config file is not type map', () {
+        const path = 'path/to/first';
+        const content = '''
+bricks:
+  first: $path.yaml
+''';
+        const content2 = '''
+- some value
+''';
+
+        createFile(BrickOvenYaml.file, content);
+        createFile('$path.yaml', content2);
+
+        expect(brickOvenCommand.bricks.isError, isTrue);
+        expect(
+          brickOvenCommand.bricks.error,
+          contains('Brick configuration file must be of type'),
+        );
+      });
+
+      test('return $BrickOrError error when brick is not correct type', () {
+        const content = '''
+bricks:
+  first: ${123}
+''';
+
+        createFile(BrickOvenYaml.file, content);
+
+        expect(brickOvenCommand.bricks.isError, isTrue);
+        expect(
+          brickOvenCommand.bricks.error,
+          contains('Invalid brick configuration'),
         );
       });
     });
