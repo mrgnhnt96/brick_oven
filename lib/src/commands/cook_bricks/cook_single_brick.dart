@@ -52,7 +52,7 @@ class CookSingleBrick extends BrickOvenCommand
   /// The output directory
   String get outputDir => argResults['output'] as String? ?? 'bricks';
 
-  @override
+  /// the config watcher for the brick oven yaml
   final FileWatcher configWatcher;
 
   @override
@@ -91,7 +91,22 @@ class CookSingleBrick extends BrickOvenCommand
 
     keyPressListener.qToQuit();
 
+    if (brick.configPath != null) {
+      unawaited(
+        watchForConfigChanges(
+          brick.configPath!,
+          onChange: () async {
+            logger.configChanged();
+
+            await cancelWatchers();
+            await brick.source.watcher?.stop();
+          },
+        ),
+      );
+    }
+
     final ovenNeedsReset = await watchForConfigChanges(
+      BrickOvenYaml.file,
       onChange: () async {
         logger.configChanged();
 

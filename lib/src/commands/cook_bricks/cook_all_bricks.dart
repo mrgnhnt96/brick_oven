@@ -24,7 +24,6 @@ class CookAllBricks extends BrickOvenCommand
   CookAllBricks({
     FileSystem? fileSystem,
     Logger? logger,
-    FileWatcher? configWatcher,
     KeyPressListener? keyPressListener,
   })  : keyPressListener = keyPressListener ??
             KeyPressListener(
@@ -32,7 +31,7 @@ class CookAllBricks extends BrickOvenCommand
               logger: logger,
               toExit: exit,
             ),
-        configWatcher = configWatcher ?? FileWatcher(BrickOvenYaml.file),
+        configWatcher = FileWatcher(BrickOvenYaml.file),
         super(fileSystem: fileSystem, logger: logger) {
     argParser
       ..addFlagsAndOptions()
@@ -42,7 +41,7 @@ class CookAllBricks extends BrickOvenCommand
   /// {@macro key_press_listener}
   final KeyPressListener keyPressListener;
 
-  @override
+  /// the config watcher for the brick oven yaml
   final FileWatcher configWatcher;
 
   @override
@@ -78,13 +77,9 @@ class CookAllBricks extends BrickOvenCommand
           runBefore: true,
         );
         watcher?.addEvent(logger.cooking, runBefore: true);
-
-        if (bricks.last == brick) {
-          watcher?.addEvent(logger.cooked, runAfter: true);
-          watcher?.addEvent(logger.watching, runAfter: true);
-          watcher?.addEvent(logger.qToQuit, runAfter: true);
-        }
-
+        watcher?.addEvent(logger.cooked, runAfter: true);
+        watcher?.addEvent(logger.watching, runAfter: true);
+        watcher?.addEvent(logger.qToQuit, runAfter: true);
         watcher?.addEvent(() => fileChanged(logger: logger));
       }
 
@@ -117,7 +112,26 @@ class CookAllBricks extends BrickOvenCommand
 
     keyPressListener.qToQuit();
 
+    for (final brick in bricks) {
+      if (brick.configPath == null) {
+        continue;
+      }
+
+      unawaited(
+        watchForConfigChanges(
+          brick.configPath!,
+          onChange: () async {
+            logger.configChanged();
+
+            await cancelWatchers();
+            await brick.source.watcher?.stop();
+          },
+        ),
+      );
+    }
+
     final ovenNeedsReset = await watchForConfigChanges(
+      BrickOvenYaml.file,
       onChange: () async {
         logger.configChanged();
 
