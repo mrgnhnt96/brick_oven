@@ -1,0 +1,16 @@
+targets:
+  $default:
+    builders:
+      source_gen:combining_builder:
+        generate_for:
+          include:
+            - lib/domain/*.dart
+          exclude:
+              - '**/example/**/*.dart'
+
+      autoequal_gen:
+        generate_for:
+          include:
+            - lib/domain/*.dart
+          exclude:
+            - '**/example/**/*.dart'
