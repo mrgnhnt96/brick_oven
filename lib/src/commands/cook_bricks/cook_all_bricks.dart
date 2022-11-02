@@ -78,6 +78,7 @@ class CookAllBricks extends BrickOvenCommand
         }
 
         if (bricks.last == brick) {
+          watcher?.addEvent(logger.cooked, runAfter: true);
           watcher?.addEvent(logger.watching, runAfter: true);
           watcher?.addEvent(logger.qToQuit, runAfter: true);
         }
