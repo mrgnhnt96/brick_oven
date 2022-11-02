@@ -13,6 +13,20 @@ void main() {
     expect(string, isA<YamlString>());
   });
 
+  test('#error can be instanciated', () {
+    const error = YamlValue.error('test');
+
+    expect(error, isA<YamlValue>());
+    expect(error, isA<YamlError>());
+  });
+
+  test('#list can be instanciated', () {
+    final list = YamlValue.list(YamlList());
+
+    expect(list, isA<YamlValue>());
+    expect(list, isA<YamlListValue>());
+  });
+
   test('#yaml can be instanciated', () {
     final yaml = YamlValue.yaml(YamlMap());
 
@@ -90,6 +104,34 @@ void main() {
     });
   });
 
+  group('#isList', () {
+    test('returns true when provided a list', () {
+      final value = YamlValue.from(YamlList());
+
+      expect(value.isList(), isTrue);
+    });
+
+    test('returns false when provided a non-list', () {
+      final value = YamlValue.from('test');
+
+      expect(value.isList(), isFalse);
+    });
+  });
+
+  group('#isError', () {
+    test('returns true when provided an error', () {
+      const value = YamlValue.error('test');
+
+      expect(value.isError(), isTrue);
+    });
+
+    test('returns false when provided a non-error', () {
+      final value = YamlValue.from('test');
+
+      expect(value.isError(), isFalse);
+    });
+  });
+
   group('#isNone', () {
     test('returns true when provided a null', () {
       final value = YamlValue.from(null);
@@ -115,6 +157,20 @@ void main() {
       final value = YamlValue.from(YamlMap());
 
       expect(value.asString, throwsA(isA<ArgumentError>()));
+    });
+  });
+
+  group('#asList', () {
+    test('should return as $YamlListValue when value is list', () {
+      final value = YamlValue.from(YamlList());
+
+      expect(value.asList(), isA<YamlListValue>());
+    });
+
+    test('should throw when value is not list', () {
+      final value = YamlValue.from('test');
+
+      expect(value.asList, throwsA(isA<ArgumentError>()));
     });
   });
 
@@ -183,7 +239,7 @@ void main() {
       expect(value, isA<YamlValue>());
     });
 
-    test('value is type YamlMap', () {
+    test('value is type $YamlMap', () {
       final yaml = YamlMap();
 
       final value = YamlMapValue(yaml);

@@ -9,26 +9,6 @@ abstract class YamlValue {
   /// {@macro yaml_value}
   const YamlValue(this.value);
 
-  /// {@macro yaml_value}
-  ///
-  /// Represents the value as a `String`
-  const factory YamlValue.string(String value) = YamlString;
-
-  /// {@macro yaml_value}
-  ///
-  /// represents the value as a `YamlMap`
-  const factory YamlValue.yaml(YamlMap value) = YamlMapValue;
-
-  /// {@macro yaml_value}
-  ///
-  /// represents the value as a `YamlList`
-  const factory YamlValue.list(YamlList value) = YamlListValue;
-
-  /// {@macro yaml_value}
-  ///
-  /// represents the value as `null`
-  const factory YamlValue.none() = YamlNone;
-
   /// {@macro yaml_error}
   const factory YamlValue.error(String error) = YamlError;
 
@@ -47,32 +27,28 @@ abstract class YamlValue {
     }
   }
 
+  /// {@macro yaml_value}
+  ///
+  /// represents the value as a `YamlList`
+  const factory YamlValue.list(YamlList value) = YamlListValue;
+
+  /// {@macro yaml_value}
+  ///
+  /// represents the value as `null`
+  const factory YamlValue.none() = YamlNone;
+
+  /// {@macro yaml_value}
+  ///
+  /// Represents the value as a `String`
+  const factory YamlValue.string(String value) = YamlString;
+
+  /// {@macro yaml_value}
+  ///
+  /// represents the value as a `YamlMap`
+  const factory YamlValue.yaml(YamlMap value) = YamlMapValue;
+
   /// the value that is provided from the key in the yaml file
   final dynamic value;
-
-  /// whether the value is a `String`
-  bool isString() => this is YamlString;
-
-  /// whether the value is a `YamlMap`
-  bool isYaml() => this is YamlMapValue;
-
-  /// whether the value is a `YamlList`
-  bool isList() => this is YamlListValue;
-
-  /// whether the value is a `null`
-  bool isNone() => this is YamlNone;
-
-  /// whether the value resulted in an error while parsing
-  bool isError() => this is YamlError;
-
-  /// converts to a `YamlMap`
-  YamlMapValue asYaml() {
-    if (!isYaml()) {
-      throw ArgumentError('$this is not a $YamlMapValue');
-    }
-
-    return this as YamlMapValue;
-  }
 
   /// converts to a `YamlList`
   YamlListValue asList() {
@@ -81,6 +57,15 @@ abstract class YamlValue {
     }
 
     return this as YamlListValue;
+  }
+
+  /// converts to a `null`
+  YamlNone asNone() {
+    if (!isNone()) {
+      throw ArgumentError('$this is not a $YamlNone');
+    }
+
+    return this as YamlNone;
   }
 
   /// converts to a `String`
@@ -92,14 +77,29 @@ abstract class YamlValue {
     return this as YamlString;
   }
 
-  /// converts to a `null`
-  YamlNone asNone() {
-    if (!isNone()) {
-      throw ArgumentError('$this is not a $YamlNone');
+  /// converts to a `YamlMap`
+  YamlMapValue asYaml() {
+    if (!isYaml()) {
+      throw ArgumentError('$this is not a $YamlMapValue');
     }
 
-    return this as YamlNone;
+    return this as YamlMapValue;
   }
+
+  /// whether the value resulted in an error while parsing
+  bool isError() => this is YamlError;
+
+  /// whether the value is a `YamlList`
+  bool isList() => this is YamlListValue;
+
+  /// whether the value is a `null`
+  bool isNone() => this is YamlNone;
+
+  /// whether the value is a `String`
+  bool isString() => this is YamlString;
+
+  /// whether the value is a `YamlMap`
+  bool isYaml() => this is YamlMapValue;
 }
 
 /// {@template yaml_string}
