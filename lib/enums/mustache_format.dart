@@ -37,6 +37,9 @@ enum MustacheFormat {
 
   /// UPPERCASE
   upperCase,
+
+  /// no format, but wrapped with `{{{}}}`
+  escape,
 }
 
 /// the extensions for Mustache
@@ -45,8 +48,20 @@ extension MustacheFormatX on MustacheFormat {
   ///
   /// eg: {{#snakeCase}}This is the content{{/snakeCase}}
   String toMustache(String content) {
+    assert(
+      content.contains('{{{') && content.contains('}}}'),
+      'Content must be wrapped with {{{}}}',
+    );
+
+    if (isEscape) {
+      return content;
+    }
+
     return '{{#$name}}$content{{/$name}}';
   }
+
+  /// whether the format is [MustacheFormat.escape]
+  bool get isEscape => this == MustacheFormat.escape;
 }
 
 /// The extensions for Lists

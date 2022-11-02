@@ -5,14 +5,30 @@ import 'package:brick_oven/enums/mustache_format.dart';
 void main() {
   group('MustacheFormatX', () {
     group('#toMustache', () {
-      test('formats the content correctly', () {
-        const format = MustacheFormat.camelCase;
-        const content = 'sup_dude';
-
+      test('throws assertion when content is not wrapped with brackets', () {
         expect(
-          format.toMustache(content),
-          '{{#camelCase}}$content{{/camelCase}}',
+          () => MustacheFormat.camelCase.toMustache('content'),
+          throwsA(isA<AssertionError>()),
         );
+      });
+
+      test('formats the content correctly', () {
+        for (final format in MustacheFormat.values) {
+          const content = '{{{sup_dude}}}';
+
+          if (format.isEscape) {
+            expect(
+              format.toMustache(content),
+              content,
+            );
+            continue;
+          }
+
+          expect(
+            format.toMustache(content),
+            '{{#${format.name}}}$content{{/${format.name}}}',
+          );
+        }
       });
     });
   });
