@@ -21,6 +21,11 @@ abstract class YamlValue {
 
   /// {@macro yaml_value}
   ///
+  /// represents the value as a `YamlList`
+  const factory YamlValue.list(YamlList value) = YamlListValue;
+
+  /// {@macro yaml_value}
+  ///
   /// represents the value as `null`
   const factory YamlValue.none() = YamlNone;
 
@@ -33,6 +38,8 @@ abstract class YamlValue {
       return YamlValue.string(value);
     } else if (value is YamlMap) {
       return YamlValue.yaml(value);
+    } else if (value is YamlList) {
+      return YamlValue.list(value);
     } else if (value == null) {
       return const YamlValue.none();
     } else {
@@ -40,11 +47,17 @@ abstract class YamlValue {
     }
   }
 
+  /// the value that is provided from the key in the yaml file
+  final dynamic value;
+
   /// whether the value is a `String`
   bool isString() => this is YamlString;
 
   /// whether the value is a `YamlMap`
   bool isYaml() => this is YamlMapValue;
+
+  /// whether the value is a `YamlList`
+  bool isList() => this is YamlListValue;
 
   /// whether the value is a `null`
   bool isNone() => this is YamlNone;
@@ -59,6 +72,15 @@ abstract class YamlValue {
     }
 
     return this as YamlMapValue;
+  }
+
+  /// converts to a `YamlList`
+  YamlListValue asList() {
+    if (!isList()) {
+      throw ArgumentError('$this is not a $YamlListValue');
+    }
+
+    return this as YamlListValue;
   }
 
   /// converts to a `String`
@@ -78,9 +100,6 @@ abstract class YamlValue {
 
     return this as YamlNone;
   }
-
-  /// the value that is provided from the key in the yaml file
-  final dynamic value;
 }
 
 /// {@template yaml_string}
@@ -103,6 +122,17 @@ class YamlMapValue extends YamlValue {
 
   @override
   final YamlMap value;
+}
+
+/// {@template yaml_list}
+/// Represents a value that is a `YamlList`
+/// {@endtemplate}
+class YamlListValue extends YamlValue {
+  /// {@macro yaml_map}
+  const YamlListValue(this.value) : super(value);
+
+  @override
+  final YamlList value;
 }
 
 /// {@template yaml_none}
