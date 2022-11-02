@@ -1,5 +1,6 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -31,7 +32,7 @@ abstract class BrickOvenCommand extends Command<int> {
   ArgResults get argResults => super.argResults!;
 
   /// gets the bricks brick oven configuration file
-  Set<Brick> get bricks {
+  BrickOrError get bricks {
     final configFile = BrickOvenYaml.findNearest(cwd);
 
     if (configFile == null) {
@@ -47,22 +48,28 @@ abstract class BrickOvenCommand extends Command<int> {
     final bricks = data.remove('bricks') as YamlMap?;
 
     if (bricks != null) {
-      for (final brick in bricks.entries) {
-        final name = brick.key as String;
-        final value = brick.value as YamlMap?;
+      try {
+        for (final brick in bricks.entries) {
+          final name = brick.key as String;
+          final value = brick.value as YamlMap?;
 
-        directories.add(Brick.fromYaml(name, value));
+          directories.add(Brick.fromYaml(name, value));
+        }
+      } on ConfigException catch (e) {
+        return BrickOrError(null, e.message);
+      } catch (e) {
+        return BrickOrError(null, '$e');
       }
     }
 
     if (data.keys.isNotEmpty) {
-      throw UnknownKeysException(
+      final error = UnknownKeysException(
         data.keys,
         BrickOvenYaml.file,
       );
+      return BrickOrError(null, error.message);
     }
-
-    return directories;
+    return BrickOrError(directories, null);
   }
 
   /// gets the current working directory
