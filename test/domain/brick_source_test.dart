@@ -5,12 +5,20 @@ import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
+import '../utils/mocks.dart';
+
 void main() {
   const localPath = 'local_path';
+  late MockLogger mockLogger;
+
+  setUp(() {
+    mockLogger = MockLogger();
+  });
 
   List<String> createFakeFiles(
     void Function(FileSystem) createFileSystem,
@@ -183,7 +191,7 @@ path:
         );
       });
 
-      final mergedFiles = source.mergeFilesAndConfig([]);
+      final mergedFiles = source.mergeFilesAndConfig([], logger: mockLogger);
 
       expect(mergedFiles, hasLength(fakePaths.length));
 
@@ -192,12 +200,44 @@ path:
       }
     });
 
-    test('should return all config files', () {
+    test('should return no config file when source files do not exist', () {
       final source = BrickSource(localPath: localPath);
 
       final configFiles = ['file1.dart', 'file2.dart'].map(BrickFile.new);
 
-      final mergedFiles = source.mergeFilesAndConfig(configFiles);
+      verifyNever(() => mockLogger.info(any()));
+      verifyNever(() => mockLogger.warn(any()));
+
+      final mergedFiles =
+          source.mergeFilesAndConfig(configFiles, logger: mockLogger);
+
+      verify(() => mockLogger.info(any())).called(2);
+      verify(() => mockLogger.warn(any())).called(2);
+
+      expect(mergedFiles, hasLength(0));
+
+      for (final file in mergedFiles) {
+        expect(configFiles, isNot(contains(file)));
+      }
+    });
+
+    test('should return all config files', () {
+      late BrickSource source;
+
+      final files = createFakeFiles((fs) {
+        source = BrickSource.memory(
+          localPath: localPath,
+          fileSystem: fs,
+        );
+      });
+
+      final configFiles = files.map((e) {
+        final path = e.replaceFirst('$localPath/', '');
+        return BrickFile(path);
+      });
+
+      final mergedFiles =
+          source.mergeFilesAndConfig(configFiles, logger: mockLogger);
 
       expect(mergedFiles, hasLength(configFiles.length));
 
@@ -229,7 +269,8 @@ path:
         );
       }
 
-      final mergedFiles = source.mergeFilesAndConfig(configFiles);
+      final mergedFiles =
+          source.mergeFilesAndConfig(configFiles, logger: mockLogger);
 
       expect(mergedFiles, hasLength(fakePaths.length));
 
@@ -268,8 +309,11 @@ path:
           fileSystem: fs,
         );
 
-        final brickFiles = source
-            .mergeFilesAndConfig([], excludedPaths: excludedPaths).toList();
+        final brickFiles = source.mergeFilesAndConfig(
+          [],
+          excludedPaths: excludedPaths,
+          logger: mockLogger,
+        ).toList();
 
         expect(brickFiles.length, 2);
         expect(brickFiles[0].path, 'file1.dart');
