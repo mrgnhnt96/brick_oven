@@ -27,6 +27,7 @@ class Brick extends Equatable {
     required this.source,
     required this.configuredDirs,
     required this.configuredFiles,
+    this.configPath,
     this.excludePaths = const [],
     Logger? logger,
   })  : _fileSystem = const LocalFileSystem(),
@@ -42,6 +43,7 @@ class Brick extends Equatable {
     required FileSystem fileSystem,
     this.excludePaths = const [],
     required Logger logger,
+    this.configPath,
   })  : _fileSystem = fileSystem,
         _logger = logger;
 
@@ -50,13 +52,18 @@ class Brick extends Equatable {
     required this.source,
     required this.configuredFiles,
     required this.configuredDirs,
-    this.excludePaths = const [],
+    required this.excludePaths,
+    required this.configPath,
   })  : _fileSystem = const LocalFileSystem(),
         _logger = Logger();
 
   /// parses [yaml]
-  factory Brick.fromYaml(String name, YamlMap? yaml) {
-    final data = yaml?.data ?? <String, dynamic>{};
+  factory Brick.fromYaml(
+    String name,
+    YamlMap yaml, {
+    String? configPath,
+  }) {
+    final data = yaml.data;
     late final BrickSource source;
     try {
       source = BrickSource.fromYaml(YamlValue.from(data.remove('source')));
@@ -163,6 +170,7 @@ class Brick extends Equatable {
       name: name,
       configuredDirs: paths().toList(),
       excludePaths: exclude().toList(),
+      configPath: configPath,
     );
   }
 
@@ -180,6 +188,9 @@ class Brick extends Equatable {
 
   /// paths to be excluded from the [source]
   final List<String> excludePaths;
+
+  /// if the brick has its own path
+  final String? configPath;
 
   @ignoreAutoequal
   final FileSystem _fileSystem;
