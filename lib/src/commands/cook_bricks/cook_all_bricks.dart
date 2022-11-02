@@ -25,21 +25,30 @@ class CookAllBricks extends BrickOvenCommand
     FileSystem? fileSystem,
     Logger? logger,
     KeyPressListener? keyPressListener,
-  })  : keyPressListener = keyPressListener ??
-            KeyPressListener(
-              stdin: stdin,
-              logger: logger,
-              toExit: exit,
-            ),
-        configWatcher = FileWatcher(BrickOvenYaml.file),
+  })  : configWatcher = FileWatcher(BrickOvenYaml.file),
         super(fileSystem: fileSystem, logger: logger) {
     argParser
       ..addFlagsAndOptions()
       ..addSeparator('${'-' * 79}\n');
+
+    this.keyPressListener = keyPressListener ??
+        keyPressListener ??
+        KeyPressListener(
+          stdin: stdin,
+          logger: logger,
+          toExit: (code) async {
+            if (ExitCode.tempFail.code == code) {
+              await cancelWatchers();
+              return;
+            }
+
+            exit(code);
+          },
+        );
   }
 
   /// {@macro key_press_listener}
-  final KeyPressListener keyPressListener;
+  late final KeyPressListener keyPressListener;
 
   /// the config watcher for the brick oven yaml
   final FileWatcher configWatcher;
@@ -79,7 +88,7 @@ class CookAllBricks extends BrickOvenCommand
         watcher?.addEvent(logger.cooking, runBefore: true);
         watcher?.addEvent(logger.cooked, runAfter: true);
         watcher?.addEvent(logger.watching, runAfter: true);
-        watcher?.addEvent(logger.qToQuit, runAfter: true);
+        watcher?.addEvent(logger.keyStrokes, runAfter: true);
         watcher?.addEvent(() => fileChanged(logger: logger));
       }
 
@@ -110,7 +119,7 @@ class CookAllBricks extends BrickOvenCommand
 
     logger.watching();
 
-    keyPressListener.qToQuit();
+    keyPressListener.listenToKeystrokes();
 
     for (final brick in bricks) {
       if (brick.configPath == null) {
