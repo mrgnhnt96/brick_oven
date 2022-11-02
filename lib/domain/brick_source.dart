@@ -1,4 +1,5 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -56,7 +57,10 @@ class BrickSource extends Equatable {
       final localPath = data.remove('path') as String?;
 
       if (data.isNotEmpty) {
-        throw ArgumentError('Unknown keys in source: ${data.keys}');
+        throw DirectoryException(
+          directory: localPath ?? '',
+          reason: 'Unknown keys: "${data.keys.join('", "')}"',
+        );
       }
 
       return BrickSource(localPath: localPath);
@@ -129,7 +133,9 @@ class BrickSource extends Equatable {
 
       if (excludedFiles.contains(path)) {
         break;
-      } else if (excludedDirs.any(path.startsWith)) {
+      }
+
+      if (excludedDirs.any(path.startsWith)) {
         break;
       }
 
