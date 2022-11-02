@@ -146,12 +146,12 @@ class BrickSource extends Equatable {
   Iterable<BrickFile> mergeFilesAndConfig(
     Iterable<BrickFile> configFiles, {
     Iterable<String> excludedPaths = const [],
+    required Logger logger,
   }) {
     final configs = configFiles.toMap();
 
     final sourceFiles = files().toMap();
 
-    final logger = Logger();
     final keys = configs.keys;
     final keysToRemove = <String>{};
     for (final file in keys) {
