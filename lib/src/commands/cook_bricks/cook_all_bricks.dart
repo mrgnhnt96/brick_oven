@@ -60,31 +60,37 @@ class CookAllBricks extends BrickOvenCommand
   Future<int> run() async {
     logger.cooking();
 
-    final bricks = this.bricks;
-
-    if (!isWatch) {
-      for (final brick in bricks) {
-        brick.cook(output: outputDir);
-      }
-      logger.info('');
-
-      return ExitCode.success.code;
+    final bricksOrError = this.bricks;
+    if (bricksOrError.isError) {
+      logger.err(bricksOrError.error);
+      return ExitCode.config.code;
     }
 
+    final bricks = bricksOrError.bricks;
+
     for (final brick in bricks) {
-      final watcher = brick.source.watcher;
+      if (isWatch) {
+        final watcher = brick.source.watcher;
 
-      if (bricks.first == brick) {
-        watcher?.addEvent(logger.cooking, runBefore: true);
+        if (bricks.first == brick) {
+          watcher?.addEvent(logger.cooking, runBefore: true);
+        }
+
+        if (bricks.last == brick) {
+          watcher?.addEvent(logger.watching, runAfter: true);
+          watcher?.addEvent(logger.qToQuit, runAfter: true);
+        }
+
+        watcher?.addEvent(() => fileChanged(logger: logger));
       }
 
-      if (bricks.last == brick) {
-        watcher?.addEvent(logger.watching, runAfter: true);
-        watcher?.addEvent(logger.qToQuit, runAfter: true);
-      }
+      brick.cook(output: outputDir, watch: isWatch);
+    }
 
-      watcher?.addEvent(() => fileChanged(logger: logger));
-      brick.cook(output: outputDir, watch: true);
+    logger.cooked();
+
+    if (!isWatch) {
+      return ExitCode.success.code;
     }
 
     if (!bricks.any((brick) => brick.source.watcher?.isRunning ?? false)) {
@@ -101,9 +107,7 @@ class CookAllBricks extends BrickOvenCommand
 
     final ovenNeedsReset = await watchForConfigChanges(
       onChange: () async {
-        logger.alert(
-          '${BrickOvenYaml.file} changed, updating bricks configuration',
-        );
+        logger.configChanged();
 
         for (final brick in bricks) {
           await brick.source.watcher?.stop();

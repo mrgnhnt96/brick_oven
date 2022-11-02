@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 
@@ -20,6 +23,15 @@ class CookBricksCommand extends BrickOvenCommand {
         logger: logger,
       ),
     );
+
+    final bricksOrError = this.bricks;
+    if (bricksOrError.isError) {
+      super.logger.err('Error reading ${BrickOvenYaml.file}:\n'
+          '${bricksOrError.error}');
+      exit(ExitCode.config.code);
+    }
+
+    final bricks = bricksOrError.bricks;
 
     for (final brick in bricks) {
       addSubcommand(
