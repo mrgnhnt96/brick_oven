@@ -109,24 +109,42 @@ class Brick extends Equatable {
       }
     }
 
-    final excludedPaths = data.remove('exclude') as YamlList?;
+    final excludedPaths = YamlValue.from(data.remove('exclude'));
 
     Iterable<String> exclude() sync* {
-      if (excludedPaths == null) {
+      if (excludedPaths.isNone()) {
         return;
       }
 
-      for (final entry in excludedPaths) {
-        final path = YamlValue.from(entry);
+      if (!excludedPaths.isList() && !excludedPaths.isString()) {
+        throw BrickException(
+          brick: name,
+          reason: '`exclude` must be a of type `List`or `String`',
+        );
+      }
 
+      final paths = <YamlValue>[];
+
+      if (excludedPaths.isList()) {
+        paths.addAll(excludedPaths.asList().value.map(YamlValue.from));
+      } else {
+        paths.add(excludedPaths.asString());
+      }
+
+      for (final path in paths) {
         if (path.isString()) {
           yield path.asString().value;
         } else {
+          final variableError = VariableException(
+            variable: 'exclude',
+            reason: 'Expected a `String`, got `${path.value}` '
+                // ignore: avoid_dynamic_calls
+                '(${path.value.runtimeType})',
+          );
+
           throw BrickException(
             brick: name,
-            reason: 'Expected string in exclude list, '
-                // ignore: avoid_dynamic_calls
-                'got ${path.value} (${path.value.runtimeType})',
+            reason: variableError.message,
           );
         }
       }

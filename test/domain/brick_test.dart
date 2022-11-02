@@ -55,23 +55,6 @@ exclude:
       expectLater(result, brick);
     });
 
-    test('throws $ConfigException non strings are provided to excluded paths',
-        () {
-      final yaml = loadYaml('''
-source: $localPath
-exclude:
-  - some/path
-  - ${123}
-  - ${true}
-  - ${<String, dynamic>{}}
-''');
-
-      expect(
-        () => Brick.fromYaml(brickName, yaml as YamlMap),
-        throwsA(isA<ConfigException>()),
-      );
-    });
-
     test('throws $ConfigException when extra keys are provided', () {
       final yaml = loadYaml('''
 source: $localPath
@@ -108,6 +91,74 @@ files:
         () => Brick.fromYaml(brickName, yaml as YamlMap),
         throwsA(isA<ConfigException>()),
       );
+    });
+
+    group('exclude', () {
+      test('throws $ConfigException when type is not a list or string', () {
+        final yaml = loadYaml('''
+source: $localPath
+exclude:
+  path: $excludeDir
+''');
+
+        expect(
+          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+
+      test('parses list', () {
+        final yaml = loadYaml('''
+source: $localPath
+exclude:
+  - $excludeDir
+''');
+
+        expect(
+          Brick.fromYaml(brickName, yaml as YamlMap),
+          Brick(
+            excludePaths: const [excludeDir],
+            configuredDirs: const [],
+            configuredFiles: const [],
+            name: brickName,
+            source: BrickSource(localPath: localPath),
+          ),
+        );
+      });
+
+      test('parses string', () {
+        final yaml = loadYaml('''
+source: $localPath
+exclude: $excludeDir
+''');
+
+        expect(
+          Brick.fromYaml(brickName, yaml as YamlMap),
+          Brick(
+            excludePaths: const [excludeDir],
+            configuredDirs: const [],
+            configuredFiles: const [],
+            name: brickName,
+            source: BrickSource(localPath: localPath),
+          ),
+        );
+      });
+
+      test('throws $ConfigException non strings are provided', () {
+        final yaml = loadYaml('''
+source: $localPath
+exclude:
+  - some/path
+  - ${123}
+  - ${true}
+  - ${<String, dynamic>{}}
+''');
+
+        expect(
+          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          throwsA(isA<ConfigException>()),
+        );
+      });
     });
   });
 
