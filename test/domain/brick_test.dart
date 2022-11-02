@@ -96,6 +96,19 @@ dirs:
         throwsA(isA<ConfigException>()),
       );
     });
+
+    test('throws $ConfigException when files is not a map', () {
+      final yaml = loadYaml('''
+source: $localPath
+files:
+  $filePath
+''');
+
+      expect(
+        () => Brick.fromYaml(brickName, yaml as YamlMap),
+        throwsA(isA<ConfigException>()),
+      );
+    });
   });
 
   // Watcher only listens to local files, so we need to mock the file system

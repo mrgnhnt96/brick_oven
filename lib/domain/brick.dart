@@ -66,35 +66,43 @@ class Brick extends Equatable {
       rethrow;
     }
 
-    final filesData = data.remove('files') as YamlMap?;
+    final filesData = YamlValue.from(data.remove('files'));
+
     Iterable<BrickFile> files() sync* {
-      if (filesData == null) {
+      if (filesData.isNone()) {
         return;
       }
 
-      for (final entry in filesData.entries) {
+      if (!filesData.isYaml()) {
+        throw FileException(
+          file: name,
+          reason: '`files` must be of type `Map`',
+        );
+      }
+
+      for (final entry in filesData.asYaml().value.entries) {
         final path = entry.key as String;
-        final yaml = entry.value as YamlMap?;
+        final yaml = YamlValue.from(entry.value);
 
         yield BrickFile.fromYaml(yaml, path: path);
       }
     }
 
-    final pathsData = data.remove('dirs');
-
-    if (pathsData is! YamlMap?) {
-      throw BrickException(
-        brick: name,
-        reason: '`dirs` must be a map',
-      );
-    }
+    final pathsData = YamlValue.from(data.remove('dirs'));
 
     Iterable<BrickPath> paths() sync* {
-      if (pathsData == null) {
+      if (pathsData.isNone()) {
         return;
       }
 
-      for (final entry in pathsData.entries) {
+      if (!pathsData.isYaml()) {
+        throw BrickException(
+          brick: name,
+          reason: '`dirs` must be a of type `Map`',
+        );
+      }
+
+      for (final entry in pathsData.asYaml().value.entries) {
         final path = entry.key as String;
 
         yield BrickPath.fromYaml(path, YamlValue.from(entry.value));
