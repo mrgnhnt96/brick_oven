@@ -1,4 +1,5 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
@@ -52,7 +53,10 @@ class BrickPath extends Equatable {
       final nameData = YamlValue.from(data.remove('name'));
 
       if (data.keys.isNotEmpty) {
-        throw ArgumentError('Unknown keys in directory: $path');
+        throw DirectoryException(
+          directory: path,
+          reason: 'Unknown keys: "${data.keys.join('", "')}"',
+        );
       }
 
       name = Name.fromYamlValue(nameData, basename(path));
