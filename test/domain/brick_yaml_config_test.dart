@@ -63,10 +63,9 @@ vars:
 
   group('#props', () {
     test('instances are equal', () {
-      const config1 = BrickYamlConfig(path: 'brick.yaml');
-      const config2 = BrickYamlConfig(path: 'brick.yaml');
+      const instance = BrickYamlConfig(path: 'brick.yaml');
 
-      expect(config1, config2);
+      expect(instance.props.length, 1);
     });
   });
 }
