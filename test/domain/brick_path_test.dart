@@ -38,13 +38,17 @@ void main() {
   });
 
   group('#fromYaml', () {
+    test('throws when yaml is error', () {
+      expect(
+        () => BrickPath.fromYaml(const YamlValue.error('error'), dirPath),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
     test('throws when path points to a file', () {
       expect(
-        () => BrickPath.fromYaml(
-          '$dirPath/file.dart',
-          const YamlValue.none(),
-        ),
-        throwsA(isA<ArgumentError>()),
+        () => BrickPath.fromYaml(const YamlValue.none(), '$dirPath/file.dart'),
+        throwsA(isA<ConfigException>()),
       );
     });
 
@@ -55,13 +59,13 @@ path: path
 ''') as YamlMap;
 
       expect(
-        () => BrickPath.fromYaml(dirPath, YamlValue.yaml(yaml)),
+        () => BrickPath.fromYaml(YamlValue.yaml(yaml), dirPath),
         throwsA(isA<ConfigException>()),
       );
     });
 
     test('name is the highest level from path when null is provided', () {
-      final brickPath = BrickPath.fromYaml(dirPath, const YamlValue.none());
+      final brickPath = BrickPath.fromYaml(const YamlValue.none(), dirPath);
 
       expect(brickPath.name.value, highestLevel);
     });
@@ -71,7 +75,7 @@ path: path
 name: name
 ''') as YamlMap;
 
-      final brickPath = BrickPath.fromYaml(dirPath, YamlValue.yaml(yaml));
+      final brickPath = BrickPath.fromYaml(YamlValue.yaml(yaml), dirPath);
 
       expect(brickPath.name.value, 'name');
     });

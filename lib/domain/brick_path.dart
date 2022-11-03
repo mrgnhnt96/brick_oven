@@ -37,12 +37,18 @@ class BrickPath extends Equatable {
   });
 
   /// parses the [yaml]
-  factory BrickPath.fromYaml(String path, YamlValue yaml) {
+  factory BrickPath.fromYaml(YamlValue yaml, String path) {
+    if (yaml.isError()) {
+      throw DirectoryException(
+        directory: path,
+        reason: 'Invalid directory: ${yaml.asError().value}',
+      );
+    }
+
     if (extension(path).isNotEmpty) {
-      throw ArgumentError.value(
-        path,
-        'path',
-        'Path must not have an extension',
+      throw DirectoryException(
+        directory: path,
+        reason: 'the path must point to a directory',
       );
     }
 
@@ -59,7 +65,7 @@ class BrickPath extends Equatable {
         );
       }
 
-      name = Name.fromYamlValue(nameData, basename(path));
+      name = Name.fromYaml(nameData, basename(path));
     } else if (yaml.isString()) {
       name = Name(yaml.asString().value);
     } else {
