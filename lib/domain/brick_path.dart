@@ -113,8 +113,9 @@ class BrickPath extends Equatable {
   static String cleanPath(String path) {
     final normalPath = normalize(path);
     final cleanPath = normalPath.replaceAll(slashPattern, '');
+    final purePath = cleanPath.cleanUpPath();
 
-    return cleanPath;
+    return purePath;
   }
 
   /// the segments of [path]
@@ -153,4 +154,28 @@ class BrickPath extends Equatable {
 
   @override
   List<Object?> get props => _$props;
+}
+
+extension _StringX on String {
+  /// cleans the path by removing trailing slash and
+  /// ./ from the beginning
+  String cleanUpPath() {
+    String removeLast(String path) {
+      if (path.endsWith('/') || path.endsWith('.')) {
+        return removeLast(path.substring(0, path.length - 1));
+      }
+
+      return path;
+    }
+
+    var str = normalize(this);
+
+    if (this == './') {
+      return '';
+    } else if (startsWith('./')) {
+      str = substring(2);
+    }
+
+    return str = removeLast(str);
+  }
 }

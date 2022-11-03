@@ -1,4 +1,5 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
@@ -61,7 +62,7 @@ class BrickSource extends Equatable {
     final configDir = dirname(configPath ?? '');
 
     if (yaml.isString()) {
-      final path = join(configDir, yaml.asString().value).cleanUpPath();
+      final path = BrickPath.cleanPath(join(configDir, yaml.asString().value));
 
       return BrickSource.fromString(path);
     }
@@ -72,7 +73,7 @@ class BrickSource extends Equatable {
       final localPath = YamlValue.from(data.remove('path'));
 
       if (localPath.isNone()) {
-        final path = configDir.cleanUpPath();
+        final path = BrickPath.cleanPath(configDir);
         if (path.isEmpty) {
           return const BrickSource.none();
         }
@@ -97,7 +98,8 @@ class BrickSource extends Equatable {
         );
       }
 
-      final path = join(configDir, localPath.asString().value).cleanUpPath();
+      final path =
+          BrickPath.cleanPath(join(configDir, localPath.asString().value));
 
       if (path.isEmpty) {
         return const BrickSource.none();
@@ -110,7 +112,7 @@ class BrickSource extends Equatable {
       return handleYaml(yaml.asYaml().value);
     }
 
-    final path = configDir.cleanUpPath();
+    final path = BrickPath.cleanPath(configDir);
 
     if (path.isEmpty) {
       return const BrickSource.none();
@@ -244,27 +246,5 @@ class BrickSource extends Equatable {
 extension on Iterable<BrickFile> {
   Map<String, BrickFile> toMap() {
     return {for (final val in this) val.path: val};
-  }
-}
-
-extension _StringX on String {
-  String cleanUpPath() {
-    String removeLast(String path) {
-      if (path.endsWith('/') || path.endsWith('.')) {
-        return removeLast(path.substring(0, path.length - 1));
-      }
-
-      return path;
-    }
-
-    var str = normalize(this);
-
-    if (this == './') {
-      return '';
-    } else if (startsWith('./')) {
-      str = substring(2);
-    }
-
-    return str = removeLast(str);
   }
 }
