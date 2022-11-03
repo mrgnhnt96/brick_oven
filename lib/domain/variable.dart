@@ -1,10 +1,8 @@
 import 'package:autoequal/autoequal.dart';
-import 'package:brick_oven/src/exception.dart';
-import 'package:equatable/equatable.dart';
-
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
-import 'package:brick_oven/utils/extensions.dart';
+import 'package:brick_oven/src/exception.dart';
+import 'package:equatable/equatable.dart';
 
 part 'variable.g.dart';
 
@@ -24,56 +22,29 @@ class Variable extends Equatable {
     required this.name,
   });
 
-  /// Parses the [yaml] into a variable
+  /// parses the [yaml] to [Variable]
   ///
-  /// The [name] is the replacement value for [placeholder]
-  factory Variable.fromYaml(String name, YamlValue? yaml) {
-    if (yaml == null) {
-      return Variable._fromYaml(
-        placeholder: name,
-        name: name,
-      );
-    }
-
-    String placeholder;
-
-    if (yaml.isString()) {
-      placeholder = yaml.asString().value;
-    } else if (yaml.isYaml()) {
-      final map = yaml.asYaml().value.data;
-
-      if (map.isEmpty) {
-        placeholder = name;
-      } else {
-        throw VariableException(
-          variable: name,
-          reason: 'Unknown keys: "${map.keys.join('", "')}"',
-        );
-      }
-    } else {
+  /// [yaml] must be a string and is the [placeholder] value
+  factory Variable.fromYaml(YamlValue yaml, String name) {
+    if (yaml.isError()) {
       throw VariableException(
         variable: name,
-        reason: 'Missing value',
+        reason: 'Invalid configuration',
       );
     }
 
-    return Variable._fromYaml(
-      name: name,
-      placeholder: placeholder,
-    );
-  }
-
-  /// parses the [value] to [YamlValue]
-  factory Variable.from(String name, dynamic value) {
-    final yamlValue = YamlValue.from(value);
-
-    if (yamlValue.isYaml()) {
-      throw VariableException(variable: name, reason: 'Cannot be type `Map`');
-    } else if (yamlValue.isString()) {
-      return Variable(name: name, placeholder: yamlValue.asString().value);
-    } else {
+    if (yaml.isNone()) {
       return Variable(name: name, placeholder: name);
     }
+
+    if (!yaml.isString()) {
+      throw VariableException(
+        variable: name,
+        reason: 'Expected type `String` or `null`',
+      );
+    }
+
+    return Variable(name: name, placeholder: yaml.asString().value);
   }
 
   /// the placeholder that currently lives in a file

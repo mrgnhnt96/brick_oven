@@ -6,86 +6,48 @@ import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
 void main() {
-  const name = 'scooby-doo';
-  const placeholder = 'dog';
-
   test('can be instanciated', () {
-    const instance = Variable(name: name, placeholder: 'placeholder');
+    const instance = Variable(name: 'Scooby Doo', placeholder: 'placeholder');
 
     expect(instance, isNotNull);
   });
 
   group('#fromYaml', () {
-    test('parses everything when provided', () {
-      final result =
-          Variable.fromYaml(name, const YamlValue.string(placeholder));
-
-      expect(result, const Variable(name: name, placeholder: placeholder));
-    });
-
-    test('parses everything except for placeholder', () {
-      final result = Variable.fromYaml(name, null);
-
-      expect(result, const Variable(name: name));
-    });
-
-    test('throws $ConfigException when name is missing', () {
-      expect(
-        () => Variable.fromYaml(name, const YamlValue.none()),
-        throwsA(isA<ConfigException>()),
-      );
-    });
-
-    test('throws $ConfigException when extra keys are provided', () {
-      final yaml = loadYaml('''
-extra: key
-''') as YamlMap;
-
-      expect(
-        () => Variable.fromYaml(name, YamlValue.yaml(yaml)),
-        throwsA(isA<ConfigException>()),
-      );
-    });
-  });
-
-  group('#from', () {
-    test('can parse null when provided', () {
-      expect(() => Variable.from('', null), returnsNormally);
-    });
-
-    test('can parse String when provided', () {
-      expect(() => Variable.from('', 'value'), returnsNormally);
-    });
-
-    test('can parse yamlMap when provided', () {
-      expect(
-        () => Variable.from(
-          '',
-          'placeholder',
-        ),
-        returnsNormally,
-      );
-    });
-
-    test('throws when yaml is map', () {
+    test('throws $ConfigException when incorrect type', () {
       final yaml = loadYaml('''
 key: value
-''') as YamlMap;
+''');
 
       expect(
-        () => Variable.from('', yaml),
+        () => Variable.fromYaml(YamlValue.from(yaml), ''),
         throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test('throws $ConfigException when yaml is error', () {
+      expect(
+        () => Variable.fromYaml(const YamlValue.error('error'), ''),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test('returns successfully when string provided', () {
+      const expected = Variable(name: 'Scooby Doo', placeholder: '_PET_');
+
+      expect(
+        Variable.fromYaml(const YamlValue.string('_PET_'), 'Scooby Doo'),
+        expected,
       );
     });
   });
 
   group('#formatName', () {
     test('returns the formatted name', () {
-      const variable = Variable(name: name);
+      const variable = Variable(name: 'Scooby Doo');
 
       expect(
         variable.formatName(MustacheFormat.camelCase),
-        '{{#camelCase}}{{{$name}}}{{/camelCase}}',
+        '{{#camelCase}}{{{Scooby Doo}}}{{/camelCase}}',
       );
     });
   });
