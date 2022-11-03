@@ -80,7 +80,7 @@ class BrickFile extends Equatable {
         final name = entry.key as String;
         try {
           yield Variable.from(name, entry.value);
-        } on VariableException catch (e) {
+        } on ConfigException catch (e) {
           throw FileException(file: path, reason: e.message);
         } catch (_) {
           rethrow;
@@ -97,7 +97,7 @@ class BrickFile extends Equatable {
     if (!nameYaml.isNone() || hasNameKey) {
       try {
         name = Name.fromYamlValue(nameYaml, basenameWithoutExtension(path));
-      } on VariableException catch (e) {
+      } on ConfigException catch (e) {
         throw FileException(file: path, reason: e.message);
       } catch (_) {
         rethrow;

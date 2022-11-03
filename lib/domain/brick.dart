@@ -73,7 +73,7 @@ class Brick extends Equatable {
         YamlValue.from(data.remove('source')),
         configPath: configPath,
       );
-    } on DirectoryException catch (e) {
+    } on ConfigException catch (e) {
       throw BrickException(brick: name, reason: e.message);
     } catch (_) {
       rethrow;
