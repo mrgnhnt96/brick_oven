@@ -34,14 +34,14 @@ void main() {
 
       test('throws $MaxUpdateException when #update increments to #quitAfter',
           () {
-        final quitAfterMixin = TestQuitAfterMixin(quitAfterX: 2)..fileChanged();
+        final quitAfterMixin = TestQuitAfterMixin(maxChanges: 2)..fileChanged();
 
         expect(quitAfterMixin.fileChanged, throwsA(isA<MaxUpdateException>()));
       });
 
       test('should log quitting after X updates on quit', () {
         overridePrint(() {
-          final quitAfterMixin = TestQuitAfterMixin(quitAfterX: 2)
+          final quitAfterMixin = TestQuitAfterMixin(maxChanges: 2)
             ..fileChanged();
 
           expect(
@@ -58,7 +58,7 @@ void main() {
 
     group('#quitAfter', () {
       test('should return number when provided', () {
-        final quitAfterMixin = TestQuitAfterMixin(quitAfterX: 2);
+        final quitAfterMixin = TestQuitAfterMixin(maxChanges: 2);
 
         expect(quitAfterMixin.quitAfter, 2);
       });
@@ -80,7 +80,7 @@ void main() {
       test(
         'should return false when quit after is provided and not greater updates',
         () {
-          final quitAfterMixin = TestQuitAfterMixin(quitAfterX: 2)
+          final quitAfterMixin = TestQuitAfterMixin(maxChanges: 2)
             ..fileChanged();
 
           expect(quitAfterMixin.shouldQuit, isFalse);
@@ -90,7 +90,7 @@ void main() {
       test(
         'should return true when quit after is provided and greater updates',
         () {
-          final quitAfterMixin = TestQuitAfterMixin(quitAfterX: 2)
+          final quitAfterMixin = TestQuitAfterMixin(maxChanges: 2)
             ..fileChanged();
 
           final mockLogger = MockLogger();
@@ -155,9 +155,9 @@ void main() {
 }
 
 class TestQuitAfterMixin extends Command<int> with QuitAfterMixin {
-  TestQuitAfterMixin({this.quitAfterX});
+  TestQuitAfterMixin({this.maxChanges});
 
-  final int? quitAfterX;
+  final int? maxChanges;
 
   @override
   String get description => throw UnimplementedError();
@@ -168,8 +168,8 @@ class TestQuitAfterMixin extends Command<int> with QuitAfterMixin {
   @override
   ArgResults get argResults => FakeArgResults(
         data: <String, dynamic>{
-          if (quitAfterX != null) ...<String, dynamic>{
-            'quit-after': '$quitAfterX'
+          if (maxChanges != null) ...<String, dynamic>{
+            'quit-after': '$maxChanges'
           }
         },
       );
