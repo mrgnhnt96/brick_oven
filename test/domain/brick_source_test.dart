@@ -56,8 +56,8 @@ void main() {
   group('#fromYaml', () {
     const path = 'test';
 
-    group('localPath', () {
-      test('should return when string provided', () {
+    group('source key', () {
+      test('should return when provided', () {
         final yaml = loadYaml('''
 $path
 ''') as String;
@@ -93,7 +93,24 @@ $path
         expect(instance, throwsA(isA<ConfigException>()));
       });
 
-      test('should return when yaml map provided', () {
+      test(
+          'should throw $ConfigException when path value is null and configPath is provided',
+          () {
+        final yaml = loadYaml('''
+path:
+''') as YamlMap;
+
+        BrickSource instance() {
+          return BrickSource.fromYaml(
+            YamlValue.from(yaml),
+            configPath: 'path/to/config.yaml',
+          );
+        }
+
+        expect(instance, throwsA(isA<ConfigException>()));
+      });
+
+      test('should return when path key is provided', () {
         final yaml = loadYaml('''
 path: $path
 ''') as YamlMap;
