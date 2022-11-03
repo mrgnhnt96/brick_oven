@@ -1,6 +1,7 @@
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
@@ -25,6 +26,20 @@ suffix: suffix
         expect(
           Name.from(yaml, 'backup'),
           equals(const Name('name', prefix: 'prefix', suffix: 'suffix')),
+        );
+      });
+
+      test('should throw $ConfigException when extra keys are provided', () {
+        final yaml = loadYaml('''
+value: name
+prefix: prefix
+suffix: suffix
+extra: extra
+''') as YamlMap;
+
+        expect(
+          () => Name.from(yaml, 'backup'),
+          throwsA(isA<ConfigException>()),
         );
       });
     });
