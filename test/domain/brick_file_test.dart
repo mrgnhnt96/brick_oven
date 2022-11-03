@@ -5,6 +5,7 @@ import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
@@ -61,13 +62,23 @@ void main() {
   });
 
   group('#fromYaml', () {
-    const prefix = 'prefix';
-    const suffix = 'suffix';
-    const name = 'name';
-
-    test('throws exception on null value', () {
+    test('throws $ConfigException on null value', () {
       expect(
         () => BrickFile.fromYaml(const YamlValue.none(), path: 'path'),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test('throws $ConfigException on incorrect type', () {
+      expect(
+        () => BrickFile.fromYaml(YamlValue.from(''), path: 'path'),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test('throws $ConfigException on incorrect type', () {
+      expect(
+        () => BrickFile.fromYaml(YamlValue.from(''), path: 'path'),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -99,9 +110,9 @@ name:
     test('can parse all provided values', () {
       final yaml = loadYaml('''
 name:
-  value: $name
-  prefix: $prefix
-  suffix: $suffix
+  value: George
+  prefix: Mr.
+  suffix: Sr.
 
 vars:
   name: value
@@ -112,9 +123,9 @@ vars:
 
       expect(instance.variables, hasLength(1));
       expect(instance.path, defaultPath);
-      expect(instance.name?.prefix, prefix);
-      expect(instance.name?.suffix, suffix);
-      expect(instance.name?.value, name);
+      expect(instance.name?.prefix, 'Mr.');
+      expect(instance.name?.suffix, 'Sr.');
+      expect(instance.name?.value, 'George');
     });
 
     test('can parse empty variables', () {
@@ -137,6 +148,26 @@ vars:
       expect(instance2.variables, isEmpty);
     });
 
+    test('throws $ConfigException if yaml is error', () {
+      expect(
+        () => BrickFile.fromYaml(
+          const YamlValue.error('error'),
+          path: defaultPath,
+        ),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test('throws $ConfigException if yaml is incorrect type', () {
+      expect(
+        () => BrickFile.fromYaml(
+          const YamlValue.string('Hi, hows it going?'),
+          path: defaultPath,
+        ),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
     group('name', () {
       test('can parse when key is not provided', () {
         final yaml = loadYaml('''
@@ -151,13 +182,25 @@ vars:
 
       test('can parse when string provided', () {
         final yaml = loadYaml('''
-name: $name
+name: Alfalfa
 ''') as YamlMap;
 
         final instance =
             BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
 
-        expect(instance.name?.value, name);
+        expect(instance.name?.value, 'Alfalfa');
+      });
+
+      test('can parse when map is provided', () {
+        final yaml = loadYaml('''
+name:
+  value: Mickie Ds
+''') as YamlMap;
+
+        final instance =
+            BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+
+        expect(instance.name?.value, 'Mickie Ds');
       });
 
       test('can parse when value is not provided', () {
@@ -170,14 +213,12 @@ name:
 
         expect(instance.name?.value, defaultFileName);
       });
-    });
 
-    group('files', () {
-      test('throws if extra keys are provided', () {
+      test('throws $ConfigException when not configured correctly', () {
         final yaml = loadYaml('''
-files:
-  $defaultFile:
-    yooooo:
+name:
+  value:
+    - 1
 ''') as YamlMap;
 
         expect(
@@ -188,12 +229,34 @@ files:
     });
 
     group('variables', () {
-      test('throws if value is not of map', () {
+      test('return with vars empty when not provided', () {
         final yaml = loadYaml('''
-files:
-  $defaultFile:
-    vars:
-      - name
+name:
+''') as YamlMap;
+        final instance =
+            BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+
+        expect(instance.variables, isEmpty);
+      });
+
+      test('throws $ConfigException if vars is not of map', () {
+        final yaml = loadYaml('''
+vars:
+  - name
+''') as YamlMap;
+
+        expect(
+          () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+
+      test('throws $ConfigException if vars value is not configured correctly',
+          () {
+        final yaml = loadYaml('''
+vars:
+  name:
+    - value
 ''') as YamlMap;
 
         expect(
@@ -902,6 +965,33 @@ yooooo:
 
         expect(newFile.readAsStringSync(), loops[loop]);
       }
+    });
+
+    test('prints warning if excess variables exist', () {
+      verifyNever(() => mockLogger.warn(any()));
+
+      const variable = Variable(placeholder: '_HELLO_', name: 'hello');
+      const extraVariable = Variable(placeholder: '_GOODBYE_', name: 'goodbye');
+      const instance =
+          BrickFile.config(defaultFile, variables: [variable, extraVariable]);
+
+      sourceFile.writeAsStringSync('replace: _HELLO_');
+
+      instance.writeTargetFile(
+        sourceFile: sourceFile,
+        configuredDirs: [],
+        targetDir: '',
+        fileSystem: fileSystem,
+        logger: mockLogger,
+      );
+
+      verify(
+        () => mockLogger.warn(
+          'The following variables are configured in brick_oven.yaml '
+          'but not used in file `${sourceFile.path}`:\n'
+          '"${extraVariable.name}"',
+        ),
+      ).called(1);
     });
   });
 }

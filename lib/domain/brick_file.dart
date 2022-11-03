@@ -25,12 +25,6 @@ class BrickFile extends Equatable {
   /// {macro brick_file}
   const BrickFile(this.path, {this.name}) : variables = const [];
 
-  const BrickFile._fromYaml(
-    this.path, {
-    required this.variables,
-    required this.name,
-  });
-
   /// configures the brick file will all available properties,
   /// should only be used in testing
   @visibleForTesting
@@ -45,6 +39,13 @@ class BrickFile extends Equatable {
     YamlValue yaml, {
     required String path,
   }) {
+    if (yaml.isError()) {
+      throw FileException(
+        file: path,
+        reason: 'Invalid brick file: ${yaml.asError().value}',
+      );
+    }
+
     if (yaml.isNone()) {
       throw FileException(
         file: path,
@@ -77,9 +78,9 @@ class BrickFile extends Equatable {
       }
 
       for (final entry in variablesData.asYaml().value.entries) {
-        final name = entry.key as String;
         try {
-          yield Variable.from(name, entry.value);
+          final name = entry.key as String;
+          yield Variable.fromYaml(YamlValue.from(entry.value), name);
         } on ConfigException catch (e) {
           throw FileException(file: path, reason: e.message);
         } catch (_) {
@@ -96,7 +97,7 @@ class BrickFile extends Equatable {
 
     if (!nameYaml.isNone() || hasNameKey) {
       try {
-        name = Name.fromYamlValue(nameYaml, basenameWithoutExtension(path));
+        name = Name.fromYaml(nameYaml, basenameWithoutExtension(path));
       } on ConfigException catch (e) {
         throw FileException(file: path, reason: e.message);
       } catch (_) {
@@ -111,7 +112,7 @@ class BrickFile extends Equatable {
       );
     }
 
-    return BrickFile._fromYaml(
+    return BrickFile.config(
       path,
       variables: variables().toList(),
       name: name,
