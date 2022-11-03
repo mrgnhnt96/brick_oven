@@ -62,11 +62,11 @@ abstract class BrickOvenCommand extends Command<int> {
         final name = brick.key as String;
         final value = YamlValue.from(brick.value);
 
-        YamlMap? yaml;
+        YamlValue yaml;
         String? configPath;
 
         if (value.isYaml()) {
-          yaml = value.asYaml().value;
+          yaml = value.asYaml();
         } else if (value.isString()) {
           final path = value.asString().value;
           final file = fileSystem.file(path);
@@ -86,7 +86,7 @@ abstract class BrickOvenCommand extends Command<int> {
             );
           }
 
-          yaml = yamlValue.asYaml().value;
+          yaml = yamlValue.asYaml();
           configPath = path;
         } else {
           throw BrickException(
@@ -96,7 +96,7 @@ abstract class BrickOvenCommand extends Command<int> {
           );
         }
 
-        directories.add(Brick.fromYaml(name, yaml, configPath: configPath));
+        directories.add(Brick.fromYaml(yaml, name, configPath: configPath));
       }
     } on ConfigException catch (e) {
       return BrickOrError(null, e.message);
