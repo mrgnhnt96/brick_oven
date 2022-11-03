@@ -6,6 +6,7 @@ import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/name.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -41,7 +42,7 @@ exclude:
   - $excludeDir
 ''');
 
-      final result = Brick.fromYaml(brickName, yaml as YamlMap);
+      final result = Brick.fromYaml(YamlValue.from(yaml), brickName);
 
       final brick = Brick(
         configuredDirs: [BrickPath(name: const Name(dirName), path: dirPath)],
@@ -55,13 +56,20 @@ exclude:
     });
 
     group('throws $ConfigException', () {
+      test('when yaml is error', () {
+        expect(
+          () => Brick.fromYaml(const YamlValue.error('error'), brickName),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+
       test('when source is incorrect type', () {
         final yaml = loadYaml('''
 source: ${1}
 ''');
 
         expect(
-          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -72,7 +80,7 @@ vars:
 ''');
 
         expect(
-          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -84,7 +92,7 @@ dirs:
 ''');
 
         expect(
-          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -96,7 +104,7 @@ files:
 ''');
 
         expect(
-          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -111,7 +119,7 @@ exclude:
 ''');
 
         expect(
-          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -124,11 +132,9 @@ exclude:
 ''');
 
         expect(
-          Brick.fromYaml(brickName, yaml as YamlMap),
+          Brick.fromYaml(YamlValue.from(yaml), brickName),
           Brick(
             excludePaths: const [excludeDir],
-            configuredDirs: const [],
-            configuredFiles: const [],
             name: brickName,
             source: BrickSource(localPath: localPath),
           ),
@@ -142,11 +148,9 @@ exclude: $excludeDir
 ''');
 
         expect(
-          Brick.fromYaml(brickName, yaml as YamlMap),
+          Brick.fromYaml(YamlValue.from(yaml), brickName),
           Brick(
             excludePaths: const [excludeDir],
-            configuredDirs: const [],
-            configuredFiles: const [],
             name: brickName,
             source: BrickSource(localPath: localPath),
           ),
@@ -164,7 +168,7 @@ exclude:
 ''');
 
         expect(
-          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -200,23 +204,17 @@ exclude:
         when(() => mockLogger.success(any())).thenReturn(null);
       });
 
-      Brick brick({bool mockWatch = false}) {
-        return Brick.memory(
+      test('#stopWatching calls stop on the watcher', () async {
+        final testBrick = Brick.memory(
           name: brickName,
           source: BrickSource.memory(
             localPath: localPath,
             fileSystem: fs,
-            watcher: mockWatch ? mockWatcher : null,
+            watcher: mockWatcher,
           ),
-          configuredDirs: const [],
-          configuredFiles: const [],
           fileSystem: fs,
           logger: mockLogger,
         );
-      }
-
-      test('#stopWatching calls stop on the watcher', () async {
-        final testBrick = brick(mockWatch: true);
 
         when(mockWatcher.stop).thenAnswer((_) => Future.value());
 
@@ -231,7 +229,16 @@ exclude:
         test(
             'uses default directory bricks/{name}/__brick__ when path not provided',
             () {
-          final testBrick = brick(mockWatch: true);
+          final testBrick = Brick.memory(
+            name: brickName,
+            source: BrickSource.memory(
+              localPath: localPath,
+              fileSystem: fs,
+              watcher: mockWatcher,
+            ),
+            fileSystem: fs,
+            logger: mockLogger,
+          );
 
           final fakeSourcePath = fs.file(join(localPath, filePath));
 
@@ -247,7 +254,16 @@ exclude:
         });
 
         test('uses provided path for output when provided', () {
-          final testBrick = brick(mockWatch: true);
+          final testBrick = Brick.memory(
+            name: brickName,
+            source: BrickSource.memory(
+              localPath: localPath,
+              fileSystem: fs,
+              watcher: mockWatcher,
+            ),
+            fileSystem: fs,
+            logger: mockLogger,
+          );
 
           final fakeSourcePath = fs.file(join(localPath, filePath));
 
@@ -267,7 +283,16 @@ exclude:
         });
 
         test('is running watcher', () async {
-          final testBrick = brick(mockWatch: true);
+          final testBrick = Brick.memory(
+            name: brickName,
+            source: BrickSource.memory(
+              localPath: localPath,
+              fileSystem: fs,
+              watcher: mockWatcher,
+            ),
+            fileSystem: fs,
+            logger: mockLogger,
+          );
 
           final sourceFile = fs.file(join(localPath, filePath));
 
@@ -299,7 +324,15 @@ exclude:
         });
 
         test('writes bricks when no watcher is available', () {
-          final testBrick = brick();
+          final testBrick = Brick.memory(
+            name: brickName,
+            source: BrickSource.memory(
+              localPath: localPath,
+              fileSystem: fs,
+            ),
+            fileSystem: fs,
+            logger: mockLogger,
+          );
 
           final sourceFile = fs.file(join(localPath, filePath));
 
@@ -324,7 +357,16 @@ exclude:
 
       group('#stopWatching', () {
         test('stops watching files for updates', () {
-          final testBrick = brick(mockWatch: true);
+          final testBrick = Brick.memory(
+            name: brickName,
+            source: BrickSource.memory(
+              localPath: localPath,
+              fileSystem: fs,
+              watcher: mockWatcher,
+            ),
+            fileSystem: fs,
+            logger: mockLogger,
+          );
 
           final sourceFile = fs.file(join(localPath, filePath));
 
@@ -389,7 +431,6 @@ exclude:
             localPath: localPath,
             fileSystem: fs,
           ),
-          configuredDirs: const [],
           configuredFiles: [BrickFile(filePath)],
           fileSystem: fs,
         );
@@ -418,7 +459,6 @@ exclude:
           localPath: localPath,
           fileSystem: fs,
         ),
-        configuredDirs: const [],
         configuredFiles: [BrickFile(filePath)],
         fileSystem: fs,
       );
@@ -450,7 +490,6 @@ exclude:
           localPath: localPath,
           fileSystem: fs,
         ),
-        configuredDirs: const [],
         configuredFiles: [BrickFile(filePath)],
         fileSystem: fs,
       );
@@ -490,7 +529,6 @@ exclude:
           localPath: localPath,
           fileSystem: fs,
         ),
-        configuredDirs: const [],
         configuredFiles: [for (final file in files) BrickFile(file)],
         fileSystem: fs,
       );

@@ -5,14 +5,12 @@ import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
-import 'package:yaml/yaml.dart';
 
 part 'brick.g.dart';
 
@@ -25,8 +23,8 @@ class Brick extends Equatable {
   Brick({
     required this.name,
     required this.source,
-    required this.configuredDirs,
-    required this.configuredFiles,
+    this.configuredDirs = const [],
+    this.configuredFiles = const [],
     this.configPath,
     this.brickYamlConfig,
     this.excludePaths = const [],
@@ -39,11 +37,11 @@ class Brick extends Equatable {
   const Brick.memory({
     required this.name,
     required this.source,
-    required this.configuredDirs,
-    required this.configuredFiles,
     required FileSystem fileSystem,
-    this.excludePaths = const [],
     required Logger logger,
+    this.configuredDirs = const [],
+    this.configuredFiles = const [],
+    this.excludePaths = const [],
     this.configPath,
     this.brickYamlConfig,
   })  : _fileSystem = fileSystem,
@@ -62,11 +60,26 @@ class Brick extends Equatable {
 
   /// parses [yaml]
   factory Brick.fromYaml(
-    String name,
-    YamlMap yaml, {
+    YamlValue yaml,
+    String name, {
     String? configPath,
   }) {
-    final data = yaml.data;
+    if (yaml.isError()) {
+      throw BrickException(
+        brick: name,
+        reason: yaml.asError().value,
+      );
+    }
+
+    if (!yaml.isYaml()) {
+      throw BrickException(
+        brick: name,
+        reason: 'Invalid brick configuration',
+      );
+    }
+
+    final data = {...yaml.asYaml().value};
+
     late final BrickSource source;
     try {
       source = BrickSource.fromYaml(
@@ -118,7 +131,7 @@ class Brick extends Equatable {
       for (final entry in pathsData.asYaml().value.entries) {
         final path = entry.key as String;
 
-        yield BrickPath.fromYaml(path, YamlValue.from(entry.value));
+        yield BrickPath.fromYaml(YamlValue.from(entry.value), path);
       }
     }
 
