@@ -14,8 +14,6 @@ void main() {
         Brick(
           name: 'brick',
           source: BrickSource.fromString('source'),
-          configuredDirs: const [],
-          configuredFiles: const [],
         )
       };
 
@@ -43,8 +41,6 @@ void main() {
         Brick(
           name: 'brick',
           source: BrickSource.fromString('source'),
-          configuredDirs: const [],
-          configuredFiles: const [],
         )
       };
 
@@ -66,8 +62,6 @@ void main() {
         Brick(
           name: 'brick',
           source: BrickSource.fromString('source'),
-          configuredDirs: const [],
-          configuredFiles: const [],
         )
       };
 
@@ -83,8 +77,6 @@ void main() {
         Brick(
           name: 'brick',
           source: BrickSource.fromString('source'),
-          configuredDirs: const [],
-          configuredFiles: const [],
         )
       };
 

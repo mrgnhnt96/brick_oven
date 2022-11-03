@@ -53,8 +53,6 @@ bricks:
 
     brick = Brick(
       source: BrickSource(localPath: 'path/to/first'),
-      configuredDirs: const [],
-      configuredFiles: const [],
       name: 'first',
       logger: mockLogger,
     );
