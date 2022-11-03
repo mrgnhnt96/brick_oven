@@ -1,4 +1,5 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/domain/brick_yaml_data.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
@@ -23,8 +24,13 @@ class BrickYamlConfig extends Equatable {
 
   /// the data within the brick.yaml file
   // ignore: library_private_types_in_public_api
-  _Config? data() {
+  BrickYamlData? data() {
     final file = _fileSystem.file(path);
+
+    if (!file.existsSync()) {
+      return null;
+    }
+
     final yaml = YamlValue.from(loadYaml(file.readAsStringSync()));
 
     if (!yaml.isYaml()) {
@@ -41,7 +47,7 @@ class BrickYamlConfig extends Equatable {
       vars.add(variable as String);
     }
 
-    return _Config(
+    return BrickYamlData(
       name: name,
       vars: vars,
     );
@@ -49,20 +55,6 @@ class BrickYamlConfig extends Equatable {
 
   @ignoreAutoequal
   final FileSystem _fileSystem;
-
-  @override
-  List<Object?> get props => _$props;
-}
-
-@autoequal
-class _Config extends Equatable {
-  const _Config({
-    required this.name,
-    required this.vars,
-  });
-
-  final String name;
-  final List<String> vars;
 
   @override
   List<Object?> get props => _$props;
