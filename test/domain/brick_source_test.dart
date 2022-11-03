@@ -103,7 +103,9 @@ path: $path
         expect(instance.localPath, path);
       });
 
-      test('should throw when extra keys in yaml map are provided', () {
+      test(
+          'should throw $ConfigException when extra keys in yaml map are provided',
+          () {
         final yaml = loadYaml('''
 path: $path
 extra: key
@@ -111,6 +113,13 @@ extra: key
 
         expect(
           () => BrickSource.fromYaml(YamlValue.yaml(yaml)),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+
+      test('should throw $ConfigException when yaml is error', () {
+        expect(
+          () => BrickSource.fromYaml(const YamlError('error')),
           throwsA(isA<ConfigException>()),
         );
       });

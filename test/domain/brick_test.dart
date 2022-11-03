@@ -54,46 +54,56 @@ exclude:
       expectLater(result, brick);
     });
 
-    test('throws $ConfigException when extra keys are provided', () {
-      final yaml = loadYaml('''
-source: $localPath
+    group('throws $ConfigException', () {
+      test('when source is incorrect type', () {
+        final yaml = loadYaml('''
+source: ${1}
+''');
+
+        expect(
+          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+
+      test('when extra keys are provided', () {
+        final yaml = loadYaml('''
 vars:
 ''');
 
-      expect(
-        () => Brick.fromYaml(brickName, yaml as YamlMap),
-        throwsA(isA<ConfigException>()),
-      );
-    });
+        expect(
+          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          throwsA(isA<ConfigException>()),
+        );
+      });
 
-    test('throws $ConfigException when dirs is not a map', () {
-      final yaml = loadYaml('''
-source: $localPath
+      test('when dirs is not a map', () {
+        final yaml = loadYaml('''
 dirs:
   $dirPath
 ''');
 
-      expect(
-        () => Brick.fromYaml(brickName, yaml as YamlMap),
-        throwsA(isA<ConfigException>()),
-      );
-    });
+        expect(
+          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          throwsA(isA<ConfigException>()),
+        );
+      });
 
-    test('throws $ConfigException when files is not a map', () {
-      final yaml = loadYaml('''
-source: $localPath
+      test('when files is not a map', () {
+        final yaml = loadYaml('''
 files:
   $filePath
 ''');
 
-      expect(
-        () => Brick.fromYaml(brickName, yaml as YamlMap),
-        throwsA(isA<ConfigException>()),
-      );
+        expect(
+          () => Brick.fromYaml(brickName, yaml as YamlMap),
+          throwsA(isA<ConfigException>()),
+        );
+      });
     });
 
     group('exclude', () {
-      test('throws $ConfigException when type is not a list or string', () {
+      test('when type is not a list or string', () {
         final yaml = loadYaml('''
 source: $localPath
 exclude:

@@ -51,6 +51,13 @@ class BrickSource extends Equatable {
     YamlValue yaml, {
     String? configPath,
   }) {
+    if (yaml.isError()) {
+      throw const SourceException(
+        source: '??',
+        reason: 'Invalid brick source',
+      );
+    }
+
     final configDir = dirname(configPath ?? '');
 
     if (yaml.isString()) {
