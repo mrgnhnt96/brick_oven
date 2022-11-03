@@ -17,11 +17,6 @@ class Variable extends Equatable {
     String? placeholder,
   }) : placeholder = placeholder ?? name;
 
-  const Variable._fromYaml({
-    required this.placeholder,
-    required this.name,
-  });
-
   /// parses the [yaml] to [Variable]
   ///
   /// [yaml] must be a string and is the [placeholder] value

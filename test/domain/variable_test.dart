@@ -39,6 +39,15 @@ key: value
         expected,
       );
     });
+
+    test('returns successfully when null provided', () {
+      const expected = Variable(name: 'Scooby Doo', placeholder: 'Scooby Doo');
+
+      expect(
+        Variable.fromYaml(const YamlValue.none(), 'Scooby Doo'),
+        expected,
+      );
+    });
   });
 
   group('#formatName', () {
