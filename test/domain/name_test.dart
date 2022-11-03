@@ -11,50 +11,17 @@ void main() {
       expect(() => const Name('name'), returnsNormally);
     });
 
-    group('#from', () {
-      test('can parse string when provided', () {
-        expect(Name.from('name', 'backup'), equals(const Name('name')));
-      });
-
-      test('can parse yaml map when provided', () {
-        final yaml = loadYaml('''
-value: name
-prefix: prefix
-suffix: suffix
-''') as YamlMap;
-
-        expect(
-          Name.from(yaml, 'backup'),
-          equals(const Name('name', prefix: 'prefix', suffix: 'suffix')),
-        );
-      });
-
-      test('should throw $ConfigException when extra keys are provided', () {
-        final yaml = loadYaml('''
-value: name
-prefix: prefix
-suffix: suffix
-extra: extra
-''') as YamlMap;
-
-        expect(
-          () => Name.from(yaml, 'backup'),
-          throwsA(isA<ConfigException>()),
-        );
-      });
-    });
-
-    group('#fromYamlValue', () {
+    group('#fromYaml', () {
       test('can parse null and returns backup name', () {
         expect(
-          Name.fromYamlValue(const YamlValue.none(), 'name'),
+          Name.fromYaml(const YamlValue.none(), 'name'),
           const Name('name'),
         );
       });
 
       test('can parse string when provided', () {
         expect(
-          Name.fromYamlValue(
+          Name.fromYaml(
             const YamlValue.string('name'),
             'backup',
           ),
@@ -70,7 +37,7 @@ suffix: suffix
 ''') as YamlMap;
 
         expect(
-          Name.fromYamlValue(YamlValue.yaml(yaml), 'backup'),
+          Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
           equals(const Name('name', prefix: 'prefix', suffix: 'suffix')),
         );
       });
@@ -82,7 +49,7 @@ format: snake
 ''') as YamlMap;
 
         expect(
-          Name.fromYamlValue(YamlValue.yaml(yaml), 'backup'),
+          Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
           equals(
             const Name(
               'name',
@@ -90,6 +57,42 @@ format: snake
             ),
           ),
         );
+      });
+
+      test('should throw $ConfigException when extra keys are provided', () {
+        final yaml = loadYaml('''
+value: name
+prefix: prefix
+suffix: suffix
+extra: extra
+''') as YamlMap;
+
+        expect(
+          () => Name.fromYaml(YamlValue.from(yaml), 'backup'),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+
+      test('should throw $ConfigException when yaml is error', () {
+        expect(
+          () => Name.fromYaml(const YamlError('error'), 'backup'),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+
+      test('should throw $ConfigException when values are wrong type', () {
+        const keys = ['name, prefix, suffix, format'];
+        for (final key in keys) {
+          final yaml = loadYaml('''
+$key:
+  key: value
+''') as YamlMap;
+
+          expect(
+            () => Name.fromYaml(YamlValue.from(yaml), 'backup'),
+            throwsA(isA<ConfigException>()),
+          );
+        }
       });
     });
 

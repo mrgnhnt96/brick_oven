@@ -24,32 +24,46 @@ class Name extends Equatable {
 
   /// {@macro name}
   ///
-  /// Parses from [value] to [YamlValue]
-  factory Name.from(dynamic value, String backup) {
-    final nameConfigYaml = YamlValue.from(value);
-
-    return Name.fromYamlValue(nameConfigYaml, backup);
-  }
-
-  /// {@macro name}
-  ///
   /// Parses from [value] from [YamlValue]
-  factory Name.fromYamlValue(YamlValue value, String backup) {
+  factory Name.fromYaml(YamlValue value, String backup) {
     String? name;
     String? prefix;
     String? suffix;
     MustacheFormat? format;
 
+    if (value.isError()) {
+      throw VariableException(
+        variable: backup,
+        reason: value.asError().value,
+      );
+    }
+
     if (value.isYaml()) {
       final nameConfig = value.asYaml().value.data;
 
-      name = nameConfig.remove('value') as String? ?? backup;
-      prefix = nameConfig.remove('prefix') as String?;
-      suffix = nameConfig.remove('suffix') as String?;
-      format = MustacheFormat.values
-          .getMustacheValue(nameConfig.remove('format') as String?);
+      String? getValue(String key) {
+        final yaml = YamlValue.from(nameConfig.remove(key));
 
-      if (nameConfig.isNotEmpty == true) {
+        if (yaml.isNone()) {
+          return null;
+        }
+
+        if (!yaml.isString()) {
+          throw VariableException(
+            variable: backup,
+            reason: 'Expected type `String` or `null` for `$key`',
+          );
+        }
+
+        return yaml.asString().value;
+      }
+
+      name = getValue('value') ?? backup;
+      prefix = getValue('prefix');
+      suffix = getValue('suffix');
+      format = MustacheFormat.values.getMustacheValue(getValue('format'));
+
+      if (nameConfig.isNotEmpty) {
         throw VariableException(
           variable: name,
           reason: 'Unknown keys: "${nameConfig.keys.join('", "')}"',
@@ -57,13 +71,15 @@ class Name extends Equatable {
       }
 
       return Name(name, prefix: prefix, suffix: suffix, format: format);
-    } else if (value.isString()) {
+    }
+
+    if (value.isString()) {
       name = value.asString().value;
 
       return Name(name);
-    } else {
-      return Name(backup);
     }
+
+    return Name(backup);
   }
 
   /// the value of the name
