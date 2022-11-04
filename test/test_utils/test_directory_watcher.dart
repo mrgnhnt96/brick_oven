@@ -7,26 +7,24 @@ import 'package:watcher/watcher.dart';
 /// does not actually listen to file system events, but instead
 /// allows you to manually trigger events via [triggerEvent].
 class TestDirectoryWatcher implements DirectoryWatcher {
-  TestDirectoryWatcher()
-      : path = '',
+  TestDirectoryWatcher() : path = '' {
+    _controller = StreamController(
+      sync: true,
+      onCancel: () {
+        _controller.close();
         _controller = StreamController(sync: true);
+        return;
+      },
+    );
+  }
 
   @override
   final String path;
 
-  StreamController<WatchEvent> _controller;
+  late StreamController<WatchEvent> _controller;
 
   @override
-  Stream<WatchEvent> get events {
-    _controller.add(WatchEvent(ChangeType.ADD, ''));
-
-    return _controller.stream.asBroadcastStream(
-      onCancel: (_) {
-        _controller.close();
-        _controller = StreamController(sync: true);
-      },
-    );
-  }
+  Stream<WatchEvent> get events => _controller.stream;
 
   @override
   String get directory => path;
