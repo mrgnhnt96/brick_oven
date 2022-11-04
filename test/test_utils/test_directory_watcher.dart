@@ -17,12 +17,16 @@ class TestDirectoryWatcher implements DirectoryWatcher {
   StreamController<WatchEvent> _controller;
 
   @override
-  Stream<WatchEvent> get events => _controller.stream.asBroadcastStream(
-        onCancel: (_) {
-          _controller.close();
-          _controller = StreamController(sync: true);
-        },
-      );
+  Stream<WatchEvent> get events {
+    _controller.add(WatchEvent(ChangeType.ADD, ''));
+
+    return _controller.stream.asBroadcastStream(
+      onCancel: (_) {
+        _controller.close();
+        _controller = StreamController(sync: true);
+      },
+    );
+  }
 
   @override
   String get directory => path;
