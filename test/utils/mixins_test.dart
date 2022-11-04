@@ -4,6 +4,7 @@ import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/mixins.dart';
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
@@ -117,17 +118,13 @@ void main() {
     late File configFile;
 
     setUp(() async {
-      fs = setUpTestingEnvironment();
+      fs = MemoryFileSystem();
 
       final configPath = join(fs.currentDirectory.path, BrickOvenYaml.file);
 
       configFile = fs.file(configPath);
 
       await configFile.create(recursive: true);
-    });
-
-    tearDown(() {
-      tearDownTestingEnvironment(fs);
     });
 
     test('#watchForChanges should return true when file changes', () async {
