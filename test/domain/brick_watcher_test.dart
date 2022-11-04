@@ -143,6 +143,8 @@ void main() {
         test('sets #hasRun to true', () async {
           expect(watcher.hasRun, isFalse);
 
+          testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
+
           await watcher.start();
 
           await expectLater(watcher.hasRun, isTrue);
@@ -154,6 +156,8 @@ void main() {
           watcher.addEvent(() {
             hasRunEvent = true;
           });
+
+          testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
 
           await watcher.start();
 
@@ -170,6 +174,8 @@ void main() {
             runBefore: true,
           );
 
+          testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
+
           await watcher.start();
 
           expect(hasRunEvent, isTrue);
@@ -184,6 +190,8 @@ void main() {
             },
             runAfter: true,
           );
+
+          testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
 
           await watcher.start();
 
