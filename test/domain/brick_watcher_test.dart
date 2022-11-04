@@ -1,52 +1,33 @@
 import 'package:brick_oven/domain/brick_watcher.dart';
-import 'package:file/file.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 import 'package:watcher/watcher.dart';
 
-import '../test_utils/testing_env.dart';
+import '../test_utils/test_directory_watcher.dart';
 
 void main() {
   group('$BrickWatcher', () {
-    late FileSystem fs;
     late BrickWatcher watcher;
-    late BrickWatcher brickWatcher;
-    late File file;
+    late TestDirectoryWatcher testDirectoryWatcher;
 
     setUp(() {
-      fs = setUpTestingEnvironment();
+      testDirectoryWatcher = TestDirectoryWatcher();
 
-      watcher = BrickWatcher(fs.currentDirectory.path);
-
-      file = fs.file(p.join(fs.currentDirectory.path, 'file.txt'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync('sah dude');
-
-      final mockDirWatcher = MockDirectoryWatcher();
-
-      brickWatcher = BrickWatcher.config(
-        dirPath: fs.currentDirectory.path,
-        watcher: mockDirWatcher,
-      );
-
-      when(() => mockDirWatcher.ready)
-          .thenAnswer((_) => Future<bool>.value(true));
-
-      when(() => mockDirWatcher.events).thenAnswer(
-        (_) => Stream.value(WatchEvent(ChangeType.MODIFY, file.path)),
+      watcher = BrickWatcher.config(
+        dirPath: 'some/path',
+        watcher: testDirectoryWatcher,
       );
     });
 
     tearDown(() {
-      tearDownTestingEnvironment(fs);
+      testDirectoryWatcher.close();
     });
 
     group('#config', () {
       test('should create an instance without explicit logger', () {
         expect(
           () => BrickWatcher.config(
-            dirPath: fs.currentDirectory.path,
+            dirPath: 'my/test/path',
             watcher: MockDirectoryWatcher(),
           ),
           returnsNormally,
@@ -90,6 +71,26 @@ void main() {
           expect(watcher.isRunning, isTrue);
         },
       );
+
+      test('is true when there are before events and a listener', () async {
+        expect(watcher.isRunning, isFalse);
+
+        watcher.addEvent(() {}, runBefore: true);
+
+        await watcher.start();
+
+        expect(watcher.isRunning, isTrue);
+      });
+
+      test('is true when there are after events and a listener', () async {
+        expect(watcher.isRunning, isFalse);
+
+        watcher.addEvent(() {}, runAfter: true);
+
+        await watcher.start();
+
+        expect(watcher.isRunning, isTrue);
+      });
     });
 
     group('#addEvent', () {
@@ -139,22 +140,22 @@ void main() {
           expect(listener1, isNot(equals(listener2)));
         });
 
-        test('sets has run to true', () async {
-          expect(brickWatcher.hasRun, isFalse);
+        test('sets #hasRun to true', () async {
+          expect(watcher.hasRun, isFalse);
 
-          await brickWatcher.start();
+          await watcher.start();
 
-          await expectLater(brickWatcher.hasRun, isTrue);
+          await expectLater(watcher.hasRun, isTrue);
         });
 
         test('calls all the events', () async {
           var hasRunEvent = false;
 
-          brickWatcher.addEvent(() {
+          watcher.addEvent(() {
             hasRunEvent = true;
           });
 
-          await brickWatcher.start();
+          await watcher.start();
 
           expect(hasRunEvent, isTrue);
         });
@@ -162,14 +163,14 @@ void main() {
         test('calls all the before events', () async {
           var hasRunEvent = false;
 
-          brickWatcher.addEvent(
+          watcher.addEvent(
             () {
               hasRunEvent = true;
             },
             runBefore: true,
           );
 
-          await brickWatcher.start();
+          await watcher.start();
 
           expect(hasRunEvent, isTrue);
         });
@@ -177,14 +178,14 @@ void main() {
         test('calls all the after events', () async {
           var hasRunEvent = false;
 
-          brickWatcher.addEvent(
+          watcher.addEvent(
             () {
               hasRunEvent = true;
             },
             runAfter: true,
           );
 
-          await brickWatcher.start();
+          await watcher.start();
 
           expect(hasRunEvent, isTrue);
         });
