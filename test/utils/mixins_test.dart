@@ -59,8 +59,10 @@ void main() {
 }
 
 class TestConfigWatcher with ConfigWatcherMixin {
+  final testFileWatcher = TestFileWatcher();
+
   @override
   TestFileWatcher watcher(String path) {
-    return TestFileWatcher();
+    return testFileWatcher;
   }
 }
