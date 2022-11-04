@@ -4,7 +4,7 @@ build:
   clean: flutter packages pub run build_runner clean build
 
 coverage:
-  - format_coverage --lcov --check-ignore --in=coverage --out=coverage/lcov.info --report-on=lib
+  # - format_coverage --lcov --check-ignore --in=coverage --out=coverage/lcov.info --report-on=lib
   - lcov --remove coverage/lcov.info '**/*.g.dart' -o coverage/lcov.info
   - genhtml coverage/lcov.info -o coverage
   - open coverage/index.html
@@ -17,11 +17,11 @@ upload_coverage:
 
 test:
   only:
-  - dart run test -r expanded --test-randomize-ordering-seed random --timeout 60s
+  - very_good test --test-randomize-ordering-seed random
 
   coverage:
   - rm -rf coverage
-  - $test:only --coverage coverage
+  - $test:only --coverage --exclude-coverage **/*.g.dart
   - $coverage
 
 prep:
