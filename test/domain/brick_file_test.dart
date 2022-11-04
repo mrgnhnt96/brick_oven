@@ -16,7 +16,7 @@ import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:yaml/yaml.dart';
 
-import '../utils/mocks.dart';
+import '../test_utils/mocks.dart';
 
 void main() {
   const defaultFileName = 'file';

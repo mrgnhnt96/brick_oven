@@ -8,7 +8,7 @@ import 'package:file/memory.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import '../../utils/fakes.dart';
+import '../../test_utils/fakes.dart';
 
 void main() {
   late FileSystem fs;

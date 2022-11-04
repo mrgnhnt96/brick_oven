@@ -8,10 +8,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
-import 'fakes.dart';
-import 'mocks.dart';
-import 'print_override.dart';
-import 'testing_env.dart';
+import '../test_utils/fakes.dart';
+import '../test_utils/mocks.dart';
+import '../test_utils/print_override.dart';
+import '../test_utils/testing_env.dart';
 
 void main() {
   setUp(() {

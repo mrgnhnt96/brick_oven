@@ -13,8 +13,8 @@ import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
 import 'package:brick_oven/utils/extensions.dart';
-import '../../../utils/fakes.dart';
-import '../../../utils/mocks.dart';
+import '../../../test_utils/fakes.dart';
+import '../../../test_utils/mocks.dart';
 import 'cook_all_bricks_test.dart';
 
 void main() {

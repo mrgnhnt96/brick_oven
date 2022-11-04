@@ -3,8 +3,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 import 'package:brick_oven/utils/extensions.dart';
-import 'mocks.dart';
-import 'print_override.dart';
+
+import '../test_utils/mocks.dart';
+import '../test_utils/print_override.dart';
 
 void main() {
   late Logger logger;

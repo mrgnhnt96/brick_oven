@@ -10,8 +10,8 @@ import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/package_details.dart';
 import 'package:brick_oven/src/runner.dart';
-import '../utils/mocks.dart';
-import '../utils/print_override.dart';
+import '../test_utils/mocks.dart';
+import '../test_utils/print_override.dart';
 
 const expectedUsage = [
   'Generate your bricks 🧱 with this oven 🎛\n',

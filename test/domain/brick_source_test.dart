@@ -10,7 +10,7 @@ import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
-import '../utils/mocks.dart';
+import '../test_utils/mocks.dart';
 
 void main() {
   const localPath = 'local_path';
@@ -200,7 +200,10 @@ path:
 
   group('#sourceDir', () {
     test('should return local path when provided', () {
-      final instance = BrickSource.memory(localPath: localPath);
+      final instance = BrickSource.memory(
+        localPath: localPath,
+        fileSystem: MemoryFileSystem(),
+      );
 
       expect(instance.sourceDir, localPath);
     });

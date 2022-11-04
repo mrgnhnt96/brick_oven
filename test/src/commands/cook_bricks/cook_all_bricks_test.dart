@@ -10,8 +10,8 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import '../../../utils/fakes.dart';
-import '../../../utils/mocks.dart';
+import '../../../test_utils/fakes.dart';
+import '../../../test_utils/mocks.dart';
 
 class MockKeyPressListener extends Mock implements KeyPressListener {}
 

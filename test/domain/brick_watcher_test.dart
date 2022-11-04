@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 import 'package:watcher/watcher.dart';
 
-import '../utils/testing_env.dart';
+import '../test_utils/testing_env.dart';
 
 void main() {
   group('$BrickWatcher', () {

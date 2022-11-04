@@ -8,9 +8,9 @@ import 'package:test/test.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/list.dart';
 import 'package:brick_oven/src/runner.dart';
-import '../../utils/fakes.dart';
-import '../../utils/mocks.dart';
-import '../../utils/print_override.dart';
+import '../../test_utils/fakes.dart';
+import '../../test_utils/mocks.dart';
+import '../../test_utils/print_override.dart';
 
 void main() {
   group('$ListCommand', () {

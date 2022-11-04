@@ -9,8 +9,8 @@ import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/update.dart';
 import 'package:brick_oven/src/package_details.dart';
 import 'package:brick_oven/src/runner.dart';
-import '../../utils/fakes.dart';
-import '../../utils/mocks.dart';
+import '../../test_utils/fakes.dart';
+import '../../test_utils/mocks.dart';
 
 class FakeProcessResult extends Fake implements ProcessResult {}
 
