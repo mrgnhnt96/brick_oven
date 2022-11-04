@@ -16,8 +16,10 @@ part 'brick_path.g.dart';
 class BrickPath extends Equatable {
   /// {@macro brick_path}
   factory BrickPath({
-    required Name name,
     required String path,
+    Name? name,
+    String? includeIf,
+    String? includeIfNot,
   }) {
     final cleanPath = BrickPath.cleanPath(path);
 
@@ -26,6 +28,8 @@ class BrickPath extends Equatable {
       originalPath: path,
       path: cleanPath,
       placeholder: basename(cleanPath),
+      includeIf: includeIf,
+      includeIfNot: includeIfNot,
     );
   }
 
@@ -34,6 +38,8 @@ class BrickPath extends Equatable {
     required this.path,
     required this.placeholder,
     required this.originalPath,
+    required this.includeIf,
+    required this.includeIfNot,
   });
 
   /// parses the [yaml]
@@ -52,40 +58,111 @@ class BrickPath extends Equatable {
       );
     }
 
-    Name name;
+    if (yaml.isNone()) {
+      throw DirectoryException(
+        directory: path,
+        reason: 'Missing configuration, please remove this '
+            'file or add configuration',
+      );
+    }
 
-    if (yaml.isYaml()) {
-      final data = yaml.asYaml().value.data;
-      final nameData = YamlValue.from(data.remove('name'));
+    if (yaml.isString()) {
+      final name = Name(yaml.asString().value);
 
-      if (data.keys.isNotEmpty) {
+      return BrickPath(
+        name: name,
+        path: path,
+      );
+    }
+
+    if (!yaml.isYaml()) {
+      throw DirectoryException(
+        directory: path,
+        reason: 'Invalid directory configuration',
+      );
+    }
+
+    final data = yaml.asYaml().value.data;
+
+    Name? name;
+
+    if (data.containsKey('name')) {
+      final nameYaml = YamlValue.from(data.remove('name'));
+
+      try {
+        name = Name.fromYaml(nameYaml, basename(path));
+      } on ConfigException catch (e) {
         throw DirectoryException(
           directory: path,
-          reason: 'Unknown keys: "${data.keys.join('", "')}"',
+          reason: e.message,
+        );
+      } catch (_) {
+        rethrow;
+      }
+    }
+
+    String? getValue(String key) {
+      final yaml = YamlValue.from(data.remove(key));
+
+      if (yaml.isNone()) {
+        return null;
+      }
+
+      if (!yaml.isString()) {
+        throw FileException(
+          file: path,
+          reason: 'Expected type `String` or `null` for `$key`',
         );
       }
 
-      name = Name.fromYaml(nameData, basename(path));
-    } else if (yaml.isString()) {
-      name = Name(yaml.asString().value);
-    } else {
-      name = Name(basename(path));
+      return yaml.asString().value;
+    }
+
+    final includeIf = getValue('include_if');
+    final includeIfNot = getValue('include_if_not');
+
+    if (includeIf != null && includeIfNot != null) {
+      throw FileException(
+        file: path,
+        reason: 'Cannot use both `include_if` and `include_if_not`',
+      );
+    }
+
+    if (data.keys.isNotEmpty) {
+      throw DirectoryException(
+        directory: path,
+        reason: 'Unknown keys: "${data.keys.join('", "')}"',
+      );
     }
 
     return BrickPath(
       path: path,
       name: name,
+      includeIf: includeIf,
+      includeIfNot: includeIfNot,
     );
   }
 
   /// the pattern to separate segments of a path
-  static RegExp separatorPattern = RegExp(r'(?<=[\w|}])[\/\\]');
+  static RegExp separatorPattern = RegExp(r'[\/\\]');
 
   /// the pattern to remove all preceeding and trailing slashes
-  static RegExp slashPattern = RegExp(r'^[\/\\]+|[\/\\]+$');
+  static RegExp leadingAndTrailingSlashPattern = RegExp(r'^[\/\\]+|[\/\\]+$');
+
+  /// whether to include the file in the _mason_ build output
+  /// based on the variable provided
+  ///
+  /// wraps the file in a `{{#if}}` block
+  final String? includeIf;
+
+  /// whether to include the file in the _mason_ build output
+  /// based on the variable provided
+  ///
+  /// wraps the file in a `{{^if}}` block
+  final String? includeIfNot;
 
   /// the name that will replace the [placeholder] within the [path]
-  final Name name;
+  final Name? name;
 
   /// the non-altered (cleaned) path, which was originally provided
   final String originalPath;
@@ -120,36 +197,45 @@ class BrickPath extends Equatable {
     }
 
     // ignore: parameter_assignments
-    path = normalize(path).replaceAll(slashPattern, '');
+    path = BrickPath.cleanPath(path);
 
-    final replacement = name.formatted;
+    final replacement = name?.formatted;
 
-    final pathParts = path.split(separatorPattern);
+    final pathParts = BrickPath.separatePath(path);
 
     if (pathParts.length < configuredParts.length) {
       return path;
     }
 
-    if (pathParts[configuredParts.length - 1] == placeholder) {
-      pathParts[configuredParts.length - 1] = replacement;
+    if (replacement != null) {
+      if (pathParts[configuredParts.length - 1] == placeholder) {
+        pathParts[configuredParts.length - 1] = replacement;
+      }
     }
 
-    return pathParts.join(separator);
+    final configuredPath = pathParts.join(separator);
+
+    if (includeIf != null) {
+      return '{{#$includeIf}}$configuredPath{{/$includeIf}}';
+    }
+
+    if (includeIfNot != null) {
+      return '{{^$includeIfNot}}$configuredPath{{/$includeIfNot}}';
+    }
+
+    return configuredPath;
   }
 
   /// cleans the path of any strange ocurrences
   /// and preceeding & trailing slashes
   static String cleanPath(String path) {
-    final normalPath = normalize(path);
-    final cleanPath = normalPath.replaceAll(slashPattern, '');
-    final purePath = cleanPath.cleanUpPath();
-
-    return purePath;
+    return path.cleanUpPath();
   }
 
   /// separates the path into segments
   static List<String> separatePath(String path) {
-    final pathParts = cleanPath(path).split(RegExp(r'[\/\\]'))
+    final cleanPath = BrickPath.cleanPath(path);
+    final pathParts = cleanPath.split(separatorPattern)
       ..removeWhere((part) => part.isEmpty);
 
     return pathParts;
@@ -160,20 +246,12 @@ extension _StringX on String {
   /// cleans the path by removing trailing slash and
   /// ./ from the beginning
   String cleanUpPath() {
-    String removeLast(String path) {
-      if (path.endsWith('/') || path.endsWith('.')) {
-        return removeLast(path.substring(0, path.length - 1));
-      }
-
-      return path;
-    }
-
-    var str = normalize(this);
-
-    if (this == './') {
+    if (this == './' || this == '.' || this == r'.\') {
       return '';
     }
 
-    return str = removeLast(str);
+    final str = normalize(this);
+
+    return str.replaceAll(BrickPath.leadingAndTrailingSlashPattern, '');
   }
 }

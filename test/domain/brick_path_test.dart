@@ -25,9 +25,14 @@ void main() {
 
       expect(brickPath.path, dirPath);
 
-      final brickPath2 = BrickPath(name: const Name('name'), path: '$dirPath/');
+      final brickPath2 =
+          BrickPath(name: const Name('name'), path: './$dirPath');
 
       expect(brickPath2.path, dirPath);
+
+      final brickPath3 = BrickPath(name: const Name('name'), path: '$dirPath/');
+
+      expect(brickPath3.path, dirPath);
     });
 
     test('placeholder is the highest level from path', () {
@@ -38,21 +43,21 @@ void main() {
   });
 
   group('#fromYaml', () {
-    test('throws when yaml is error', () {
+    test('throws $ConfigException when yaml is error', () {
       expect(
         () => BrickPath.fromYaml(const YamlValue.error('error'), dirPath),
         throwsA(isA<ConfigException>()),
       );
     });
 
-    test('throws when path points to a file', () {
+    test('throws $ConfigException when path points to a file', () {
       expect(
         () => BrickPath.fromYaml(const YamlValue.none(), '$dirPath/file.dart'),
         throwsA(isA<ConfigException>()),
       );
     });
 
-    test('throws when extra keys are provided', () {
+    test('throws $ConfigException when extra keys are provided', () {
       final yaml = loadYaml('''
 name: name
 path: path
@@ -64,10 +69,91 @@ path: path
       );
     });
 
-    test('name is the highest level from path when null is provided', () {
-      final brickPath = BrickPath.fromYaml(const YamlValue.none(), dirPath);
+    test('can parse include if', () {
+      final yaml = loadYaml('''
+include_if: check
+''') as YamlMap;
 
-      expect(brickPath.name.value, highestLevel);
+      final instance = BrickPath.fromYaml(YamlValue.from(yaml), dirPath);
+
+      expect(instance.includeIf, 'check');
+    });
+
+    test('can parse include if not', () {
+      final yaml = loadYaml('''
+include_if_not: check
+''') as YamlMap;
+
+      final instance = BrickPath.fromYaml(YamlValue.from(yaml), dirPath);
+
+      expect(instance.includeIfNot, 'check');
+    });
+
+    test('throws $ConfigException when null is provided', () {
+      expect(
+        () => BrickPath.fromYaml(const YamlValue.none(), dirPath),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test('throws $ConfigException when yaml is not a map', () {
+      expect(
+        () => BrickPath.fromYaml(YamlValue.list(YamlList()), dirPath),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test('throws $ConfigException when name is not configured correctly', () {
+      final yaml = loadYaml('''
+name:
+  name: name
+''') as YamlMap;
+
+      expect(
+        () => BrickPath.fromYaml(YamlValue.from(yaml), dirPath),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test(
+        'throws $ConfigException if include_if and include_if_not are both used',
+        () {
+      final yaml = loadYaml('''
+include_if: check
+include_if_not: check
+''') as YamlMap;
+
+      expect(
+        () => BrickPath.fromYaml(YamlValue.from(yaml), dirPath),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test('throws $ConfigException if include_if is not configured correctly',
+        () {
+      final yaml = loadYaml('''
+include_if:
+  - check
+''') as YamlMap;
+
+      expect(
+        () => BrickPath.fromYaml(YamlValue.from(yaml), dirPath),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test(
+        'throws $ConfigException if include_if_not is not configured correctly',
+        () {
+      final yaml = loadYaml('''
+include_if_not:
+  - check
+''') as YamlMap;
+
+      expect(
+        () => BrickPath.fromYaml(YamlValue.from(yaml), dirPath),
+        throwsA(isA<ConfigException>()),
+      );
     });
 
     test('returns name from yaml map', () {
@@ -77,7 +163,7 @@ name: name
 
       final brickPath = BrickPath.fromYaml(YamlValue.yaml(yaml), dirPath);
 
-      expect(brickPath.name.value, 'name');
+      expect(brickPath.name?.value, 'name');
     });
   });
 
@@ -90,6 +176,7 @@ name: name
     '/path/to/some/dir/file.dart/': 5,
     '//path/to/some/dir': 4,
     '//path/to/some/dir//': 4,
+    '///path/to/some/dir///': 4,
     '//path/to/some/dir//file.dart': 5,
     r'path\to\some\dir': 4,
     r'path\to\some\dir\': 4,
@@ -116,9 +203,9 @@ name: name
     });
   });
 
-  group('#slashPattern', () {
+  group('#leadingAndTrailingSlashPattern', () {
     test('returns a RegExp', () {
-      expect(BrickPath.slashPattern, isA<RegExp>());
+      expect(BrickPath.leadingAndTrailingSlashPattern, isA<RegExp>());
     });
 
     test('#cleanPath removes slashes from beginning and end of path', () {
@@ -146,18 +233,11 @@ name: name
   group('#apply', () {
     const replacement = 'batman';
 
-    BrickPath brickPath(String path, {MustacheFormat? format, String? name}) {
-      return BrickPath(
-        path: path,
-        name: Name(name ?? replacement, format: format),
-      );
-    }
-
     test('formats the path when provided', () {
       const original = '/path/to/other/file.png';
-      final brick = brickPath(
-        'path',
-        format: MustacheFormat.snakeCase,
+      final brick = BrickPath(
+        path: 'path',
+        name: const Name(replacement, format: MustacheFormat.snakeCase),
       );
 
       expect(
@@ -168,14 +248,15 @@ name: name
 
     group('return original path when', () {
       test('parts do not match', () {
-        final path = brickPath('/path/to/some');
+        final path = BrickPath(path: '/path/to/some');
+
         const original = '/path/to/other/file.png';
         final result = path.apply(original, originalPath: original);
         expect(result, original);
       });
 
       test('brick path is not a directory', () {
-        final path = brickPath('/path/to/some/file.png');
+        final path = BrickPath(path: '/path/to/some/file.png');
         const original = '/path/to/some/file.png';
         final result = path.apply(original, originalPath: original);
 
@@ -192,7 +273,11 @@ name: name
             const dir = 'path';
             const filePath = '/to/some/file.png';
 
-            final path = brickPath(dir);
+            final path = BrickPath(
+              path: dir,
+              name: const Name(replacement),
+            );
+
             const original = '$dir$filePath';
 
             final result = path.apply(original, originalPath: original);
@@ -201,7 +286,7 @@ name: name
           });
 
           test('as non starting position', () {
-            final path = brickPath('to');
+            final path = BrickPath(path: 'to');
             const original = 'path/to/some/file.png';
             final result = path.apply(original, originalPath: original);
 
@@ -214,7 +299,10 @@ name: name
             const dir = '/path';
             const filePath = '/to/some/file.png';
 
-            final path = brickPath(dir);
+            final path = BrickPath(
+              path: dir,
+              name: const Name(replacement),
+            );
             const original = '$dir$filePath';
 
             final result = path.apply(original, originalPath: original);
@@ -223,7 +311,10 @@ name: name
           });
 
           test('as non starting position', () {
-            final path = brickPath('/to');
+            final path = BrickPath(
+              path: '/to',
+              name: const Name(replacement),
+            );
             const original = 'path/to/some/file.png';
             final result = path.apply(original, originalPath: original);
 
@@ -236,7 +327,10 @@ name: name
             const dir = 'path/';
             const filePath = '/to/some/file.png';
 
-            final path = brickPath(dir);
+            final path = BrickPath(
+              path: dir,
+              name: const Name(replacement),
+            );
             const original = '$dir$filePath';
 
             final result = path.apply(original, originalPath: original);
@@ -245,7 +339,7 @@ name: name
           });
 
           test('as non starting position', () {
-            final path = brickPath('to/');
+            final path = BrickPath(path: 'to/');
             const original = 'path/to/some/file.png';
             final result = path.apply(original, originalPath: original);
 
@@ -260,7 +354,10 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = brickPath('foo');
+        final brick = BrickPath(
+          path: 'foo',
+          name: const Name(replacement),
+        );
         path = brick.apply(path, originalPath: originalPath);
 
         expect(
@@ -273,7 +370,10 @@ name: name
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final brick = brickPath('foo/bar');
+        final brick = BrickPath(
+          path: 'foo/bar',
+          name: const Name(replacement),
+        );
         path = brick.apply(path, originalPath: originalPath);
 
         expect(
@@ -286,7 +386,10 @@ name: name
         const originalPath = 'foo/bar/baz/foo/bar/baz';
         var path = originalPath;
 
-        final brick = brickPath('foo/bar/baz');
+        final brick = BrickPath(
+          path: 'foo/bar/baz',
+          name: const Name(replacement),
+        );
         path = brick.apply(path, originalPath: originalPath);
 
         expect(
@@ -301,7 +404,10 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = brickPath('foo/bar/baz/foo');
+        final brick = BrickPath(
+          path: 'foo/bar/baz/foo',
+          name: const Name(replacement),
+        );
         path = brick.apply(path, originalPath: originalPath);
 
         expect(
@@ -314,7 +420,10 @@ name: name
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final brick = brickPath('foo/bar/baz/foo/bar');
+        final brick = BrickPath(
+          path: 'foo/bar/baz/foo/bar',
+          name: const Name(replacement),
+        );
         path = brick.apply(path, originalPath: originalPath);
 
         expect(
@@ -327,7 +436,10 @@ name: name
         const originalPath = 'foo/bar/baz/foo/bar/baz';
         var path = originalPath;
 
-        final brick = brickPath('foo/bar/baz/foo/bar/baz');
+        final brick = BrickPath(
+          path: 'foo/bar/baz/foo/bar/baz',
+          name: const Name(replacement),
+        );
         path = brick.apply(path, originalPath: originalPath);
 
         expect(
@@ -343,10 +455,14 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = brickPath('foo');
+        final brick = BrickPath(
+          path: 'foo',
+          name: const Name(replacement),
+        );
         path = brick.apply(path, originalPath: originalPath);
 
-        final brick2 = brickPath('foo/bar/baz/foo', name: replacement2);
+        final brick2 =
+            BrickPath(path: 'foo/bar/baz/foo', name: const Name(replacement2));
         path = brick2.apply(path, originalPath: originalPath);
 
         expect(
@@ -359,15 +475,126 @@ name: name
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final brick = brickPath('foo');
+        final brick = BrickPath(
+          path: 'foo',
+          name: const Name(replacement),
+        );
         path = brick.apply(path, originalPath: originalPath);
 
-        final brick2 = brickPath('foo/bar', name: replacement2);
+        final brick2 =
+            BrickPath(path: 'foo/bar', name: const Name(replacement2));
         path = brick2.apply(path, originalPath: originalPath);
 
         expect(
           path,
           '{{{$replacement}}}/{{{$replacement2}}}/baz/foo/bar',
+        );
+      });
+    });
+
+    group('#includeIf', () {
+      test('wraps path with include if without name configuration', () {
+        const originalPath = 'foo/bar/baz/foo';
+        var path = originalPath;
+
+        final brick = BrickPath(
+          path: 'foo',
+          includeIf: 'check',
+        );
+        path = brick.apply(path, originalPath: originalPath);
+
+        expect(
+          path,
+          '{{#check}}foo/bar/baz/foo{{/check}}',
+        );
+      });
+
+      test('wraps path with include if with name configuration', () {
+        const originalPath = 'foo/bar/baz/foo';
+        var path = originalPath;
+
+        final brick = BrickPath(
+          path: 'foo',
+          name: const Name(replacement),
+          includeIf: 'check',
+        );
+        path = brick.apply(path, originalPath: originalPath);
+
+        expect(
+          path,
+          '{{#check}}{{{$replacement}}}/bar/baz/foo{{/check}}',
+        );
+      });
+
+      test('wraps path with include if with name configuration and formatting',
+          () {
+        const originalPath = 'foo/bar/baz/foo';
+        var path = originalPath;
+
+        final brick = BrickPath(
+          path: 'foo',
+          name: const Name(replacement, format: MustacheFormat.snakeCase),
+          includeIf: 'check',
+        );
+        path = brick.apply(path, originalPath: originalPath);
+
+        expect(
+          path,
+          '{{#check}}{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}/bar/baz/foo{{/check}}',
+        );
+      });
+    });
+
+    group('#includeIfNot', () {
+      test('wraps path with include if not without name configuration', () {
+        const originalPath = 'foo/bar/baz/foo';
+        var path = originalPath;
+
+        final brick = BrickPath(
+          path: 'foo',
+          includeIfNot: 'check',
+        );
+        path = brick.apply(path, originalPath: originalPath);
+
+        expect(
+          path,
+          '{{^check}}foo/bar/baz/foo{{/check}}',
+        );
+      });
+
+      test('wraps path with include if not with name configuration', () {
+        const originalPath = 'foo/bar/baz/foo';
+        var path = originalPath;
+
+        final brick = BrickPath(
+          path: 'foo',
+          name: const Name(replacement),
+          includeIfNot: 'check',
+        );
+        path = brick.apply(path, originalPath: originalPath);
+
+        expect(
+          path,
+          '{{^check}}{{{$replacement}}}/bar/baz/foo{{/check}}',
+        );
+      });
+
+      test(
+          'wraps path with include if not with name configuration and formatting',
+          () {
+        const originalPath = 'foo/bar/baz/foo';
+        var path = originalPath;
+
+        final brick = BrickPath(
+          path: 'foo',
+          name: const Name(replacement, format: MustacheFormat.snakeCase),
+          includeIfNot: 'check',
+        );
+        path = brick.apply(path, originalPath: originalPath);
+
+        expect(
+          path,
+          '{{^check}}{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}/bar/baz/foo{{/check}}',
         );
       });
     });
