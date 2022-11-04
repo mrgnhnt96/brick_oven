@@ -265,7 +265,10 @@ class Brick extends Equatable {
     }
 
     for (final dir in configuredDirs) {
-      variables.add(dir.name.value);
+      final dirName = dir.name?.value;
+      if (dirName != null) {
+        variables.add(dirName);
+      }
     }
 
     final data = config.data();

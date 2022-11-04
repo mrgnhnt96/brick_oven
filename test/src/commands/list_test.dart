@@ -60,6 +60,7 @@ bricks:
     source: example/lib
     dirs:
       lib/nested:
+        name:
     files:
       readme.md:
         vars:
@@ -68,6 +69,7 @@ bricks:
     source: example/lib
     dirs:
       lib/nested:
+        name:
     files:
       readme.md:
         vars:

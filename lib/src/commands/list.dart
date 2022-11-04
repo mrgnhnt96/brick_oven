@@ -67,8 +67,13 @@ class ListCommand extends BrickOvenCommand {
       final originalDir = parts.removeLast();
 
       final pathWithoutName = darkGray.wrap(parts.join(separator) + separator);
-      return '${tab * 2}- $pathWithoutName$originalDir '
-          '${green.wrap('->')} ${dir.name.simple}';
+      final dirDescription = '${tab * 2}- $pathWithoutName$originalDir';
+
+      if (dir.name?.simple != null) {
+        return '$dirDescription ${green.wrap('->')} ${dir.name!.simple}';
+      }
+
+      return dirDescription;
     }
 
     final bricksOrError = this.bricks();
