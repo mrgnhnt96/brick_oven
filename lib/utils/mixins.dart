@@ -43,7 +43,6 @@ mixin ConfigWatcherMixin {
   }
 
   /// Watches the [path] for changes
-  @visibleForOverriding
   @visibleForTesting
   FileWatcher watcher(String path) {
     return FileWatcher(path);
