@@ -172,8 +172,6 @@ extension _StringX on String {
 
     if (this == './') {
       return '';
-    } else if (startsWith('./')) {
-      str = substring(2);
     }
 
     return str = removeLast(str);
