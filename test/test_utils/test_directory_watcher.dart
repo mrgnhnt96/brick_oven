@@ -14,10 +14,15 @@ class TestDirectoryWatcher implements DirectoryWatcher {
   @override
   final String path;
 
-  final StreamController<WatchEvent> _controller;
+  StreamController<WatchEvent> _controller;
 
   @override
-  Stream<WatchEvent> get events => _controller.stream;
+  Stream<WatchEvent> get events => _controller.stream.asBroadcastStream(
+        onCancel: (_) {
+          _controller.close();
+          _controller = StreamController(sync: true);
+        },
+      );
 
   @override
   String get directory => path;
