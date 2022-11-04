@@ -191,16 +191,30 @@ void main() {
       },
     );
 
-    group(
-      '#reset',
-      () {
-        test('calls stop then start', () async {
-          await watcher.reset();
+    group('#reset', () {
+      test('calls stop then start', () async {
+        await watcher.reset();
 
-          expect(watcher.listener, isNotNull);
-        });
-      },
-    );
+        expect(watcher.listener, isNotNull);
+      });
+
+      test('maintains events', () async {
+        watcher
+          ..addEvent(() {})
+          ..addEvent(() {}, runBefore: true)
+          ..addEvent(() {}, runAfter: true);
+
+        expect(watcher.events.length, 1);
+        expect(watcher.beforeEvents.length, 1);
+        expect(watcher.afterEvents.length, 1);
+
+        await watcher.reset();
+
+        expect(watcher.events.length, 1);
+        expect(watcher.beforeEvents.length, 1);
+        expect(watcher.afterEvents.length, 1);
+      });
+    });
 
     group('#stop', () {
       test('sets listener to null', () async {
@@ -211,6 +225,23 @@ void main() {
         await watcher.stop();
 
         expect(watcher.listener, isNull);
+      });
+
+      test('removes all events', () async {
+        watcher
+          ..addEvent(() {})
+          ..addEvent(() {}, runAfter: true)
+          ..addEvent(() {}, runBefore: true);
+
+        expect(watcher.events.length, 1);
+        expect(watcher.beforeEvents.length, 1);
+        expect(watcher.afterEvents.length, 1);
+
+        await watcher.stop();
+
+        expect(watcher.events.length, 0);
+        expect(watcher.beforeEvents.length, 0);
+        expect(watcher.afterEvents.length, 0);
       });
     });
   });

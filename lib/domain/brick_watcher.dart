@@ -70,7 +70,7 @@ class BrickWatcher extends Equatable {
   var _hasRun = false;
 
   /// whether the watcher is running
-  bool get isRunning => _listener != null && _events.isNotEmpty;
+  bool get isRunning => _listener != null;
 
   /// adds event that will be called when a file creates an event
   void addEvent(
@@ -115,15 +115,26 @@ class BrickWatcher extends Equatable {
 
   /// resets the watcher by stopping it and restarting it
   Future<void> reset() async {
-    await stop();
+    await _stop(removeEvents: false);
 
     await start();
   }
 
   /// stops the watcher
-  Future<void> stop() async {
+  Future<void> stop() => _stop(removeEvents: true);
+
+  /// stops the watcher
+  Future<void> _stop({required bool removeEvents}) async {
     await _listener?.cancel();
     _listener = null;
+
+    if (!removeEvents) {
+      return;
+    }
+
+    _events.clear();
+    _beforeEvents.clear();
+    _afterEvents.clear();
   }
 
   @override
