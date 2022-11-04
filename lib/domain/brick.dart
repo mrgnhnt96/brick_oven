@@ -192,8 +192,8 @@ class Brick extends Equatable {
     }
 
     if (brickYamlPath != null) {
-      brickYamlConfig =
-          BrickYamlConfig(path: join(dirname(configPath ?? ''), brickYamlPath));
+      final dir = BrickPath.cleanPath(dirname(configPath ?? ''));
+      brickYamlConfig = BrickYamlConfig(path: join(dir, brickYamlPath));
     }
 
     if (data.isNotEmpty) {

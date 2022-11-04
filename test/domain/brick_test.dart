@@ -1,10 +1,13 @@
 // ignore_for_file: unnecessary_cast
 
+import 'dart:async';
+
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -14,10 +17,12 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
+import 'package:watcher/watcher.dart';
 import 'package:yaml/yaml.dart';
 
-import '../utils/fakes.dart';
-import '../utils/mocks.dart';
+import '../test_utils/fakes.dart';
+import '../test_utils/mocks.dart';
+import '../test_utils/test_directory_watcher.dart';
 
 void main() {
   const brickName = 'super_awesome';
@@ -59,6 +64,16 @@ exclude:
       test('when yaml is error', () {
         expect(
           () => Brick.fromYaml(const YamlValue.error('error'), brickName),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+
+      test('when yaml is not map', () {
+        expect(
+          () => Brick.fromYaml(
+            const YamlValue.string('Jar Jar Binks'),
+            brickName,
+          ),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -107,6 +122,42 @@ files:
           () => Brick.fromYaml(YamlValue.from(yaml), brickName),
           throwsA(isA<ConfigException>()),
         );
+      });
+
+      group('brick config', () {
+        test('throws $ConfigException when brick config is wrong type', () {
+          final yaml = loadYaml('''
+brick_config:
+  - Hi
+''');
+
+          expect(
+            () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+            throwsA(isA<ConfigException>()),
+          );
+        });
+
+        test('runs gracefully when brick config is null', () {
+          final yaml = loadYaml('''
+brick_config:
+''');
+
+          expect(
+            () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+            returnsNormally,
+          );
+        });
+
+        test('returns provided brick config', () {
+          final yaml = loadYaml('''
+brick_config: brick.yaml
+''');
+
+          expect(
+            Brick.fromYaml(YamlValue.from(yaml), brickName).brickYamlConfig,
+            const BrickYamlConfig(path: 'brick.yaml'),
+          );
+        });
       });
     });
 
@@ -181,12 +232,14 @@ exclude:
     () {
       late FileSystem fs;
       late BrickWatcher mockWatcher;
+      late TestDirectoryWatcher testDirectoryWatcher;
       late Logger mockLogger;
       late Progress mockProgress;
 
       setUp(() {
         fs = MemoryFileSystem();
         mockWatcher = MockBrickWatcher();
+        testDirectoryWatcher = TestDirectoryWatcher();
 
         when(() => mockWatcher.addEvent(any())).thenReturn(voidCallback());
         when(mockWatcher.start).thenAnswer((_) => Future.value());
@@ -204,25 +257,8 @@ exclude:
         when(() => mockLogger.success(any())).thenReturn(null);
       });
 
-      test('#stopWatching calls stop on the watcher', () async {
-        final testBrick = Brick.memory(
-          name: brickName,
-          source: BrickSource.memory(
-            localPath: localPath,
-            fileSystem: fs,
-            watcher: mockWatcher,
-          ),
-          fileSystem: fs,
-          logger: mockLogger,
-        );
-
-        when(mockWatcher.stop).thenAnswer((_) => Future.value());
-
-        verifyNever(mockWatcher.stop);
-
-        await testBrick.source.watcher?.stop();
-
-        verify(mockWatcher.stop).called(1);
+      tearDown(() {
+        testDirectoryWatcher.close();
       });
 
       group('#cook', () {
@@ -282,13 +318,16 @@ exclude:
           expect(targetFile.existsSync(), isTrue);
         });
 
-        test('is running watcher', () async {
+        test('file gets updated on modify event', () async {
           final testBrick = Brick.memory(
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
               fileSystem: fs,
-              watcher: mockWatcher,
+              watcher: BrickWatcher.config(
+                dirPath: localPath,
+                watcher: testDirectoryWatcher,
+              ),
             ),
             fileSystem: fs,
             logger: mockLogger,
@@ -311,14 +350,93 @@ exclude:
           expect(targetFile.existsSync(), isTrue);
           expect(targetFile.readAsStringSync(), content);
 
-          // Because MemoryFileSystem doesn't support watching,
-          // We are just checking if watcher is running.
-          //
-          // const newContent = '// new content';
-          // sourceFile.writeAsStringSync(newContent);
-          // expect(targetFile.readAsStringSync(), newContent);
+          const newContent = '// new content';
+          sourceFile.writeAsStringSync(newContent);
 
-          when(() => mockWatcher.isRunning).thenReturn(true);
+          final event = WatchEvent(ChangeType.MODIFY, sourceFile.path);
+          testDirectoryWatcher.triggerEvent(event);
+
+          expect(targetFile.readAsStringSync(), newContent);
+          expect(testBrick.source.watcher?.isRunning, isTrue);
+        });
+
+        test('file gets added on create event', () async {
+          final testBrick = Brick.memory(
+            name: brickName,
+            source: BrickSource.memory(
+              localPath: localPath,
+              fileSystem: fs,
+              watcher: BrickWatcher.config(
+                dirPath: localPath,
+                watcher: testDirectoryWatcher,
+              ),
+            ),
+            fileSystem: fs,
+            logger: mockLogger,
+          );
+
+          final sourceFile = fs.file(join(localPath, filePath));
+
+          const content = '// content';
+
+          final targetFile = fs.file(join(brickPath, filePath));
+
+          expect(sourceFile.existsSync(), isFalse);
+          expect(targetFile.existsSync(), isFalse);
+
+          testBrick.cook(watch: true);
+
+          sourceFile
+            ..createSync(recursive: true)
+            ..writeAsStringSync(content);
+
+          final event = WatchEvent(ChangeType.ADD, sourceFile.path);
+          testDirectoryWatcher.triggerEvent(event);
+
+          expect(targetFile.existsSync(), isTrue);
+          expect(targetFile.readAsStringSync(), content);
+
+          expect(testBrick.source.watcher?.isRunning, isTrue);
+        });
+
+        test('file gets delete on delete event', () async {
+          final testBrick = Brick.memory(
+            name: brickName,
+            source: BrickSource.memory(
+              localPath: localPath,
+              fileSystem: fs,
+              watcher: BrickWatcher.config(
+                dirPath: localPath,
+                watcher: testDirectoryWatcher,
+              ),
+            ),
+            fileSystem: fs,
+            logger: mockLogger,
+          );
+
+          final sourceFile = fs.file(join(localPath, filePath));
+
+          const content = '// content';
+
+          final targetFile = fs.file(join(brickPath, filePath));
+
+          sourceFile
+            ..createSync(recursive: true)
+            ..writeAsStringSync(content);
+
+          expect(sourceFile.existsSync(), isTrue);
+
+          testBrick.cook(watch: true);
+
+          expect(targetFile.existsSync(), isTrue);
+          expect(targetFile.readAsStringSync(), content);
+
+          sourceFile.deleteSync();
+
+          final event = WatchEvent(ChangeType.REMOVE, sourceFile.path);
+          testDirectoryWatcher.triggerEvent(event);
+
+          expect(targetFile.existsSync(), isFalse);
 
           expect(testBrick.source.watcher?.isRunning, isTrue);
         });
@@ -355,50 +473,43 @@ exclude:
         });
       });
 
-      group('#stopWatching', () {
-        test('stops watching files for updates', () {
-          final testBrick = Brick.memory(
-            name: brickName,
-            source: BrickSource.memory(
-              localPath: localPath,
-              fileSystem: fs,
-              watcher: mockWatcher,
-            ),
+      test('stops watching files for updates', () async {
+        final testBrick = Brick.memory(
+          name: brickName,
+          source: BrickSource.memory(
+            localPath: localPath,
             fileSystem: fs,
-            logger: mockLogger,
-          );
+            watcher: BrickWatcher.config(
+              dirPath: localPath,
+              watcher: testDirectoryWatcher,
+            ),
+          ),
+          fileSystem: fs,
+          logger: mockLogger,
+        );
 
-          final sourceFile = fs.file(join(localPath, filePath));
+        final sourceFile = fs.file(join(localPath, filePath));
 
-          const content = '// content';
+        const content = '// content';
 
-          sourceFile
-            ..createSync(recursive: true)
-            ..writeAsStringSync(content);
+        sourceFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(content);
 
-          final targetFile = fs.file(join(brickPath, filePath));
+        final targetFile = fs.file(join(brickPath, filePath));
 
-          expect(targetFile.existsSync(), isFalse);
+        expect(targetFile.existsSync(), isFalse);
 
-          testBrick.cook(watch: true);
+        testBrick.cook(watch: true);
 
-          expect(targetFile.existsSync(), isTrue);
-          expect(targetFile.readAsStringSync(), content);
+        expect(targetFile.existsSync(), isTrue);
+        expect(targetFile.readAsStringSync(), content);
 
-          when(() => mockWatcher.isRunning).thenReturn(true);
+        expect(testBrick.source.watcher?.isRunning, isTrue);
 
-          expect(testBrick.source.watcher?.isRunning, isTrue);
+        await testBrick.source.watcher?.stop();
 
-          reset(mockWatcher);
-
-          when(mockWatcher.stop).thenAnswer((_) => Future.value());
-
-          testBrick.source.watcher?.stop();
-
-          when(() => mockWatcher.isRunning).thenReturn(false);
-
-          expect(testBrick.source.watcher?.isRunning, isFalse);
-        });
+        expect(testBrick.source.watcher?.isRunning, isFalse);
       });
     },
   );
