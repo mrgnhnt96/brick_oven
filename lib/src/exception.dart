@@ -58,10 +58,7 @@ class UnknownKeysException extends BrickOvenException {
 /// {@template config_exception}
 /// An exception thrown when a configuration is invalid.
 /// {@endtemplate}
-abstract class ConfigException implements BrickOvenException {
-  @override
-  String toString() => message;
-}
+abstract class ConfigException implements BrickOvenException {}
 
 /// {@template variable_exception}
 /// An exception thrown when a variable is not configured correctly.
