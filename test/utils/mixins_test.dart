@@ -12,7 +12,6 @@ import 'package:test/test.dart';
 import '../test_utils/fakes.dart';
 import '../test_utils/mocks.dart';
 import '../test_utils/print_override.dart';
-import '../test_utils/testing_env.dart';
 
 void main() {
   setUp(() {
