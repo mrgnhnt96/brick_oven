@@ -1,11 +1,19 @@
 import 'dart:async';
 
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
-/// Watches the [BrickOvenYaml.file] for changes
+/// Watches the path provided for changes
 mixin ConfigWatcherMixin {
   final Map<String, Completer<void>> _completers = {};
+
+  /// Watches the [path] for changes
+  @visibleForOverriding
+  @visibleForTesting
+  FileWatcher watcher(String path) {
+    return FileWatcher(path);
+  }
 
   /// the watcher for the [BrickOvenYaml.file]
   Future<bool> watchForConfigChanges(
@@ -14,7 +22,7 @@ mixin ConfigWatcherMixin {
   }) async {
     final watchCompleter = Completer<void>();
 
-    final yamlListener = FileWatcher(path).events.listen((event) async {
+    final yamlListener = watcher(path).events.listen((event) async {
       await onChange?.call();
 
       await _cancelWatcher(path);

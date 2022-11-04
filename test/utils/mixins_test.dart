@@ -4,8 +4,10 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
+import 'package:watcher/watcher.dart';
 
 import '../test_utils/print_override.dart';
+import '../test_utils/test_file_watcher.dart';
 
 void main() {
   setUp(() {
@@ -29,6 +31,7 @@ void main() {
     test('#watchForChanges should return true when file changes', () async {
       var hasChanged = false;
       final testConfigWatcher = TestConfigWatcher();
+      final testFileWatcher = testConfigWatcher.watcher(configFile.path);
 
       final listener = testConfigWatcher.watchForConfigChanges(
         configFile.path,
@@ -36,6 +39,9 @@ void main() {
       );
 
       configFile.writeAsStringSync('update');
+
+      final event = WatchEvent(ChangeType.MODIFY, configFile.path);
+      testFileWatcher.triggerEvent(event);
 
       await listener;
 
@@ -50,4 +56,9 @@ void main() {
   });
 }
 
-class TestConfigWatcher with ConfigWatcherMixin {}
+class TestConfigWatcher with ConfigWatcherMixin {
+  @override
+  TestFileWatcher watcher(String path) {
+    return TestFileWatcher();
+  }
+}
