@@ -31,3 +31,6 @@ prep:
 
 install:
   - dart pub global activate --source path . --overwrite
+
+format:
+  - flutter-stylizer -w ./...
