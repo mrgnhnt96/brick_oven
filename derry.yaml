@@ -4,7 +4,8 @@ build:
   clean: flutter packages pub run build_runner clean build
 
 coverage:
-  - format_coverage --lcov --check-ignore --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
+  - format_coverage --lcov --check-ignore --in=coverage --out=coverage/lcov.info --report-on=lib
+  - lcov --remove coverage/lcov.info '**/*.g.dart' -o coverage/lcov.info
   - genhtml coverage/lcov.info -o coverage
   - open coverage/index.html
   - curl -Os https://uploader.codecov.io/latest/macos/codecov
@@ -16,11 +17,11 @@ upload_coverage:
 
 test:
   only:
-  - dart run test -j 1 -r expanded --test-randomize-ordering-seed random --timeout 60s
+  - dart run test -r expanded --test-randomize-ordering-seed random --timeout 60s
 
   coverage:
   - rm -rf coverage
-  - dart run test -j 1 --coverage coverage -r expanded --test-randomize-ordering-seed random --timeout 60s
+  - $test:only --coverage coverage
   - $coverage
 
 prep:
