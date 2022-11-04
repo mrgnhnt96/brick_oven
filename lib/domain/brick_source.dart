@@ -31,20 +31,6 @@ class BrickSource extends Equatable {
     return BrickSource(localPath: value);
   }
 
-  /// creates a memory source, avoids writing files to machine/locally
-  @visibleForTesting
-  const BrickSource.memory({
-    required this.localPath,
-    required FileSystem fileSystem,
-    this.watcher,
-  }) : _fileSystem = fileSystem;
-
-  /// creates and empty source
-  const BrickSource.none()
-      : localPath = null,
-        _fileSystem = const LocalFileSystem(),
-        watcher = null;
-
   /// parse [yaml] into the source
   factory BrickSource.fromYaml(
     YamlValue yaml, {
@@ -122,14 +108,40 @@ class BrickSource extends Equatable {
     );
   }
 
+  /// creates a memory source, avoids writing files to machine/locally
+  @visibleForTesting
+  const BrickSource.memory({
+    required this.localPath,
+    required FileSystem fileSystem,
+    this.watcher,
+  }) : _fileSystem = fileSystem;
+
+  /// creates and empty source
+  const BrickSource.none()
+      : localPath = null,
+        _fileSystem = const LocalFileSystem(),
+        watcher = null;
+
   /// the local path of the source files
   final String? localPath;
+
+  /// Watches the local files, and updates on events
+  final BrickWatcher? watcher;
 
   @ignoreAutoequal
   final FileSystem _fileSystem;
 
-  /// Watches the local files, and updates on events
-  final BrickWatcher? watcher;
+  @override
+  List<Object?> get props => _$props;
+
+  /// the directory of the source
+  String get sourceDir {
+    if (localPath == null) {
+      return '';
+    }
+
+    return localPath!;
+  }
 
   /// retrieves the files from the `source` value
   Iterable<BrickFile> files() sync* {
@@ -139,13 +151,9 @@ class BrickSource extends Equatable {
     }
   }
 
-  /// the directory of the source
-  String get sourceDir {
-    if (localPath == null) {
-      return '';
-    }
-
-    return localPath!;
+  /// returns the path of [file] as if it were from the [sourceDir]
+  String fromSourcePath(BrickFile file) {
+    return join(sourceDir, file.path);
   }
 
   /// merges the [configFiles] onto [files], which copies all
@@ -231,14 +239,6 @@ class BrickSource extends Equatable {
       yield BrickFile(file.path.replaceFirst(RegExp('$localPath.'), ''));
     }
   }
-
-  /// returns the path of [file] as if it were from the [sourceDir]
-  String fromSourcePath(BrickFile file) {
-    return join(sourceDir, file.path);
-  }
-
-  @override
-  List<Object?> get props => _$props;
 }
 
 extension on Iterable<BrickFile> {

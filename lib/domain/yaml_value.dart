@@ -50,15 +50,6 @@ abstract class YamlValue {
   /// the value that is provided from the key in the yaml file
   final dynamic value;
 
-  /// converts to a `YamlList`
-  YamlListValue asList() {
-    if (!isList()) {
-      throw ArgumentError('$this is not a $YamlListValue');
-    }
-
-    return this as YamlListValue;
-  }
-
   /// converts to a `YamlError`
   YamlError asError() {
     if (!isError()) {
@@ -66,6 +57,15 @@ abstract class YamlValue {
     }
 
     return this as YamlError;
+  }
+
+  /// converts to a `YamlList`
+  YamlListValue asList() {
+    if (!isList()) {
+      throw ArgumentError('$this is not a $YamlListValue');
+    }
+
+    return this as YamlListValue;
   }
 
   /// converts to a `null`

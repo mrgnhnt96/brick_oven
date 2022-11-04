@@ -42,14 +42,17 @@ class Variable extends Equatable {
     return Variable(name: name, placeholder: yaml.asString().value);
   }
 
-  /// the placeholder that currently lives in a file
-  /// that will be replaced by [name]
-  final String placeholder;
-
   /// the name of variable to replace [placeholder]
   ///
   /// Will be wrapped as `{{#someCase}}{{{name}}}{{/someCase}}`
   final String name;
+
+  /// the placeholder that currently lives in a file
+  /// that will be replaced by [name]
+  final String placeholder;
+
+  @override
+  List<Object?> get props => _$props;
 
   /// formats [name] by wrapping it with mustache
   ///
@@ -57,7 +60,4 @@ class Variable extends Equatable {
   String formatName(MustacheFormat format) {
     return format.toMustache('{{{$name}}}');
   }
-
-  @override
-  List<Object?> get props => _$props;
 }

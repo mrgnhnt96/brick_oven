@@ -22,6 +22,12 @@ class BrickYamlConfig extends Equatable {
   /// the path to the brick.yaml file
   final String path;
 
+  @ignoreAutoequal
+  final FileSystem _fileSystem;
+
+  @override
+  List<Object?> get props => _$props;
+
   /// the data within the brick.yaml file
   // ignore: library_private_types_in_public_api
   BrickYamlData? data() {
@@ -52,10 +58,4 @@ class BrickYamlConfig extends Equatable {
       vars: vars,
     );
   }
-
-  @ignoreAutoequal
-  final FileSystem _fileSystem;
-
-  @override
-  List<Object?> get props => _$props;
 }

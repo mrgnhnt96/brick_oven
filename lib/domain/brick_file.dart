@@ -119,29 +119,25 @@ class BrickFile extends Equatable {
     );
   }
 
-  /// the path of the file
-  final String path;
-
-  /// All variables that the content contains and will be updated with
-  final List<Variable> variables;
-
   /// the name of the file
   ///
   /// if provided, [fileName] will format the name
   /// using mustache
   final Name? name;
 
-  /// if the name of the file has been configured
-  bool get hasConfiguredName => name != null;
+  /// the path of the file
+  final String path;
 
-  /// gets the name of the file without formatting to mustache
-  String get simpleName {
-    if (!hasConfiguredName) {
-      return basename(path);
-    }
+  /// All variables that the content contains and will be updated with
+  final List<Variable> variables;
 
-    return '${name!.simple}$extension';
-  }
+  @override
+  List<Object?> get props => _$props;
+
+  /// all of the extensions of the file
+  ///
+  /// eg: `.g.dart`
+  String get extension => p.extension(path, 10);
 
   /// the name of file with extension
   ///
@@ -155,10 +151,17 @@ class BrickFile extends Equatable {
     return '${name!.formatted}$extension';
   }
 
-  /// all of the extensions of the file
-  ///
-  /// eg: `.g.dart`
-  String get extension => p.extension(path, 10);
+  /// if the name of the file has been configured
+  bool get hasConfiguredName => name != null;
+
+  /// gets the name of the file without formatting to mustache
+  String get simpleName {
+    if (!hasConfiguredName) {
+      return basename(path);
+    }
+
+    return '${name!.simple}$extension';
+  }
 
   /// writes the file in the [targetDir], with the
   /// contents of the [sourceFile].
@@ -348,7 +351,4 @@ class BrickFile extends Equatable {
 
     file.writeAsStringSync(content);
   }
-
-  @override
-  List<Object?> get props => _$props;
 }

@@ -18,16 +18,16 @@ class TestDirectoryWatcher implements DirectoryWatcher {
     );
   }
 
-  @override
-  final String path;
-
   late StreamController<WatchEvent> _controller;
 
   @override
-  Stream<WatchEvent> get events => _controller.stream;
+  final String path;
 
   @override
   String get directory => path;
+
+  @override
+  Stream<WatchEvent> get events => _controller.stream;
 
   @override
   bool get isReady => true;

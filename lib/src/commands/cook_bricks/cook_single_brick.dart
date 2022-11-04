@@ -39,20 +39,14 @@ class CookSingleBrick extends BrickOvenCommand with ConfigWatcherMixin {
       ..addSeparator('${'-' * 79}\n');
   }
 
-  /// {@macro key_press_listener}
-  final KeyPressListener keyPressListener;
-
   /// The brick to cook
   final Brick brick;
 
-  /// whether to watch for file changes
-  bool get isWatch => argResults['watch'] == true;
-
-  /// The output directory
-  String get outputDir => argResults['output'] as String? ?? 'bricks';
-
   /// the config watcher for the brick oven yaml
   final FileWatcher configWatcher;
+
+  /// {@macro key_press_listener}
+  final KeyPressListener keyPressListener;
 
   @override
   String get description => 'Cook the brick: $name.';
@@ -118,6 +112,12 @@ class CookSingleBrick extends BrickOvenCommand with ConfigWatcherMixin {
 
     return ExitCode.success.code;
   }
+
+  /// whether to watch for file changes
+  bool get isWatch => argResults['watch'] == true;
+
+  /// The output directory
+  String get outputDir => argResults['output'] as String? ?? 'bricks';
 }
 
 extension on ArgParser {

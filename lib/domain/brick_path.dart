@@ -78,45 +78,30 @@ class BrickPath extends Equatable {
     );
   }
 
-  /// the placeholder of the [path] that will be replaced with [name]
-  ///
-  /// The placeholder MUST be a directory
-  final String placeholder;
-
-  /// the name that will replace the [placeholder] within the [path]
-  final Name name;
-
-  /// the path that will be updated using [name]
-  ///
-  /// The path MUST point to a directory, a file's path will not be altered
-  final String path;
-
-  /// the non-altered (cleaned) path, which was originally provided
-  final String originalPath;
-
   /// the pattern to separate segments of a path
   static RegExp separatorPattern = RegExp(r'(?<=[\w|}])[\/\\]');
 
   /// the pattern to remove all preceeding and trailing slashes
   static RegExp slashPattern = RegExp(r'^[\/\\]+|[\/\\]+$');
 
-  /// separates the path into segments
-  static List<String> separatePath(String path) {
-    final pathParts = cleanPath(path).split(RegExp(r'[\/\\]'))
-      ..removeWhere((part) => part.isEmpty);
+  /// the name that will replace the [placeholder] within the [path]
+  final Name name;
 
-    return pathParts;
-  }
+  /// the non-altered (cleaned) path, which was originally provided
+  final String originalPath;
 
-  /// cleans the path of any strange ocurrences
-  /// and preceeding & trailing slashes
-  static String cleanPath(String path) {
-    final normalPath = normalize(path);
-    final cleanPath = normalPath.replaceAll(slashPattern, '');
-    final purePath = cleanPath.cleanUpPath();
+  /// the path that will be updated using [name]
+  ///
+  /// The path MUST point to a directory, a file's path will not be altered
+  final String path;
 
-    return purePath;
-  }
+  /// the placeholder of the [path] that will be replaced with [name]
+  ///
+  /// The placeholder MUST be a directory
+  final String placeholder;
+
+  @override
+  List<Object?> get props => _$props;
 
   /// the segments of [path]
   List<String> get configuredParts => separatePath(path);
@@ -152,8 +137,23 @@ class BrickPath extends Equatable {
     return pathParts.join(separator);
   }
 
-  @override
-  List<Object?> get props => _$props;
+  /// cleans the path of any strange ocurrences
+  /// and preceeding & trailing slashes
+  static String cleanPath(String path) {
+    final normalPath = normalize(path);
+    final cleanPath = normalPath.replaceAll(slashPattern, '');
+    final purePath = cleanPath.cleanUpPath();
+
+    return purePath;
+  }
+
+  /// separates the path into segments
+  static List<String> separatePath(String path) {
+    final pathParts = cleanPath(path).split(RegExp(r'[\/\\]'))
+      ..removeWhere((part) => part.isEmpty);
+
+    return pathParts;
+  }
 }
 
 extension _StringX on String {

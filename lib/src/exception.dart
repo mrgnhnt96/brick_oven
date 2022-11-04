@@ -73,11 +73,11 @@ class VariableException implements ConfigException {
     required this.reason,
   });
 
-  /// the variable that is not configured correctly
-  final String variable;
-
   /// the reason the variable is not configured correctly
   final String reason;
+
+  /// the variable that is not configured correctly
+  final String variable;
 
   @override
   String get message => 'Variable "$variable" is invalid -- $reason';
@@ -114,11 +114,11 @@ class SourceException implements ConfigException {
     required this.reason,
   });
 
-  /// the source that is not configured correctly
-  final String source;
-
   /// the reason the source is not configured correctly
   final String reason;
+
+  /// the source that is not configured correctly
+  final String source;
 
   @override
   String get message => 'Invalid source config: "$source"\nReason: $reason';

@@ -18,10 +18,10 @@ class TestFileWatcher implements FileWatcher {
     );
   }
 
+  late StreamController<WatchEvent> _controller;
+
   @override
   final String path;
-
-  late StreamController<WatchEvent> _controller;
 
   @override
   Stream<WatchEvent> get events => _controller.stream;

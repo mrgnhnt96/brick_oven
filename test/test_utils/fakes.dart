@@ -6,6 +6,7 @@ import 'package:mocktail/mocktail.dart';
 
 class FakeArgResults extends Fake implements ArgResults {
   FakeArgResults({required this.data});
+
   final Map<String, dynamic> data;
 
   @override

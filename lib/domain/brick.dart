@@ -32,21 +32,6 @@ class Brick extends Equatable {
   })  : _fileSystem = const LocalFileSystem(),
         _logger = logger ?? Logger();
 
-  /// provide
-  @visibleForTesting
-  const Brick.memory({
-    required this.name,
-    required this.source,
-    required FileSystem fileSystem,
-    required Logger logger,
-    this.configuredDirs = const [],
-    this.configuredFiles = const [],
-    this.excludePaths = const [],
-    this.configPath,
-    this.brickYamlConfig,
-  })  : _fileSystem = fileSystem,
-        _logger = logger;
-
   Brick._fromYaml({
     required this.name,
     required this.source,
@@ -214,11 +199,20 @@ class Brick extends Equatable {
     );
   }
 
-  /// the name of the brick
-  final String name;
-
-  /// the source of the content that the brick will create
-  final BrickSource source;
+  /// provide
+  @visibleForTesting
+  const Brick.memory({
+    required this.name,
+    required this.source,
+    required FileSystem fileSystem,
+    required Logger logger,
+    this.configuredDirs = const [],
+    this.configuredFiles = const [],
+    this.excludePaths = const [],
+    this.configPath,
+    this.brickYamlConfig,
+  })  : _fileSystem = fileSystem,
+        _logger = logger;
 
   /// the config file to the brick.yaml file
   ///
@@ -226,17 +220,23 @@ class Brick extends Equatable {
   /// in sync with the brick_oven.yaml file
   final BrickYamlConfig? brickYamlConfig;
 
-  /// the configured files that will alter/update the [source] files
-  final List<BrickFile> configuredFiles;
+  /// if the brick has its own path
+  final String? configPath;
 
   /// the configured directories that will alter/update the paths of the [source] files
   final List<BrickPath> configuredDirs;
 
+  /// the configured files that will alter/update the [source] files
+  final List<BrickFile> configuredFiles;
+
   /// paths to be excluded from the [source]
   final List<String> excludePaths;
 
-  /// if the brick has its own path
-  final String? configPath;
+  /// the name of the brick
+  final String name;
+
+  /// the source of the content that the brick will create
+  final BrickSource source;
 
   @ignoreAutoequal
   final FileSystem _fileSystem;
@@ -244,62 +244,8 @@ class Brick extends Equatable {
   @ignoreAutoequal
   final Logger _logger;
 
-  /// writes the brick's files, from the [source]'s files.
-  ///
-  /// targets: [output] (bricks) -> [name] -> __brick__
-  void cook({String output = 'bricks', bool watch = false}) {
-    final done = _logger.progress('Writing Brick: $name');
-
-    void putInTheOven() {
-      final targetDir = join(
-        output,
-        name,
-        '__brick__',
-      );
-
-      final directory = _fileSystem.directory(targetDir);
-      if (directory.existsSync()) {
-        directory.deleteSync(recursive: true);
-      }
-
-      final files = source.mergeFilesAndConfig(
-        configuredFiles,
-        excludedPaths: excludePaths,
-        logger: _logger,
-      );
-      final count = files.length;
-
-      for (final file in files) {
-        file.writeTargetFile(
-          targetDir: targetDir,
-          sourceFile: _fileSystem.file(source.fromSourcePath(file)),
-          configuredDirs: configuredDirs,
-          fileSystem: _fileSystem,
-          logger: _logger,
-        );
-      }
-
-      done.complete('$name: $count file${count == 1 ? '' : 's'} cooked');
-    }
-
-    final watcher = source.watcher;
-
-    if (watch && watcher != null) {
-      watcher
-        ..addEvent(() {
-          putInTheOven();
-          checkBrickYamlConfig();
-        })
-        ..start();
-
-      if (watcher.hasRun) {
-        return;
-      }
-    }
-
-    putInTheOven();
-    checkBrickYamlConfig();
-  }
+  @override
+  List<Object?> get props => _$props;
 
   /// checks the brick.yaml file to ensure it is in
   /// sync with the brick_oven.yaml file
@@ -366,6 +312,60 @@ class Brick extends Equatable {
     }
   }
 
-  @override
-  List<Object?> get props => _$props;
+  /// writes the brick's files, from the [source]'s files.
+  ///
+  /// targets: [output] (bricks) -> [name] -> __brick__
+  void cook({String output = 'bricks', bool watch = false}) {
+    final done = _logger.progress('Writing Brick: $name');
+
+    void putInTheOven() {
+      final targetDir = join(
+        output,
+        name,
+        '__brick__',
+      );
+
+      final directory = _fileSystem.directory(targetDir);
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+
+      final files = source.mergeFilesAndConfig(
+        configuredFiles,
+        excludedPaths: excludePaths,
+        logger: _logger,
+      );
+      final count = files.length;
+
+      for (final file in files) {
+        file.writeTargetFile(
+          targetDir: targetDir,
+          sourceFile: _fileSystem.file(source.fromSourcePath(file)),
+          configuredDirs: configuredDirs,
+          fileSystem: _fileSystem,
+          logger: _logger,
+        );
+      }
+
+      done.complete('$name: $count file${count == 1 ? '' : 's'} cooked');
+    }
+
+    final watcher = source.watcher;
+
+    if (watch && watcher != null) {
+      watcher
+        ..addEvent(() {
+          putInTheOven();
+          checkBrickYamlConfig();
+        })
+        ..start();
+
+      if (watcher.hasRun) {
+        return;
+      }
+    }
+
+    putInTheOven();
+    checkBrickYamlConfig();
+  }
 }

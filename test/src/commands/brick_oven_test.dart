@@ -187,14 +187,15 @@ bricks:
 
 class TestBrickOvenCommand extends BrickOvenCommand {
   TestBrickOvenCommand(FileSystem fs) : super(fileSystem: fs);
+
+  @override
+  ArgResults get argResults => FakeArgResults(data: <String, dynamic>{});
+
   @override
   String get description => throw UnimplementedError();
 
   @override
   String get name => throw UnimplementedError();
-
-  @override
-  ArgResults get argResults => FakeArgResults(data: <String, dynamic>{});
 }
 
 class MockBrickOvenCommand extends Mock implements BrickOvenCommand {}

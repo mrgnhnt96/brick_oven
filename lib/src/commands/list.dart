@@ -36,9 +36,6 @@ class ListCommand extends BrickOvenCommand {
   @override
   String get name => 'list';
 
-  /// whether to list the output in verbose mode
-  bool get isVerbose => argResults['verbose'] as bool? ?? false;
-
   @override
   Future<int> run() async {
     logger.info('\nBricks in the oven:');
@@ -119,4 +116,7 @@ $tab${cyan.wrap('dirs')}: ${brick.configuredDirs.length}\n''',
 
     return ExitCode.success.code;
   }
+
+  /// whether to list the output in verbose mode
+  bool get isVerbose => argResults['verbose'] as bool? ?? false;
 }

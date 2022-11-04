@@ -8,11 +8,15 @@ import 'package:watcher/watcher.dart';
 mixin ConfigWatcherMixin {
   final Map<String, Completer<void>> _completers = {};
 
-  /// Watches the [path] for changes
-  @visibleForOverriding
-  @visibleForTesting
-  FileWatcher watcher(String path) {
-    return FileWatcher(path);
+  /// cancels all watchers
+  Future<void> cancelWatchers() async {
+    for (final completer in _completers.values) {
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    }
+
+    _completers.clear();
   }
 
   /// the watcher for the [BrickOvenYaml.file]
@@ -38,15 +42,11 @@ mixin ConfigWatcherMixin {
     return true;
   }
 
-  /// cancels all watchers
-  Future<void> cancelWatchers() async {
-    for (final completer in _completers.values) {
-      if (!completer.isCompleted) {
-        completer.complete();
-      }
-    }
-
-    _completers.clear();
+  /// Watches the [path] for changes
+  @visibleForOverriding
+  @visibleForTesting
+  FileWatcher watcher(String path) {
+    return FileWatcher(path);
   }
 
   /// cancels the watcher for the given [path]

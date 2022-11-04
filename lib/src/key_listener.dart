@@ -24,6 +24,13 @@ class KeyPressListener {
         _toExit = toExit,
         _logger = logger ?? Logger();
 
+  /// the stream of key presses
+  @visibleForTesting
+  static Stream<List<int>>? stream;
+
+  /// the listener of key presses
+  static StreamSubscription<List<int>>? _listener;
+
   final Logger _logger;
   final Stdin _stdin;
   final void Function(int) _toExit;
@@ -47,36 +54,6 @@ class KeyPressListener {
         0x1b: _logger.keyStrokes,
       } as KeyMap;
 
-  /// listens to keystrokes and handles them with the [keyPresses] map.
-  void listenToKeystrokes() {
-    if (!_stdin.hasTerminal) {
-      return;
-    }
-
-    _logger.keyStrokes();
-
-    keyListener(keys: keyPresses);
-  }
-
-  /// the stream of key presses
-  @visibleForTesting
-  static Stream<List<int>>? stream;
-
-  /// the listener of key presses
-  static StreamSubscription<List<int>>? _listener;
-
-  /// listens for keypresses
-  @visibleForTesting
-  void onListen(List<int> codes, Map<dynamic, FutureOr<void> Function()> keys) {
-    final key = utf8.decode(codes);
-
-    if (keys.containsKey(key)) {
-      keys[key]?.call();
-    } else if (codes.length == 1 && keys.containsKey(codes[0])) {
-      keys[codes[0]]?.call();
-    }
-  }
-
   /// Returns a stream of keypresses.
   void keyListener({required KeyMap keys}) {
     if (!_stdin.hasTerminal) {
@@ -94,5 +71,28 @@ class KeyPressListener {
     _listener = stream!.listen((codes) {
       onListen(codes, keys);
     });
+  }
+
+  /// listens to keystrokes and handles them with the [keyPresses] map.
+  void listenToKeystrokes() {
+    if (!_stdin.hasTerminal) {
+      return;
+    }
+
+    _logger.keyStrokes();
+
+    keyListener(keys: keyPresses);
+  }
+
+  /// listens for keypresses
+  @visibleForTesting
+  void onListen(List<int> codes, Map<dynamic, FutureOr<void> Function()> keys) {
+    final key = utf8.decode(codes);
+
+    if (keys.containsKey(key)) {
+      keys[key]?.call();
+    } else if (codes.length == 1 && keys.containsKey(codes[0])) {
+      keys[codes[0]]?.call();
+    }
   }
 }

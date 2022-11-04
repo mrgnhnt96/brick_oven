@@ -30,6 +30,11 @@ abstract class BrickOvenCommand extends Command<int> {
   @override
   ArgResults get argResults => super.argResults!;
 
+  /// gets the current working directory
+  Directory get cwd {
+    return fileSystem.currentDirectory;
+  }
+
   /// gets the bricks brick oven configuration file
   BrickOrError bricks() {
     final configFile = BrickOvenYaml.findNearest(cwd);
@@ -112,10 +117,5 @@ abstract class BrickOvenCommand extends Command<int> {
       return BrickOrError(null, error.message);
     }
     return BrickOrError(directories, null);
-  }
-
-  /// gets the current working directory
-  Directory get cwd {
-    return fileSystem.currentDirectory;
   }
 }

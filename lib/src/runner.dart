@@ -31,9 +31,10 @@ class BrickOvenRunner extends CommandRunner<int> {
     addCommand(UpdateCommand(pubUpdater: _pubUpdater, logger: _logger));
   }
 
+  final PubUpdater _pubUpdater;
+
   /// the logger for the application
   final Logger _logger;
-  final PubUpdater _pubUpdater;
 
   @override
   Future<int?> run(Iterable<String> args) async {

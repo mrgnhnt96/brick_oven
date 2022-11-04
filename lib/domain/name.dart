@@ -82,8 +82,8 @@ class Name extends Equatable {
     return Name(backup);
   }
 
-  /// the value of the name
-  final String value;
+  /// the format of the name
+  final MustacheFormat? format;
 
   /// the prefix of the name
   final String prefix;
@@ -91,14 +91,14 @@ class Name extends Equatable {
   /// the suffix of the name
   final String suffix;
 
-  /// the format of the name
-  final MustacheFormat? format;
+  /// the value of the name
+  final String value;
 
-  /// gets the name of the file without formatting to mustache
-  ///
-  /// eg: `prefix{name}suffix`
-  String get simple {
-    return '$prefix{$value}$suffix';
+  @override
+  List<Object?> get props => _$props;
+
+  String get _toVariable {
+    return '$prefix{{{$value}}}$suffix';
   }
 
   /// gets the name of the file with formatting to mustache
@@ -110,15 +110,15 @@ class Name extends Equatable {
     return _toVariable;
   }
 
-  String get _toVariable {
-    return '$prefix{{{$value}}}$suffix';
+  /// gets the name of the file without formatting to mustache
+  ///
+  /// eg: `prefix{name}suffix`
+  String get simple {
+    return '$prefix{$value}$suffix';
   }
 
   /// gets the name of the file with formatting to mustache from [format]
   String formatWith(MustacheFormat format) {
     return format.toMustache(_toVariable);
   }
-
-  @override
-  List<Object?> get props => _$props;
 }

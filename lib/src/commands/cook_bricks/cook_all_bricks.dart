@@ -47,23 +47,17 @@ class CookAllBricks extends BrickOvenCommand
         );
   }
 
-  /// {@macro key_press_listener}
-  late final KeyPressListener keyPressListener;
-
   /// the config watcher for the brick oven yaml
   final FileWatcher configWatcher;
+
+  /// {@macro key_press_listener}
+  late final KeyPressListener keyPressListener;
 
   @override
   String get description => 'Cook all bricks.';
 
   @override
   String get name => 'all';
-
-  /// whether to watch for file changes
-  bool get isWatch => argResults['watch'] == true;
-
-  /// The output directory
-  String get outputDir => argResults['output'] as String? ?? 'bricks';
 
   @override
   Future<int> run() async {
@@ -155,6 +149,12 @@ class CookAllBricks extends BrickOvenCommand
 
     return ExitCode.success.code;
   }
+
+  /// whether to watch for file changes
+  bool get isWatch => argResults['watch'] == true;
+
+  /// The output directory
+  String get outputDir => argResults['output'] as String? ?? 'bricks';
 }
 
 extension on ArgParser {

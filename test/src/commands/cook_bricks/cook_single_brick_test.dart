@@ -223,14 +223,14 @@ class TestCookSingleBrick extends CookSingleBrick {
           keyPressListener: keyPressListener,
         );
 
+  final bool allowConfigChanges;
+
   final Map<String, dynamic> _argResults;
+
+  var _hasWatchedConfigChanges = false;
 
   @override
   ArgResults get argResults => FakeArgResults(data: _argResults);
-
-  final bool allowConfigChanges;
-
-  var _hasWatchedConfigChanges = false;
 
   @override
   Future<bool> watchForConfigChanges(

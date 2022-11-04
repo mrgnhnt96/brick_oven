@@ -29,31 +29,29 @@ class BrickWatcher extends Equatable {
   }) : _watcher = watcher;
 
   /// the source directory of the brick, which will be watched
-  @ignoreAutoequal
-  final DirectoryWatcher _watcher;
-
-  /// the source directory of the brick, which will be watched
   final String dirPath;
-
-  @ignoreAutoequal
-  StreamSubscription<WatchEvent>? _listener;
-
-  /// the stream subscription for the watcher
-  @visibleForTesting
-  StreamSubscription<WatchEvent>? get listener => _listener;
-
-  @ignoreAutoequal
-  final _beforeEvents = <OnEvent>[];
 
   @ignoreAutoequal
   final _afterEvents = <OnEvent>[];
 
   @ignoreAutoequal
+  final _beforeEvents = <OnEvent>[];
+
+  @ignoreAutoequal
   final _events = <OnEvent>[];
 
-  /// events to be called for each brick that gets cooked
-  @visibleForTesting
-  List<OnEvent> get events => List.from(_events);
+  @ignoreAutoequal
+  var _hasRun = false;
+
+  @ignoreAutoequal
+  StreamSubscription<WatchEvent>? _listener;
+
+  /// the source directory of the brick, which will be watched
+  @ignoreAutoequal
+  final DirectoryWatcher _watcher;
+
+  @override
+  List<Object?> get props => _$props;
 
   /// events to be called after all bricks are cooked
   @visibleForTesting
@@ -63,11 +61,12 @@ class BrickWatcher extends Equatable {
   @visibleForTesting
   List<OnEvent> get beforeEvents => List.from(_beforeEvents);
 
+  /// events to be called for each brick that gets cooked
+  @visibleForTesting
+  List<OnEvent> get events => List.from(_events);
+
   /// whether the watcher has run
   bool get hasRun => _hasRun;
-
-  @ignoreAutoequal
-  var _hasRun = false;
 
   /// whether the watcher is running
   bool get isRunning =>
@@ -75,6 +74,10 @@ class BrickWatcher extends Equatable {
       (_events.isNotEmpty ||
           _beforeEvents.isNotEmpty ||
           _afterEvents.isNotEmpty);
+
+  /// the stream subscription for the watcher
+  @visibleForTesting
+  StreamSubscription<WatchEvent>? get listener => _listener;
 
   /// adds event that will be called when a file creates an event
   void addEvent(
@@ -89,6 +92,13 @@ class BrickWatcher extends Equatable {
     } else {
       _events.add(onEvent);
     }
+  }
+
+  /// resets the watcher by stopping it and restarting it
+  Future<void> reset() async {
+    await _stop(removeEvents: false);
+
+    await start();
   }
 
   /// starts the watcher
@@ -117,13 +127,6 @@ class BrickWatcher extends Equatable {
     await _watcher.ready;
   }
 
-  /// resets the watcher by stopping it and restarting it
-  Future<void> reset() async {
-    await _stop(removeEvents: false);
-
-    await start();
-  }
-
   /// stops the watcher
   Future<void> stop() => _stop(removeEvents: true);
 
@@ -140,7 +143,4 @@ class BrickWatcher extends Equatable {
     _beforeEvents.clear();
     _afterEvents.clear();
   }
-
-  @override
-  List<Object?> get props => _$props;
 }
