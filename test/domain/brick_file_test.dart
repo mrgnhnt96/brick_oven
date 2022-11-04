@@ -59,6 +59,14 @@ void main() {
     test('providedName is null', () {
       expect(instance.name?.value, isNull);
     });
+
+    test('include if is null', () {
+      expect(instance.includeIf, isNull);
+    });
+
+    test('include if not is null', () {
+      expect(instance.includeIfNot, isNull);
+    });
   });
 
   group('#fromYaml', () {
@@ -128,6 +136,28 @@ vars:
       expect(instance.name?.value, 'George');
     });
 
+    test('can parse include if', () {
+      final yaml = loadYaml('''
+include_if: check
+''') as YamlMap;
+
+      final instance =
+          BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+
+      expect(instance.includeIf, 'check');
+    });
+
+    test('can parse include if not', () {
+      final yaml = loadYaml('''
+include_if_not: check
+''') as YamlMap;
+
+      final instance =
+          BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+
+      expect(instance.includeIfNot, 'check');
+    });
+
     test('can parse empty variables', () {
       final yaml = loadYaml('''
 name:
@@ -162,6 +192,23 @@ vars:
       expect(
         () => BrickFile.fromYaml(
           const YamlValue.string('Hi, hows it going?'),
+          path: defaultPath,
+        ),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test(
+        'throws $ConfigException if include_if and include_if_not are both used',
+        () {
+      final yaml = loadYaml('''
+include_if: check
+include_if_not: check
+''') as YamlMap;
+
+      expect(
+        () => BrickFile.fromYaml(
+          YamlValue.from(yaml),
           path: defaultPath,
         ),
         throwsA(isA<ConfigException>()),
@@ -312,7 +359,7 @@ yooooo:
         name: Name(name, suffix: suffix),
       );
 
-      expect(instance.fileName, contains('{{{$name}}}$suffix'));
+      expect(instance.fileName, '{{{$name}}}$suffix.dart');
     });
 
     test('formats the name to mustache format when provided', () {
@@ -323,7 +370,7 @@ yooooo:
 
       expect(
         instance.fileName,
-        contains('{{#snakeCase}}{{{$name}}}{{/snakeCase}}'),
+        '{{#snakeCase}}{{{$name}}}{{/snakeCase}}.dart',
       );
     });
 
@@ -343,6 +390,84 @@ yooooo:
 
         expect(instance.fileName, endsWith(expected));
       }
+    });
+
+    group('#include_if', () {
+      test('returns name wrapped in if without formatting or configured name',
+          () {
+        const instance = BrickFile.config(
+          defaultPath,
+          includeIf: 'check',
+        );
+
+        expect(instance.fileName, '{{#check}}$defaultPath{{/check}}');
+      });
+
+      test('returns name wrapped in if with configured name', () {
+        const instance = BrickFile.config(
+          defaultPath,
+          name: Name(name),
+          includeIf: 'check',
+        );
+
+        expect(
+          instance.fileName,
+          '{{#check}}{{{$name}}}.dart{{/check}}',
+        );
+      });
+
+      test('returns name wrapped in if with configured name and formatting',
+          () {
+        const instance = BrickFile.config(
+          defaultPath,
+          name: Name(name, format: MustacheFormat.snakeCase),
+          includeIf: 'check',
+        );
+
+        expect(
+          instance.fileName,
+          '{{#check}}{{#snakeCase}}{{{$name}}}{{/snakeCase}}.dart{{/check}}',
+        );
+      });
+    });
+
+    group('#include_if_not', () {
+      test('returns name wrapped in if without formatting or configured name',
+          () {
+        const instance = BrickFile.config(
+          defaultPath,
+          includeIfNot: 'check',
+        );
+
+        expect(instance.fileName, '{{^check}}$defaultPath{{/check}}');
+      });
+
+      test('returns name wrapped in if with configured name', () {
+        const instance = BrickFile.config(
+          defaultPath,
+          name: Name(name),
+          includeIfNot: 'check',
+        );
+
+        expect(
+          instance.fileName,
+          '{{^check}}{{{$name}}}.dart{{/check}}',
+        );
+      });
+
+      test('returns name wrapped in if with configured name and formatting',
+          () {
+        const instance = BrickFile.config(
+          defaultPath,
+          name: Name(name, format: MustacheFormat.snakeCase),
+          includeIfNot: 'check',
+        );
+
+        expect(
+          instance.fileName,
+          '{{^check}}{{#snakeCase}}{{{$name}}}{{/snakeCase}}.dart{{/check}}',
+        );
+      });
     });
   });
 

@@ -23,7 +23,10 @@ part 'brick_file.g.dart';
 @autoequal
 class BrickFile extends Equatable {
   /// {macro brick_file}
-  const BrickFile(this.path, {this.name}) : variables = const [];
+  const BrickFile(this.path, {this.name})
+      : variables = const [],
+        includeIf = null,
+        includeIfNot = null;
 
   /// configures the brick file will all available properties,
   /// should only be used in testing
@@ -32,6 +35,8 @@ class BrickFile extends Equatable {
     this.path, {
     this.variables = const [],
     this.name,
+    this.includeIf,
+    this.includeIfNot,
   });
 
   /// parses the [yaml]
@@ -105,6 +110,33 @@ class BrickFile extends Equatable {
       }
     }
 
+    String? getValue(String key) {
+      final yaml = YamlValue.from(data.remove(key));
+
+      if (yaml.isNone()) {
+        return null;
+      }
+
+      if (!yaml.isString()) {
+        throw FileException(
+          file: path,
+          reason: 'Expected type `String` or `null` for `$key`',
+        );
+      }
+
+      return yaml.asString().value;
+    }
+
+    final includeIf = getValue('include_if');
+    final includeIfNot = getValue('include_if_not');
+
+    if (includeIf != null && includeIfNot != null) {
+      throw FileException(
+        file: path,
+        reason: 'Cannot use both `include_if` and `include_if_not`',
+      );
+    }
+
     if (data.isNotEmpty) {
       throw FileException(
         file: path,
@@ -116,8 +148,22 @@ class BrickFile extends Equatable {
       path,
       variables: variables().toList(),
       name: name,
+      includeIf: includeIf,
+      includeIfNot: includeIfNot,
     );
   }
+
+  /// whether to include the file in the _mason_ build output
+  /// based on the variable provided
+  ///
+  /// wraps the file in a `{{#if}}` block
+  final String? includeIf;
+
+  /// whether to include the file in the _mason_ build output
+  /// based on the variable provided
+  ///
+  /// wraps the file in a `{{^if}}` block
+  final String? includeIfNot;
 
   /// the name of the file
   ///
@@ -144,11 +190,22 @@ class BrickFile extends Equatable {
   /// If [hasConfiguredName], then the name will be formatted with mustache,
   /// prepended with prefix, and appended with suffix
   String get fileName {
-    if (!hasConfiguredName) {
-      return basename(path);
+    String name;
+    if (hasConfiguredName) {
+      name = '${this.name!.formatted}$extension';
+    } else {
+      name = basename(path);
     }
 
-    return '${name!.formatted}$extension';
+    if (includeIf != null) {
+      return '{{#$includeIf}}$name{{/$includeIf}}';
+    }
+
+    if (includeIfNot != null) {
+      return '{{^$includeIfNot}}$name{{/$includeIfNot}}';
+    }
+
+    return name;
   }
 
   /// if the name of the file has been configured
