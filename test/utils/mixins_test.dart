@@ -46,6 +46,8 @@ void main() {
       await listener;
 
       expect(hasChanged, isTrue);
+
+      testFileWatcher.close();
     });
 
     test('#cancelWatchers can be called', () async {
