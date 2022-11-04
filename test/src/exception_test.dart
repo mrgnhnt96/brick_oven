@@ -178,19 +178,4 @@ void main() {
       );
     });
   });
-
-  group('$MaxUpdateException', () {
-    test('can be instanciated', () {
-      expect(const MaxUpdateException(1), isA<BrickOvenException>());
-
-      expect(() => const MaxUpdateException(1), returnsNormally);
-    });
-
-    test('has the correct message', () {
-      expect(
-        const MaxUpdateException(1).message,
-        'Reached the maximum number of updates (1) allowed.',
-      );
-    });
-  });
 }

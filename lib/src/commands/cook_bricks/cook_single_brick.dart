@@ -18,8 +18,7 @@ import 'package:brick_oven/utils/mixins.dart';
 /// {@template cook_single_brick_command}
 /// Writes a single brick from the configuration file
 /// {@endtemplate}
-class CookSingleBrick extends BrickOvenCommand
-    with QuitAfterMixin, ConfigWatcherMixin {
+class CookSingleBrick extends BrickOvenCommand with ConfigWatcherMixin {
   /// {@macro cook_single_brick_command}
   CookSingleBrick(
     this.brick, {
@@ -74,8 +73,7 @@ class CookSingleBrick extends BrickOvenCommand
     brick.source.watcher
       ?..addEvent(logger.cooking, runBefore: true)
       ..addEvent(logger.watching, runAfter: true)
-      ..addEvent(logger.keyStrokes, runAfter: true)
-      ..addEvent(() => fileChanged(logger: logger));
+      ..addEvent(logger.keyStrokes, runAfter: true);
 
     brick.cook(output: outputDir, watch: true);
 

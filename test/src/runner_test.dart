@@ -1,4 +1,7 @@
 import 'package:args/command_runner.dart';
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/src/package_details.dart';
+import 'package:brick_oven/src/runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -6,10 +9,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/src/package_details.dart';
-import 'package:brick_oven/src/runner.dart';
 import '../test_utils/mocks.dart';
 import '../test_utils/print_override.dart';
 
@@ -102,24 +101,6 @@ void main() {
         expect(result, equals(ExitCode.success.code));
 
         verifyNever(() => logger.info(updateMessage));
-      });
-
-      test('handles $MaxUpdateException', () async {
-        const exception = MaxUpdateException(1);
-        var isFirstInvocation = true;
-
-        when(() => logger.alert(any())).thenAnswer((_) {
-          if (isFirstInvocation) {
-            isFirstInvocation = false;
-            throw exception;
-          }
-        });
-
-        final result = await commandRunner.run(['--version']);
-
-        expect(result, equals(ExitCode.success.code));
-
-        verify(() => logger.err(exception.message)).called(1);
       });
 
       test('handles $FormatException', () async {

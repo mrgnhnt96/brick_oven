@@ -19,7 +19,7 @@ import 'package:brick_oven/utils/mixins.dart';
 /// Writes all bricks from the configuration file
 /// {@endtemplate}
 class CookAllBricks extends BrickOvenCommand
-    with QuitAfterMixin, ConfigWatcherMixin {
+    with ConfigWatcherMixin {
   /// {@macro cook_all_bricks_command}
   CookAllBricks({
     FileSystem? fileSystem,
@@ -89,7 +89,6 @@ class CookAllBricks extends BrickOvenCommand
         watcher?.addEvent(logger.cooked, runAfter: true);
         watcher?.addEvent(logger.watching, runAfter: true);
         watcher?.addEvent(logger.keyStrokes, runAfter: true);
-        watcher?.addEvent(() => fileChanged(logger: logger));
       }
 
       try {
