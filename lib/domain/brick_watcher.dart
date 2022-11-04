@@ -70,7 +70,11 @@ class BrickWatcher extends Equatable {
   var _hasRun = false;
 
   /// whether the watcher is running
-  bool get isRunning => _listener != null;
+  bool get isRunning =>
+      _listener != null &&
+      (_events.isNotEmpty ||
+          _beforeEvents.isNotEmpty ||
+          _afterEvents.isNotEmpty);
 
   /// adds event that will be called when a file creates an event
   void addEvent(
