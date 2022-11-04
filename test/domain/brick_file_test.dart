@@ -178,6 +178,33 @@ vars:
       expect(instance2.variables, isEmpty);
     });
 
+    test('throws $ConfigException if include_if is not configured correctly',
+        () {
+      final yaml = loadYaml('''
+include_if:
+  - check
+''') as YamlMap;
+
+      expect(
+        () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
+    test(
+        'throws $ConfigException if include_if_not is not configured correctly',
+        () {
+      final yaml = loadYaml('''
+include_if_not:
+  - check
+''') as YamlMap;
+
+      expect(
+        () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
     test('throws $ConfigException if yaml is error', () {
       expect(
         () => BrickFile.fromYaml(
