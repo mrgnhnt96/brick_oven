@@ -1,19 +1,17 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
-
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_watcher.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/utils/extensions.dart';
 
 part 'brick_source.g.dart';
 
@@ -35,11 +33,11 @@ class BrickSource extends Equatable {
 
   /// creates a memory source, avoids writing files to machine/locally
   @visibleForTesting
-  BrickSource.memory({
+  const BrickSource.memory({
     required this.localPath,
-    FileSystem? fileSystem,
+    required FileSystem fileSystem,
     this.watcher,
-  }) : _fileSystem = fileSystem ?? MemoryFileSystem();
+  }) : _fileSystem = fileSystem;
 
   /// creates and empty source
   const BrickSource.none()
