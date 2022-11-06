@@ -8,12 +8,14 @@ import 'package:watcher/watcher.dart';
 mixin ConfigWatcherMixin {
   final Map<String, Completer<void>> _completers = {};
 
+  /// gets the completers
+  @visibleForTesting
+  Map<String, Completer<void>> get completers => {..._completers};
+
   /// cancels all watchers
   Future<void> cancelWatchers() async {
     for (final completer in _completers.values) {
-      if (!completer.isCompleted) {
-        completer.complete();
-      }
+      completer.complete();
     }
 
     _completers.clear();
@@ -25,6 +27,8 @@ mixin ConfigWatcherMixin {
     FutureOr<void> Function()? onChange,
   }) async {
     final watchCompleter = Completer<void>();
+
+    assert(!_completers.containsKey(path), 'Already watching $path');
 
     final yamlListener = watcher(path).events.listen((event) async {
       await onChange?.call();

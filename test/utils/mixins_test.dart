@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/utils/mixins.dart';
 import 'package:file/file.dart';
@@ -31,7 +33,8 @@ void main() {
     test('#watchForChanges should return true when file changes', () async {
       var hasChanged = false;
       final testConfigWatcher = TestConfigWatcher();
-      final testFileWatcher = testConfigWatcher.watcher(configFile.path);
+      final testFileWatcher =
+          testConfigWatcher.watcher(configFile.path) as TestFileWatcher;
 
       final listener = testConfigWatcher.watchForConfigChanges(
         configFile.path,
@@ -50,10 +53,61 @@ void main() {
       testFileWatcher.close();
     });
 
-    test('#cancelWatchers can be called', () async {
+    test('#watcher returns $FileWatcher', () {
       final testConfigWatcher = TestConfigWatcher();
 
-      expect(testConfigWatcher.cancelWatchers, returnsNormally);
+      expect(
+        testConfigWatcher.watcher(configFile.path, useTestWatcher: false),
+        isA<FileWatcher>(),
+      );
+      expect(
+        testConfigWatcher.watcher(configFile.path, useTestWatcher: false).path,
+        configFile.path,
+      );
+    });
+
+    group('#completers', () {
+      test('#watchForConfigChanges adds to completers', () async {
+        final testConfigWatcher = TestConfigWatcher();
+        unawaited(testConfigWatcher.watchForConfigChanges(configFile.path));
+
+        await Future<void>.delayed(Duration.zero);
+
+        expect(testConfigWatcher.completers, isNotEmpty);
+        expect(testConfigWatcher.completers, hasLength(1));
+        expect(testConfigWatcher.completers.keys, [configFile.path]);
+      });
+
+      test('#cancelWatchers removes from completers', () async {
+        final testConfigWatcher = TestConfigWatcher();
+
+        unawaited(testConfigWatcher.watchForConfigChanges(configFile.path));
+
+        // wait for the watcher to be added
+        await Future<void>.delayed(Duration.zero);
+
+        expect(testConfigWatcher.completers, isNotEmpty);
+        expect(testConfigWatcher.completers, hasLength(1));
+        expect(testConfigWatcher.completers.keys, [configFile.path]);
+
+        await testConfigWatcher.cancelWatchers();
+
+        expect(testConfigWatcher.completers, isEmpty);
+      });
+
+      test('#watchForConfigChanges throws assertion when re-watching path',
+          () async {
+        final testConfigWatcher = TestConfigWatcher();
+
+        unawaited(testConfigWatcher.watchForConfigChanges(configFile.path));
+
+        await Future<void>.delayed(Duration.zero);
+
+        expect(
+          () => testConfigWatcher.watchForConfigChanges(configFile.path),
+          throwsA(isA<AssertionError>()),
+        );
+      });
     });
   });
 }
@@ -62,7 +116,11 @@ class TestConfigWatcher with ConfigWatcherMixin {
   final testFileWatcher = TestFileWatcher();
 
   @override
-  TestFileWatcher watcher(String path) {
-    return testFileWatcher;
+  FileWatcher watcher(String path, {bool useTestWatcher = true}) {
+    if (useTestWatcher) {
+      return testFileWatcher;
+    }
+
+    return super.watcher(path);
   }
 }
