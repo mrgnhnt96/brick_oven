@@ -1,4 +1,5 @@
 import 'package:args/args.dart';
+import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -44,6 +45,22 @@ void main() {
         expect(command.isVerbose, false);
       });
     });
+  });
+
+  test('prints error when configuration is bad and exits with 78', () async {
+    final logger = MockLogger();
+    final fileSystem = MemoryFileSystem();
+    final command = TestListCommand(
+      logger: logger,
+      fileSystem: fileSystem,
+    )..brickOrErrorResponse = const BrickOrError(null, 'bad config');
+
+    verifyNever(() => logger.err(any()));
+
+    final code = await command.run();
+
+    expect(code, 78);
+    verify(() => logger.err('bad config')).called(1);
   });
 
   group('brick_oven list', () {
@@ -162,9 +179,23 @@ ${lightYellow.wrap('package_2')}
 }
 
 class TestListCommand extends ListCommand {
-  TestListCommand({this.verbose});
+  TestListCommand({
+    this.verbose,
+    Logger? logger,
+    FileSystem? fileSystem,
+  }) : super(
+          logger: logger,
+          fileSystem: fileSystem,
+        );
 
   final bool? verbose;
+
+  @override
+  BrickOrError bricks() {
+    return brickOrErrorResponse ?? super.bricks();
+  }
+
+  BrickOrError? brickOrErrorResponse;
 
   @override
   ArgResults get argResults => FakeArgResults(
