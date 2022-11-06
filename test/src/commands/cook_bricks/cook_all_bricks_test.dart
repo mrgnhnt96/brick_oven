@@ -135,7 +135,7 @@ void main() {
           verify(() => mockBrick.cook(output: 'output/dir', watch: true))
               .called(1);
 
-          expect(result, ExitCode.success.code);
+          expect(result, ExitCode.tempFail.code);
         });
 
         test('listens to config changes and returns code 75', () async {

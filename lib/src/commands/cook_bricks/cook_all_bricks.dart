@@ -18,8 +18,7 @@ import 'package:brick_oven/utils/mixins.dart';
 /// {@template cook_all_bricks_command}
 /// Writes all bricks from the configuration file
 /// {@endtemplate}
-class CookAllBricks extends BrickOvenCommand
-    with ConfigWatcherMixin {
+class CookAllBricks extends BrickOvenCommand with ConfigWatcherMixin {
   /// {@macro cook_all_bricks_command}
   CookAllBricks({
     FileSystem? fileSystem,
@@ -132,7 +131,7 @@ class CookAllBricks extends BrickOvenCommand
       );
     }
 
-    final ovenNeedsReset = await watchForConfigChanges(
+    await watchForConfigChanges(
       BrickOvenYaml.file,
       onChange: () async {
         logger.configChanged();
@@ -143,11 +142,7 @@ class CookAllBricks extends BrickOvenCommand
       },
     );
 
-    if (ovenNeedsReset) {
-      return ExitCode.tempFail.code;
-    }
-
-    return ExitCode.success.code;
+    return ExitCode.tempFail.code;
   }
 
   /// whether to watch for file changes
