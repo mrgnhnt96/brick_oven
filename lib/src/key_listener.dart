@@ -55,6 +55,7 @@ class KeyPressListener {
       } as KeyMap;
 
   /// Returns a stream of keypresses.
+  @visibleForTesting
   void keyListener({required KeyMap keys}) {
     if (!_stdin.hasTerminal) {
       throw StateError('stdin does not have terminal');
@@ -64,7 +65,7 @@ class KeyPressListener {
       ..lineMode = false
       ..echoMode = false;
 
-    stream ??= _stdin.asBroadcastStream();
+    stream = _stdin.asBroadcastStream();
 
     _listener?.cancel();
 
