@@ -97,7 +97,7 @@ class CookSingleBrick extends BrickOvenCommand with ConfigWatcherMixin {
       );
     }
 
-    final ovenNeedsReset = await watchForConfigChanges(
+    await watchForConfigChanges(
       BrickOvenYaml.file,
       onChange: () async {
         logger.configChanged();
@@ -106,11 +106,7 @@ class CookSingleBrick extends BrickOvenCommand with ConfigWatcherMixin {
       },
     );
 
-    if (ovenNeedsReset) {
-      return ExitCode.tempFail.code;
-    }
-
-    return ExitCode.success.code;
+    return ExitCode.tempFail.code;
   }
 
   /// whether to watch for file changes
