@@ -143,11 +143,11 @@ class BrickPath extends Equatable {
     );
   }
 
-  /// the pattern to separate segments of a path
-  static RegExp separatorPattern = RegExp(r'[\/\\]');
-
   /// the pattern to remove all preceeding and trailing slashes
   static RegExp leadingAndTrailingSlashPattern = RegExp(r'^[\/\\]+|[\/\\]+$');
+
+  /// the pattern to separate segments of a path
+  static RegExp separatorPattern = RegExp(r'[\/\\]');
 
   /// whether to include the file in the _mason_ build output
   /// based on the variable provided
