@@ -23,7 +23,7 @@ void main() {
         overridePrint(() {
           logger.cooking();
 
-          expect(printLogs, ['\n⏲️  Cooking...']);
+          expect(printLogs, [('\n⏲️  Cooking...')]);
         });
       });
 
@@ -102,7 +102,7 @@ void main() {
           final date = DateTime(2021, 1, 1, 12);
           mockLogger.cooked(date);
 
-          final cooked = lightGreen.wrap('\n🍽️  Cooked! (');
+          final cooked = lightGreen.wrap('🍽️  Cooked! (');
           final timed = darkGray.wrap(date.formatted);
           final end = lightGreen.wrap(')');
 
@@ -118,11 +118,11 @@ void main() {
         final date = DateTime(2021, 1, 1, 12);
         mockLogger.cooked(date);
 
-        final cooked = lightGreen.wrap('\n🍽️  Cooked! (');
+        final cooked = lightGreen.wrap('🍽️  Cooked! (');
         final timed = darkGray.wrap(date.formatted);
         final end = lightGreen.wrap(')');
 
-        final expected = '$cooked$timed$end\n';
+        final expected = '$cooked$timed$end';
 
         verify(
           () => mockLogger.info(expected),

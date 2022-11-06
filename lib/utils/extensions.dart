@@ -46,11 +46,11 @@ extension LoggerX on Logger {
   void cooked([DateTime? date]) {
     final time = (date ?? DateTime.now()).formatted;
 
-    final cooked = lightGreen.wrap('\n🍽️  Cooked! (');
+    final cooked = lightGreen.wrap('🍽️  Cooked! (');
     final timed = darkGray.wrap(time);
     final end = lightGreen.wrap(')');
 
-    info('$cooked$timed$end\n');
+    info('$cooked$timed$end');
   }
 
   /// writes `🔧  Configuration changed`
