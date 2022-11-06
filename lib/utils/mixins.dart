@@ -22,7 +22,7 @@ mixin ConfigWatcherMixin {
   }
 
   /// the watcher for the [BrickOvenYaml.file]
-  Future<bool> watchForConfigChanges(
+  Future<void> watchForConfigChanges(
     String path, {
     FutureOr<void> Function()? onChange,
   }) async {
@@ -43,7 +43,7 @@ mixin ConfigWatcherMixin {
     await watchCompleter.future;
     await yamlListener.cancel();
 
-    return true;
+    return;
   }
 
   /// Watches the [path] for changes
