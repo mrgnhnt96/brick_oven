@@ -45,7 +45,7 @@ abstract class BrickOvenCommand extends Command<int> {
 
     final config = YamlValue.from(loadYaml(configFile.readAsStringSync()));
     if (config.isError()) {
-      throw BrickOvenException(config.asError().value);
+      throw const BrickOvenException('Invalid brick oven configuration file');
     }
 
     if (!config.isYaml()) {

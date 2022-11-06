@@ -56,6 +56,19 @@ bricks:
         );
       });
 
+      test('throws $ConfigException when bricks config is bad', () {
+        const content = '''
+bricks: ${1}
+''';
+
+        createFile(BrickOvenYaml.file, content);
+
+        expect(
+          brickOvenCommand.bricks,
+          throwsA(isA<BrickOvenException>()),
+        );
+      });
+
       test('throws $ConfigException when bricks is not yaml', () {
         const content = '''
 bricks: Not YAML
