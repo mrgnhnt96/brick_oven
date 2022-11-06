@@ -24,6 +24,11 @@ test:
   - $test:only --coverage --exclude-coverage **/*.g.dart
   - $coverage
 
+clean:
+  proj:
+    - rm -rf pubspec.lock
+    - dart pub get
+
 prep:
   - dart analyze lib test
   - dart format lib test
