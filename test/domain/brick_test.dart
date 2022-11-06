@@ -8,7 +8,9 @@ import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
+import 'package:brick_oven/domain/brick_yaml_data.dart';
 import 'package:brick_oven/domain/name.dart';
+import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
@@ -22,6 +24,7 @@ import 'package:yaml/yaml.dart';
 
 import '../test_utils/fakes.dart';
 import '../test_utils/mocks.dart';
+import '../test_utils/print_override.dart';
 import '../test_utils/test_directory_watcher.dart';
 
 void main() {
@@ -653,6 +656,318 @@ exclude:
       for (final file in testBrick.configuredFiles) {
         expect(fs.file(join(brickPath, file.path)).existsSync(), isTrue);
       }
+    });
+  });
+
+  group('#allBrickVariables', () {
+    group('files', () {
+      test('gets #variables from files', () {
+        final brick = Brick(
+          name: '',
+          source: const BrickSource.none(),
+          configuredFiles: const [
+            BrickFile.config(
+              '',
+              variables: [
+                Variable(name: 'var1'),
+                Variable(name: 'var2'),
+                Variable(name: 'var3'),
+              ],
+            ),
+            BrickFile.config(
+              '',
+              variables: [
+                Variable(name: 'var4'),
+                Variable(name: 'var5'),
+                Variable(name: 'var6'),
+              ],
+            ),
+          ],
+        );
+
+        expect(
+          brick.allBrickVariables(),
+          {
+            'var1',
+            'var2',
+            'var3',
+            'var4',
+            'var5',
+            'var6',
+          },
+        );
+      });
+
+      test('gets #includeIf', () {
+        final brick = Brick(
+          name: '',
+          source: const BrickSource.none(),
+          configuredFiles: const [
+            BrickFile.config(
+              '',
+              includeIf: 'var1',
+            ),
+            BrickFile.config(
+              '',
+              includeIf: 'var2',
+            ),
+          ],
+        );
+
+        expect(
+          brick.allBrickVariables(),
+          {
+            'var1',
+            'var2',
+          },
+        );
+      });
+
+      test('gets #includeIfNot', () {
+        final brick = Brick(
+          name: '',
+          source: const BrickSource.none(),
+          configuredFiles: const [
+            BrickFile.config(
+              '',
+              includeIfNot: 'var1',
+            ),
+            BrickFile.config(
+              '',
+              includeIfNot: 'var2',
+            ),
+          ],
+        );
+
+        expect(
+          brick.allBrickVariables(),
+          {
+            'var1',
+            'var2',
+          },
+        );
+      });
+    });
+
+    group('dirs', () {
+      test('gets #names', () {
+        final brick = Brick(
+          name: '',
+          source: const BrickSource.none(),
+          configuredDirs: [
+            BrickPath(name: const Name('name1'), path: ''),
+            BrickPath(name: const Name('name2'), path: ''),
+          ],
+        );
+
+        expect(
+          brick.allBrickVariables(),
+          {
+            'name1',
+            'name2',
+          },
+        );
+      });
+
+      test('gets #includeIf', () {
+        final brick = Brick(
+          name: '',
+          source: const BrickSource.none(),
+          configuredDirs: [
+            BrickPath(
+              path: '',
+              includeIf: 'var1',
+            ),
+            BrickPath(
+              path: '',
+              includeIf: 'var2',
+            ),
+          ],
+        );
+
+        expect(
+          brick.allBrickVariables(),
+          {
+            'var1',
+            'var2',
+          },
+        );
+      });
+
+      test('gets #includeIfNot', () {
+        final brick = Brick(
+          name: '',
+          source: const BrickSource.none(),
+          configuredDirs: [
+            BrickPath(
+              path: '',
+              includeIfNot: 'var1',
+            ),
+            BrickPath(
+              path: '',
+              includeIfNot: 'var2',
+            ),
+          ],
+        );
+
+        expect(
+          brick.allBrickVariables(),
+          {
+            'var1',
+            'var2',
+          },
+        );
+      });
+    });
+  });
+
+  group('#checkBrickYamlConfig', () {
+    late Logger mockLogger;
+    late BrickYamlConfig mockBricYamlConfig;
+
+    setUp(() {
+      printLogs = [];
+
+      mockLogger = MockLogger();
+      mockBricYamlConfig = MockBrickYamlConfig();
+    });
+
+    test('returns when brickYamlConfig is null', () {
+      Brick(
+        name: '',
+        source: const BrickSource.none(),
+      ).checkBrickYamlConfig();
+
+      expect(printLogs, isEmpty);
+    });
+
+    test('warns when data returns null in reading brick.yaml file', () {
+      when(mockBricYamlConfig.data).thenReturn(null);
+      verifyNever(() => mockLogger.warn(any()));
+
+      Brick(
+        name: '',
+        source: const BrickSource.none(),
+        brickYamlConfig: mockBricYamlConfig,
+        logger: mockLogger,
+      ).checkBrickYamlConfig();
+
+      verify(() => mockLogger.warn('Error reading `brick.yaml`')).called(1);
+    });
+
+    test('warns when names are not in sync', () {
+      when(mockBricYamlConfig.data)
+          .thenReturn(const BrickYamlData(name: 'Master Skywalker', vars: []));
+
+      verifyNever(() => mockLogger.warn(any()));
+
+      Brick(
+        name: 'Master Yoda',
+        source: const BrickSource.none(),
+        brickYamlConfig: mockBricYamlConfig,
+        logger: mockLogger,
+      ).checkBrickYamlConfig();
+
+      verify(
+        () => mockLogger.warn(
+          '`name` (Master Skywalker) in brick.yaml does not '
+          'match the name in brick_oven.yaml (Master Yoda)',
+        ),
+      ).called(1);
+
+      verify(() => mockLogger.err('brick.yaml is out of sync')).called(1);
+    });
+
+    test('alerts when brick.yaml is in sync', () {
+      when(mockBricYamlConfig.data)
+          .thenReturn(const BrickYamlData(name: 'Count Dooku', vars: []));
+
+      verifyNever(() => mockLogger.info(any()));
+
+      Brick(
+        name: 'Count Dooku',
+        source: const BrickSource.none(),
+        brickYamlConfig: mockBricYamlConfig,
+        logger: mockLogger,
+      ).checkBrickYamlConfig();
+
+      verifyNever(() => mockLogger.warn(any()));
+      verifyNever(() => mockLogger.err(any()));
+      verify(() => mockLogger.info(darkGray.wrap('brick.yaml is in sync')))
+          .called(1);
+    });
+
+    group('alerts when brick.yaml is in out of sync', () {
+      test('when brick.yaml contains extra variables', () {
+        when(mockBricYamlConfig.data).thenReturn(
+          const BrickYamlData(
+            name: 'Count Dooku',
+            vars: ['var1', 'var2'],
+          ),
+        );
+
+        verifyNever(() => mockLogger.warn(any()));
+        verifyNever(() => mockLogger.err(any()));
+
+        Brick(
+          name: 'Count Dooku',
+          source: const BrickSource.none(),
+          brickYamlConfig: mockBricYamlConfig,
+          logger: mockLogger,
+        ).checkBrickYamlConfig();
+
+        verify(
+          () => mockLogger.warn(
+            darkGray.wrap(
+              'Variables are defined in brick.yaml but not used in '
+              'brick_oven.yaml: "var1", "var2"',
+            ),
+          ),
+        ).called(1);
+
+        verify(
+          () => mockLogger.err('brick.yaml is out of sync'),
+        ).called(1);
+      });
+
+      test('when brick_oven.yaml contains extra variables', () {
+        when(mockBricYamlConfig.data).thenReturn(
+          const BrickYamlData(
+            name: 'Count Dooku',
+            vars: [],
+          ),
+        );
+
+        verifyNever(() => mockLogger.warn(any()));
+        verifyNever(() => mockLogger.err(any()));
+
+        Brick(
+          name: 'Count Dooku',
+          source: const BrickSource.none(),
+          brickYamlConfig: mockBricYamlConfig,
+          logger: mockLogger,
+          configuredDirs: [
+            BrickPath(
+              name: const Name('var1'),
+              includeIf: 'var2',
+              path: '',
+            ),
+          ],
+        ).checkBrickYamlConfig();
+
+        verify(
+          () => mockLogger.warn(
+            darkGray.wrap(
+              'Variables are defined in brick_oven.yaml but not used in '
+              'brick.yaml: "var1", "var2"',
+            ),
+          ),
+        ).called(1);
+
+        verify(
+          () => mockLogger.err('brick.yaml is out of sync'),
+        ).called(1);
+      });
     });
   });
 }

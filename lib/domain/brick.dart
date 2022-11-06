@@ -1,5 +1,6 @@
 import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
@@ -247,6 +248,49 @@ class Brick extends Equatable {
   @override
   List<Object?> get props => _$props;
 
+  /// returns the variables within brick
+  ///
+  /// pulls from
+  /// - [configuredFiles]
+  ///   - [BrickFile.variables]
+  /// - [configuredDirs]
+  ///   - [BrickPath.name]
+  ///   - [BrickPath.includeIf]
+  ///   - [BrickPath.includeIfNot]
+  Set<String> allBrickVariables() {
+    final variables = <String>{};
+
+    for (final file in configuredFiles) {
+      final names = file.variables.map((e) => e.name);
+      variables.addAll(names);
+
+      if (file.includeIf != null) {
+        variables.add(file.includeIf!);
+      }
+
+      if (file.includeIfNot != null) {
+        variables.add(file.includeIfNot!);
+      }
+    }
+
+    for (final dir in configuredDirs) {
+      final dirName = dir.name?.value;
+      if (dirName != null) {
+        variables.add(dirName);
+      }
+
+      if (dir.includeIf != null) {
+        variables.add(dir.includeIf!);
+      }
+
+      if (dir.includeIfNot != null) {
+        variables.add(dir.includeIfNot!);
+      }
+    }
+
+    return variables;
+  }
+
   /// checks the brick.yaml file to ensure it is in
   /// sync with the brick_oven.yaml file
   void checkBrickYamlConfig() {
@@ -255,63 +299,52 @@ class Brick extends Equatable {
       return;
     }
 
-    final done = _logger.progress('Checking brick.yaml config');
+    final brickYaml = config.data();
 
-    final variables = <String>{};
-
-    for (final file in configuredFiles) {
-      final names = file.variables.map((e) => e.name);
-      variables.addAll(names);
-    }
-
-    for (final dir in configuredDirs) {
-      final dirName = dir.name?.value;
-      if (dirName != null) {
-        variables.add(dirName);
-      }
-    }
-
-    final data = config.data();
-
-    if (data == null) {
-      done.fail("Something went wrong, couldn't read the brick.yaml file");
+    if (brickYaml == null) {
+      _logger.warn('Error reading `brick.yaml`');
       return;
     }
 
-    if (data.name != name) {
+    final brickOvenFileName = configPath ?? BrickOvenYaml.file;
+
+    var isInSync = true;
+
+    if (brickYaml.name != name) {
+      isInSync = false;
       _logger.warn(
-        '`name` (${data.name}) in brick.yaml does not '
-        'match the brick name ($name)',
+        '`name` (${brickYaml.name}) in brick.yaml does not '
+        'match the name in $brickOvenFileName ($name)',
       );
     }
 
-    final variablesInBrickYaml = data.vars.toSet();
+    final variables = allBrickVariables();
 
-    var couldUseAttention = false;
+    final variablesInBrickYaml = brickYaml.vars.toSet();
 
     if (variablesInBrickYaml.difference(variables).isNotEmpty) {
+      isInSync = false;
       _logger.warn(
-        '\nThe following variables are defined in brick.yaml but not used in '
-        'brick_oven.yaml: '
-        '"${variablesInBrickYaml.difference(variables).join('", "')}"\n',
+        'Variables are defined in brick.yaml but not used in '
+        '$brickOvenFileName: '
+        '"${variablesInBrickYaml.difference(variables).join('", "')}"',
       );
-      couldUseAttention = true;
     }
 
     if (variables.difference(variablesInBrickYaml).isNotEmpty) {
+      isInSync = false;
       _logger.warn(
-        'The following variables are defined in '
-        'brick_oven.yaml but not used in '
-        'brick.yaml:\n'
+        'Variables are defined in '
+        '$brickOvenFileName but not used in '
+        'brick.yaml: '
         '"${variables.difference(variablesInBrickYaml).join('", "')}"',
       );
-      couldUseAttention = true;
     }
 
-    if (couldUseAttention) {
-      done.fail('$name: brick.yaml needs attention');
+    if (isInSync) {
+      _logger.info(darkGray.wrap('brick.yaml is in sync'));
     } else {
-      done.complete('$name: brick.yaml is in sync');
+      _logger.err('brick.yaml is out of sync');
     }
   }
 
@@ -350,17 +383,18 @@ class Brick extends Equatable {
         );
       }
 
-      done.complete('$name: $count file${count == 1 ? '' : 's'} cooked');
+      done.complete(
+        '${cyan.wrap(name)}: cooked '
+        '${yellow.wrap('$count')} file${count == 1 ? '' : 's'}',
+      );
     }
 
     final watcher = source.watcher;
 
     if (watch && watcher != null) {
       watcher
-        ..addEvent(() {
-          putInTheOven();
-          checkBrickYamlConfig();
-        })
+        ..addEvent(putInTheOven)
+        ..addEvent(checkBrickYamlConfig, runAfter: true)
         ..start();
 
       if (watcher.hasRun) {
