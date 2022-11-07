@@ -1,8 +1,13 @@
+import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/brick.dart';
+import 'package:equatable/equatable.dart';
+
+part 'brick_or_error.g.dart';
 
 /// returns the bricks or the error that occurred
 /// when parsing the configuration file
-class BrickOrError {
+@autoequal
+class BrickOrError extends Equatable {
   /// returns the bricks or the error that occurred
   /// when parsing the configuration file
   const BrickOrError(this._bricks, this._error);
@@ -21,4 +26,7 @@ class BrickOrError {
 
   /// if there was an error parsing the configuration file
   bool get isError => _error != null;
+
+  @override
+  List<Object?> get props => _$props;
 }
