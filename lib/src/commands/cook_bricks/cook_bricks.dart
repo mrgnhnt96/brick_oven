@@ -1,4 +1,3 @@
-import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
