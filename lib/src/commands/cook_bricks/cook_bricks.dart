@@ -1,13 +1,10 @@
-import 'dart:io';
-
 import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:file/file.dart';
-import 'package:mason_logger/mason_logger.dart';
-
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
+import 'package:file/file.dart';
+import 'package:mason_logger/mason_logger.dart';
 
 /// {@template cook_bricks_command}
 /// Writes the bricks from the configuration file
@@ -16,7 +13,7 @@ class CookBricksCommand extends BrickOvenCommand {
   /// {@macro cook_bricks_command}
   CookBricksCommand({
     FileSystem? fileSystem,
-    Logger? logger,
+    required Logger logger,
   }) : super(fileSystem: fileSystem, logger: logger) {
     addSubcommand(
       CookAllBricks(
@@ -25,17 +22,13 @@ class CookBricksCommand extends BrickOvenCommand {
       ),
     );
 
-    BrickOrError bricksOrError;
-    try {
-      bricksOrError = this.bricks();
-    } catch (_) {
-      return;
-    }
+    final bricksOrError = this.bricks();
 
     if (bricksOrError.isError) {
-      super.logger.err('Error reading ${BrickOvenYaml.file}:\n'
-          '${bricksOrError.error}');
-      exit(ExitCode.config.code);
+      logger
+        ..warn(bricksOrError.error)
+        ..err('Error reading ${BrickOvenYaml.file}');
+      return;
     }
 
     final bricks = bricksOrError.bricks;
