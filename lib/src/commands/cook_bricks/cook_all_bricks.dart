@@ -22,7 +22,7 @@ class CookAllBricks extends BrickOvenCommand with ConfigWatcherMixin {
   /// {@macro cook_all_bricks_command}
   CookAllBricks({
     FileSystem? fileSystem,
-    Logger? logger,
+    required Logger logger,
     KeyPressListener? keyPressListener,
   })  : configWatcher = FileWatcher(BrickOvenYaml.file),
         super(fileSystem: fileSystem, logger: logger) {

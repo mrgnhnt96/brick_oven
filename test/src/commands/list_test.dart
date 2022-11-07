@@ -15,32 +15,38 @@ import '../../test_utils/print_override.dart';
 
 void main() {
   group('$ListCommand', () {
+    late MockLogger mockLogger;
+
+    setUp(() {
+      mockLogger = MockLogger();
+    });
+
     test('displays description correctly', () {
       expect(
-        ListCommand().description,
+        ListCommand(logger: mockLogger).description,
         'Lists all configured bricks from ${BrickOvenYaml.file}.',
       );
     });
 
     test('displays name correctly', () {
-      expect(ListCommand().name, 'list');
+      expect(ListCommand(logger: mockLogger).name, 'list');
     });
 
     group('#isVerbose', () {
       test('returns true when verbose is provided', () {
-        final command = TestListCommand(verbose: true);
+        final command = TestListCommand(logger: mockLogger, verbose: true);
 
         expect(command.isVerbose, true);
       });
 
       test('returns false when verbose is not provided', () {
-        final command = TestListCommand();
+        final command = TestListCommand(logger: mockLogger);
 
         expect(command.isVerbose, isFalse);
       });
 
       test('returns false when verbose is provided false', () {
-        final command = TestListCommand(verbose: false);
+        final command = TestListCommand(logger: mockLogger, verbose: false);
 
         expect(command.isVerbose, false);
       });
@@ -181,7 +187,7 @@ ${lightYellow.wrap('package_2')}
 class TestListCommand extends ListCommand {
   TestListCommand({
     this.verbose,
-    Logger? logger,
+    required Logger logger,
     FileSystem? fileSystem,
   }) : super(
           logger: logger,

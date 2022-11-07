@@ -16,7 +16,7 @@ import 'package:brick_oven/src/commands/brick_oven.dart';
 class ListCommand extends BrickOvenCommand {
   /// {@macro lists_command}
   ListCommand({
-    Logger? logger,
+    required Logger logger,
     FileSystem? fileSystem,
   }) : super(
           logger: logger,

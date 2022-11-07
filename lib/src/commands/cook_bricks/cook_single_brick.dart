@@ -23,7 +23,7 @@ class CookSingleBrick extends BrickOvenCommand with ConfigWatcherMixin {
   CookSingleBrick(
     this.brick, {
     FileSystem? fileSystem,
-    Logger? logger,
+    required Logger logger,
     FileWatcher? configWatcher,
     KeyPressListener? keyPressListener,
   })  : keyPressListener = keyPressListener ??

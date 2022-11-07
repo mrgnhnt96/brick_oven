@@ -63,12 +63,22 @@ bricks:
       logger: mockLogger,
     );
 
-    brickOvenCommand = CookSingleBrick(brick, fileSystem: fs);
+    brickOvenCommand = CookSingleBrick(
+      brick,
+      fileSystem: fs,
+      logger: mockLogger,
+    );
   });
 
   group('$CookSingleBrick', () {
     test('instanciate without an explicit file system or logger', () {
-      expect(() => CookSingleBrick(brick), returnsNormally);
+      expect(
+        () => CookSingleBrick(
+          brick,
+          logger: mockLogger,
+        ),
+        returnsNormally,
+      );
     });
 
     test('description displays correctly', () {
@@ -84,15 +94,19 @@ bricks:
 
     group('#isWatch', () {
       test('returns true when watch flag is provided', () {
-        final command =
-            TestCookSingleBrick(argResults: <String, dynamic>{'watch': true});
+        final command = TestCookSingleBrick(
+          logger: mockLogger,
+          argResults: <String, dynamic>{'watch': true},
+        );
 
         expect(command.isWatch, isTrue);
       });
 
       test('returns false when watch flag is not provided', () {
-        final command =
-            TestCookSingleBrick(argResults: <String, dynamic>{'watch': false});
+        final command = TestCookSingleBrick(
+          logger: mockLogger,
+          argResults: <String, dynamic>{'watch': false},
+        );
 
         expect(command.isWatch, isFalse);
       });
@@ -101,6 +115,7 @@ bricks:
     group('#outputDir', () {
       test('returns the output dir when provided', () {
         final command = TestCookSingleBrick(
+          logger: mockLogger,
           argResults: <String, dynamic>{'output': 'output/dir'},
         );
 
@@ -108,7 +123,10 @@ bricks:
       });
 
       test('returns null when not provided', () {
-        final command = TestCookSingleBrick(argResults: <String, dynamic>{});
+        final command = TestCookSingleBrick(
+          logger: mockLogger,
+          argResults: <String, dynamic>{},
+        );
 
         expect(command.outputDir, 'bricks');
       });
@@ -361,7 +379,7 @@ bricks:
 class TestCookSingleBrick extends CookSingleBrick {
   TestCookSingleBrick({
     required Map<String, dynamic> argResults,
-    Logger? logger,
+    required Logger logger,
     Brick? brick,
     KeyPressListener? keyPressListener,
     this.fileWatchers,

@@ -19,10 +19,10 @@ class KeyPressListener {
   KeyPressListener({
     required Stdin stdin,
     required void Function(int) toExit,
-    Logger? logger,
+    required Logger logger,
   })  : _stdin = stdin,
         _toExit = toExit,
-        _logger = logger ?? Logger();
+        _logger = logger;
 
   /// the listener of key presses
   static StreamSubscription<List<int>>? _listener;
