@@ -1,0 +1,24 @@
+# TODO
+
+- [x] Handle exception errors better
+- [x] Allow for import yaml files in configuration
+  - [x] source should be relative to the configuration file
+- [ ] Update documentation
+- [x] Fix: when variable is wrapped with "/" it is not replaced
+  - for example: `/var/var.dart` is changing to `/var/{CHANGED}.dart`
+- [x] Allow escaping of variables in configuration
+  - This could be used when you need to use a variable as a path
+- [x] Review mason updates and change accordingly
+- [x] Review mason logger updates and change accordingly
+- [x] Check for variables in brick.yaml file
+  - [x] Check for non-existing
+  - [x] Check for non-configured
+    - Meaning that the variable is setup in the brick.yaml file but not in the brick_oven.yaml file
+- [ ] Add support for variables in brick.yaml file
+  - [ ] Allow override of variable properties
+- [ ] rename `value` to `change_to` for files & dirs
+- [x] Look into ommitting a file or directory by variable
+  - [x] {#var}...{/var}
+  - [x] {#var}{{#snakeCase}}{{{...}}}{{/snakeCase}}{/var}
+- [x] Add `include_if` and `include_if_not` to variables to check against the `brick.yaml` file
+- [ ] Look into changing the format from {{#format}}NAME{{/format}} to NAME.toFormat()

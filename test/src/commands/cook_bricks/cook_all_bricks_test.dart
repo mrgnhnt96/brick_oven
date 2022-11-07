@@ -4,7 +4,7 @@ import 'package:args/args.dart';
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
-import 'package:brick_oven/src/key_listener.dart';
+import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';

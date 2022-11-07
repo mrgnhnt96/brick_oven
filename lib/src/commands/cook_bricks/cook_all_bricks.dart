@@ -11,7 +11,7 @@ import 'package:watcher/watcher.dart';
 
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
-import 'package:brick_oven/src/key_listener.dart';
+import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:brick_oven/utils/mixins.dart';
 

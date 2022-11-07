@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import 'package:brick_oven/src/key_listener.dart';
+import 'package:brick_oven/src/key_press_listener.dart';
 import '../test_utils/mocks.dart';
 
 class MockStdout extends Mock implements Stdout {}

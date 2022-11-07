@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:brick_oven/src/key_listener.dart';
+import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:watcher/watcher.dart';
