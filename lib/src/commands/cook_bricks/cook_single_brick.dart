@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -13,7 +14,7 @@ import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/utils/extensions.dart';
-import 'package:brick_oven/utils/mixins.dart';
+import 'package:brick_oven/utils/config_watcher_mixin.dart';
 
 /// {@template cook_single_brick_command}
 /// Writes a single brick from the configuration file
@@ -61,25 +62,33 @@ class CookSingleBrick extends BrickOvenCommand with ConfigWatcherMixin {
     if (!isWatch) {
       brick.cook(output: outputDir);
 
+      logger.cooked();
+
       return ExitCode.success.code;
     }
 
     brick.source.watcher
-      ?..addEvent(logger.cooking, runBefore: true)
+      ?..addEvent(
+        () => logger.fileChanged(brick.name),
+        runBefore: true,
+      )
+      ..addEvent(logger.cooking, runBefore: true)
       ..addEvent(logger.watching, runAfter: true)
       ..addEvent(logger.keyStrokes, runAfter: true);
 
-    brick.cook(output: outputDir, watch: true);
-
-    logger.watching();
-
-    if (!(brick.source.watcher?.isRunning ?? false)) {
-      logger.err(
-        'There are no bricks currently watching local files, ending',
-      );
-
-      return ExitCode.ioError.code;
+    try {
+      brick.cook(output: outputDir, watch: true);
+    } on ConfigException catch (e) {
+      logger.err(e.message);
+      return ExitCode.config.code;
+    } catch (e) {
+      logger.err('$e');
+      return ExitCode.software.code;
     }
+
+    logger
+      ..cooked()
+      ..watching();
 
     keyPressListener.listenToKeystrokes();
 
@@ -90,7 +99,7 @@ class CookSingleBrick extends BrickOvenCommand with ConfigWatcherMixin {
           onChange: () async {
             logger.configChanged();
 
-            await cancelWatchers();
+            await cancelConfigWatchers();
             await brick.source.watcher?.stop();
           },
         ),

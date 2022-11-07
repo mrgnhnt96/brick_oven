@@ -24,15 +24,14 @@ import '../../key_listener_test.dart';
 import 'cook_all_bricks_test.dart';
 
 void main() {
-  late FileSystem fs;
+  late FileSystem memoryFileSystem;
   late CookSingleBrick brickOvenCommand;
   late Brick brick;
   late Logger mockLogger;
-
   late Progress mockProgress;
 
   setUp(() {
-    fs = MemoryFileSystem();
+    memoryFileSystem = MemoryFileSystem();
     mockLogger = MockLogger();
 
     mockProgress = MockProgress();
@@ -43,7 +42,7 @@ void main() {
 
     when(() => mockLogger.progress(any())).thenReturn(mockProgress);
 
-    fs.file(BrickOvenYaml.file)
+    memoryFileSystem.file(BrickOvenYaml.file)
       ..createSync()
       ..writeAsStringSync(
         '''
@@ -65,7 +64,7 @@ bricks:
 
     brickOvenCommand = CookSingleBrick(
       brick,
-      fileSystem: fs,
+      fileSystem: memoryFileSystem,
       logger: mockLogger,
     );
   });
@@ -96,6 +95,7 @@ bricks:
       test('returns true when watch flag is provided', () {
         final command = TestCookSingleBrick(
           logger: mockLogger,
+          brick: MockBrick(),
           argResults: <String, dynamic>{'watch': true},
         );
 
@@ -105,6 +105,7 @@ bricks:
       test('returns false when watch flag is not provided', () {
         final command = TestCookSingleBrick(
           logger: mockLogger,
+          brick: MockBrick(),
           argResults: <String, dynamic>{'watch': false},
         );
 
@@ -116,6 +117,7 @@ bricks:
       test('returns the output dir when provided', () {
         final command = TestCookSingleBrick(
           logger: mockLogger,
+          brick: MockBrick(),
           argResults: <String, dynamic>{'output': 'output/dir'},
         );
 
@@ -125,6 +127,7 @@ bricks:
       test('returns null when not provided', () {
         final command = TestCookSingleBrick(
           logger: mockLogger,
+          brick: MockBrick(),
           argResults: <String, dynamic>{},
         );
 
@@ -134,16 +137,16 @@ bricks:
   });
 
   group('brick_oven cook', () {
-    late TestFileWatcher testFileWatcher;
-    late FileSystem memoryFileSystem;
     late Brick mockBrick;
     late Stdin mockStdin;
+    late TestFileWatcher testFileWatcher;
+    late TestDirectoryWatcher testDirectoryWatcher;
 
     setUp(() {
       mockBrick = MockBrick();
-      testFileWatcher = TestFileWatcher();
-      memoryFileSystem = MemoryFileSystem();
       mockStdin = MockStdin();
+      testFileWatcher = TestFileWatcher();
+      testDirectoryWatcher = TestDirectoryWatcher();
 
       when(() => mockStdin.hasTerminal).thenReturn(true);
 
@@ -153,7 +156,7 @@ bricks:
           fileSystem: memoryFileSystem,
           watcher: BrickWatcher.config(
             dirPath: '',
-            watcher: TestDirectoryWatcher(),
+            watcher: testDirectoryWatcher,
           ),
         ),
       );
@@ -161,6 +164,7 @@ bricks:
 
     tearDown(() {
       testFileWatcher.close();
+      testDirectoryWatcher.close();
     });
 
     test('#run calls cook with output and exit with code 0', () async {
@@ -210,7 +214,7 @@ bricks:
                 fileSystem: memoryFileSystem,
                 watcher: BrickWatcher.config(
                   dirPath: '',
-                  watcher: TestDirectoryWatcher(),
+                  watcher: testDirectoryWatcher,
                 ),
               ),
               fileSystem: memoryFileSystem,
@@ -257,7 +261,7 @@ bricks:
                 fileSystem: memoryFileSystem,
                 watcher: BrickWatcher.config(
                   dirPath: '',
-                  watcher: TestDirectoryWatcher(),
+                  watcher: testDirectoryWatcher,
                 ),
               ),
               fileSystem: memoryFileSystem,
@@ -311,7 +315,7 @@ bricks:
                 fileSystem: memoryFileSystem,
                 watcher: BrickWatcher.config(
                   dirPath: '',
-                  watcher: TestDirectoryWatcher(),
+                  watcher: testDirectoryWatcher,
                 ),
               ),
               fileSystem: memoryFileSystem,
@@ -380,12 +384,12 @@ class TestCookSingleBrick extends CookSingleBrick {
   TestCookSingleBrick({
     required Map<String, dynamic> argResults,
     required Logger logger,
-    Brick? brick,
+    required Brick brick,
     KeyPressListener? keyPressListener,
     this.fileWatchers,
   })  : _argResults = argResults,
         super(
-          brick ?? FakeBrick(),
+          brick,
           logger: logger,
           keyPressListener: keyPressListener,
         );
@@ -410,5 +414,3 @@ class TestCookSingleBrick extends CookSingleBrick {
   @override
   ArgResults get argResults => FakeArgResults(data: _argResults);
 }
-
-class MockFileWatcher extends Mock implements FileWatcher {}
