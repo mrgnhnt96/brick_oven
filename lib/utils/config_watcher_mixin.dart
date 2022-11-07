@@ -13,7 +13,7 @@ mixin ConfigWatcherMixin {
   Map<String, Completer<void>> get completers => {..._completers};
 
   /// cancels all watchers
-  Future<void> cancelWatchers() async {
+  Future<void> cancelConfigWatchers() async {
     for (final completer in _completers.values) {
       completer.complete();
     }

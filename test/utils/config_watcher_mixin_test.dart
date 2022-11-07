@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/utils/mixins.dart';
+import 'package:brick_oven/utils/config_watcher_mixin.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart';
@@ -78,7 +78,7 @@ void main() {
         expect(testConfigWatcher.completers.keys, [configFile.path]);
       });
 
-      test('#cancelWatchers removes from completers', () async {
+      test('#cancelConfigWatchers removes from completers', () async {
         final testConfigWatcher = TestConfigWatcher();
 
         unawaited(testConfigWatcher.watchForConfigChanges(configFile.path));
@@ -90,7 +90,7 @@ void main() {
         expect(testConfigWatcher.completers, hasLength(1));
         expect(testConfigWatcher.completers.keys, [configFile.path]);
 
-        await testConfigWatcher.cancelWatchers();
+        await testConfigWatcher.cancelConfigWatchers();
 
         expect(testConfigWatcher.completers, isEmpty);
       });
