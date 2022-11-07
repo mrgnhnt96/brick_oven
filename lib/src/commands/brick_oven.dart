@@ -17,9 +17,8 @@ abstract class BrickOvenCommand extends Command<int> {
   /// {@macro brick_oven_command}
   BrickOvenCommand({
     FileSystem? fileSystem,
-    Logger? logger,
-  })  : fileSystem = fileSystem ?? const LocalFileSystem(),
-        logger = logger ?? Logger();
+    required this.logger,
+  }) : fileSystem = fileSystem ?? const LocalFileSystem();
 
   /// the file system to be used for all file operations
   final FileSystem fileSystem;
@@ -40,30 +39,26 @@ abstract class BrickOvenCommand extends Command<int> {
     final configFile = BrickOvenYaml.findNearest(cwd);
 
     if (configFile == null) {
-      throw const BrickOvenNotFoundException();
+      return const BrickOrError(null, 'No ${BrickOvenYaml.file} file found');
     }
 
     final config = YamlValue.from(loadYaml(configFile.readAsStringSync()));
-    if (config.isError()) {
-      throw const BrickOvenException('Invalid brick oven configuration file');
+    if (config.isError() || !config.isYaml()) {
+      return const BrickOrError(null, 'Invalid brick oven configuration file');
     }
 
-    if (!config.isYaml()) {
-      throw const BrickOvenException('Bricks must be of type `Map`');
-    }
-
-    final directories = <Brick>{};
+    final bricks = <Brick>{};
 
     final data = Map<String, dynamic>.from(config.asYaml().value);
 
-    final bricks = YamlValue.from(data.remove('bricks'));
+    final bricksYaml = YamlValue.from(data.remove('bricks'));
 
-    if (!bricks.isYaml()) {
-      throw const BrickOvenException('Bricks must be of type `Map`');
+    if (!bricksYaml.isYaml()) {
+      return const BrickOrError(null, 'Bricks must be of type `Map`');
     }
 
     try {
-      for (final brick in bricks.asYaml().value.entries) {
+      for (final brick in bricksYaml.asYaml().value.entries) {
         final name = brick.key as String;
         final value = YamlValue.from(brick.value);
 
@@ -77,15 +72,16 @@ abstract class BrickOvenCommand extends Command<int> {
           final file = fileSystem.file(path);
 
           if (!file.existsSync()) {
-            throw BrickOvenException(
-              'Brick configuration file not found | ($name) -- $path',
-            );
+            logger
+                .warn('Brick configuration file not found | ($name) -- $path');
+            continue;
           }
 
           final yamlValue = YamlValue.from(loadYaml(file.readAsStringSync()));
 
           if (!yamlValue.isYaml()) {
-            throw BrickOvenException(
+            return BrickOrError(
+              null,
               'Brick configuration file must be of '
               'type `Map` | ($name) -- $path',
             );
@@ -94,28 +90,29 @@ abstract class BrickOvenCommand extends Command<int> {
           yaml = yamlValue.asYaml();
           configPath = path;
         } else {
-          throw BrickException(
+          final err = BrickException(
             brick: name,
-            reason: 'Invalid brick configuration -- Expected `Map` or '
+            reason: 'Expected `Map` or '
                 '`String` (path to brick configuration file)',
           );
+          return BrickOrError(null, err.message);
         }
 
-        directories.add(Brick.fromYaml(yaml, name, configPath: configPath));
+        bricks.add(Brick.fromYaml(yaml, name, configPath: configPath));
       }
     } on ConfigException catch (e) {
       return BrickOrError(null, e.message);
     } catch (e) {
-      return BrickOrError(null, '$e');
+      return const BrickOrError(null, 'Invalid brick configuration');
     }
 
     if (data.keys.isNotEmpty) {
-      final error = UnknownKeysException(
-        data.keys,
-        BrickOvenYaml.file,
+      final error = BrickOvenException(
+        'Invalid ${BrickOvenYaml.file} config:\n'
+        'Unknown keys: "${data.keys.join('", "')}"',
       );
       return BrickOrError(null, error.message);
     }
-    return BrickOrError(directories, null);
+    return BrickOrError(bricks, null);
   }
 }

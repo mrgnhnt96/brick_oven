@@ -1,18 +1,21 @@
 import 'package:args/args.dart';
+import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
-import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 import '../../test_utils/fakes.dart';
+import '../../test_utils/mocks.dart';
 
 void main() {
   late FileSystem fs;
   late BrickOvenCommand brickOvenCommand;
+  late Logger mockLogger;
 
   void createFile(String path, String content) {
     fs.file(path)
@@ -22,7 +25,12 @@ void main() {
 
   setUp(() {
     fs = MemoryFileSystem();
-    brickOvenCommand = TestBrickOvenCommand(fs);
+    mockLogger = MockLogger();
+
+    brickOvenCommand = TestBrickOvenCommand(
+      fs,
+      logger: mockLogger,
+    );
   });
 
   group('$BrickOvenCommand', () {
@@ -45,49 +53,23 @@ bricks:
         expect(bricks.length, 3);
       });
 
-      test('throws $ConfigException when ${BrickOvenYaml.file} is empty', () {
+      test('returns error when when ${BrickOvenYaml.file} is bad', () {
         const content = '';
 
         createFile(BrickOvenYaml.file, content);
 
         expect(
-          brickOvenCommand.bricks,
-          throwsA(isA<BrickOvenException>()),
-        );
-      });
-
-      test('throws $ConfigException when bricks config is bad', () {
-        const content = '''
-bricks: ${1}
-''';
-
-        createFile(BrickOvenYaml.file, content);
-
-        expect(
-          brickOvenCommand.bricks,
-          throwsA(isA<BrickOvenException>()),
-        );
-      });
-
-      test('throws $ConfigException when bricks is not yaml', () {
-        const content = '''
-bricks: Not YAML
-''';
-
-        createFile(BrickOvenYaml.file, content);
-
-        expect(
-          brickOvenCommand.bricks,
-          throwsA(isA<BrickOvenException>()),
+          brickOvenCommand.bricks(),
+          const BrickOrError(null, 'Invalid brick oven configuration file'),
         );
       });
 
       test(
-        'throws $BrickOvenNotFoundException when ${BrickOvenYaml.file} does not exist',
+        'returns error when ${BrickOvenYaml.file} does not exist',
         () {
           expect(
-            brickOvenCommand.bricks,
-            throwsA(isA<BrickOvenNotFoundException>()),
+            brickOvenCommand.bricks(),
+            const BrickOrError(null, 'No ${BrickOvenYaml.file} file found'),
           );
         },
       );
@@ -103,10 +85,13 @@ second:
 
         createFile(BrickOvenYaml.file, content);
 
-        expect(brickOvenCommand.bricks().isError, isTrue);
+        final result = brickOvenCommand.bricks();
+
+        expect(result.isError, isTrue);
         expect(
-          brickOvenCommand.bricks().error,
-          'Unknown keys: second, in brick_oven.yaml',
+          result.error,
+          'Invalid brick_oven.yaml config:\n'
+          'Unknown keys: "second"',
         );
       });
 
@@ -144,10 +129,14 @@ bricks:
 
         createFile(BrickOvenYaml.file, content);
 
-        expect(brickOvenCommand.bricks().isError, isTrue);
-        expect(
-          brickOvenCommand.bricks().error,
-          contains('Brick configuration file not found'),
+        final result = brickOvenCommand.bricks();
+
+        expect(result, const BrickOrError(<Brick>{}, null));
+
+        verify(
+          () => mockLogger.warn(
+            'Brick configuration file not found | (first) -- $path.yaml',
+          ),
         );
       });
 
@@ -179,10 +168,13 @@ bricks:
 
         createFile(BrickOvenYaml.file, content);
 
-        expect(brickOvenCommand.bricks().isError, isTrue);
+        final result = brickOvenCommand.bricks();
+
+        expect(result.isError, isTrue);
         expect(
-          brickOvenCommand.bricks().error,
-          contains('Invalid brick configuration'),
+          result.error,
+          'Invalid brick config: "first"\n'
+          'Reason: Expected `Map` or `String` (path to brick configuration file)',
         );
       });
     });
@@ -199,7 +191,13 @@ bricks:
 }
 
 class TestBrickOvenCommand extends BrickOvenCommand {
-  TestBrickOvenCommand(FileSystem fs) : super(fileSystem: fs);
+  TestBrickOvenCommand(
+    FileSystem fs, {
+    required Logger logger,
+  }) : super(
+          fileSystem: fs,
+          logger: logger,
+        );
 
   @override
   ArgResults get argResults => FakeArgResults(data: <String, dynamic>{});
