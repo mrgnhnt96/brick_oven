@@ -9,5 +9,5 @@ part of 'name.dart';
 extension _$NameAutoequal on Name {
   @Deprecated(r'Use _$props instead')
   List<Object?> get _autoequalProps => _$props;
-  List<Object?> get _$props => [value, prefix, suffix, format];
+  List<Object?> get _$props => [format, prefix, suffix, value];
 }

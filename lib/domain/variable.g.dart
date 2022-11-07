@@ -9,5 +9,5 @@ part of 'variable.dart';
 extension _$VariableAutoequal on Variable {
   @Deprecated(r'Use _$props instead')
   List<Object?> get _autoequalProps => _$props;
-  List<Object?> get _$props => [placeholder, name];
+  List<Object?> get _$props => [name, placeholder];
 }

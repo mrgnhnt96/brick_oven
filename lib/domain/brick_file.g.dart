@@ -9,5 +9,5 @@ part of 'brick_file.dart';
 extension _$BrickFileAutoequal on BrickFile {
   @Deprecated(r'Use _$props instead')
   List<Object?> get _autoequalProps => _$props;
-  List<Object?> get _$props => [path, variables, name];
+  List<Object?> get _$props => [includeIf, includeIfNot, name, path, variables];
 }
