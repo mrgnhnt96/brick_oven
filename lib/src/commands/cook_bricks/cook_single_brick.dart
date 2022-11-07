@@ -4,22 +4,23 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/src/commands/brick_oven_cooker.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
+import 'package:brick_oven/utils/config_watcher_mixin.dart';
+import 'package:brick_oven/utils/extensions.dart';
+import 'package:brick_oven/utils/oven_mixin.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:watcher/watcher.dart';
 
-import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/src/commands/brick_oven.dart';
-import 'package:brick_oven/utils/extensions.dart';
-import 'package:brick_oven/utils/config_watcher_mixin.dart';
-
 /// {@template cook_single_brick_command}
 /// Writes a single brick from the configuration file
 /// {@endtemplate}
-class CookSingleBrick extends BrickOvenCommand with ConfigWatcherMixin {
+class CookSingleBrick extends BrickOvenCooker
+    with ConfigWatcherMixin, OvenMixin {
   /// {@macro cook_single_brick_command}
   CookSingleBrick(
     this.brick, {
@@ -43,10 +44,10 @@ class CookSingleBrick extends BrickOvenCommand with ConfigWatcherMixin {
   /// The brick to cook
   final Brick brick;
 
-  /// the config watcher for the brick oven yaml
+  @override
   final FileWatcher configWatcher;
 
-  /// {@macro key_press_listener}
+  @override
   final KeyPressListener keyPressListener;
 
   @override
