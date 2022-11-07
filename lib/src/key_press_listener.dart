@@ -24,10 +24,6 @@ class KeyPressListener {
         _toExit = toExit,
         _logger = logger ?? Logger();
 
-  /// the stream of key presses
-  @visibleForTesting
-  static Stream<List<int>>? stream;
-
   /// the listener of key presses
   static StreamSubscription<List<int>>? _listener;
 
@@ -65,11 +61,9 @@ class KeyPressListener {
       ..lineMode = false
       ..echoMode = false;
 
-    stream = _stdin.asBroadcastStream();
-
     _listener?.cancel();
 
-    _listener = stream!.listen((codes) {
+    _listener = _stdin.asBroadcastStream().listen((codes) {
       onListen(codes, keys);
     });
   }

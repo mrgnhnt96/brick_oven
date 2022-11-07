@@ -25,8 +25,6 @@ void main() {
       reset(mockStdout);
       reset(mockStdin);
 
-      KeyPressListener.stream = null;
-
       when(() => mockStdin.hasTerminal).thenReturn(true);
       when(() => mockStdout.supportsAnsiEscapes).thenReturn(true);
       mockLogger = MockLogger();

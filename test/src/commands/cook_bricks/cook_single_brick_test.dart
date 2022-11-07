@@ -143,7 +143,6 @@ bricks:
 
     tearDown(() {
       testFileWatcher.close();
-      KeyPressListener.stream = null;
     });
 
     test('#run calls cook with output and exit with code 0', () async {
