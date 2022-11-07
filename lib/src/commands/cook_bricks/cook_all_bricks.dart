@@ -13,7 +13,7 @@ import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/extensions.dart';
-import 'package:brick_oven/utils/mixins.dart';
+import 'package:brick_oven/utils/config_watcher_mixin.dart';
 
 /// {@template cook_all_bricks_command}
 /// Writes all bricks from the configuration file
@@ -37,7 +37,7 @@ class CookAllBricks extends BrickOvenCommand with ConfigWatcherMixin {
           logger: logger,
           toExit: (code) async {
             if (ExitCode.tempFail.code == code) {
-              await cancelWatchers();
+              await cancelConfigWatchers();
               return;
             }
 
@@ -70,22 +70,29 @@ class CookAllBricks extends BrickOvenCommand with ConfigWatcherMixin {
 
     final bricks = bricksOrError.bricks;
 
-    for (final brick in bricks) {
-      if (isWatch) {
-        final watcher = brick.source.watcher;
-
-        watcher?.addEvent(
-          () => logger.fileChanged(brick.name),
-          runBefore: true,
-        );
-        watcher?.addEvent(logger.cooking, runBefore: true);
-        watcher?.addEvent(logger.cooked, runAfter: true);
-        watcher?.addEvent(logger.watching, runAfter: true);
-        watcher?.addEvent(logger.keyStrokes, runAfter: true);
+    if (!isWatch) {
+      for (final brick in bricks) {
+        brick.cook(output: outputDir);
       }
 
+      logger.cooked();
+
+      return ExitCode.success.code;
+    }
+
+    for (final brick in bricks) {
+      brick.source.watcher
+        ?..addEvent(
+          () => logger.fileChanged(brick.name),
+          runBefore: true,
+        )
+        ..addEvent(logger.cooking, runBefore: true)
+        ..addEvent(logger.cooked, runAfter: true)
+        ..addEvent(logger.watching, runAfter: true)
+        ..addEvent(logger.keyStrokes, runAfter: true);
+
       try {
-        brick.cook(output: outputDir, watch: isWatch);
+        brick.cook(output: outputDir, watch: true);
       } on ConfigException catch (e) {
         logger.err(e.message);
         return ExitCode.config.code;
@@ -95,21 +102,9 @@ class CookAllBricks extends BrickOvenCommand with ConfigWatcherMixin {
       }
     }
 
-    logger.cooked();
-
-    if (!isWatch) {
-      return ExitCode.success.code;
-    }
-
-    if (!bricks.any((brick) => brick.source.watcher?.isRunning ?? false)) {
-      logger.err(
-        'There are no bricks currently watching local files, ending',
-      );
-
-      return ExitCode.ioError.code;
-    }
-
-    logger.watching();
+    logger
+      ..cooked()
+      ..watching();
 
     keyPressListener.listenToKeystrokes();
 
@@ -124,7 +119,7 @@ class CookAllBricks extends BrickOvenCommand with ConfigWatcherMixin {
           onChange: () async {
             logger.configChanged();
 
-            await cancelWatchers();
+            await cancelConfigWatchers();
             await brick.source.watcher?.stop();
           },
         ),
