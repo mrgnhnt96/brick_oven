@@ -9,5 +9,6 @@ part of 'brick_path.dart';
 extension _$BrickPathAutoequal on BrickPath {
   @Deprecated(r'Use _$props instead')
   List<Object?> get _autoequalProps => _$props;
-  List<Object?> get _$props => [placeholder, name, path, originalPath];
+  List<Object?> get _$props =>
+      [includeIf, includeIfNot, name, originalPath, path, placeholder];
 }
