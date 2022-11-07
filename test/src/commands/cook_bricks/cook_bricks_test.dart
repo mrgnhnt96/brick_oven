@@ -51,23 +51,15 @@ bricks:
       );
     });
 
-    test('cook all', () {
+    test('contains all keys for cook', () {
       expect(
         runner.commands['cook']?.subcommands.keys,
-        contains('all'),
-      );
-    });
-
-    test('cook specific brick', () {
-      const subcommands = [
-        'first',
-        'second',
-        'third',
-      ];
-
-      expect(
-        runner.commands['cook']?.subcommands.keys,
-        containsAll(subcommands),
+        [
+          'all',
+          'first',
+          'second',
+          'third',
+        ],
       );
     });
 
