@@ -88,7 +88,7 @@ void main() {
           fileSystem: memoryFileSystem,
         );
 
-        expect(command.outputDir, 'bricks');
+        expect(command.outputDir, null);
       });
     });
   });

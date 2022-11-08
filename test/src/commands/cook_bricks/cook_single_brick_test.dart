@@ -127,7 +127,7 @@ bricks:
           argResults: <String, dynamic>{},
         );
 
-        expect(command.outputDir, 'bricks');
+        expect(command.outputDir, null);
       });
     });
   });
