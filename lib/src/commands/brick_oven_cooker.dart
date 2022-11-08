@@ -9,7 +9,7 @@ import 'package:mason_logger/mason_logger.dart';
 abstract class BrickOvenCooker extends BrickOvenCommand implements OvenMixin {
   /// {@macro brick_oven_cooker}
   BrickOvenCooker({
-    FileSystem? fileSystem,
+    required FileSystem? fileSystem,
     required Logger logger,
   }) : super(
           fileSystem: fileSystem,
