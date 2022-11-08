@@ -11,9 +11,9 @@ class UpdateCommand extends BrickOvenCommand {
   /// {@macro update_command}
   UpdateCommand({
     PubUpdater? pubUpdater,
-    Logger? logger,
+    required Logger logger,
   })  : _pubUpdater = pubUpdater ?? PubUpdater(),
-        super(logger: logger ?? Logger());
+        super(logger: logger);
 
   final PubUpdater _pubUpdater;
 

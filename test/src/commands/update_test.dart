@@ -16,17 +16,22 @@ class FakeProcessResult extends Fake implements ProcessResult {}
 
 void main() {
   const latestVersion = '0.0.0';
+  late Logger mockLogger;
+
+  setUp(() {
+    mockLogger = MockLogger();
+  });
 
   group('$UpdateCommand', () {
     test('description displays correctly', () {
       expect(
-        UpdateCommand().description,
+        UpdateCommand(logger: mockLogger).description,
         'Updates brick_oven to the latest version.',
       );
     });
 
     test('name displays correctly', () {
-      expect(UpdateCommand().name, 'update');
+      expect(UpdateCommand(logger: mockLogger).name, 'update');
     });
   });
 

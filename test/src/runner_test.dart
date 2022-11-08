@@ -71,9 +71,12 @@ void main() {
     });
 
     test(
-      'can be instantiated without an explicit logger & pub updater instance',
+      'can be instantiated without an explicit pub updater instance',
       () {
-        final commandRunner = BrickOvenRunner(fileSystem: fs);
+        final commandRunner = BrickOvenRunner(
+          fileSystem: fs,
+          logger: MockLogger(),
+        );
         expect(commandRunner, isNotNull);
       },
     );

@@ -37,7 +37,10 @@ bricks:
       fileSystem: fs,
       logger: mockLogger,
     );
-    runner = BrickOvenRunner(fileSystem: fs);
+    runner = BrickOvenRunner(
+      fileSystem: fs,
+      logger: mockLogger,
+    );
   });
 
   group('$CookBricksCommand', () {

@@ -119,10 +119,10 @@ class CookSingleBrick extends BrickOvenCooker
     return ExitCode.tempFail.code;
   }
 
-  /// whether to watch for file changes
+  @override
   bool get isWatch => argResults['watch'] == true;
 
-  /// The output directory
+  @override
   String get outputDir => argResults['output'] as String? ?? 'bricks';
 }
 

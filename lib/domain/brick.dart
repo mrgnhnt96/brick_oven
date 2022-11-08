@@ -21,7 +21,7 @@ part 'brick.g.dart';
 @autoequal
 class Brick extends Equatable {
   /// {@macro brick}
-  Brick({
+  const Brick({
     required this.name,
     required this.source,
     this.configuredDirs = const [],
@@ -29,9 +29,9 @@ class Brick extends Equatable {
     this.configPath,
     this.brickYamlConfig,
     this.excludePaths = const [],
-    Logger? logger,
+    required Logger logger,
   })  : _fileSystem = const LocalFileSystem(),
-        _logger = logger ?? Logger();
+        _logger = logger;
 
   Brick._fromYaml({
     required this.name,

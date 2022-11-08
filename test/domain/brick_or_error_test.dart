@@ -1,9 +1,18 @@
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:brick_oven/domain/brick_source.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:test/test.dart';
 
+import '../test_utils/mocks.dart';
+
 void main() {
+  late Logger mockLogger;
+
+  setUp(() {
+    mockLogger = MockLogger();
+  });
+
   test('can be instanciated', () {
     expect(() => const BrickOrError(null, null), returnsNormally);
   });
@@ -14,6 +23,7 @@ void main() {
         Brick(
           name: 'brick',
           source: BrickSource.fromString('source'),
+          logger: mockLogger,
         )
       };
 
@@ -41,6 +51,7 @@ void main() {
         Brick(
           name: 'brick',
           source: BrickSource.fromString('source'),
+          logger: mockLogger,
         )
       };
 
@@ -62,6 +73,7 @@ void main() {
         Brick(
           name: 'brick',
           source: BrickSource.fromString('source'),
+          logger: mockLogger,
         )
       };
 
@@ -77,6 +89,7 @@ void main() {
         Brick(
           name: 'brick',
           source: BrickSource.fromString('source'),
+          logger: mockLogger,
         )
       };
 

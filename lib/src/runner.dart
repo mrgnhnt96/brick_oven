@@ -14,11 +14,11 @@ import 'package:pub_updater/pub_updater.dart';
 class BrickOvenRunner extends CommandRunner<int> {
   /// {@macro brick_oven_runner}
   BrickOvenRunner({
-    Logger? logger,
+    required Logger logger,
     PubUpdater? pubUpdater,
     FileSystem? fileSystem,
   })  : _pubUpdater = pubUpdater ?? PubUpdater(),
-        _logger = logger ?? Logger(),
+        _logger = logger,
         super('brick_oven', 'Generate your bricks 🧱 with this oven 🎛') {
     argParser.addFlag(
       'version',

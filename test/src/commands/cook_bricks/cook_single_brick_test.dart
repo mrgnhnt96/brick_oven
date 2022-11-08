@@ -139,12 +139,14 @@ bricks:
   group('brick_oven cook', () {
     late Brick mockBrick;
     late Stdin mockStdin;
+    late FileSystem memoryFileSystem;
     late TestFileWatcher testFileWatcher;
     late TestDirectoryWatcher testDirectoryWatcher;
 
     setUp(() {
       mockBrick = MockBrick();
       mockStdin = MockStdin();
+      memoryFileSystem = MemoryFileSystem();
       testFileWatcher = TestFileWatcher();
       testDirectoryWatcher = TestDirectoryWatcher();
 

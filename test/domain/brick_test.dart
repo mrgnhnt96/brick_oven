@@ -28,6 +28,12 @@ import '../test_utils/print_override.dart';
 import '../test_utils/test_directory_watcher.dart';
 
 void main() {
+  late Logger mockLogger;
+
+  setUp(() {
+    mockLogger = MockLogger();
+  });
+
   const brickName = 'super_awesome';
   const localPath = 'localPath';
   final brickPath = join('bricks', brickName, '__brick__');
@@ -58,6 +64,7 @@ exclude:
         excludePaths: const [excludeDir],
         name: brickName,
         source: BrickSource(localPath: localPath),
+        logger: mockLogger,
       );
 
       expectLater(result, brick);
@@ -191,6 +198,7 @@ exclude:
             excludePaths: const [excludeDir],
             name: brickName,
             source: BrickSource(localPath: localPath),
+            logger: mockLogger,
           ),
         );
       });
@@ -207,6 +215,7 @@ exclude: $excludeDir
             excludePaths: const [excludeDir],
             name: brickName,
             source: BrickSource(localPath: localPath),
+            logger: mockLogger,
           ),
         );
       });
@@ -665,6 +674,7 @@ exclude:
         final brick = Brick(
           name: '',
           source: const BrickSource.none(),
+          logger: mockLogger,
           configuredFiles: const [
             BrickFile.config(
               '',
@@ -702,6 +712,7 @@ exclude:
         final brick = Brick(
           name: '',
           source: const BrickSource.none(),
+          logger: mockLogger,
           configuredFiles: const [
             BrickFile.config(
               '',
@@ -727,6 +738,7 @@ exclude:
         final brick = Brick(
           name: '',
           source: const BrickSource.none(),
+          logger: mockLogger,
           configuredFiles: const [
             BrickFile.config(
               '',
@@ -754,6 +766,7 @@ exclude:
         final brick = Brick(
           name: '',
           source: const BrickSource.none(),
+          logger: mockLogger,
           configuredDirs: [
             BrickPath(name: const Name('name1'), path: ''),
             BrickPath(name: const Name('name2'), path: ''),
@@ -773,6 +786,7 @@ exclude:
         final brick = Brick(
           name: '',
           source: const BrickSource.none(),
+          logger: mockLogger,
           configuredDirs: [
             BrickPath(
               path: '',
@@ -798,6 +812,7 @@ exclude:
         final brick = Brick(
           name: '',
           source: const BrickSource.none(),
+          logger: mockLogger,
           configuredDirs: [
             BrickPath(
               path: '',
@@ -836,6 +851,7 @@ exclude:
       Brick(
         name: '',
         source: const BrickSource.none(),
+        logger: mockLogger,
       ).checkBrickYamlConfig();
 
       expect(printLogs, isEmpty);
