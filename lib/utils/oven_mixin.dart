@@ -24,7 +24,20 @@ mixin OvenMixin on BrickCooker {
 
     if (!isWatch) {
       for (final brick in bricks) {
-        brick.cook(output: outputDir);
+        try {
+          brick.cook(output: outputDir);
+        } on ConfigException catch (e) {
+          logger
+            ..warn(e.message)
+            ..err('Could not cook brick: ${brick.name}');
+
+          continue;
+        } catch (e) {
+          logger
+            ..warn('Unknown error: $e')
+            ..err('Could not cook brick: ${brick.name}');
+          continue;
+        }
       }
 
       logger.cooked();
