@@ -58,65 +58,9 @@ class CookSingleBrick extends BrickOvenCooker
 
   @override
   Future<int> run() async {
-    logger.cooking();
+    final result = await putInOven({brick});
 
-    if (!isWatch) {
-      brick.cook(output: outputDir);
-
-      logger.cooked();
-
-      return ExitCode.success.code;
-    }
-
-    brick.source.watcher
-      ?..addEvent(
-        () => logger.fileChanged(brick.name),
-        runBefore: true,
-      )
-      ..addEvent(logger.cooking, runBefore: true)
-      ..addEvent(logger.watching, runAfter: true)
-      ..addEvent(logger.keyStrokes, runAfter: true);
-
-    try {
-      brick.cook(output: outputDir, watch: true);
-    } on ConfigException catch (e) {
-      logger.err(e.message);
-      return ExitCode.config.code;
-    } catch (e) {
-      logger.err('$e');
-      return ExitCode.software.code;
-    }
-
-    logger
-      ..cooked()
-      ..watching();
-
-    keyPressListener.listenToKeystrokes();
-
-    if (brick.configPath != null) {
-      unawaited(
-        watchForConfigChanges(
-          brick.configPath!,
-          onChange: () async {
-            logger.configChanged();
-
-            await cancelConfigWatchers();
-            await brick.source.watcher?.stop();
-          },
-        ),
-      );
-    }
-
-    await watchForConfigChanges(
-      BrickOvenYaml.file,
-      onChange: () async {
-        logger.configChanged();
-
-        await brick.source.watcher?.stop();
-      },
-    );
-
-    return ExitCode.tempFail.code;
+    return result.code;
   }
 
   @override

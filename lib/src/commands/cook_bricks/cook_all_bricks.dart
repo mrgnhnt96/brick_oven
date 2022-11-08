@@ -58,8 +58,6 @@ class CookAllBricks extends BrickOvenCooker with ConfigWatcherMixin, OvenMixin {
 
   @override
   Future<int> run() async {
-    logger.cooking();
-
     final bricksOrError = this.bricks();
     if (bricksOrError.isError) {
       logger.err(bricksOrError.error);
@@ -68,74 +66,9 @@ class CookAllBricks extends BrickOvenCooker with ConfigWatcherMixin, OvenMixin {
 
     final bricks = bricksOrError.bricks;
 
-    if (!isWatch) {
-      for (final brick in bricks) {
-        brick.cook(output: outputDir);
-      }
+    final result = await putInOven(bricks);
 
-      logger.cooked();
-
-      return ExitCode.success.code;
-    }
-
-    for (final brick in bricks) {
-      brick.source.watcher
-        ?..addEvent(
-          () => logger.fileChanged(brick.name),
-          runBefore: true,
-        )
-        ..addEvent(logger.cooking, runBefore: true)
-        ..addEvent(logger.cooked, runAfter: true)
-        ..addEvent(logger.watching, runAfter: true)
-        ..addEvent(logger.keyStrokes, runAfter: true);
-
-      try {
-        brick.cook(output: outputDir, watch: true);
-      } on ConfigException catch (e) {
-        logger.err(e.message);
-        return ExitCode.config.code;
-      } catch (e) {
-        logger.err('$e');
-        return ExitCode.software.code;
-      }
-    }
-
-    logger
-      ..cooked()
-      ..watching();
-
-    keyPressListener.listenToKeystrokes();
-
-    for (final brick in bricks) {
-      if (brick.configPath == null) {
-        continue;
-      }
-
-      unawaited(
-        watchForConfigChanges(
-          brick.configPath!,
-          onChange: () async {
-            logger.configChanged();
-
-            await cancelConfigWatchers();
-            await brick.source.watcher?.stop();
-          },
-        ),
-      );
-    }
-
-    await watchForConfigChanges(
-      BrickOvenYaml.file,
-      onChange: () async {
-        logger.configChanged();
-
-        for (final brick in bricks) {
-          await brick.source.watcher?.stop();
-        }
-      },
-    );
-
-    return ExitCode.tempFail.code;
+    return result.code;
   }
 
   @override
