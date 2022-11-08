@@ -1,17 +1,12 @@
 // ignore_for_file: unnecessary_cast
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 import 'package:brick_oven/src/key_press_listener.dart';
 import '../test_utils/mocks.dart';
-
-class MockStdout extends Mock implements Stdout {}
-
-class MockStdin extends Mock implements Stdin {}
 
 void main() {
   group('$KeyPressListener', () {
@@ -134,7 +129,7 @@ void main() {
 
         expect(hasExited, isTrue);
         expect(exitCode, 0);
-        verify(() => mockLogger.info('\nExiting...\n')).called(1);
+        verify(() => mockLogger.info('\nExiting...')).called(1);
       });
 
       test('"r" logs and exits with code 75', () {
@@ -156,7 +151,7 @@ void main() {
 
         expect(hasExited, isTrue);
         expect(exitCode, 75);
-        verify(() => mockLogger.info('\nRestarting...\n')).called(1);
+        verify(() => mockLogger.info('\nRestarting...')).called(1);
       });
 
       test('"esc" logs', () {

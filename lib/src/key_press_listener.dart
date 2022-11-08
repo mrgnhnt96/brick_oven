@@ -36,13 +36,13 @@ class KeyPressListener {
   // ignore: unnecessary_cast
   KeyMap get keyPresses => {
         'q': () {
-          _logger.info('\nExiting...\n');
+          _logger.info('\nExiting...');
 
           _toExit(ExitCode.success.code);
         },
         'r': () {
           _listener?.cancel();
-          _logger.info('\nRestarting...\n');
+          _logger.info('\nRestarting...');
 
           _toExit(ExitCode.tempFail.code);
         },
