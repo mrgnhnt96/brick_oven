@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:brick_oven/src/commands/brick_oven_cooker.dart';
@@ -18,30 +17,15 @@ class CookAllBricks extends BrickOvenCooker with ConfigWatcherMixin, OvenMixin {
   CookAllBricks({
     FileSystem? fileSystem,
     required Logger logger,
-    KeyPressListener? keyPressListener,
+    this.keyPressListener,
   }) : super(fileSystem: fileSystem, logger: logger) {
     argParser
       ..addFlagsAndOptions()
       ..addSeparator('${'-' * 79}\n');
-
-    this.keyPressListener = keyPressListener ??
-        keyPressListener ??
-        KeyPressListener(
-          stdin: stdin,
-          logger: logger,
-          toExit: (code) async {
-            if (ExitCode.tempFail.code == code) {
-              await cancelConfigWatchers();
-              return;
-            }
-
-            exit(code);
-          },
-        );
   }
 
   @override
-  late final KeyPressListener keyPressListener;
+  final KeyPressListener? keyPressListener;
 
   @override
   String get description => 'Cook all bricks.';

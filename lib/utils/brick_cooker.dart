@@ -20,5 +20,5 @@ abstract class BrickCooker with ConfigWatcherMixin {
   String? get outputDir;
 
   /// {@macro key_press_listener}
-  KeyPressListener get keyPressListener;
+  KeyPressListener? get keyPressListener;
 }

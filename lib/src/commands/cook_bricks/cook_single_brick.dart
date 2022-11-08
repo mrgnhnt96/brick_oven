@@ -1,7 +1,6 @@
 // ignore_for_file: overridden_fields
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:brick_oven/domain/brick.dart';
@@ -23,14 +22,8 @@ class CookSingleBrick extends BrickOvenCooker
     this.brick, {
     FileSystem? fileSystem,
     required Logger logger,
-    KeyPressListener? keyPressListener,
-  })  : keyPressListener = keyPressListener ??
-            KeyPressListener(
-              stdin: stdin,
-              logger: logger,
-              toExit: exit,
-            ),
-        super(fileSystem: fileSystem, logger: logger) {
+    this.keyPressListener,
+  }) : super(fileSystem: fileSystem, logger: logger) {
     argParser
       ..addFlagsAndOptions()
       ..addSeparator('${'-' * 79}\n');
@@ -40,7 +33,7 @@ class CookSingleBrick extends BrickOvenCooker
   final Brick brick;
 
   @override
-  final KeyPressListener keyPressListener;
+  final KeyPressListener? keyPressListener;
 
   @override
   String get description => 'Cook the brick: $name.';
