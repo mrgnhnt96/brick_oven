@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
@@ -91,6 +92,29 @@ void main() {
         expect(command.outputDir, null);
       });
     });
+
+    group('#run', () {
+      test('returns ${ExitCode.config.code} when bricks returns an error', () {
+        final command = TestCookAllBricks(
+          bricksOrError: const BrickOrError(null, 'error'),
+          logger: mockLogger,
+          fileSystem: memoryFileSystem,
+        );
+
+        expect(command.run(), completion(ExitCode.config.code));
+      });
+
+      test('returns gracefully', () {
+        final command = TestCookAllBricks(
+          bricksOrError: const BrickOrError({}, null),
+          logger: mockLogger,
+          fileSystem: memoryFileSystem,
+          putInOvenOverride: ExitCode.success,
+        );
+
+        expect(command.run(), completion(ExitCode.success.code));
+      });
+    });
   });
 }
 
@@ -102,6 +126,7 @@ class TestCookAllBricks extends CookAllBricks {
     this.fileWatchers,
     Map<String, dynamic>? argResults,
     KeyPressListener? keyPressListener,
+    this.putInOvenOverride,
   })  : _argResults = argResults ?? <String, dynamic>{},
         super(
           logger: logger,
@@ -112,6 +137,7 @@ class TestCookAllBricks extends CookAllBricks {
   final Map<String, dynamic> _argResults;
   final List<FileWatcher?>? fileWatchers;
   final BrickOrError? bricksOrError;
+  final ExitCode? putInOvenOverride;
 
   @override
   BrickOrError bricks() => bricksOrError ?? const BrickOrError({}, null);
@@ -127,6 +153,15 @@ class TestCookAllBricks extends CookAllBricks {
       return fileWatchers![_callCount++] ?? mock;
     }
     return super.watcher(path);
+  }
+
+  @override
+  Future<ExitCode> putInOven(Set<Brick> bricks) async {
+    if (putInOvenOverride != null) {
+      return putInOvenOverride!;
+    }
+
+    return super.putInOven(bricks);
   }
 
   @override
