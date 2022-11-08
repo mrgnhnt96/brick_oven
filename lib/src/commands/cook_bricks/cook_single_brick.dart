@@ -5,16 +5,13 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven_cooker.dart';
-import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/config_watcher_mixin.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:brick_oven/utils/oven_mixin.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
-import 'package:watcher/watcher.dart';
 
 /// {@template cook_single_brick_command}
 /// Writes a single brick from the configuration file
@@ -26,7 +23,6 @@ class CookSingleBrick extends BrickOvenCooker
     this.brick, {
     FileSystem? fileSystem,
     required Logger logger,
-    FileWatcher? configWatcher,
     KeyPressListener? keyPressListener,
   })  : keyPressListener = keyPressListener ??
             KeyPressListener(
@@ -34,7 +30,6 @@ class CookSingleBrick extends BrickOvenCooker
               logger: logger,
               toExit: exit,
             ),
-        configWatcher = configWatcher ?? FileWatcher(BrickOvenYaml.file),
         super(fileSystem: fileSystem, logger: logger) {
     argParser
       ..addFlagsAndOptions()
@@ -43,9 +38,6 @@ class CookSingleBrick extends BrickOvenCooker
 
   /// The brick to cook
   final Brick brick;
-
-  @override
-  final FileWatcher configWatcher;
 
   @override
   final KeyPressListener keyPressListener;
@@ -67,7 +59,7 @@ class CookSingleBrick extends BrickOvenCooker
   bool get isWatch => argResults['watch'] == true;
 
   @override
-  String get outputDir => argResults['output'] as String? ?? 'bricks';
+  String? get outputDir => argResults['output'] as String?;
 }
 
 extension on ArgParser {
