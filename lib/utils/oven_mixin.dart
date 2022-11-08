@@ -1,11 +1,13 @@
 // ignore_for_file: overridden_fields
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -14,6 +16,27 @@ import 'package:mason_logger/mason_logger.dart';
 /// A mixin for [BrickOvenCommand]s that cook bricks.
 /// {@endtemplate}
 mixin OvenMixin on BrickCooker {
+  KeyPressListener get _keyListener {
+    final listener = keyPressListener;
+
+    if (listener != null) {
+      return listener;
+    }
+
+    return KeyPressListener(
+      stdin: stdin,
+      logger: logger,
+      toExit: (code) async {
+        if (ExitCode.tempFail.code == code) {
+          await cancelConfigWatchers();
+          return;
+        }
+
+        exit(code);
+      },
+    );
+  }
+
   /// cooks the [bricks]
   ///
   /// If [isWatch] is true, the [bricks] will be cooked on every change to the
@@ -58,7 +81,7 @@ mixin OvenMixin on BrickCooker {
 
     logger.watching();
 
-    keyPressListener.listenToKeystrokes();
+    _keyListener.listenToKeystrokes();
 
     for (final brick in bricks) {
       if (brick.configPath == null) {
