@@ -350,33 +350,6 @@ bricks:
 
           streamController.add('q'.codeUnits);
         });
-
-        test('returns code 74 when watcher is not running', () async {
-          final runner = TestCookSingleBrick(
-            logger: mockLogger,
-            brick: mockBrick,
-            fileWatchers: [testFileWatcher],
-            argResults: <String, dynamic>{
-              'output': 'output/dir',
-              'watch': true,
-            },
-            keyPressListener: MockKeyPressListener(),
-          );
-
-          final result = await runner.run();
-
-          verify(mockLogger.cooking).called(1);
-          verify(
-            () => mockLogger.err(
-              'There are no bricks currently watching local files, ending',
-            ),
-          ).called(1);
-
-          verify(() => mockBrick.cook(output: 'output/dir', watch: true))
-              .called(1);
-
-          expect(result, ExitCode.ioError.code);
-        });
       },
     );
   });
