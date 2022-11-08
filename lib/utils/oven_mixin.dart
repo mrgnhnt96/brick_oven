@@ -22,41 +22,20 @@ mixin OvenMixin on BrickCooker {
   Future<ExitCode> putInOven(Set<Brick> bricks) async {
     logger.cooking();
 
-    if (!isWatch) {
-      for (final brick in bricks) {
-        try {
-          brick.cook(output: outputDir);
-        } on ConfigException catch (e) {
-          logger
-            ..warn(e.message)
-            ..err('Could not cook brick: ${brick.name}');
-
-          continue;
-        } catch (e) {
-          logger
-            ..warn('Unknown error: $e')
-            ..err('Could not cook brick: ${brick.name}');
-          continue;
-        }
+    for (final brick in bricks) {
+      if (isWatch) {
+        brick.source.watcher
+          ?..addEvent(
+            () => logger.fileChanged(brick.name),
+            runBefore: true,
+          )
+          ..addEvent(logger.cooking, runBefore: true)
+          ..addEvent(logger.watching, runAfter: true)
+          ..addEvent(logger.keyStrokes, runAfter: true);
       }
 
-      logger.cooked();
-
-      return ExitCode.success;
-    }
-
-    for (final brick in bricks) {
-      brick.source.watcher
-        ?..addEvent(
-          () => logger.fileChanged(brick.name),
-          runBefore: true,
-        )
-        ..addEvent(logger.cooking, runBefore: true)
-        ..addEvent(logger.watching, runAfter: true)
-        ..addEvent(logger.keyStrokes, runAfter: true);
-
       try {
-        brick.cook(output: outputDir, watch: true);
+        brick.cook(output: outputDir ?? 'bricks', watch: isWatch);
       } on ConfigException catch (e) {
         logger
           ..warn(e.message)
@@ -71,9 +50,13 @@ mixin OvenMixin on BrickCooker {
       }
     }
 
-    logger
-      ..cooked()
-      ..watching();
+    logger.cooked();
+
+    if (!isWatch) {
+      return ExitCode.success;
+    }
+
+    logger.watching();
 
     keyPressListener.listenToKeystrokes();
 
