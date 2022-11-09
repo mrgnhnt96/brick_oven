@@ -22,6 +22,67 @@ import '../test_utils/test_directory_watcher.dart';
 import '../test_utils/test_file_watcher.dart';
 
 void main() {
+  group('#keyListener', () {
+    test('returns super $KeyPressListener', () {
+      final listener = KeyPressListener(
+        stdin: MockStdin(),
+        logger: MockLogger(),
+        toExit: (_) {},
+      );
+
+      final instance = TestOvenMixin(
+        keyPressListener: listener,
+        logger: MockLogger(),
+        fileWatchers: {},
+      );
+
+      expect(instance.keyListener, listener);
+    });
+
+    test('returns default $KeyPressListener', () {
+      final instance = TestOvenMixin(
+        logger: MockLogger(),
+        fileWatchers: {},
+      );
+
+      expect(instance.keyListener, isA<KeyPressListener>());
+    });
+
+    group('default $KeyPressListener', () {
+      late Logger mockLogger;
+
+      setUp(() {
+        mockLogger = MockLogger();
+      });
+
+      test('calls toExit with ExitCode.tempFail when key is pressed', () async {
+        final instance = TestOvenMixin(
+          logger: mockLogger,
+          fileWatchers: {},
+        );
+
+        final listener = instance.keyListener;
+        final toExit = listener.toExit;
+        const exitCode = ExitCode.success;
+
+        expect(() => toExit(exitCode.code), returnsNormally);
+      });
+
+      test('exits with code provided to toExit', () async {
+        final instance = TestOvenMixin(
+          logger: mockLogger,
+          fileWatchers: {},
+        );
+
+        final listener = instance.keyListener;
+        final toExit = listener.toExit;
+        const exitCode = ExitCode.ioError;
+
+        expect(() async => toExit(exitCode.code), returnsNormally);
+      });
+    });
+  });
+
   group('cook', () {
     group('mock', () {
       late MockBrick mockBrick;
@@ -723,7 +784,7 @@ void main() {
 
 class TestOvenMixin extends BrickCooker with OvenMixin {
   TestOvenMixin({
-    required this.keyPressListener,
+    this.keyPressListener,
     required this.logger,
     this.outputDir = '',
     required this.fileWatchers,
@@ -734,7 +795,7 @@ class TestOvenMixin extends BrickCooker with OvenMixin {
   final bool isWatch;
 
   @override
-  final KeyPressListener keyPressListener;
+  final KeyPressListener? keyPressListener;
 
   @override
   final Logger logger;

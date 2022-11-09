@@ -11,12 +11,15 @@ import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:meta/meta.dart';
 
 /// {@template oven_mixin}
 /// A mixin for [BrickOvenCommand]s that cook bricks.
 /// {@endtemplate}
 mixin OvenMixin on BrickCooker {
-  KeyPressListener get _keyListener {
+  /// {@macro key_press_listener}
+  @visibleForTesting
+  KeyPressListener get keyListener {
     final listener = keyPressListener;
 
     if (listener != null) {
@@ -27,12 +30,12 @@ mixin OvenMixin on BrickCooker {
       stdin: stdin,
       logger: logger,
       toExit: (code) async {
-        if (ExitCode.tempFail.code == code) {
-          await cancelConfigWatchers();
+        if (ExitCode.success.code == code) {
+          await cancelConfigWatchers(shouldQuit: true);
           return;
         }
 
-        exit(code);
+        await cancelConfigWatchers(shouldQuit: false);
       },
     );
   }
@@ -81,7 +84,7 @@ mixin OvenMixin on BrickCooker {
 
     logger.watching();
 
-    _keyListener.listenToKeystrokes();
+    keyListener.listenToKeystrokes();
 
     for (final brick in bricks) {
       if (brick.configPath == null) {
@@ -94,14 +97,14 @@ mixin OvenMixin on BrickCooker {
           onChange: () async {
             logger.configChanged();
 
-            await cancelConfigWatchers();
+            await cancelConfigWatchers(shouldQuit: false);
             await brick.source.watcher?.stop();
           },
         ),
       );
     }
 
-    await watchForConfigChanges(
+    final shouldQuit = await watchForConfigChanges(
       BrickOvenYaml.file,
       onChange: () async {
         logger.configChanged();
@@ -111,6 +114,10 @@ mixin OvenMixin on BrickCooker {
         }
       },
     );
+
+    if (shouldQuit) {
+      return ExitCode.success;
+    }
 
     return ExitCode.tempFail;
   }
