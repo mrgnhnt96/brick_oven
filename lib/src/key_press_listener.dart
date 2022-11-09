@@ -18,18 +18,23 @@ class KeyPressListener {
   /// {@macro key_press_listener}
   KeyPressListener({
     required Stdin stdin,
-    required void Function(int) toExit,
+    required this.toExit,
     required Logger logger,
   })  : _stdin = stdin,
-        _toExit = toExit,
         _logger = logger;
 
   /// the listener of key presses
   static StreamSubscription<List<int>>? _listener;
 
+  /// we only need one stream for stdin
+  static Stream<List<int>>? _stream;
+
   final Logger _logger;
   final Stdin _stdin;
-  final void Function(int) _toExit;
+
+  /// the method to call when a key is pressed
+  @visibleForTesting
+  final FutureOr<void> Function(int) toExit;
 
   /// The key presses that can be detected.
   @visibleForTesting
@@ -38,13 +43,13 @@ class KeyPressListener {
         'q': () {
           _logger.info('\nExiting...');
 
-          _toExit(ExitCode.success.code);
+          toExit(ExitCode.success.code);
         },
         'r': () {
           _listener?.cancel();
           _logger.info('\nRestarting...');
 
-          _toExit(ExitCode.tempFail.code);
+          toExit(ExitCode.tempFail.code);
         },
         // escape key
         0x1b: _logger.keyStrokes,
@@ -63,7 +68,8 @@ class KeyPressListener {
 
     _listener?.cancel();
 
-    _listener = _stdin.asBroadcastStream().listen((codes) {
+    _stream ??= _stdin.asBroadcastStream();
+    _listener = _stream!.listen((codes) {
       onListen(codes, keys);
     });
   }
