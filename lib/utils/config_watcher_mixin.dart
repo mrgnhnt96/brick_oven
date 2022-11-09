@@ -6,44 +6,44 @@ import 'package:watcher/watcher.dart';
 
 /// Watches the path provided for changes
 mixin ConfigWatcherMixin {
-  final Map<String, Completer<void>> _completers = {};
+  final Map<String, Completer<bool>> _completers = {};
 
   /// gets the completers
   @visibleForTesting
-  Map<String, Completer<void>> get completers => {..._completers};
+  Map<String, Completer<bool>> get completers => {..._completers};
 
   /// cancels all watchers
-  Future<void> cancelConfigWatchers() async {
+  Future<void> cancelConfigWatchers({required bool shouldQuit}) async {
     for (final completer in _completers.values) {
-      completer.complete();
+      completer.complete(shouldQuit);
     }
 
     _completers.clear();
   }
 
   /// the watcher for the [BrickOvenYaml.file]
-  Future<void> watchForConfigChanges(
+  Future<bool> watchForConfigChanges(
     String path, {
     FutureOr<void> Function()? onChange,
   }) async {
-    final watchCompleter = Completer<void>();
+    final watchCompleter = Completer<bool>();
 
     assert(!_completers.containsKey(path), 'Already watching $path');
 
     final yamlListener = watcher(path).events.listen((event) async {
       await onChange?.call();
 
-      await _cancelWatcher(path);
+      await _cancelWatcher(path, shouldQuit: false);
     });
 
-    await _cancelWatcher(path);
+    await _cancelWatcher(path, shouldQuit: false);
 
     _completers[path] = watchCompleter;
 
-    await watchCompleter.future;
+    final shouldQuit = await watchCompleter.future;
     await yamlListener.cancel();
 
-    return;
+    return shouldQuit;
   }
 
   /// Watches the [path] for changes
@@ -53,14 +53,14 @@ mixin ConfigWatcherMixin {
   }
 
   /// cancels the watcher for the given [path]
-  Future<void> _cancelWatcher(String path) async {
+  Future<void> _cancelWatcher(String path, {required bool shouldQuit}) async {
     if (!_completers.containsKey(path)) {
       return;
     }
 
     final completer = _completers[path]!;
     if (!completer.isCompleted) {
-      completer.complete();
+      completer.complete(shouldQuit);
     }
     _completers.remove(path);
   }

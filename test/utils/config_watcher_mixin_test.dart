@@ -78,21 +78,65 @@ void main() {
         expect(testConfigWatcher.completers.keys, [configFile.path]);
       });
 
-      test('#cancelConfigWatchers removes from completers', () async {
-        final testConfigWatcher = TestConfigWatcher();
+      group('#cancelConfigWatchers', () {
+        test('removes from completers', () async {
+          final testConfigWatcher = TestConfigWatcher();
 
-        unawaited(testConfigWatcher.watchForConfigChanges(configFile.path));
+          unawaited(testConfigWatcher.watchForConfigChanges(configFile.path));
 
-        // wait for the watcher to be added
-        await Future<void>.delayed(Duration.zero);
+          // wait for the watcher to be added
+          await Future<void>.delayed(Duration.zero);
 
-        expect(testConfigWatcher.completers, isNotEmpty);
-        expect(testConfigWatcher.completers, hasLength(1));
-        expect(testConfigWatcher.completers.keys, [configFile.path]);
+          expect(testConfigWatcher.completers, isNotEmpty);
+          expect(testConfigWatcher.completers, hasLength(1));
+          expect(testConfigWatcher.completers.keys, [configFile.path]);
 
-        await testConfigWatcher.cancelConfigWatchers();
+          await testConfigWatcher.cancelConfigWatchers(shouldQuit: false);
 
-        expect(testConfigWatcher.completers, isEmpty);
+          expect(testConfigWatcher.completers, isEmpty);
+        });
+
+        test(
+            'should return false when provided for #watchForconfigChanges return value',
+            () async {
+          final testConfigWatcher = TestConfigWatcher();
+
+          final shouldQuitCompleter = Completer<bool>();
+
+          unawaited(
+            testConfigWatcher
+                .watchForConfigChanges(configFile.path)
+                .then(shouldQuitCompleter.complete),
+          );
+
+          // wait for the watcher to be added
+          await Future<void>.delayed(Duration.zero);
+
+          await testConfigWatcher.cancelConfigWatchers(shouldQuit: false);
+
+          expect(await shouldQuitCompleter.future, isFalse);
+        });
+
+        test(
+            'should return true when provided for #watchForconfigChanges return value',
+            () async {
+          final testConfigWatcher = TestConfigWatcher();
+
+          final shouldQuitCompleter = Completer<bool>();
+
+          unawaited(
+            testConfigWatcher
+                .watchForConfigChanges(configFile.path)
+                .then(shouldQuitCompleter.complete),
+          );
+
+          // wait for the watcher to be added
+          await Future<void>.delayed(Duration.zero);
+
+          await testConfigWatcher.cancelConfigWatchers(shouldQuit: true);
+
+          expect(await shouldQuitCompleter.future, isTrue);
+        });
       });
 
       test('#watchForConfigChanges throws assertion when re-watching path',
