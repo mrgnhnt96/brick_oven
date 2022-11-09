@@ -1,11 +1,13 @@
 // ignore_for_file: unnecessary_cast
 
 import 'dart:async';
+import 'dart:io';
 
+import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import 'package:brick_oven/src/key_press_listener.dart';
+import '../test_utils/fakes.dart';
 import '../test_utils/mocks.dart';
 
 void main() {
@@ -109,6 +111,21 @@ void main() {
       });
     });
 
+    test('#listenToKeystrokes can be called multiple times', () {
+      final stdin = FakeStdin();
+
+      final instance = KeyPressListener(
+        logger: mockLogger,
+        stdin: stdin,
+        toExit: fakeExit,
+      );
+
+      expect(instance.listenToKeystrokes, returnsNormally);
+      expect(instance.listenToKeystrokes, returnsNormally);
+      expect(instance.listenToKeystrokes, returnsNormally);
+      expect(instance.listenToKeystrokes, returnsNormally);
+    });
+
     group('#keyPresses', () {
       test('"q" logs and exits with code 0', () {
         var hasExited = false;
@@ -167,23 +184,3 @@ void main() {
     });
   });
 }
-
-// FutureOr<void> Function() overrideIO(
-//   FutureOr<void> Function() fn, {
-//   Stdin? mockStdin,
-//   Stdout? mockStdout,
-// }) {
-//   final din = mockStdin ?? MockStdin();
-//   final out = mockStdout ?? MockStdout();
-
-//   return () => IOOverrides.runZoned(
-//         () {
-//           when(() => din.hasTerminal).thenReturn(true);
-//           when(() => out.supportsAnsiEscapes).thenReturn(true);
-
-//           fn();
-//         },
-//         mockStdin: () => din,
-//         mockStdout: () => out,
-//       );
-// }
