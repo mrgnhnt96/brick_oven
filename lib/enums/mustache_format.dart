@@ -17,6 +17,9 @@ enum MustacheFormat {
   /// lowercase
   lowerCase,
 
+  /// {{ mustache }}
+  mustache,
+
   /// Pascal Case
   pascalCase,
 
