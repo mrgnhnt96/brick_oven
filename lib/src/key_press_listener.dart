@@ -26,8 +26,11 @@ class KeyPressListener {
   /// the listener of key presses
   static StreamSubscription<List<int>>? _listener;
 
+  /// it needs to be visible so that the stream can be set back to null
+  @visibleForTesting
+
   /// we only need one stream for stdin
-  static Stream<List<int>>? _stream;
+  static Stream<List<int>>? stream;
 
   final Logger _logger;
   final Stdin _stdin;
@@ -68,8 +71,8 @@ class KeyPressListener {
 
     _listener?.cancel();
 
-    _stream ??= _stdin.asBroadcastStream();
-    _listener = _stream!.listen((codes) {
+    stream ??= _stdin.asBroadcastStream();
+    _listener = stream!.listen((codes) {
       onListen(codes, keys);
     });
   }

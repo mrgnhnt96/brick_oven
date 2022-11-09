@@ -10,7 +10,6 @@ import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:brick_oven/utils/oven_mixin.dart';
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
@@ -22,6 +21,10 @@ import '../test_utils/test_directory_watcher.dart';
 import '../test_utils/test_file_watcher.dart';
 
 void main() {
+  tearDown(() {
+    KeyPressListener.stream = null;
+  });
+
   group('#keyListener', () {
     test('returns super $KeyPressListener', () {
       final listener = KeyPressListener(
@@ -583,203 +586,6 @@ void main() {
 
     group('write to file system', () {});
   });
-
-  group(
-    '',
-    () {
-      late Brick mockBrick;
-      late Stdin mockStdin;
-      late Logger mockLogger;
-      late FileSystem memoryFileSystem;
-      late TestFileWatcher testFileWatcher;
-      late TestDirectoryWatcher testDirectoryWatcher;
-
-      setUp(() {
-        mockBrick = MockBrick();
-        mockStdin = MockStdin();
-        mockLogger = MockLogger();
-        memoryFileSystem = MemoryFileSystem();
-        testFileWatcher = TestFileWatcher();
-        testDirectoryWatcher = TestDirectoryWatcher();
-
-        when(() => mockStdin.hasTerminal).thenReturn(true);
-
-        when(() => mockBrick.source).thenReturn(
-          BrickSource.memory(
-            localPath: '',
-            fileSystem: memoryFileSystem,
-            watcher: BrickWatcher.config(
-              dirPath: '',
-              watcher: testDirectoryWatcher,
-            ),
-          ),
-        );
-      });
-
-      tearDown(() {
-        testFileWatcher.close();
-        testDirectoryWatcher.close();
-      });
-
-      test('gracefully runs with watcher', () async {
-        when(mockStdin.asBroadcastStream).thenAnswer(
-          (_) => Stream.fromIterable([
-            'q'.codeUnits,
-            [0x1b]
-          ]),
-        );
-
-        final codeCompleter = Completer<int>();
-
-        final keyPressListener = KeyPressListener(
-          stdin: mockStdin,
-          logger: mockLogger,
-          toExit: codeCompleter.complete,
-        );
-
-        final brick = Brick.memory(
-          name: '',
-          source: BrickSource.memory(
-            localPath: '',
-            fileSystem: memoryFileSystem,
-            watcher: BrickWatcher.config(
-              dirPath: '',
-              watcher: testDirectoryWatcher,
-            ),
-          ),
-          fileSystem: memoryFileSystem,
-          logger: mockLogger,
-        );
-
-        final runner = TestOvenMixin(
-          logger: mockLogger,
-          fileWatchers: {BrickOvenYaml.file: testFileWatcher},
-          keyPressListener: keyPressListener,
-        );
-
-        unawaited(runner.putInOven({brick}));
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.cooking).called(1);
-        verify(mockLogger.cooked).called(1);
-
-        expect(await codeCompleter.future, ExitCode.success.code);
-      });
-
-      test('listens to config changes and exits with code 76', () async {
-        final streamController = StreamController<List<int>>();
-
-        when(mockStdin.asBroadcastStream).thenAnswer(
-          (_) => streamController.stream,
-        );
-
-        final codeCompleter = Completer<int>();
-
-        final keyPressListener = KeyPressListener(
-          stdin: mockStdin,
-          logger: mockLogger,
-          toExit: (_) {},
-        );
-
-        final brick = Brick.memory(
-          name: '',
-          source: BrickSource.memory(
-            localPath: '',
-            fileSystem: memoryFileSystem,
-            watcher: BrickWatcher.config(
-              dirPath: '',
-              watcher: testDirectoryWatcher,
-            ),
-          ),
-          fileSystem: memoryFileSystem,
-          logger: mockLogger,
-        );
-
-        final runner = TestOvenMixin(
-          logger: mockLogger,
-          fileWatchers: {BrickOvenYaml.file: testFileWatcher},
-          keyPressListener: keyPressListener,
-        );
-
-        unawaited(
-          runner.putInOven({brick}).then(
-            (exitCode) => codeCompleter.complete(exitCode.code),
-          ),
-        );
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.cooking).called(1);
-        verify(mockLogger.watching).called(1);
-
-        testFileWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.configChanged).called(1);
-
-        expect(await codeCompleter.future, ExitCode.tempFail.code);
-      });
-
-      test('listens to config path changes', () async {
-        final streamController = StreamController<List<int>>();
-
-        when(mockStdin.asBroadcastStream).thenAnswer(
-          (answer) => streamController.stream,
-        );
-
-        final codeCompleter = Completer<int>();
-
-        final keyPressListener = KeyPressListener(
-          stdin: mockStdin,
-          logger: mockLogger,
-          toExit: codeCompleter.complete,
-        );
-
-        final runner = TestOvenMixin(
-          logger: mockLogger,
-          fileWatchers: {BrickOvenYaml.file: testFileWatcher},
-          outputDir: 'output/dir',
-          isWatch: true,
-          keyPressListener: keyPressListener,
-        );
-
-        final brick = Brick.memory(
-          name: '',
-          source: BrickSource.memory(
-            localPath: '',
-            fileSystem: memoryFileSystem,
-            watcher: BrickWatcher.config(
-              dirPath: '',
-              watcher: testDirectoryWatcher,
-            ),
-          ),
-          fileSystem: memoryFileSystem,
-          logger: mockLogger,
-        );
-
-        unawaited(runner.putInOven({brick}));
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.cooking).called(1);
-        verify(mockLogger.watching).called(1);
-
-        expect(runner.completers.keys, ['config/path', 'brick_oven.yaml']);
-
-        testFileWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.configChanged).called(1);
-        expect(runner.completers.keys, isEmpty);
-
-        streamController.add('q'.codeUnits);
-      });
-    },
-    skip: true,
-  );
 }
 
 class TestOvenMixin extends BrickCooker with OvenMixin {

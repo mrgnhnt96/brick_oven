@@ -1,7 +1,6 @@
 // ignore_for_file: unnecessary_cast
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:mocktail/mocktail.dart';
@@ -11,6 +10,10 @@ import '../test_utils/fakes.dart';
 import '../test_utils/mocks.dart';
 
 void main() {
+  tearDown(() {
+    KeyPressListener.stream = null;
+  });
+
   group('$KeyPressListener', () {
     final mockStdout = MockStdout();
     final mockStdin = MockStdin();
@@ -58,7 +61,7 @@ void main() {
         verify(() => mockStdin.lineMode = false).called(1);
         verify(() => mockStdin.echoMode = false).called(1);
 
-        await Future<void>.delayed(const Duration(milliseconds: 200));
+        await Future<void>.delayed(Duration.zero);
 
         verify(mockStdin.asBroadcastStream).called(1);
       },
@@ -104,7 +107,7 @@ void main() {
           } as KeyMap,
         );
 
-        await Future<void>.delayed(const Duration(milliseconds: 200));
+        await Future<void>.delayed(Duration.zero);
 
         expect(qPressed, isTrue);
         expect(escPressed, isTrue);

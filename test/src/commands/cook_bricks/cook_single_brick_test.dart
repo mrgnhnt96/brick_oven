@@ -6,7 +6,6 @@ import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
-import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -190,12 +189,10 @@ class TestCookSingleBrick extends CookSingleBrick {
     required Map<String, dynamic> argResults,
     required Logger logger,
     required Brick brick,
-    KeyPressListener? keyPressListener,
   })  : _argResults = argResults,
         super(
           brick,
           logger: logger,
-          keyPressListener: keyPressListener,
         );
 
   final Map<String, dynamic> _argResults;
