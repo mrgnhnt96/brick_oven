@@ -1,24 +1,26 @@
 # TODO
 
-- [x] Handle exception errors better
-- [x] Allow for import yaml files in configuration
-  - [x] source should be relative to the configuration file
-- [ ] Update documentation
-- [x] Fix: when variable is wrapped with "/" it is not replaced
-  - for example: `/var/var.dart` is changing to `/var/{CHANGED}.dart`
-- [x] Allow escaping of variables in configuration
-  - This could be used when you need to use a variable as a path
-- [x] Review mason updates and change accordingly
-- [x] Review mason logger updates and change accordingly
-- [x] Check for variables in brick.yaml file
-  - [x] Check for non-existing
-  - [x] Check for non-configured
-    - Meaning that the variable is setup in the brick.yaml file but not in the brick_oven.yaml file
-- [ ] Add support for variables in brick.yaml file
-  - [ ] Allow override of variable properties
+- [ ] ? Add support for variables in brick.yaml file
+  - [ ] ? Allow override of variable properties
+
 - [ ] rename `value` to `change_to` for files & dirs
-- [x] Look into ommitting a file or directory by variable
-  - [x] {#var}...{/var}
-  - [x] {#var}{{#snakeCase}}{{{...}}}{{/snakeCase}}{/var}
-- [x] Add `include_if` and `include_if_not` to variables to check against the `brick.yaml` file
-- [ ] Look into changing the format from {{#format}}NAME{{/format}} to NAME.toFormat()
+- [ ] Look into changing the format from {{#format}}NAME{{/format}} to {{NAME.toFormat()}}
+- [ ] Make sure line breaks match the original file
+- [ ] Warn when a variable is not used
+- [ ] Change default behavior for escaped variables?
+  - [ ] Currently when formatted, the variable is escaped, I don't know if this is the best behavior or if we should introduce an option to NOT escape the variable
+- [ ] Add support for partials
+  - Requirements
+    - [ ] Should be an array on a brick
+    - [ ] Allow variables
+    - [ ] Do NOT allow name
+    - [ ] Get generated to root of project
+      - This is because mason does not support partials being generated in a subdirectory
+    - [ ] Check for duplicate partials
+    - [ ] Check for unused partials
+    - [ ] Check for non existing referenced partials
+    - [ ] variables in files should replace whole line
+    - [ ] Allow variable names to be
+      - [ ] file name
+        - [ ] with ext
+        - [ ] without ext
