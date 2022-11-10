@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
@@ -38,10 +39,12 @@ void main() {
   const localPath = 'localPath';
   final brickPath = join('bricks', brickName, '__brick__');
   const dirName = 'director_of_shield';
+  final dirPath = join('path', 'to', dirName);
   const excludeDir = 'exclude_me';
   const fileName = 'nick_fury.dart';
-  final dirPath = join('path', 'to', dirName);
   final filePath = join(dirPath, fileName);
+  const partialName = 'partial.dart';
+  final partialPath = join(dirPath, partialName);
 
   group('#fromYaml', () {
     test('parses when provided', () {
@@ -52,6 +55,10 @@ dirs:
 files:
   $filePath:
     name: $fileName
+partials:
+  $partialPath:
+    vars:
+      one:
 exclude:
   - $excludeDir
 ''');
@@ -64,6 +71,12 @@ exclude:
         exclude: const [excludeDir],
         name: brickName,
         source: BrickSource(localPath: localPath),
+        partials: [
+          BrickPartial(
+            path: partialPath,
+            variables: const [Variable(name: 'one')],
+          )
+        ],
         logger: mockLogger,
       );
 
@@ -126,6 +139,18 @@ dirs:
         final yaml = loadYaml('''
 files:
   $filePath
+''');
+
+        expect(
+          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+
+      test('when partials is not a map', () {
+        final yaml = loadYaml('''
+partials:
+  $partialPath
 ''');
 
         expect(
@@ -686,6 +711,44 @@ exclude:
             ),
             BrickFile.config(
               '',
+              variables: [
+                Variable(name: 'var4'),
+                Variable(name: 'var5'),
+                Variable(name: 'var6'),
+              ],
+            ),
+          ],
+        );
+
+        expect(
+          brick.allBrickVariables(),
+          {
+            'var1',
+            'var2',
+            'var3',
+            'var4',
+            'var5',
+            'var6',
+          },
+        );
+      });
+
+      test('gets #variables from partials', () {
+        final brick = Brick(
+          name: '',
+          source: const BrickSource.none(),
+          logger: mockLogger,
+          partials: const [
+            BrickPartial(
+              path: '',
+              variables: [
+                Variable(name: 'var1'),
+                Variable(name: 'var2'),
+                Variable(name: 'var3'),
+              ],
+            ),
+            BrickPartial(
+              path: '',
               variables: [
                 Variable(name: 'var4'),
                 Variable(name: 'var5'),
