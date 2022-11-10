@@ -96,8 +96,6 @@ class BrickPath extends Equatable {
           directory: path,
           reason: e.message,
         );
-      } catch (_) {
-        rethrow;
       }
     }
 

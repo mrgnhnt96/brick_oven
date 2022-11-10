@@ -74,8 +74,6 @@ class Brick extends Equatable {
       );
     } on ConfigException catch (e) {
       throw BrickException(brick: name, reason: e.message);
-    } catch (_) {
-      rethrow;
     }
 
     final filesData = YamlValue.from(data.remove('files'));

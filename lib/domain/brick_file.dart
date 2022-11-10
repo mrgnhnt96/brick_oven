@@ -88,8 +88,6 @@ class BrickFile extends Equatable {
           yield Variable.fromYaml(YamlValue.from(entry.value), name);
         } on ConfigException catch (e) {
           throw FileException(file: path, reason: e.message);
-        } catch (_) {
-          rethrow;
         }
       }
     }
@@ -105,8 +103,6 @@ class BrickFile extends Equatable {
         name = Name.fromYaml(nameYaml, basenameWithoutExtension(path));
       } on ConfigException catch (e) {
         throw FileException(file: path, reason: e.message);
-      } catch (_) {
-        rethrow;
       }
     }
 
