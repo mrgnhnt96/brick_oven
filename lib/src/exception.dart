@@ -34,6 +34,26 @@ class VariableException implements ConfigException {
   String get message => 'Variable "$variable" is invalid -- $reason';
 }
 
+/// {@template partial_exception}
+/// An exception thrown when a partial is not configured correctly.
+/// {@endtemplate}
+class PartialException implements ConfigException {
+  /// {@macro variable_exception}
+  const PartialException({
+    required this.partial,
+    required this.reason,
+  });
+
+  /// the reason the partial is not configured correctly
+  final String reason;
+
+  /// the partial that is not configured correctly
+  final String partial;
+
+  @override
+  String get message => 'Partial "$partial" is invalid -- $reason';
+}
+
 /// {@template directory_exception}
 /// An exception thrown when a directory is not configured correctly.
 /// {@endtemplate}
