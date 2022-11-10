@@ -59,9 +59,9 @@ exclude:
       final result = Brick.fromYaml(YamlValue.from(yaml), brickName);
 
       final brick = Brick(
-        configuredDirs: [BrickPath(name: const Name(dirName), path: dirPath)],
-        configuredFiles: [BrickFile(filePath, name: const Name(fileName))],
-        excludePaths: const [excludeDir],
+        dirs: [BrickPath(name: const Name(dirName), path: dirPath)],
+        files: [BrickFile(filePath, name: const Name(fileName))],
+        exclude: const [excludeDir],
         name: brickName,
         source: BrickSource(localPath: localPath),
         logger: mockLogger,
@@ -195,7 +195,7 @@ exclude:
         expect(
           Brick.fromYaml(YamlValue.from(yaml), brickName),
           Brick(
-            excludePaths: const [excludeDir],
+            exclude: const [excludeDir],
             name: brickName,
             source: BrickSource(localPath: localPath),
             logger: mockLogger,
@@ -212,7 +212,7 @@ exclude: $excludeDir
         expect(
           Brick.fromYaml(YamlValue.from(yaml), brickName),
           Brick(
-            excludePaths: const [excludeDir],
+            exclude: const [excludeDir],
             name: brickName,
             source: BrickSource(localPath: localPath),
             logger: mockLogger,
@@ -554,12 +554,12 @@ exclude:
             localPath: localPath,
             fileSystem: fs,
           ),
-          configuredFiles: [BrickFile(filePath)],
+          files: [BrickFile(filePath)],
           fileSystem: fs,
         );
 
         final fakeSourcePath = fs.file(
-          testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
+          testBrick.source.fromSourcePath(testBrick.files.single),
         );
 
         final targetFile = fs.file(join(brickPath, filePath));
@@ -582,12 +582,12 @@ exclude:
           localPath: localPath,
           fileSystem: fs,
         ),
-        configuredFiles: [BrickFile(filePath)],
+        files: [BrickFile(filePath)],
         fileSystem: fs,
       );
 
       final fakeSourcePath = fs.file(
-        testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
+        testBrick.source.fromSourcePath(testBrick.files.single),
       );
 
       const output = 'out';
@@ -613,12 +613,12 @@ exclude:
           localPath: localPath,
           fileSystem: fs,
         ),
-        configuredFiles: [BrickFile(filePath)],
+        files: [BrickFile(filePath)],
         fileSystem: fs,
       );
 
       final fakeSourcePath = fs.file(
-        testBrick.source.fromSourcePath(testBrick.configuredFiles.single),
+        testBrick.source.fromSourcePath(testBrick.files.single),
       );
 
       final fakeUnneededFile = fs.file(join(brickPath, 'unneeded.dart'));
@@ -652,17 +652,17 @@ exclude:
           localPath: localPath,
           fileSystem: fs,
         ),
-        configuredFiles: [for (final file in files) BrickFile(file)],
+        files: [for (final file in files) BrickFile(file)],
         fileSystem: fs,
       );
 
-      for (final file in testBrick.configuredFiles) {
+      for (final file in testBrick.files) {
         expect(fs.file(join(brickPath, file.path)).existsSync(), isFalse);
       }
 
       testBrick.cook();
 
-      for (final file in testBrick.configuredFiles) {
+      for (final file in testBrick.files) {
         expect(fs.file(join(brickPath, file.path)).existsSync(), isTrue);
       }
     });
@@ -675,7 +675,7 @@ exclude:
           name: '',
           source: const BrickSource.none(),
           logger: mockLogger,
-          configuredFiles: const [
+          files: const [
             BrickFile.config(
               '',
               variables: [
@@ -713,7 +713,7 @@ exclude:
           name: '',
           source: const BrickSource.none(),
           logger: mockLogger,
-          configuredFiles: const [
+          files: const [
             BrickFile.config(
               '',
               includeIf: 'var1',
@@ -739,7 +739,7 @@ exclude:
           name: '',
           source: const BrickSource.none(),
           logger: mockLogger,
-          configuredFiles: const [
+          files: const [
             BrickFile.config(
               '',
               includeIfNot: 'var1',
@@ -767,7 +767,7 @@ exclude:
           name: '',
           source: const BrickSource.none(),
           logger: mockLogger,
-          configuredDirs: [
+          dirs: [
             BrickPath(name: const Name('name1'), path: ''),
             BrickPath(name: const Name('name2'), path: ''),
           ],
@@ -787,7 +787,7 @@ exclude:
           name: '',
           source: const BrickSource.none(),
           logger: mockLogger,
-          configuredDirs: [
+          dirs: [
             BrickPath(
               path: '',
               includeIf: 'var1',
@@ -813,7 +813,7 @@ exclude:
           name: '',
           source: const BrickSource.none(),
           logger: mockLogger,
-          configuredDirs: [
+          dirs: [
             BrickPath(
               path: '',
               includeIfNot: 'var1',
@@ -962,7 +962,7 @@ exclude:
           source: const BrickSource.none(),
           brickYamlConfig: mockBricYamlConfig,
           logger: mockLogger,
-          configuredDirs: [
+          dirs: [
             BrickPath(
               name: const Name('var1'),
               includeIf: 'var2',

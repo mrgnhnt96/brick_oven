@@ -24,11 +24,11 @@ class Brick extends Equatable {
   const Brick({
     required this.name,
     required this.source,
-    this.configuredDirs = const [],
-    this.configuredFiles = const [],
+    this.dirs = const [],
+    this.files = const [],
     this.configPath,
     this.brickYamlConfig,
-    this.excludePaths = const [],
+    this.exclude = const [],
     required Logger logger,
   })  : _fileSystem = const LocalFileSystem(),
         _logger = logger;
@@ -36,9 +36,9 @@ class Brick extends Equatable {
   Brick._fromYaml({
     required this.name,
     required this.source,
-    required this.configuredFiles,
-    required this.configuredDirs,
-    required this.excludePaths,
+    required this.files,
+    required this.dirs,
+    required this.exclude,
     required this.configPath,
     required this.brickYamlConfig,
   })  : _fileSystem = const LocalFileSystem(),
@@ -190,11 +190,11 @@ class Brick extends Equatable {
     }
 
     return Brick._fromYaml(
-      configuredFiles: files().toList(),
+      files: files().toList(),
       source: source,
       name: name,
-      configuredDirs: paths().toList(),
-      excludePaths: exclude().toList(),
+      dirs: paths().toList(),
+      exclude: exclude().toList(),
       configPath: configPath,
       brickYamlConfig: brickYamlConfig,
     );
@@ -207,9 +207,9 @@ class Brick extends Equatable {
     required this.source,
     required FileSystem fileSystem,
     required Logger logger,
-    this.configuredDirs = const [],
-    this.configuredFiles = const [],
-    this.excludePaths = const [],
+    this.dirs = const [],
+    this.files = const [],
+    this.exclude = const [],
     this.configPath,
     this.brickYamlConfig,
   })  : _fileSystem = fileSystem,
@@ -221,17 +221,18 @@ class Brick extends Equatable {
   /// in sync with the brick_oven.yaml file
   final BrickYamlConfig? brickYamlConfig;
 
-  /// if the brick has its own path
+  /// The path of the configuration for this brick if it is not
+  /// configured within the [BrickOvenYaml.file]
   final String? configPath;
 
   /// the configured directories that will alter/update the paths of the [source] files
-  final List<BrickPath> configuredDirs;
+  final List<BrickPath> dirs;
 
   /// the configured files that will alter/update the [source] files
-  final List<BrickFile> configuredFiles;
+  final List<BrickFile> files;
 
   /// paths to be excluded from the [source]
-  final List<String> excludePaths;
+  final List<String> exclude;
 
   /// the name of the brick
   final String name;
@@ -251,16 +252,16 @@ class Brick extends Equatable {
   /// returns the variables within brick
   ///
   /// pulls from
-  /// - [configuredFiles]
+  /// - [files]
   ///   - [BrickFile.variables]
-  /// - [configuredDirs]
+  /// - [dirs]
   ///   - [BrickPath.name]
   ///   - [BrickPath.includeIf]
   ///   - [BrickPath.includeIfNot]
   Set<String> allBrickVariables() {
     final variables = <String>{};
 
-    for (final file in configuredFiles) {
+    for (final file in files) {
       final names = file.variables.map((e) => e.name);
       variables.addAll(names);
 
@@ -273,7 +274,7 @@ class Brick extends Equatable {
       }
     }
 
-    for (final dir in configuredDirs) {
+    for (final dir in dirs) {
       final dirName = dir.name?.value;
       if (dirName != null) {
         variables.add(dirName);
@@ -366,18 +367,18 @@ class Brick extends Equatable {
         directory.deleteSync(recursive: true);
       }
 
-      final files = source.mergeFilesAndConfig(
-        configuredFiles,
-        excludedPaths: excludePaths,
+      final mergedFiles = source.mergeFilesAndConfig(
+        files,
+        excludedPaths: exclude,
         logger: _logger,
       );
-      final count = files.length;
+      final count = mergedFiles.length;
 
-      for (final file in files) {
+      for (final file in mergedFiles) {
         file.writeTargetFile(
           targetDir: targetDir,
           sourceFile: _fileSystem.file(source.fromSourcePath(file)),
-          configuredDirs: configuredDirs,
+          configuredDirs: dirs,
           fileSystem: _fileSystem,
           logger: _logger,
         );

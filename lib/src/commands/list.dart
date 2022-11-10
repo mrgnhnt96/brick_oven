@@ -86,9 +86,9 @@ class ListCommand extends BrickOvenCommand {
 
     for (final brick in bricks) {
       if (isVerbose) {
-        final configFiles = brick.configuredFiles.toList()
+        final configFiles = brick.files.toList()
           ..sort((a, b) => a.path.compareTo(b.path));
-        final configDirs = brick.configuredDirs.toList()
+        final configDirs = brick.dirs.toList()
           ..sort((a, b) => a.path.compareTo(b.path));
 
         final files = configFiles.isEmpty
@@ -112,8 +112,8 @@ class ListCommand extends BrickOvenCommand {
           '''
 ${lightYellow.wrap(brick.name)}
 ${tab}source: ${brick.source.sourceDir}
-$tab${cyan.wrap('files')}: ${brick.configuredFiles.length}
-$tab${cyan.wrap('dirs')}: ${brick.configuredDirs.length}\n''',
+$tab${cyan.wrap('files')}: ${brick.files.length}
+$tab${cyan.wrap('dirs')}: ${brick.dirs.length}\n''',
         );
       }
     }
