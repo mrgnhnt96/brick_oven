@@ -1,6 +1,7 @@
 import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
@@ -26,6 +27,7 @@ class Brick extends Equatable {
     required this.source,
     this.dirs = const [],
     this.files = const [],
+    this.partials = const [],
     this.configPath,
     this.brickYamlConfig,
     this.exclude = const [],
@@ -41,6 +43,7 @@ class Brick extends Equatable {
     required this.exclude,
     required this.configPath,
     required this.brickYamlConfig,
+    required this.partials,
   })  : _fileSystem = const LocalFileSystem(),
         _logger = Logger();
 
@@ -119,6 +122,27 @@ class Brick extends Equatable {
       }
     }
 
+    final partialsData = YamlValue.from(data.remove('partials'));
+
+    Iterable<BrickPartial> partials() sync* {
+      if (partialsData.isNone()) {
+        return;
+      }
+
+      if (!partialsData.isYaml()) {
+        throw BrickException(
+          brick: name,
+          reason: '`partials` must be a of type `Map`',
+        );
+      }
+
+      for (final entry in partialsData.asYaml().value.entries) {
+        final path = entry.key as String;
+
+        yield BrickPartial.fromYaml(YamlValue.from(entry.value), path);
+      }
+    }
+
     final excludedPaths = YamlValue.from(data.remove('exclude'));
 
     Iterable<String> exclude() sync* {
@@ -189,6 +213,7 @@ class Brick extends Equatable {
 
     return Brick._fromYaml(
       files: files().toList(),
+      partials: partials().toList(),
       source: source,
       name: name,
       dirs: paths().toList(),
@@ -208,6 +233,7 @@ class Brick extends Equatable {
     this.dirs = const [],
     this.files = const [],
     this.exclude = const [],
+    this.partials = const [],
     this.configPath,
     this.brickYamlConfig,
   })  : _fileSystem = fileSystem,
@@ -228,6 +254,9 @@ class Brick extends Equatable {
 
   /// the configured files that will alter/update the [source] files
   final List<BrickFile> files;
+
+  /// the configured partials that will be imported to the [source] files
+  final List<BrickPartial> partials;
 
   /// paths to be excluded from the [source]
   final List<String> exclude;
@@ -270,6 +299,11 @@ class Brick extends Equatable {
       if (file.includeIfNot != null) {
         variables.add(file.includeIfNot!);
       }
+    }
+
+    for (final partial in partials) {
+      final names = partial.variables.map((e) => e.name);
+      variables.addAll(names);
     }
 
     for (final dir in dirs) {
