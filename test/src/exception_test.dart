@@ -31,6 +31,30 @@ void main() {
     });
   });
 
+  group('$PartialException', () {
+    test('can be instanciated', () {
+      expect(
+        const PartialException(partial: 'test', reason: 'test'),
+        isA<BrickOvenException>(),
+      );
+
+      expect(
+        () => const PartialException(partial: 'test', reason: 'test'),
+        returnsNormally,
+      );
+    });
+
+    test('has the correct message', () {
+      const partial = '💩';
+      const reason = '🚽';
+
+      expect(
+        const PartialException(partial: partial, reason: reason).message,
+        'Partial "$partial" is invalid -- $reason',
+      );
+    });
+  });
+
   group('$DirectoryException', () {
     test('can be instanciated', () {
       expect(
