@@ -601,7 +601,7 @@ yooooo:
 
       instance.writeTargetFile(
         sourceFile: sourceFile,
-        configuredDirs: [],
+        dirs: [],
         targetDir: '',
         fileSystem: fileSystem,
         logger: mockLogger,
@@ -617,7 +617,7 @@ yooooo:
 
       instance.writeTargetFile(
         sourceFile: sourceFile,
-        configuredDirs: [],
+        dirs: [],
         targetDir: 'nested',
         fileSystem: fileSystem,
         logger: mockLogger,
@@ -640,7 +640,7 @@ yooooo:
 
       instance.writeTargetFile(
         sourceFile: sourceFile,
-        configuredDirs: [dir],
+        dirs: [dir],
         targetDir: '',
         fileSystem: fileSystem,
         logger: mockLogger,
@@ -664,7 +664,7 @@ yooooo:
 
       instance.writeTargetFile(
         sourceFile: sourceFile,
-        configuredDirs: [],
+        dirs: [],
         targetDir: '',
         fileSystem: fileSystem,
         logger: mockLogger,
@@ -686,7 +686,7 @@ yooooo:
 
       instance.writeTargetFile(
         sourceFile: sourceFile,
-        configuredDirs: [],
+        dirs: [],
         targetDir: '',
         fileSystem: fileSystem,
         logger: mockLogger,
@@ -710,7 +710,7 @@ yooooo:
 
         instance.writeTargetFile(
           sourceFile: sourceFile,
-          configuredDirs: [],
+          dirs: [],
           targetDir: '',
           fileSystem: fileSystem,
           logger: mockLogger,
@@ -750,7 +750,7 @@ yooooo:
           sourceFile.writeAsStringSync(content.key);
           instance.writeTargetFile(
             sourceFile: sourceFile,
-            configuredDirs: [],
+            dirs: [],
             targetDir: '',
             fileSystem: fileSystem,
             logger: mockLogger,
@@ -775,7 +775,7 @@ yooooo:
         sourceFile.writeAsStringSync(content);
         instance.writeTargetFile(
           sourceFile: sourceFile,
-          configuredDirs: [],
+          dirs: [],
           targetDir: '',
           fileSystem: fileSystem,
           logger: mockLogger,
@@ -802,7 +802,7 @@ yooooo:
         sourceFile.writeAsStringSync(content);
         instance.writeTargetFile(
           sourceFile: sourceFile,
-          configuredDirs: [],
+          dirs: [],
           targetDir: '',
           fileSystem: fileSystem,
           logger: mockLogger,
@@ -858,7 +858,7 @@ yooooo:
                 sourceFile.writeAsStringSync(content.key);
                 instance.writeTargetFile(
                   sourceFile: sourceFile,
-                  configuredDirs: [],
+                  dirs: [],
                   targetDir: '',
                   fileSystem: fileSystem,
                   logger: mockLogger,
@@ -881,7 +881,7 @@ yooooo:
                 sourceFile.writeAsStringSync(content.key);
                 instance.writeTargetFile(
                   sourceFile: sourceFile,
-                  configuredDirs: [],
+                  dirs: [],
                   targetDir: '',
                   fileSystem: fileSystem,
                   logger: mockLogger,
@@ -904,7 +904,7 @@ yooooo:
                 sourceFile.writeAsStringSync(content.key);
                 instance.writeTargetFile(
                   sourceFile: sourceFile,
-                  configuredDirs: [],
+                  dirs: [],
                   targetDir: '',
                   fileSystem: fileSystem,
                   logger: mockLogger,
@@ -932,7 +932,7 @@ yooooo:
                 sourceFile.writeAsStringSync(content.key);
                 instance.writeTargetFile(
                   sourceFile: sourceFile,
-                  configuredDirs: [],
+                  dirs: [],
                   targetDir: '',
                   fileSystem: fileSystem,
                   logger: mockLogger,
@@ -960,7 +960,7 @@ yooooo:
                 sourceFile.writeAsStringSync(content.key);
                 instance.writeTargetFile(
                   sourceFile: sourceFile,
-                  configuredDirs: [],
+                  dirs: [],
                   targetDir: '',
                   fileSystem: fileSystem,
                   logger: mockLogger,
@@ -1006,7 +1006,7 @@ yooooo:
 
                   instance.writeTargetFile(
                     sourceFile: sourceFile,
-                    configuredDirs: [],
+                    dirs: [],
                     targetDir: '',
                     fileSystem: fileSystem,
                     logger: mockLogger,
@@ -1036,7 +1036,7 @@ yooooo:
 
           instance.writeTargetFile(
             sourceFile: sourceFile,
-            configuredDirs: [],
+            dirs: [],
             targetDir: '',
             fileSystem: fileSystem,
             logger: mockLogger,
@@ -1063,7 +1063,7 @@ yooooo:
           void writeFile() {
             instance.writeTargetFile(
               sourceFile: sourceFile,
-              configuredDirs: [],
+              dirs: [],
               targetDir: '',
               fileSystem: fileSystem,
               logger: mockLogger,
@@ -1109,7 +1109,7 @@ yooooo:
 
         instance.writeTargetFile(
           sourceFile: sourceFile,
-          configuredDirs: [],
+          dirs: [],
           targetDir: '',
           fileSystem: fileSystem,
           logger: mockLogger,
@@ -1131,7 +1131,7 @@ yooooo:
 
       instance.writeTargetFile(
         sourceFile: sourceFile,
-        configuredDirs: [],
+        dirs: [],
         targetDir: '',
         fileSystem: fileSystem,
         logger: mockLogger,

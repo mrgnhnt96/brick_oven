@@ -410,7 +410,7 @@ class Brick extends Equatable {
         file.writeTargetFile(
           targetDir: targetDir,
           sourceFile: _fileSystem.file(source.fromSourcePath(file)),
-          configuredDirs: dirs,
+          dirs: dirs,
           fileSystem: _fileSystem,
           logger: _logger,
         );

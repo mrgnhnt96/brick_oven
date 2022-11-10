@@ -219,12 +219,12 @@ class BrickFile extends Equatable {
   /// writes the file in the [targetDir], with the
   /// contents of the [sourceFile].
   ///
-  /// If there are any [configuredDirs], they will be applied
+  /// If there are any [dirs], they will be applied
   /// to the [path]
   void writeTargetFile({
     required String targetDir,
     required File sourceFile,
-    required Iterable<BrickPath> configuredDirs,
+    required Iterable<BrickPath> dirs,
     required FileSystem? fileSystem,
     required Logger logger,
   }) {
@@ -236,7 +236,7 @@ class BrickFile extends Equatable {
     if (path.contains(separator)) {
       final originalPath = path;
 
-      for (final configDir in configuredDirs) {
+      for (final configDir in dirs) {
         path = configDir.apply(path, originalPath: originalPath);
       }
     }
