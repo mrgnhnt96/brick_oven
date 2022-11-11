@@ -409,8 +409,19 @@ class Brick extends Equatable {
       for (final file in mergedFiles) {
         file.writeTargetFile(
           targetDir: targetDir,
-          sourceFile: _fileSystem.file(source.fromSourcePath(file)),
+          sourceFile: _fileSystem.file(source.fromSourcePath(file.path)),
           dirs: dirs,
+          partials: partials,
+          fileSystem: _fileSystem,
+          logger: _logger,
+        );
+      }
+
+      for (final partial in partials) {
+        partial.writeTargetFile(
+          targetDir: targetDir,
+          sourceFile: _fileSystem.file(source.fromSourcePath(partial.path)),
+          partials: partials,
           fileSystem: _fileSystem,
           logger: _logger,
         );
