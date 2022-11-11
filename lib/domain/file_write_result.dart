@@ -11,7 +11,8 @@ class FileWriteResult {
 
   /// {@macro file_write_result}
   const FileWriteResult.empty()
-      : this(usedPartials: const {}, usedVariables: const {});
+      : usedPartials = const {},
+        usedVariables = const {};
 
   /// the names of the variables used in the file
   final Set<String> usedVariables;
