@@ -584,7 +584,7 @@ exclude:
         );
 
         final fakeSourcePath = fs.file(
-          testBrick.source.fromSourcePath(testBrick.files.single),
+          testBrick.source.fromSourcePath(testBrick.files.single.path),
         );
 
         final targetFile = fs.file(join(brickPath, filePath));
@@ -612,7 +612,7 @@ exclude:
       );
 
       final fakeSourcePath = fs.file(
-        testBrick.source.fromSourcePath(testBrick.files.single),
+        testBrick.source.fromSourcePath(testBrick.files.single.path),
       );
 
       const output = 'out';
@@ -643,7 +643,7 @@ exclude:
       );
 
       final fakeSourcePath = fs.file(
-        testBrick.source.fromSourcePath(testBrick.files.single),
+        testBrick.source.fromSourcePath(testBrick.files.single.path),
       );
 
       final fakeUnneededFile = fs.file(join(brickPath, 'unneeded.dart'));

@@ -600,6 +600,7 @@ yooooo:
       const instance = BrickFile.config(defaultFile);
 
       instance.writeTargetFile(
+        partials: [],
         sourceFile: sourceFile,
         dirs: [],
         targetDir: '',
@@ -616,6 +617,7 @@ yooooo:
       const instance = BrickFile.config(defaultFile);
 
       instance.writeTargetFile(
+        partials: [],
         sourceFile: sourceFile,
         dirs: [],
         targetDir: 'nested',
@@ -639,6 +641,7 @@ yooooo:
       final dir = brickPath(name: replacement, path: join('path', 'to'));
 
       instance.writeTargetFile(
+        partials: [],
         sourceFile: sourceFile,
         dirs: [dir],
         targetDir: '',
@@ -663,6 +666,7 @@ yooooo:
           BrickFile.config(defaultPath, name: const Name(replacement));
 
       instance.writeTargetFile(
+        partials: [],
         sourceFile: sourceFile,
         dirs: [],
         targetDir: '',
@@ -685,6 +689,7 @@ yooooo:
       const instance = BrickFile.config(defaultFile);
 
       instance.writeTargetFile(
+        partials: [],
         sourceFile: sourceFile,
         dirs: [],
         targetDir: '',
@@ -709,6 +714,7 @@ yooooo:
         sourceFile.writeAsStringSync(content);
 
         instance.writeTargetFile(
+          partials: [],
           sourceFile: sourceFile,
           dirs: [],
           targetDir: '',
@@ -749,6 +755,7 @@ yooooo:
         for (final content in contents.entries) {
           sourceFile.writeAsStringSync(content.key);
           instance.writeTargetFile(
+            partials: [],
             sourceFile: sourceFile,
             dirs: [],
             targetDir: '',
@@ -774,6 +781,7 @@ yooooo:
 
         sourceFile.writeAsStringSync(content);
         instance.writeTargetFile(
+          partials: [],
           sourceFile: sourceFile,
           dirs: [],
           targetDir: '',
@@ -801,6 +809,7 @@ yooooo:
 
         sourceFile.writeAsStringSync(content);
         instance.writeTargetFile(
+          partials: [],
           sourceFile: sourceFile,
           dirs: [],
           targetDir: '',
@@ -857,6 +866,7 @@ yooooo:
               for (final content in contents.entries) {
                 sourceFile.writeAsStringSync(content.key);
                 instance.writeTargetFile(
+                  partials: [],
                   sourceFile: sourceFile,
                   dirs: [],
                   targetDir: '',
@@ -880,6 +890,7 @@ yooooo:
               for (final content in contents.entries) {
                 sourceFile.writeAsStringSync(content.key);
                 instance.writeTargetFile(
+                  partials: [],
                   sourceFile: sourceFile,
                   dirs: [],
                   targetDir: '',
@@ -903,6 +914,7 @@ yooooo:
               for (final content in contents.entries) {
                 sourceFile.writeAsStringSync(content.key);
                 instance.writeTargetFile(
+                  partials: [],
                   sourceFile: sourceFile,
                   dirs: [],
                   targetDir: '',
@@ -931,6 +943,7 @@ yooooo:
               for (final content in contents.entries) {
                 sourceFile.writeAsStringSync(content.key);
                 instance.writeTargetFile(
+                  partials: [],
                   sourceFile: sourceFile,
                   dirs: [],
                   targetDir: '',
@@ -959,6 +972,7 @@ yooooo:
               for (final content in contents.entries) {
                 sourceFile.writeAsStringSync(content.key);
                 instance.writeTargetFile(
+                  partials: [],
                   sourceFile: sourceFile,
                   dirs: [],
                   targetDir: '',
@@ -1005,6 +1019,7 @@ yooooo:
                   sourceFile.writeAsStringSync(content.key);
 
                   instance.writeTargetFile(
+                    partials: [],
                     sourceFile: sourceFile,
                     dirs: [],
                     targetDir: '',
@@ -1035,6 +1050,7 @@ yooooo:
           sourceFile.writeAsStringSync(content);
 
           instance.writeTargetFile(
+            partials: [],
             sourceFile: sourceFile,
             dirs: [],
             targetDir: '',
@@ -1062,6 +1078,7 @@ yooooo:
 
           void writeFile() {
             instance.writeTargetFile(
+              partials: [],
               sourceFile: sourceFile,
               dirs: [],
               targetDir: '',
@@ -1108,6 +1125,7 @@ yooooo:
         sourceFile.writeAsStringSync(loop);
 
         instance.writeTargetFile(
+          partials: [],
           sourceFile: sourceFile,
           dirs: [],
           targetDir: '',
@@ -1130,6 +1148,7 @@ yooooo:
       sourceFile.writeAsStringSync('replace: _HELLO_');
 
       instance.writeTargetFile(
+        partials: [],
         sourceFile: sourceFile,
         dirs: [],
         targetDir: '',

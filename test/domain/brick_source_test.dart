@@ -359,7 +359,7 @@ path:
       const file = BrickFile(fileName);
 
       expect(
-        source.fromSourcePath(file),
+        source.fromSourcePath(file.path),
         join(localPath, fileName),
       );
     });
