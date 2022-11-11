@@ -3,7 +3,13 @@ import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions.dart';
+import 'package:brick_oven/utils/file_replacements.dart';
+import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:equatable/equatable.dart';
+import 'package:file/file.dart';
+import 'package:file/local.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:path/path.dart';
 
 part 'brick_partial.g.dart';
 
@@ -11,7 +17,7 @@ part 'brick_partial.g.dart';
 /// A partial is a template that can be re-used within files
 /// {@endtemplate}
 @autoequal
-class BrickPartial extends Equatable {
+class BrickPartial extends Equatable with FileReplacements {
   /// {@macro brick_partial}
   const BrickPartial({
     required this.path,
@@ -90,6 +96,48 @@ class BrickPartial extends Equatable {
 
   /// the variables within the partial
   final List<Variable> variables;
+
+  /// returns the name of the partial
+  String get name => basenameWithoutExtension(path);
+
+  /// returns the file extension of the partial
+  String get fileExt => extension(path);
+
+  /// returns the file name and extension of the partial
+  String get fileName => basename(path);
+
+  /// returns the [fileName] wrapped with `{{>` and `}}`
+  String toPartialFile() {
+    return '{{~ $fileName }}';
+  }
+
+  /// returns the [fileName] wrapped with `{{~` and `}}`
+  String toPartialInput() {
+    return '{{> $fileName }}';
+  }
+
+  ///
+  FileWriteResult writeTargetFile({
+    required String targetDir,
+    required File sourceFile,
+    required List<BrickPartial> partials,
+    required FileSystem? fileSystem,
+    required Logger logger,
+  }) {
+    fileSystem ??= const LocalFileSystem();
+
+    final file = fileSystem.file(join(targetDir, toPartialFile()))
+      ..createSync(recursive: true);
+
+    return writeFile(
+      targetFile: file,
+      sourceFile: sourceFile,
+      variables: variables,
+      partials: partials,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+  }
 
   @override
   List<Object?> get props => _$props;
