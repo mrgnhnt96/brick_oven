@@ -151,9 +151,9 @@ class BrickSource extends Equatable {
     }
   }
 
-  /// returns the path of [file] as if it were from the [sourceDir]
-  String fromSourcePath(BrickFile file) {
-    return join(sourceDir, file.path);
+  /// returns the path of [path] as if it were from the [sourceDir]
+  String fromSourcePath(String path) {
+    return join(sourceDir, path);
   }
 
   /// merges the [configFiles] onto [files], which copies all
