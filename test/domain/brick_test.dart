@@ -159,6 +159,19 @@ partials:
         );
       });
 
+      test('when duplicate partials exist', () {
+        final yaml = loadYaml('''
+partials:
+  $partialPath:
+  another/$partialPath:
+''');
+
+        expect(
+          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+          throwsA(isA<ConfigException>()),
+        );
+      });
+
       group('brick config', () {
         test('throws $ConfigException when brick config is wrong type', () {
           final yaml = loadYaml('''
@@ -507,6 +520,62 @@ exclude:
           expect(targetFile.readAsStringSync(), content);
 
           expect(testBrick.source.watcher?.isRunning, isNull);
+        });
+
+        test('prints warning if excess variables exist', () {
+          verifyNever(() => mockLogger.warn(any()));
+
+          fs.file(join(localPath, filePath))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('');
+
+          const variable = Variable(placeholder: '_HELLO_', name: 'hello');
+
+          final brick = Brick.memory(
+            name: 'BRICK',
+            source: const BrickSource.none(),
+            logger: mockLogger,
+            fileSystem: fs,
+            files: [
+              BrickFile.config(
+                filePath,
+                variables: const [variable],
+              ),
+            ],
+          );
+
+          // ignore: cascade_invocations
+          brick.cook();
+
+          verify(() => mockLogger.warn('Unused variables in BRICK: "hello"'))
+              .called(1);
+        });
+
+        test('prints warning if excess partials exist', () {
+          verifyNever(() => mockLogger.warn(any()));
+
+          fs.file(join(localPath, filePath))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('');
+
+          final brick = Brick.memory(
+            name: 'BRICK',
+            source: const BrickSource.none(),
+            logger: mockLogger,
+            fileSystem: fs,
+            partials: [
+              BrickPartial(
+                path: join(localPath, filePath),
+              ),
+            ],
+          );
+
+          // ignore: cascade_invocations
+          brick.cook();
+
+          verify(
+            () => mockLogger.warn('Unused partials in BRICK: "$fileName"'),
+          ).called(1);
         });
       });
 

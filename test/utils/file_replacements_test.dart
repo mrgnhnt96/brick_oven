@@ -526,6 +526,30 @@ void main() {
       ),
     ).called(1);
   });
+
+  test('prints warning if file does not exist', () {
+    verifyNever(() => mockLogger.warn(any()));
+
+    const variable = Variable(placeholder: '_HELLO_', name: 'hello');
+    const extraVariable = Variable(placeholder: '_GOODBYE_', name: 'goodbye');
+
+    sourceFile.deleteSync();
+
+    instance.writeFile(
+      partials: [],
+      sourceFile: sourceFile,
+      targetFile: targetFile,
+      variables: [variable, extraVariable],
+      fileSystem: fileSystem,
+      logger: mockLogger,
+    );
+
+    verify(
+      () => mockLogger.warn(
+        'source file does not exist: ${sourceFile.path}',
+      ),
+    ).called(1);
+  });
 }
 
 class _TestFileReplacements with FileReplacements {
