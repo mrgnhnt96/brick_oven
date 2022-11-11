@@ -234,24 +234,42 @@ class BrickFile extends Equatable with FileReplacements {
     newPath = newPath.replaceAll(basename(newPath), '');
     newPath = join(newPath, fileName);
 
+    final dirsUsed = <String>{};
+
     if (newPath.contains(separator)) {
       final originalPath = newPath;
 
       for (final configDir in dirs) {
+        final comparePath = newPath;
         newPath = configDir.apply(newPath, originalPath: originalPath);
+
+        if (newPath != comparePath) {
+          final name = configDir.name?.value;
+          if (name != null) {
+            dirsUsed.add(name);
+          }
+        }
       }
     }
 
     final file = fileSystem.file(join(targetDir, newPath))
       ..createSync(recursive: true);
 
-    return writeFile(
+    final writeResult = writeFile(
       targetFile: file,
       sourceFile: sourceFile,
       variables: variables,
       partials: partials,
       fileSystem: fileSystem,
       logger: logger,
+    );
+
+    return FileWriteResult(
+      usedPartials: writeResult.usedPartials,
+      usedVariables: {
+        ...writeResult.usedVariables,
+        ...dirsUsed,
+      },
     );
   }
 }
