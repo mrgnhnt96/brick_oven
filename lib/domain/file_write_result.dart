@@ -5,13 +5,13 @@ import 'package:brick_oven/domain/variable.dart';
 class FileWriteResult {
   ///
   const FileWriteResult({
-    required this.unusedPartials,
-    required this.unusedVariables,
+    required this.usedPartials,
+    required this.usedVariables,
   });
 
   ///
-  final Set<Variable> unusedVariables;
+  final Set<Variable> usedVariables;
 
   ///
-  final Set<BrickPartial> unusedPartials;
+  final Set<BrickPartial> usedPartials;
 }
