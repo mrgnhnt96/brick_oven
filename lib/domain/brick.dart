@@ -5,7 +5,6 @@ import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
-import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
@@ -148,19 +147,6 @@ class Brick extends Equatable {
         );
 
         partials.add(partial);
-      }
-
-      final names = <String>{};
-
-      for (final partial in partials) {
-        if (names.contains(partial.fileName)) {
-          throw BrickException(
-            brick: name,
-            reason: 'Duplicate partial name `${partial.fileName}`',
-          );
-        }
-
-        names.add(partial.fileName);
       }
 
       return partials;
@@ -380,20 +366,20 @@ class Brick extends Equatable {
 
     if (variablesInBrickYaml.difference(variables).isNotEmpty) {
       isInSync = false;
+      final vars =
+          '"${variablesInBrickYaml.difference(variables).join('", "')}"';
       _logger.warn(
-        'Variables are defined in brick.yaml but not used in '
-        '$brickOvenFileName: '
-        '"${variablesInBrickYaml.difference(variables).join('", "')}"',
+        'Variables ($vars) exist in brick.yaml but not in $brickOvenFileName',
       );
     }
 
     if (variables.difference(variablesInBrickYaml).isNotEmpty) {
       isInSync = false;
+      final vars =
+          '"${variables.difference(variablesInBrickYaml).join('", "')}"';
+
       _logger.warn(
-        'Variables are defined in '
-        '$brickOvenFileName but not used in '
-        'brick.yaml: '
-        '"${variables.difference(variablesInBrickYaml).join('", "')}"',
+        'Variables ($vars) exist in $brickOvenFileName but not in brick.yaml',
       );
     }
 
@@ -408,6 +394,19 @@ class Brick extends Equatable {
   ///
   /// targets: [output] (bricks) -> [name] -> __brick__
   void cook({String output = 'bricks', bool watch = false}) {
+    final names = <String>{};
+
+    for (final partial in partials) {
+      if (names.contains(partial.fileName)) {
+        throw BrickException(
+          brick: name,
+          reason: 'Duplicate partials ("${partial.fileName}") in $name',
+        );
+      }
+
+      names.add(partial.fileName);
+    }
+
     final done = _logger.progress('Writing Brick: $name');
 
     void putInTheOven() {
@@ -429,8 +428,8 @@ class Brick extends Equatable {
       );
       final count = mergedFiles.length;
 
-      final usedVariables = <Variable>{};
-      final usedPartials = <BrickPartial>{};
+      final usedVariables = <String>{};
+      final usedPartials = <String>{};
 
       for (final file in mergedFiles) {
         final writeResult = file.writeTargetFile(
@@ -459,21 +458,22 @@ class Brick extends Equatable {
         usedVariables.addAll(writeResult.usedVariables);
       }
 
-      final unusedVariables = allBrickVariables()
-          .difference(usedVariables.map((e) => name).toSet());
-      final unusedPartials = partials.toSet().difference(usedPartials);
+      final partialNames = partials.map((e) => e.path).toSet();
+
+      final unusedVariables = allBrickVariables().difference(usedVariables);
+      final unusedPartials = partialNames.difference(usedPartials);
 
       if (unusedVariables.isNotEmpty) {
+        final vars = '"${unusedVariables.join('", "')}"';
         _logger.warn(
-          'Unused variables in $name: '
-          '"${unusedVariables.join('", "')}"',
+          'Unused variables ($vars) in $name',
         );
       }
 
       if (unusedPartials.isNotEmpty) {
+        final partials = '"${unusedPartials.map(basename).join('", "')}"';
         _logger.warn(
-          'Unused partials in $name: '
-          '"${unusedPartials.map((e) => e.fileName).join('", "')}"',
+          'Unused partials ($partials) in $name',
         );
       }
 
@@ -488,7 +488,7 @@ class Brick extends Equatable {
     if (watch && watcher != null) {
       watcher
         ..addEvent(putInTheOven)
-        ..addEvent(checkBrickYamlConfig, runAfter: true)
+        ..addEvent(checkBrickYamlConfig)
         ..start();
 
       if (watcher.hasRun) {

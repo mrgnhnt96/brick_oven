@@ -27,22 +27,16 @@ mixin FileReplacements {
     if (variables.isEmpty && partials.isEmpty) {
       sourceFile.copySync(targetFile.path);
 
-      return FileWriteResult(
-        usedPartials: partials.toSet(),
-        usedVariables: variables.toSet(),
-      );
+      return const FileWriteResult.empty();
     }
 
     /// used to check if variable/partials is goes unused
-    final unusedVariables = {...variables};
-    final unusedPartials = {...partials};
+    final usedVariables = <String>{};
+    final usedPartials = <String>{};
 
     if (!sourceFile.existsSync()) {
       logger.warn('source file does not exist: ${sourceFile.path}');
-      return FileWriteResult(
-        usedPartials: partials.toSet(),
-        usedVariables: variables.toSet(),
-      );
+      return const FileWriteResult.empty();
     }
 
     var content = sourceFile.readAsStringSync();
@@ -52,8 +46,7 @@ mixin FileReplacements {
           _writeVariables(variables: variables, content: content);
       content = variablesResult.content;
 
-      /// remove variables that were used in file
-      unusedVariables.removeWhere(variablesResult.used.contains);
+      usedVariables.addAll(variablesResult.used);
     } on ConfigException catch (e) {
       throw FileException(
         file: sourceFile.path,
@@ -64,64 +57,68 @@ mixin FileReplacements {
     final partialsResult = _writePartials(partials: partials, content: content);
     content = partialsResult.content;
 
-    /// remove partials that were used in file
-    unusedPartials.removeWhere(partialsResult.used.contains);
+    usedPartials.addAll(partialsResult.used);
+
+    final variableNames = variables.map((v) => v.name).toSet();
+
+    final unusedVariables = variableNames.difference(usedVariables);
 
     if (unusedVariables.isNotEmpty) {
+      final vars = '"${unusedVariables.map((e) => e).join('", "')}"';
       logger.warn(
-        'The following variables are configured in brick_oven.yaml '
-        'but not used in file `${sourceFile.path}`:\n'
-        '"${unusedVariables.map((e) => e.name).join('", "')}"',
+        'Unused variables ($vars) in `${sourceFile.path}`',
       );
     }
 
     targetFile.writeAsStringSync(content);
 
     return FileWriteResult(
-      usedVariables: unusedVariables.toSet(),
-      usedPartials: unusedPartials.toSet(),
+      usedVariables: usedVariables.toSet(),
+      usedPartials: usedPartials.toSet(),
     );
   }
 
-  _ReplacementResult<BrickPartial> _writePartials({
+  _ReplacementResult _writePartials({
     required String content,
     required Iterable<BrickPartial> partials,
   }) {
     var newContent = content;
 
-    final partialsUsed = <BrickPartial>{};
+    final partialsUsed = <String>{};
 
     for (final partial in partials) {
       final partialPattern = RegExp('.*partial.${partial.name}.*');
+      final compareContent = newContent;
       newContent =
           newContent.replaceAll(partialPattern, partial.toPartialInput());
-      partialsUsed.add(partial);
+
+      if (compareContent != newContent) {
+        partialsUsed.add(partial.path);
+      }
     }
 
     return _ReplacementResult(content: newContent, used: partialsUsed);
   }
 
-  _ReplacementResult<Variable> _writeVariables({
+  _ReplacementResult _writeVariables({
     required List<Variable> variables,
     required String content,
   }) {
     var newContent = content;
 
-    final usedVariables = <Variable>{};
+    final usedVariables = <String>{};
 
     for (final variable in variables) {
       // formats the content
       final loopResult = _checkForLoops(newContent, variable);
       newContent = loopResult.content;
       if (loopResult.used.isNotEmpty) {
-        usedVariables.add(variable);
+        usedVariables.addAll(loopResult.used);
       }
 
       final variableResult = _checkForVariables(newContent, variable);
       newContent = variableResult.content;
-      if (variableResult.used.isNotEmpty) {
-        usedVariables.add(variable);
-      }
+      usedVariables.addAll(variableResult.used);
     }
 
     return _ReplacementResult(
@@ -134,7 +131,7 @@ mixin FileReplacements {
   Pattern _variablePattern(Variable variable) =>
       RegExp(r'([\w-{#^/]*)' '${variable.placeholder}' r'([\w}]*)');
 
-  _ReplacementResult<Variable> _checkForLoops(
+  _ReplacementResult _checkForLoops(
     String content,
     Variable variable,
   ) {
@@ -187,16 +184,16 @@ mixin FileReplacements {
     return _ReplacementResult(
       content: clean,
       used: {
-        if (isVariableUsed) variable,
+        if (isVariableUsed) variable.name,
       },
     );
   }
 
-  _ReplacementResult<Variable> _checkForVariables(
+  _ReplacementResult _checkForVariables(
     String content,
     Variable variable,
   ) {
-    var variableIsUsed = false;
+    var isVariableUsed = false;
 
     final newContent =
         content.replaceAllMapped(_variablePattern(variable), (match) {
@@ -216,7 +213,7 @@ mixin FileReplacements {
                 _checkForVariables(possibleSection, variable);
 
             if (additionalVariables.used.isNotEmpty) {
-              variableIsUsed = true;
+              isVariableUsed = true;
             }
 
             prefix = additionalVariables.content;
@@ -267,7 +264,7 @@ mixin FileReplacements {
         return match.group(0)!;
       }
 
-      variableIsUsed = true;
+      isVariableUsed = true;
 
       return '$prefix$result$suffix';
     });
@@ -275,13 +272,13 @@ mixin FileReplacements {
     return _ReplacementResult(
       content: newContent,
       used: {
-        if (variableIsUsed) variable,
+        if (isVariableUsed) variable.name,
       },
     );
   }
 }
 
-class _ReplacementResult<T> {
+class _ReplacementResult {
   const _ReplacementResult({
     required this.content,
     required this.used,
@@ -289,5 +286,5 @@ class _ReplacementResult<T> {
 
   final String content;
 
-  final Set<T> used;
+  final Set<String> used;
 }

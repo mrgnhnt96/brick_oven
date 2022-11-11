@@ -329,7 +329,8 @@ void main() {
 
         verify(mockWatcher.start).called(1);
         verify(() => mockWatcher.addEvent(any(), runBefore: true)).called(2);
-        verify(() => mockWatcher.addEvent(any(), runAfter: true)).called(3);
+        verify(() => mockWatcher.addEvent(any())).called(2);
+        verify(() => mockWatcher.addEvent(any(), runAfter: true)).called(2);
 
         // this could possibly fail since this prints the time
         verify(mockLogger.cooked).called(1);
@@ -402,7 +403,8 @@ void main() {
 
         verify(mockWatcher.start).called(1);
         verify(() => mockWatcher.addEvent(any(), runBefore: true)).called(2);
-        verify(() => mockWatcher.addEvent(any(), runAfter: true)).called(3);
+        verify(() => mockWatcher.addEvent(any())).called(2);
+        verify(() => mockWatcher.addEvent(any(), runAfter: true)).called(2);
 
         testFileWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
 

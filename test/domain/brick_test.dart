@@ -159,19 +159,6 @@ partials:
         );
       });
 
-      test('when duplicate partials exist', () {
-        final yaml = loadYaml('''
-partials:
-  $partialPath:
-  another/$partialPath:
-''');
-
-        expect(
-          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
-          throwsA(isA<ConfigException>()),
-        );
-      });
-
       group('brick config', () {
         test('throws $ConfigException when brick config is wrong type', () {
           final yaml = loadYaml('''
@@ -547,7 +534,7 @@ exclude:
           // ignore: cascade_invocations
           brick.cook();
 
-          verify(() => mockLogger.warn('Unused variables in BRICK: "hello"'))
+          verify(() => mockLogger.warn('Unused variables ("hello") in BRICK'))
               .called(1);
         });
 
@@ -574,7 +561,7 @@ exclude:
           brick.cook();
 
           verify(
-            () => mockLogger.warn('Unused partials in BRICK: "$fileName"'),
+            () => mockLogger.warn('Unused partials ("$fileName") in BRICK'),
           ).called(1);
         });
       });
@@ -636,6 +623,34 @@ exclude:
 
       when(() => mockLogger.progress(any())).thenReturn(mockProgress);
       when(() => mockLogger.success(any())).thenReturn(null);
+    });
+
+    test('throws $ConfigException when duplicate partials exist', () {
+      final brick = Brick.memory(
+        name: 'Brick',
+        source: const BrickSource.none(),
+        logger: mockLogger,
+        fileSystem: fs,
+        partials: [
+          BrickPartial(
+            path: join(localPath, filePath),
+          ),
+          BrickPartial(
+            path: join(localPath, 'to', filePath),
+          ),
+        ],
+      );
+
+      expect(
+        brick.cook,
+        throwsA(
+          isA<ConfigException>().having(
+            (e) => e.message,
+            'message',
+            contains('Duplicate partials ("$fileName") in Brick'),
+          ),
+        ),
+      );
     });
 
     test(
@@ -1104,8 +1119,7 @@ exclude:
         verify(
           () => mockLogger.warn(
             darkGray.wrap(
-              'Variables are defined in brick.yaml but not used in '
-              'brick_oven.yaml: "var1", "var2"',
+              'Variables ("var1", "var2") exist in brick.yaml but not in brick_oven.yaml',
             ),
           ),
         ).called(1);
@@ -1143,8 +1157,7 @@ exclude:
         verify(
           () => mockLogger.warn(
             darkGray.wrap(
-              'Variables are defined in brick_oven.yaml but not used in '
-              'brick.yaml: "var1", "var2"',
+              'Variables ("var1", "var2") exist in brick_oven.yaml but not in brick.yaml',
             ),
           ),
         ).called(1);

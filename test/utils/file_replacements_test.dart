@@ -520,9 +520,7 @@ void main() {
 
     verify(
       () => mockLogger.warn(
-        'The following variables are configured in brick_oven.yaml '
-        'but not used in file `${sourceFile.path}`:\n'
-        '"${extraVariable.name}"',
+        'Unused variables ("${extraVariable.name}") in `${sourceFile.path}`',
       ),
     ).called(1);
   });
