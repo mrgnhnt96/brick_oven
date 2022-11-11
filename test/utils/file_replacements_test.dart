@@ -1,5 +1,6 @@
 // ignore_for_file: cascade_invocations
 
+import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -35,7 +36,7 @@ void main() {
     targetFile = fileSystem.file(targetFilePath);
   });
 
-  test('copies file when no variables are provided', () {
+  test('copies file when no variables or partials are provided', () {
     instance.writeFile(
       partials: [],
       variables: [],
@@ -454,6 +455,50 @@ void main() {
 
       expect(targetFile.readAsStringSync(), loops[loop]);
     }
+  });
+
+  group('partials', () {
+    group('replaces when placeholder is', () {
+      test('file name with extension', () {
+        const placeholder = 'file.dart';
+        const content = '// partial.$placeholder';
+
+        const partial = BrickPartial(path: 'path/to/file.dart');
+
+        sourceFile.writeAsStringSync(content);
+
+        instance.writeFile(
+          partials: [partial],
+          sourceFile: sourceFile,
+          targetFile: targetFile,
+          variables: [],
+          fileSystem: fileSystem,
+          logger: mockLogger,
+        );
+
+        expect(targetFile.readAsStringSync(), '{{> file.dart }}');
+      });
+
+      test('file name without extension', () {
+        const placeholder = 'file';
+        const content = '// partial.$placeholder';
+
+        const partial = BrickPartial(path: 'path/to/file.dart');
+
+        sourceFile.writeAsStringSync(content);
+
+        instance.writeFile(
+          partials: [partial],
+          sourceFile: sourceFile,
+          targetFile: targetFile,
+          variables: [],
+          fileSystem: fileSystem,
+          logger: mockLogger,
+        );
+
+        expect(targetFile.readAsStringSync(), '{{> file.dart }}');
+      });
+    });
   });
 
   test('prints warning if excess variables exist', () {

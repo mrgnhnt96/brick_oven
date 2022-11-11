@@ -1,16 +1,12 @@
-import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/brick_partial.dart';
+import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/domain/file_write_result.dart';
-import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
-
-part 'file_replacements.g.dart';
 
 /// {@template file_replacements}
 /// the methods to replace variables and partials in a file
@@ -28,7 +24,7 @@ mixin FileReplacements {
     required FileSystem? fileSystem,
     required Logger logger,
   }) {
-    if (variables.isEmpty == true) {
+    if (variables.isEmpty && partials.isEmpty) {
       sourceFile.copySync(targetFile.path);
 
       return FileWriteResult(
@@ -88,7 +84,7 @@ mixin FileReplacements {
     final partialsUsed = <BrickPartial>{};
 
     for (final partial in partials) {
-      final partialPattern = RegExp('(${partial.name}' r'(\S+)?)');
+      final partialPattern = RegExp('.*partial.${partial.name}.*');
       newContent =
           newContent.replaceAll(partialPattern, partial.toPartialInput());
       partialsUsed.add(partial);
@@ -277,8 +273,7 @@ mixin FileReplacements {
   }
 }
 
-@autoequal
-class _ReplacementResult<T> extends Equatable {
+class _ReplacementResult<T> {
   const _ReplacementResult({
     required this.content,
     required this.used,
@@ -287,7 +282,4 @@ class _ReplacementResult<T> extends Equatable {
   final String content;
 
   final Set<T> used;
-
-  @override
-  List<Object?> get props => _$props;
 }
