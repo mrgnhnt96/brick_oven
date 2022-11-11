@@ -5,6 +5,7 @@ import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
+import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
@@ -124,9 +125,9 @@ class Brick extends Equatable {
 
     final partialsData = YamlValue.from(data.remove('partials'));
 
-    Iterable<BrickPartial> partials() sync* {
+    List<BrickPartial> partials() {
       if (partialsData.isNone()) {
-        return;
+        return [];
       }
 
       if (!partialsData.isYaml()) {
@@ -136,11 +137,33 @@ class Brick extends Equatable {
         );
       }
 
+      final partials = <BrickPartial>[];
+
       for (final entry in partialsData.asYaml().value.entries) {
         final path = entry.key as String;
 
-        yield BrickPartial.fromYaml(YamlValue.from(entry.value), path);
+        final partial = BrickPartial.fromYaml(
+          YamlValue.from(entry.value),
+          path,
+        );
+
+        partials.add(partial);
       }
+
+      final names = <String>{};
+
+      for (final partial in partials) {
+        if (names.contains(partial.fileName)) {
+          throw BrickException(
+            brick: name,
+            reason: 'Duplicate partial name `${partial.fileName}`',
+          );
+        }
+
+        names.add(partial.fileName);
+      }
+
+      return partials;
     }
 
     final excludedPaths = YamlValue.from(data.remove('exclude'));
@@ -406,8 +429,11 @@ class Brick extends Equatable {
       );
       final count = mergedFiles.length;
 
+      final usedVariables = <Variable>{};
+      final usedPartials = <BrickPartial>{};
+
       for (final file in mergedFiles) {
-        file.writeTargetFile(
+        final writeResult = file.writeTargetFile(
           targetDir: targetDir,
           sourceFile: _fileSystem.file(source.fromSourcePath(file.path)),
           dirs: dirs,
@@ -415,15 +441,39 @@ class Brick extends Equatable {
           fileSystem: _fileSystem,
           logger: _logger,
         );
+
+        usedVariables.addAll(writeResult.usedVariables);
+        usedPartials.addAll(writeResult.usedPartials);
       }
 
       for (final partial in partials) {
-        partial.writeTargetFile(
+        final writeResult = partial.writeTargetFile(
           targetDir: targetDir,
           sourceFile: _fileSystem.file(source.fromSourcePath(partial.path)),
           partials: partials,
           fileSystem: _fileSystem,
           logger: _logger,
+        );
+
+        usedPartials.addAll(writeResult.usedPartials);
+        usedVariables.addAll(writeResult.usedVariables);
+      }
+
+      final unusedVariables = allBrickVariables()
+          .difference(usedVariables.map((e) => name).toSet());
+      final unusedPartials = partials.toSet().difference(usedPartials);
+
+      if (unusedVariables.isNotEmpty) {
+        _logger.warn(
+          'Unused variables in $name: '
+          '"${unusedVariables.join('", "')}"',
+        );
+      }
+
+      if (unusedPartials.isNotEmpty) {
+        _logger.warn(
+          'Unused partials in $name: '
+          '"${unusedPartials.map((e) => e.fileName).join('", "')}"',
         );
       }
 
