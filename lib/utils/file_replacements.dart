@@ -28,14 +28,22 @@ mixin FileReplacements {
       sourceFile.copySync(targetFile.path);
 
       return FileWriteResult(
-        unusedPartials: partials.toSet(),
-        unusedVariables: variables.toSet(),
+        usedPartials: partials.toSet(),
+        usedVariables: variables.toSet(),
       );
     }
 
     /// used to check if variable/partials is goes unused
     final unusedVariables = {...variables};
     final unusedPartials = {...partials};
+
+    if (!sourceFile.existsSync()) {
+      logger.warn('source file does not exist: ${sourceFile.path}');
+      return FileWriteResult(
+        usedPartials: partials.toSet(),
+        usedVariables: variables.toSet(),
+      );
+    }
 
     var content = sourceFile.readAsStringSync();
 
@@ -70,8 +78,8 @@ mixin FileReplacements {
     targetFile.writeAsStringSync(content);
 
     return FileWriteResult(
-      unusedVariables: unusedVariables.toSet(),
-      unusedPartials: unusedPartials.toSet(),
+      usedVariables: unusedVariables.toSet(),
+      usedPartials: unusedPartials.toSet(),
     );
   }
 
