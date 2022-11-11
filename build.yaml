@@ -5,6 +5,7 @@ targets:
         generate_for:
           include:
             - lib/domain/*.dart
+            - lib/utils/file_replacements.dart
           exclude:
               - '**/example/**/*.dart'
 
@@ -12,5 +13,6 @@ targets:
         generate_for:
           include:
             - lib/domain/*.dart
+            - lib/utils/file_replacements.dart
           exclude:
             - '**/example/**/*.dart'
