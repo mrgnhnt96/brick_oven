@@ -551,7 +551,7 @@ exclude:
     },
   );
 
-  group('#writeBrick', () {
+  group('#cook', () {
     late FileSystem fs;
     late Logger mockLogger;
     late Progress mockProgress;
@@ -689,6 +689,43 @@ exclude:
 
       for (final file in testBrick.files) {
         expect(fs.file(join(brickPath, file.path)).existsSync(), isTrue);
+      }
+    });
+
+    test('loops through partials to write', () {
+      const files = ['file1.dart', 'path/file2.dart', 'path/to/file3.dart'];
+
+      for (final file in files) {
+        final fakeSourcePath = fs.file(join(localPath, file));
+
+        fs.file(fakeSourcePath).createSync(recursive: true);
+      }
+
+      final testBrick = Brick.memory(
+        name: brickName,
+        logger: mockLogger,
+        source: BrickSource.memory(
+          localPath: localPath,
+          fileSystem: fs,
+        ),
+        partials: [for (final file in files) BrickPartial(path: file)],
+        fileSystem: fs,
+      );
+
+      for (final partial in testBrick.partials) {
+        expect(
+          fs.file(join(brickPath, partial.toPartialFile())).existsSync(),
+          isFalse,
+        );
+      }
+
+      testBrick.cook();
+
+      for (final partial in testBrick.partials) {
+        expect(
+          fs.file(join(brickPath, partial.toPartialFile())).existsSync(),
+          isTrue,
+        );
       }
     });
   });
