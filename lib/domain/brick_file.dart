@@ -1,12 +1,12 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/enums/mustache_format.dart';
-import 'package:brick_oven/enums/mustache_loops.dart';
-import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/file_replacements.dart';
+import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -18,10 +18,10 @@ import 'package:path/path.dart' hide extension;
 part 'brick_file.g.dart';
 
 /// {@template brick_file}
-/// Represents the file from the `brick_oven.yaml` file
+/// Represents a file configured in a brick
 /// {@endtemplate}
 @autoequal
-class BrickFile extends Equatable {
+class BrickFile extends Equatable with FileReplacements {
   /// {macro brick_file}
   const BrickFile(this.path, {this.name})
       : variables = const [],
@@ -221,187 +221,37 @@ class BrickFile extends Equatable {
   ///
   /// If there are any [dirs], they will be applied
   /// to the [path]
-  void writeTargetFile({
+  FileWriteResult writeTargetFile({
     required String targetDir,
     required File sourceFile,
-    required Iterable<BrickPath> dirs,
+    required List<BrickPath> dirs,
+    required List<BrickPartial> partials,
     required FileSystem? fileSystem,
     required Logger logger,
   }) {
     fileSystem ??= const LocalFileSystem();
-    var path = this.path;
-    path = path.replaceAll(basename(path), '');
-    path = join(path, fileName);
+    var newPath = path;
+    newPath = newPath.replaceAll(basename(newPath), '');
+    newPath = join(newPath, fileName);
 
-    if (path.contains(separator)) {
-      final originalPath = path;
+    if (newPath.contains(separator)) {
+      final originalPath = newPath;
 
       for (final configDir in dirs) {
-        path = configDir.apply(path, originalPath: originalPath);
+        newPath = configDir.apply(newPath, originalPath: originalPath);
       }
     }
 
-    final file = fileSystem.file(join(targetDir, path))
+    final file = fileSystem.file(join(targetDir, newPath))
       ..createSync(recursive: true);
 
-    if (variables.isEmpty == true) {
-      sourceFile.copySync(file.path);
-
-      return;
-    }
-
-    String content;
-    try {
-      content = sourceFile.readAsStringSync();
-    } catch (e) {
-      return;
-    }
-
-    const loopSetUp = '---set-up-loop---';
-
-    /// used to check if variable is used in file
-    final allVariables = [...variables];
-
-    for (final variable in variables) {
-      final loopPattern = RegExp('.*$loopSetUp' r'({{.[\w-+$\.]+}}).*');
-      final variablePattern =
-          RegExp(r'([\w-{#^/]*)' '${variable.placeholder}' r'([\w}]*)');
-
-      String checkForLoops(String content) {
-        final setUpLoops = content.replaceAllMapped(variablePattern, (match) {
-          final possibleLoop = match.group(1);
-          final loop = MustacheLoops.values.from(possibleLoop);
-
-          // if loop is found, then replace the content
-          if (loop == null) {
-            return match.group(0)!;
-          }
-
-          allVariables.remove(variable);
-          final formattedLoop = loop.format(variable.name);
-
-          return '$loopSetUp$formattedLoop';
-        });
-
-        // remove the loop setup and all pre/post content
-        final looped = setUpLoops.replaceAllMapped(loopPattern, (match) {
-          return match.group(1)!;
-        });
-
-        // remove all extra linebreaks before & after the loop
-        final clean = looped.replaceAllMapped(
-          RegExp(r'(\n*)({{[#^/][\w-]+}})$(\n*)', multiLine: true),
-          (match) {
-            var before = '';
-            var after = '';
-
-            final beforeMatch = match.group(1);
-            if (beforeMatch != null && beforeMatch.isNotEmpty) {
-              before = '\n';
-            }
-
-            final afterMatch = match.group(3);
-            if (afterMatch != null && afterMatch.isNotEmpty) {
-              after = '\n';
-            }
-
-            allVariables.remove(variable);
-            return '$before${match.group(2)!}$after';
-          },
-        );
-
-        return clean;
-      }
-
-      String checkForVariables(String content) {
-        return content.replaceAllMapped(variablePattern, (match) {
-          final possibleSection = match.group(1);
-          MustacheSections? section;
-          String result;
-          var suffix = '';
-          var prefix = '';
-
-          // check for section or loop
-          if (possibleSection != null && possibleSection.isNotEmpty) {
-            section = MustacheSections.values.from(possibleSection);
-
-            if (section == null) {
-              if (possibleSection.isNotEmpty) {
-                final additionalVariables = checkForVariables(possibleSection);
-
-                prefix = additionalVariables;
-              }
-            } else {
-              prefix = prefix.replaceAll(section.matcher, '');
-            }
-          }
-
-          if (section == null &&
-              possibleSection?.startsWith(RegExp(r'{{[\^#\\]')) == false) {
-            final completeMatch = match.group(0);
-
-            if (completeMatch != null && completeMatch.isNotEmpty) {
-              if (completeMatch.startsWith('{') ||
-                  completeMatch.endsWith('}')) {
-                final variableError = VariableException(
-                  variable: completeMatch,
-                  reason: 'Please remove curly braces from variable '
-                      '`$completeMatch` '
-                      'This will cause unexpected behavior '
-                      'when creating the brick',
-                );
-
-                throw FileException(
-                  file: sourceFile.path,
-                  reason: variableError.message,
-                );
-              }
-            }
-          }
-
-          final possibleFormat = match.group(2);
-
-          final format = MustacheFormat.values.getMustacheValue(possibleFormat);
-
-          if (format == null) {
-            if (possibleFormat != null && possibleFormat.isNotEmpty) {
-              suffix = possibleFormat;
-            }
-
-            if (section == null) {
-              result = '{{${variable.name}}}';
-            } else {
-              result = section.format(variable.name);
-            }
-          } else {
-            // format the variable
-            suffix = MustacheFormat.values.getSuffix(possibleFormat) ?? '';
-            result = variable.formatName(format);
-          }
-
-          if (prefix.startsWith(RegExp('{{[#^/]')) || suffix.endsWith('}}')) {
-            return match.group(0)!;
-          }
-
-          allVariables.remove(variable);
-
-          return '$prefix$result$suffix';
-        });
-      }
-
-      // formats the content
-      content = checkForLoops(content);
-      content = checkForVariables(content);
-    }
-
-    if (allVariables.isNotEmpty) {
-      logger.warn(
-        'The following variables are configured in brick_oven.yaml '
-        'but not used in file `${sourceFile.path}`:\n'
-        '"${allVariables.map((e) => e.name).join('", "')}"',
-      );
-    }
-
-    file.writeAsStringSync(content);
+    return writeFile(
+      targetFile: file,
+      sourceFile: sourceFile,
+      variables: variables,
+      partials: partials,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
   }
 }
