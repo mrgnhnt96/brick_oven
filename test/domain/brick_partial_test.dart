@@ -1,9 +1,17 @@
+// ignore_for_file: cascade_invocations
+
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:yaml/yaml.dart';
+
+import '../test_utils/mocks.dart';
 
 void main() {
   test('can be instanciated', () {
@@ -97,6 +105,71 @@ vars:
           ),
         );
       });
+    });
+  });
+
+  test('#name returns file name without extension', () {
+    const instance = BrickPartial(path: 'path/to/file.dart');
+
+    expect(instance.name, 'file');
+  });
+
+  group('#fileName', () {
+    test('returns the file name with extension', () {
+      const instance = BrickPartial(path: 'path/to/file.dart');
+
+      expect(instance.fileName, 'file.dart');
+    });
+
+    test('returns the file name with generated extension', () {
+      const instance = BrickPartial(path: 'path/to/file.g.dart');
+
+      expect(instance.fileName, 'file.g.dart');
+    });
+  });
+
+  test('#toPartialFile, returns formatted partial file', () {
+    const instance = BrickPartial(path: 'path/to/file.dart');
+
+    expect(instance.toPartialFile(), '{{~ file.dart }}');
+  });
+
+  test('#toPartialInput returns formatted partial input', () {
+    const instance = BrickPartial(path: 'path/to/file.dart');
+
+    expect(instance.toPartialInput(), '{{> file.dart }}');
+  });
+
+  group('#writeTargetFile', () {
+    late FileSystem fs;
+    late Logger mockLogger;
+    const targetDir = 'bricks';
+    const fileName = 'file.dart';
+    const sourcePath = 'path/to/$fileName';
+    const defaultContent = 'content';
+    late File sourceFile;
+
+    setUp(() {
+      mockLogger = MockLogger();
+
+      fs = MemoryFileSystem();
+      sourceFile = fs.file(sourcePath)
+        ..create(recursive: true)
+        ..writeAsStringSync(defaultContent);
+    });
+
+    test('writes file on target dir root', () {
+      const instance = BrickPartial(path: 'path/to/file.dart');
+
+      instance.writeTargetFile(
+        targetDir: targetDir,
+        sourceFile: sourceFile,
+        partials: [],
+        fileSystem: fs,
+        logger: mockLogger,
+      );
+
+      expect(fs.file(join(targetDir, '{{~ $fileName }}')).existsSync(), isTrue);
     });
   });
 }

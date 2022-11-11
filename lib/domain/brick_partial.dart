@@ -100,9 +100,6 @@ class BrickPartial extends Equatable with FileReplacements {
   /// returns the name of the partial
   String get name => basenameWithoutExtension(path);
 
-  /// returns the file extension of the partial
-  String get fileExt => extension(path);
-
   /// returns the file name and extension of the partial
   String get fileName => basename(path);
 
@@ -116,7 +113,8 @@ class BrickPartial extends Equatable with FileReplacements {
     return '{{> $fileName }}';
   }
 
-  ///
+  /// writes the partial file replacing variables and partials with
+  /// their respective values
   FileWriteResult writeTargetFile({
     required String targetDir,
     required File sourceFile,
