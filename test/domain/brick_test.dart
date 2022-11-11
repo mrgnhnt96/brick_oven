@@ -810,6 +810,11 @@ exclude:
           fs.file(join(brickPath, partial.toPartialFile())).existsSync(),
           isTrue,
         );
+
+        expect(
+          fs.file(join(brickPath, partial.path)).existsSync(),
+          isFalse,
+        );
       }
     });
   });

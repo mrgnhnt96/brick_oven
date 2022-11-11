@@ -431,7 +431,14 @@ class Brick extends Equatable {
       final usedVariables = <String>{};
       final usedPartials = <String>{};
 
+      final partialPaths = partials.map((e) => e.path).toSet();
+
       for (final file in mergedFiles) {
+        if (partialPaths.contains(file.path)) {
+          // skip partial file generation
+          continue;
+        }
+
         final writeResult = file.writeTargetFile(
           targetDir: targetDir,
           sourceFile: _fileSystem.file(source.fromSourcePath(file.path)),
