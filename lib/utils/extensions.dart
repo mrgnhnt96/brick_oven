@@ -77,8 +77,14 @@ extension LoggerX on Logger {
 
 /// extensions for [ArgParser]
 extension ArgParserX on ArgParser {
+  /// adds the [ArgParser] for `BrickCooker`
+  void addCookOptionsAndFlags() {
+    addOutputOption();
+    addWatchFlag();
+  }
+
   /// the output directory
-  void output() {
+  void addOutputOption() {
     addOption(
       'output',
       abbr: 'o',
@@ -89,7 +95,7 @@ extension ArgParserX on ArgParser {
   }
 
   /// watches the local source files
-  void watch() {
+  void addWatchFlag() {
     addFlag(
       'watch',
       abbr: 'w',
