@@ -98,14 +98,4 @@ extension ArgParserX on ArgParser {
           're-cook the bricks as they change.',
     );
   }
-
-  /// quits after x file updates
-  void quitAfter() {
-    addOption(
-      'quit-after',
-      abbr: 'x',
-      help: 'Quit after the specified number of updates.',
-      hide: true,
-    );
-  }
 }

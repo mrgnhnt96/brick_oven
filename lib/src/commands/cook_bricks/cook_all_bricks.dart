@@ -60,7 +60,5 @@ extension on ArgParser {
     output();
 
     watch();
-
-    quitAfter();
   }
 }
