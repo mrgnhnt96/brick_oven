@@ -24,7 +24,7 @@ void main() {
     test('displays description correctly', () {
       expect(
         ListCommand(logger: mockLogger).description,
-        'Lists all configured bricks from ${BrickOvenYaml.file}.',
+        'Lists all configured bricks from ${BrickOvenYaml.file}',
       );
     });
 

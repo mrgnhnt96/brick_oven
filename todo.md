@@ -1,27 +1,27 @@
 # TODO
 
-- [ ] ? Add support for variables in brick.yaml file
-  - [ ] ? Allow override of variable properties
+<!-- ?? -->
+- [ ] Add support for variables in brick.yaml file
+  - [ ] Allow override of variable properties
+- [ ] Configure provide match pattern for sections, variables, and partials
 
-- [ ] rename `value` to `change_to` for files & dirs
-- [ ] Look into changing the format from {{#format}}NAME{{/format}} to {{NAME.toFormat()}}
-- [ ] Make sure line breaks match the original file
-- [x] Warn when a variable is not used
+- [ ] look up transpiler vs generator
+
 - [ ] Change default behavior for escaped variables?
-  - [ ] Currently when formatted, the variable is escaped, I don't know if this is the best behavior or if we should introduce an option to NOT escape the variable
-- [x] Add support for partials
-  - Requirements
-    - [x] Should be an array on a brick
-    - [x] require unique file names
-    - [x] Allow variables
-    - [x] Do NOT allow name
-    - [x] Get generated to root of project
-      - This is because mason does not support partials being generated in a subdirectory
-    - [x] Check for duplicate partials
-    - [x] Check for unused partials
-    - [ ] ~~Check for non existing referenced partials~~
-    - [x] variables in files should replace whole line
-    - [x] Allow variable (within file) names to be
-      - [x] file name
-        - [x] with ext
-        - [x] without ext
+  - Currently when formatted, the variable is escaped, I don't know if this is the best behavior or if we should introduce an option to NOT escape the variable
+
+## BUGS
+
+- [ ] Make sure line breaks match the original file
+- [ ] write test for if variable is wrapped in {}
+  - check logger for warning
+
+## FEATURES
+
+- [ ] Possible unconverted variables within files
+  - [ ] get all variables and check in files with all variables
+- [ ] Add flag to sync or not
+- [ ] add mixpanel analytics
+
+<!-- FUTURE -->
+- [ ] Look into changing the format from {{#format}}NAME{{/format}} to {{NAME.toFormat()}}

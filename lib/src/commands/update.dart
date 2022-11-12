@@ -18,7 +18,7 @@ class UpdateCommand extends BrickOvenCommand {
   final PubUpdater _pubUpdater;
 
   @override
-  final String description = 'Updates brick_oven to the latest version.';
+  final String description = 'Updates brick_oven to the latest version';
 
   @override
   final String name = 'update';

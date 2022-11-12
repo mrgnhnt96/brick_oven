@@ -22,9 +22,9 @@ const expectedUsage = [
   '    --version    Print the current version\n',
   '\n',
   'Available commands:\n',
-  '  cook     Cook 👨‍🍳 bricks from the config file.\n',
-  '  list     Lists all configured bricks from brick_oven.yaml.\n',
-  '  update   Updates brick_oven to the latest version.\n',
+  '  cook     Cook 👨‍🍳 bricks from the config file\n',
+  '  list     Lists all configured bricks from brick_oven.yaml\n',
+  '  update   Updates brick_oven to the latest version\n',
   '\n',
   'Run "brick_oven help <command>" for more information about a command.',
 ];

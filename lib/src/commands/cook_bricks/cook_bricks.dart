@@ -44,7 +44,7 @@ class CookBricksCommand extends BrickOvenCommand {
   }
 
   @override
-  String get description => 'Cook 👨‍🍳 bricks from the config file.';
+  String get description => 'Cook 👨‍🍳 bricks from the config file';
 
   @override
   String get name => 'cook';

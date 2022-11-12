@@ -26,7 +26,7 @@ void main() {
     test('description displays correctly', () {
       expect(
         UpdateCommand(logger: mockLogger).description,
-        'Updates brick_oven to the latest version.',
+        'Updates brick_oven to the latest version',
       );
     });
 

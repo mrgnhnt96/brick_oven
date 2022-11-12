@@ -28,7 +28,7 @@ class CookAllBricks extends BrickOvenCooker with ConfigWatcherMixin, OvenMixin {
   final KeyPressListener? keyPressListener;
 
   @override
-  String get description => 'Cook all bricks.';
+  String get description => 'Cook all bricks';
 
   @override
   String get name => 'all';

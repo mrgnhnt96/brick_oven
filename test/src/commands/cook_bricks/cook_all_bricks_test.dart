@@ -41,7 +41,7 @@ void main() {
 
   group('$CookAllBricks', () {
     test('description displays correctly', () {
-      expect(command.description, 'Cook all bricks.');
+      expect(command.description, 'Cook all bricks');
     });
 
     test('name displays correctly', () {

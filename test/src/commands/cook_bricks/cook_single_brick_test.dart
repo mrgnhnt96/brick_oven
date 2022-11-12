@@ -78,7 +78,7 @@ bricks:
     test('description displays correctly', () {
       expect(
         brickOvenCommand.description,
-        'Cook the brick: ${brick.name}.',
+        'Cook the brick: ${brick.name}',
       );
     });
 

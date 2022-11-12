@@ -69,7 +69,7 @@ bricks:
     test('description displays correctly', () {
       expect(
         brickOvenCommand.description,
-        'Cook 👨‍🍳 bricks from the config file.',
+        'Cook 👨‍🍳 bricks from the config file',
       );
     });
 

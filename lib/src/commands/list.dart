@@ -31,7 +31,7 @@ class ListCommand extends BrickOvenCommand {
 
   @override
   String get description =>
-      'Lists all configured bricks from ${BrickOvenYaml.file}.';
+      'Lists all configured bricks from ${BrickOvenYaml.file}';
 
   @override
   String get name => 'list';

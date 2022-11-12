@@ -36,7 +36,7 @@ class CookSingleBrick extends BrickOvenCooker
   final KeyPressListener? keyPressListener;
 
   @override
-  String get description => 'Cook the brick: $name.';
+  String get description => 'Cook the brick: $name';
 
   @override
   String get name => brick.name;
