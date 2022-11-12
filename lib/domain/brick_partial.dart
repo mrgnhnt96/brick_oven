@@ -127,14 +127,21 @@ class BrickPartial extends Equatable with FileReplacements {
     final file = fileSystem.file(join(targetDir, toPartialFile()))
       ..createSync(recursive: true);
 
-    return writeFile(
-      targetFile: file,
-      sourceFile: sourceFile,
-      variables: variables,
-      partials: partials,
-      fileSystem: fileSystem,
-      logger: logger,
-    );
+    try {
+      return writeFile(
+        targetFile: file,
+        sourceFile: sourceFile,
+        variables: variables,
+        partials: partials,
+        fileSystem: fileSystem,
+        logger: logger,
+      );
+    } on ConfigException catch (e) {
+      throw PartialException(
+        partial: path,
+        reason: e.message,
+      );
+    }
   }
 
   @override

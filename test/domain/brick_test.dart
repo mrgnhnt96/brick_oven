@@ -623,9 +623,12 @@ exclude:
 
       when(() => mockLogger.progress(any())).thenReturn(mockProgress);
       when(() => mockLogger.success(any())).thenReturn(null);
+
+      registerFallbackValue(MockLogger());
+      registerFallbackValue(MockFile());
     });
 
-    test('throws $ConfigException when duplicate partials exist', () {
+    test('throws $BrickException when duplicate partials exist', () {
       final brick = Brick.memory(
         name: 'Brick',
         source: const BrickSource.none(),
@@ -644,12 +647,88 @@ exclude:
       expect(
         brick.cook,
         throwsA(
-          isA<ConfigException>().having(
+          isA<BrickException>().having(
             (e) => e.message,
             'message',
             contains('Duplicate partials ("$fileName") in Brick'),
           ),
         ),
+      );
+    });
+
+    test('throws $BrickException when partial #writeFile throws', () {
+      final mockPartial = MockBrickPartial();
+
+      when(() => mockPartial.fileName).thenReturn(fileName);
+      when(() => mockPartial.path).thenReturn(filePath);
+
+      when(
+        () => mockPartial.writeTargetFile(
+          targetDir: any(named: 'targetDir'),
+          logger: any(named: 'logger'),
+          fileSystem: any(named: 'fileSystem'),
+          partials: any(named: 'partials'),
+          sourceFile: any(named: 'sourceFile'),
+        ),
+      ).thenThrow(
+        const PartialException(partial: 'this one', reason: 'for no reason'),
+      );
+
+      final brick = Brick.memory(
+        name: 'Brick',
+        source: const BrickSource.none(),
+        logger: mockLogger,
+        fileSystem: fs,
+        partials: [mockPartial],
+      );
+
+      expect(
+        brick.cook,
+        throwsA(isA<BrickException>()),
+      );
+    });
+
+    test('throws $BrickException when file #writefile throws', () {
+      final mockFile = MockBrickFile();
+      final mockSource = MockSource();
+
+      when(
+        () =>
+            mockSource.mergeFilesAndConfig(any(), logger: any(named: 'logger')),
+      ).thenReturn([mockFile]);
+
+      when(
+        () => mockSource.fromSourcePath(any()),
+      ).thenReturn('');
+
+      when(() => mockFile.fileName).thenReturn(fileName);
+      when(() => mockFile.path).thenReturn(filePath);
+      when(() => mockFile.variables).thenReturn([]);
+
+      when(
+        () => mockFile.writeTargetFile(
+          targetDir: any(named: 'targetDir'),
+          logger: any(named: 'logger'),
+          fileSystem: any(named: 'fileSystem'),
+          partials: any(named: 'partials'),
+          sourceFile: any(named: 'sourceFile'),
+          dirs: any(named: 'dirs'),
+        ),
+      ).thenThrow(
+        const FileException(file: 'this one', reason: 'for no reason'),
+      );
+
+      final brick = Brick.memory(
+        name: 'Brick',
+        source: mockSource,
+        logger: mockLogger,
+        fileSystem: fs,
+        files: [mockFile],
+      );
+
+      expect(
+        brick.cook,
+        throwsA(isA<BrickException>()),
       );
     });
 

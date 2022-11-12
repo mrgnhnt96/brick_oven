@@ -1,5 +1,6 @@
 // ignore_for_file: cascade_invocations
 
+import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -158,6 +159,21 @@ vars:
         ..writeAsStringSync(defaultContent);
     });
 
+    test('Throws $PartialException when #writeFile throws', () {
+      const instance = TestBrickPartial(sourcePath);
+
+      expect(
+        () => instance.writeTargetFile(
+          partials: [],
+          sourceFile: sourceFile,
+          targetDir: '',
+          fileSystem: fs,
+          logger: mockLogger,
+        ),
+        throwsA(isA<PartialException>()),
+      );
+    });
+
     test('writes file on target dir root', () {
       const instance = BrickPartial(path: 'path/to/file.dart');
 
@@ -172,4 +188,20 @@ vars:
       expect(fs.file(join(targetDir, '{{~ $fileName }}')).existsSync(), isTrue);
     });
   });
+}
+
+class TestBrickPartial extends BrickPartial {
+  const TestBrickPartial(String path) : super(path: path);
+
+  @override
+  FileWriteResult writeFile({
+    required File targetFile,
+    required File sourceFile,
+    required List<Variable> variables,
+    required List<BrickPartial> partials,
+    required FileSystem? fileSystem,
+    required Logger logger,
+  }) {
+    throw const FileException(file: 'file', reason: 'reason');
+  }
 }

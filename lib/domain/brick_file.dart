@@ -255,21 +255,28 @@ class BrickFile extends Equatable with FileReplacements {
     final file = fileSystem.file(join(targetDir, newPath))
       ..createSync(recursive: true);
 
-    final writeResult = writeFile(
-      targetFile: file,
-      sourceFile: sourceFile,
-      variables: variables,
-      partials: partials,
-      fileSystem: fileSystem,
-      logger: logger,
-    );
+    try {
+      final writeResult = writeFile(
+        targetFile: file,
+        sourceFile: sourceFile,
+        variables: variables,
+        partials: partials,
+        fileSystem: fileSystem,
+        logger: logger,
+      );
 
-    return FileWriteResult(
-      usedPartials: writeResult.usedPartials,
-      usedVariables: {
-        ...writeResult.usedVariables,
-        ...dirsUsed,
-      },
-    );
+      return FileWriteResult(
+        usedPartials: writeResult.usedPartials,
+        usedVariables: {
+          ...writeResult.usedVariables,
+          ...dirsUsed,
+        },
+      );
+    } on ConfigException catch (e) {
+      throw FileException(
+        file: file.path,
+        reason: e.message,
+      );
+    }
   }
 }

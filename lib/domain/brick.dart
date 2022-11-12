@@ -5,6 +5,7 @@ import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
+import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
@@ -439,27 +440,44 @@ class Brick extends Equatable {
           continue;
         }
 
-        final writeResult = file.writeTargetFile(
-          targetDir: targetDir,
-          sourceFile: _fileSystem.file(source.fromSourcePath(file.path)),
-          dirs: dirs,
-          partials: partials,
-          fileSystem: _fileSystem,
-          logger: _logger,
-        );
+        FileWriteResult writeResult;
+
+        try {
+          writeResult = file.writeTargetFile(
+            targetDir: targetDir,
+            sourceFile: _fileSystem.file(source.fromSourcePath(file.path)),
+            dirs: dirs,
+            partials: partials,
+            fileSystem: _fileSystem,
+            logger: _logger,
+          );
+        } on ConfigException catch (e) {
+          throw BrickException(
+            brick: name,
+            reason: e.message,
+          );
+        }
 
         usedVariables.addAll(writeResult.usedVariables);
         usedPartials.addAll(writeResult.usedPartials);
       }
 
       for (final partial in partials) {
-        final writeResult = partial.writeTargetFile(
-          targetDir: targetDir,
-          sourceFile: _fileSystem.file(source.fromSourcePath(partial.path)),
-          partials: partials,
-          fileSystem: _fileSystem,
-          logger: _logger,
-        );
+        FileWriteResult writeResult;
+        try {
+          writeResult = partial.writeTargetFile(
+            targetDir: targetDir,
+            sourceFile: _fileSystem.file(source.fromSourcePath(partial.path)),
+            partials: partials,
+            fileSystem: _fileSystem,
+            logger: _logger,
+          );
+        } on ConfigException catch (e) {
+          throw BrickException(
+            brick: name,
+            reason: e.message,
+          );
+        }
 
         usedPartials.addAll(writeResult.usedPartials);
         usedVariables.addAll(writeResult.usedVariables);

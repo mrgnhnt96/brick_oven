@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
@@ -9,6 +11,7 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:watcher/watcher.dart';
+import 'package:file/file.dart' as file;
 
 class MockBrick extends Mock implements Brick {}
 
@@ -33,3 +36,9 @@ class MockFileWatcher extends Mock implements FileWatcher {}
 class MockStdout extends Mock implements Stdout {}
 
 class MockStdin extends Mock implements Stdin {}
+
+class MockBrickPartial extends Mock implements BrickPartial {}
+
+class MockBrickFile extends Mock implements BrickFile {}
+
+class MockFile extends Mock implements file.File {}

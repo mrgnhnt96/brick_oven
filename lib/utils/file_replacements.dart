@@ -41,18 +41,11 @@ mixin FileReplacements {
 
     var content = sourceFile.readAsStringSync();
 
-    try {
-      final variablesResult =
-          _writeVariables(variables: variables, content: content);
-      content = variablesResult.content;
+    final variablesResult =
+        _writeVariables(variables: variables, content: content);
+    content = variablesResult.content;
 
-      usedVariables.addAll(variablesResult.used);
-    } on ConfigException catch (e) {
-      throw FileException(
-        file: sourceFile.path,
-        reason: e.message,
-      );
-    }
+    usedVariables.addAll(variablesResult.used);
 
     final partialsResult = _writePartials(partials: partials, content: content);
     content = partialsResult.content;

@@ -410,7 +410,7 @@ void main() {
           );
         }
 
-        expect(writeFile, throwsA(isA<FileException>()));
+        expect(writeFile, throwsA(isA<ConfigException>()));
       },
     );
   });
