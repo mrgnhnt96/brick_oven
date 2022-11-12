@@ -42,7 +42,14 @@ abstract class BrickOvenCommand extends Command<int> {
       return const BrickOrError(null, 'No ${BrickOvenYaml.file} file found');
     }
 
-    final config = YamlValue.from(loadYaml(configFile.readAsStringSync()));
+    YamlValue config;
+
+    try {
+      config = YamlValue.from(loadYaml(configFile.readAsStringSync()));
+    } catch (e) {
+      return BrickOrError(null, 'Invalid configuration, $e');
+    }
+
     if (config.isError() || !config.isYaml()) {
       return const BrickOrError(null, 'Invalid brick oven configuration file');
     }

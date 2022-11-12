@@ -74,6 +74,24 @@ bricks:
         },
       );
 
+      test('return $BrickOrError with error yaml has bad syntax', () {
+        const content = '''
+bricks:
+  some:
+  1
+''';
+
+        createFile(BrickOvenYaml.file, content);
+
+        final result = brickOvenCommand.bricks();
+
+        expect(result.isError, isTrue);
+        expect(
+          result.error,
+          startsWith('Invalid configuration, '),
+        );
+      });
+
       test('return $BrickOrError with error when extra keys are provided', () {
         const content = '''
 bricks:
