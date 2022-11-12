@@ -18,21 +18,22 @@ void main() {
   });
 
   group('LoggerX', () {
-    group('#cooking', () {
+    group('#preheat', () {
       test('prints', () {
         overridePrint(() {
-          logger.cooking();
+          logger.preheat();
 
-          expect(printLogs, [('\n⏲️  Cooking...')]);
+          expect(printLogs, [('\n⏲️  Preheating...')]);
         });
       });
 
       test('calls info', () {
         verifyNever(() => mockLogger.info(any()));
 
-        mockLogger.cooking();
+        mockLogger.preheat();
 
-        verify(() => mockLogger.info(cyan.wrap('\n⏲️  Cooking...'))).called(1);
+        verify(() => mockLogger.info(cyan.wrap('\n⏲️  Preheating...')))
+            .called(1);
       });
     });
 
@@ -80,7 +81,7 @@ void main() {
         overridePrint(() {
           logger.watching();
 
-          expect(printLogs, ['\n👀 Watching local files...']);
+          expect(printLogs, ['\n👀 Watching config & source files...']);
         });
       });
 
@@ -90,19 +91,19 @@ void main() {
         mockLogger.watching();
 
         verify(
-          () =>
-              mockLogger.info(lightYellow.wrap('\n👀 Watching local files...')),
+          () => mockLogger
+              .info(lightYellow.wrap('\n👀 Watching config & source files...')),
         ).called(1);
       });
     });
 
-    group('#cooked', () {
+    group('#dingDing', () {
       test('prints', () {
         overridePrint(() {
           final date = DateTime(2021, 1, 1, 12);
-          mockLogger.cooked(date);
+          logger.dingDing(date);
 
-          final cooked = lightGreen.wrap('🍽️  Cooked! (');
+          final cooked = lightGreen.wrap('🔔  Ding Ding! (');
           final timed = darkGray.wrap(date.formatted);
           final end = lightGreen.wrap(')');
 
@@ -116,9 +117,9 @@ void main() {
         verifyNever(() => mockLogger.info(any()));
 
         final date = DateTime(2021, 1, 1, 12);
-        mockLogger.cooked(date);
+        mockLogger.dingDing(date);
 
-        final cooked = lightGreen.wrap('🍽️  Cooked! (');
+        final cooked = lightGreen.wrap('🔔  Ding Ding! (');
         final timed = darkGray.wrap(date.formatted);
         final end = lightGreen.wrap(')');
 

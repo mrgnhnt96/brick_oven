@@ -175,7 +175,7 @@ bricks:
 
       final result = await runner.run();
 
-      verify(mockLogger.cooking).called(1);
+      verify(mockLogger.preheat).called(1);
 
       verify(() => mockBrick.cook(output: 'output/dir')).called(1);
 

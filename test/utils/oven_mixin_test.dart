@@ -120,9 +120,9 @@ void main() {
         final result = await oven.putInOven({mockBrick});
         expect(result.code, ExitCode.success.code);
 
-        verify(mockLogger.cooking).called(1);
+        verify(mockLogger.preheat).called(1);
         // this could possibly fail since this prints the time
-        verify(mockLogger.cooked).called(1);
+        verify(mockLogger.dingDing).called(1);
 
         verifyNever(mockKeyPressListener.listenToKeystrokes);
         verifyNever(() => mockFileWatcher.events);
@@ -147,9 +147,9 @@ void main() {
         final result = await oven.putInOven({mockBrick});
         expect(result.code, ExitCode.success.code);
 
-        verify(mockLogger.cooking).called(1);
+        verify(mockLogger.preheat).called(1);
         // this could possibly fail since this prints the time
-        verify(mockLogger.cooked).called(1);
+        verify(mockLogger.dingDing).called(1);
 
         verifyNever(mockKeyPressListener.listenToKeystrokes);
         verifyNever(() => mockFileWatcher.events);
@@ -176,9 +176,9 @@ void main() {
         final result = await oven.putInOven({mockBrick});
         expect(result.code, ExitCode.success.code);
 
-        verify(mockLogger.cooking).called(1);
+        verify(mockLogger.preheat).called(1);
         // this could possibly fail since this prints the time
-        verify(mockLogger.cooked).called(1);
+        verify(mockLogger.dingDing).called(1);
 
         verifyNever(mockKeyPressListener.listenToKeystrokes);
         verifyNever(() => mockFileWatcher.events);
@@ -267,9 +267,9 @@ void main() {
 
         await Future<void>.delayed(Duration.zero);
 
-        verify(mockLogger.cooking).called(1);
+        verify(mockLogger.preheat).called(1);
         // this could possibly fail since this prints the time
-        verify(mockLogger.cooked).called(1);
+        verify(mockLogger.dingDing).called(1);
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);
@@ -326,7 +326,7 @@ void main() {
 
         await Future<void>.delayed(Duration.zero);
 
-        verify(mockLogger.cooking).called(1);
+        verify(mockLogger.preheat).called(1);
         verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
 
         verify(mockWatcher.start).called(1);
@@ -335,7 +335,7 @@ void main() {
         verify(() => mockWatcher.addEvent(any(), runAfter: true)).called(2);
 
         // this could possibly fail since this prints the time
-        verify(mockLogger.cooked).called(1);
+        verify(mockLogger.dingDing).called(1);
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);
@@ -391,10 +391,10 @@ void main() {
 
         await Future<void>.delayed(Duration.zero);
 
-        verify(mockLogger.cooking).called(1);
+        verify(mockLogger.preheat).called(1);
         verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
         // this could possibly fail since this prints the time
-        verify(mockLogger.cooked).called(1);
+        verify(mockLogger.dingDing).called(1);
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);
@@ -459,10 +459,10 @@ void main() {
 
         await Future<void>.delayed(Duration.zero);
 
-        verify(mockLogger.cooking).called(1);
+        verify(mockLogger.preheat).called(1);
         verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
         // this could possibly fail since this prints the time
-        verify(mockLogger.cooked).called(1);
+        verify(mockLogger.dingDing).called(1);
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);
@@ -476,7 +476,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
 
         verify(() => mockLogger.fileChanged('BRICK')).called(1);
-        verify(mockLogger.cooking).called(1);
+        verify(mockLogger.preheat).called(1);
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);
@@ -529,10 +529,10 @@ void main() {
         await Future<void>.delayed(Duration.zero);
 
         verify(() => mockLogger.info('\nRestarting...')).called(1);
-        verify(mockLogger.cooking).called(1);
+        verify(mockLogger.preheat).called(1);
         verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
         // this could possibly fail since this prints the time
-        verify(mockLogger.cooked).called(1);
+        verify(mockLogger.dingDing).called(1);
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);

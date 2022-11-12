@@ -47,7 +47,7 @@ mixin OvenMixin on BrickCooker, BrickCookerArgs, ConfigWatcherMixin {
   /// [BrickOvenYaml.file] or [Brick.configPath] and
   /// the [Brick.source] directory/files.
   Future<ExitCode> putInOven(Set<Brick> bricks) async {
-    logger.cooking();
+    logger.preheat();
 
     for (final brick in bricks) {
       if (isWatch) {
@@ -56,7 +56,7 @@ mixin OvenMixin on BrickCooker, BrickCookerArgs, ConfigWatcherMixin {
             () => logger.fileChanged(brick.name),
             runBefore: true,
           )
-          ..addEvent(logger.cooking, runBefore: true)
+          ..addEvent(logger.preheat, runBefore: true)
           ..addEvent(logger.watching, runAfter: true)
           ..addEvent(logger.keyStrokes, runAfter: true);
       }
@@ -77,7 +77,7 @@ mixin OvenMixin on BrickCooker, BrickCookerArgs, ConfigWatcherMixin {
       }
     }
 
-    logger.cooked();
+    logger.dingDing();
 
     if (!isWatch) {
       return ExitCode.success;

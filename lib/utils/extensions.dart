@@ -37,16 +37,16 @@ extension DateTimeX on DateTime {
 
 /// the extension for [Logger]
 extension LoggerX on Logger {
-  /// writes `\n⏲️  Cooking...`
-  void cooking() {
-    info(cyan.wrap('\n⏲️  Cooking...'));
+  /// writes `\n⏲️  Preheating...`
+  void preheat() {
+    info(cyan.wrap('\n⏲️  Preheating...'));
   }
 
   /// writes `Cooked!`
-  void cooked([DateTime? date]) {
+  void dingDing([DateTime? date]) {
     final time = (date ?? DateTime.now()).formatted;
 
-    final cooked = lightGreen.wrap('🍽️  Cooked! (');
+    final cooked = lightGreen.wrap('🔔  Ding Ding! (');
     final timed = darkGray.wrap(time);
     final end = lightGreen.wrap(')');
 
@@ -65,7 +65,7 @@ extension LoggerX on Logger {
 
   /// writes `\n👀 Watching local files...`
   void watching() {
-    info(lightYellow.wrap('\n👀 Watching local files...'));
+    info(lightYellow.wrap('\n👀 Watching config & source files...'));
   }
 
   /// writes `Press q to quit...`
