@@ -409,6 +409,12 @@ class Brick extends Equatable {
     }
 
     final done = _logger.progress('Writing Brick: $name');
+    void fail(String type, String path) {
+      done.fail(
+        '${darkGray.wrap('($name)')} '
+        'Failed to write $type: $path',
+      );
+    }
 
     void putInTheOven() {
       final targetDir = join(
@@ -452,10 +458,15 @@ class Brick extends Equatable {
             logger: _logger,
           );
         } on ConfigException catch (e) {
+          fail('file', file.path);
+
           throw BrickException(
             brick: name,
             reason: e.message,
           );
+        } catch (_) {
+          fail('file', file.path);
+          rethrow;
         }
 
         usedVariables.addAll(writeResult.usedVariables);
@@ -473,10 +484,15 @@ class Brick extends Equatable {
             logger: _logger,
           );
         } on ConfigException catch (e) {
+          fail('partial', partial.path);
           throw BrickException(
             brick: name,
             reason: e.message,
           );
+        } catch (_) {
+          fail('partial', partial.path);
+
+          rethrow;
         }
 
         usedPartials.addAll(writeResult.usedPartials);
