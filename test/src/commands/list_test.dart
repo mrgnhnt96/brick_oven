@@ -88,6 +88,8 @@ bricks:
       readme.md:
         vars:
           some_var: some_value
+    partials:
+      header.md:
   package_2:
     source: example/lib
     dirs:
@@ -97,6 +99,8 @@ bricks:
       readme.md:
         vars:
           some_var: some_value
+    partials:
+      header.md:
 ''';
 
       brickConfigFile.writeAsStringSync(contents);
@@ -120,27 +124,12 @@ bricks:
 
         expect(result, ExitCode.success.code);
 
-        verify(() => mockLogger.info('\nBricks in the oven:')).called(1);
         verify(
-          () => mockLogger.info(
-            '''
-${lightYellow.wrap('package_1')}
-  source: example/lib
-  ${cyan.wrap('files')}: 1
-  ${cyan.wrap('dirs')}: 1
-''',
-          ),
+          () => mockLogger.info('package_1: example/lib'),
         ).called(1);
 
         verify(
-          () => mockLogger.info(
-            '''
-${lightYellow.wrap('package_2')}
-  source: example/lib
-  ${cyan.wrap('files')}: 1
-  ${cyan.wrap('dirs')}: 1
-''',
-          ),
+          () => mockLogger.info('package_2: example/lib'),
         ).called(1);
       },
     );
@@ -150,36 +139,18 @@ ${lightYellow.wrap('package_2')}
 
       runner.run(['list', '--verbose']);
 
-      verify(() => mockLogger.info('\nBricks in the oven:')).called(1);
       verify(
-        () => mockLogger.info(
-          '''
-${lightYellow.wrap('package_1')}
-  source: example/lib
-  ${cyan.wrap('files')}:
-    - ${darkGray.wrap('/')}readme.md
-      ${cyan.wrap('vars')}:
-        - some_value ${green.wrap('->')} {some_var}
-  ${cyan.wrap('dirs')}:
-    - ${darkGray.wrap('lib/')}nested ${green.wrap('->')} {nested}
-''',
-        ),
+        () => mockLogger.info('package_1: example/lib'),
       ).called(1);
 
       verify(
-        () => mockLogger.info(
-          '''
-${lightYellow.wrap('package_2')}
-  source: example/lib
-  ${cyan.wrap('files')}:
-    - ${darkGray.wrap('/')}readme.md
-      ${cyan.wrap('vars')}:
-        - some_value ${green.wrap('->')} {some_var}
-  ${cyan.wrap('dirs')}:
-    - ${darkGray.wrap('lib/')}nested ${green.wrap('->')} {nested}
-''',
-        ),
+        () => mockLogger.info('package_2: example/lib'),
       ).called(1);
+
+      verify(
+        () => mockLogger
+            .info('  (configured) dirs: 1, files: 1, partials: 1, vars: 2'),
+      ).called(2);
     });
   });
 }

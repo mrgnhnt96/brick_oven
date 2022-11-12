@@ -38,43 +38,7 @@ class ListCommand extends BrickOvenCommand {
 
   @override
   Future<int> run() async {
-    logger.info('\nBricks in the oven:');
     const tab = '  ';
-
-    String varString(Variable variable) {
-      return '${tab * 4}- '
-          '${variable.placeholder} ${green.wrap('->')} {${variable.name}}';
-    }
-
-    String fileString(BrickFile file) {
-      final segments = BrickPath.separatePath(file.path);
-      final originalName = segments.removeLast();
-      final dir = segments.join(separator) + separator;
-
-      final vars = tab * 3 +
-          cyan.wrap('vars')! +
-          ':\n' +
-          file.variables.map(varString).join('\n');
-
-      return '${tab * 2}- ${darkGray.wrap(dir)}$originalName'
-          // ignore: lines_longer_than_80_chars
-          '${file.hasConfiguredName ? ' ${green.wrap('->')} ${file.simpleName}' : ''}'
-          '${file.variables.isNotEmpty ? '\n$vars' : ''}';
-    }
-
-    String dirString(BrickPath dir) {
-      final parts = dir.configuredParts;
-      final originalDir = parts.removeLast();
-
-      final pathWithoutName = darkGray.wrap(parts.join(separator) + separator);
-      final dirDescription = '${tab * 2}- $pathWithoutName$originalDir';
-
-      if (dir.name?.simple != null) {
-        return '$dirDescription ${green.wrap('->')} ${dir.name!.simple}';
-      }
-
-      return dirDescription;
-    }
 
     final bricksOrError = this.bricks();
     if (bricksOrError.isError) {
@@ -85,39 +49,26 @@ class ListCommand extends BrickOvenCommand {
     final bricks = bricksOrError.bricks;
 
     for (final brick in bricks) {
+      logger.info(
+        '${cyan.wrap(brick.name)}: '
+        '${darkGray.wrap(brick.source.sourceDir)}',
+      );
+
       if (isVerbose) {
-        final configFiles = brick.files.toList()
-          ..sort((a, b) => a.path.compareTo(b.path));
-        final configDirs = brick.dirs.toList()
-          ..sort((a, b) => a.path.compareTo(b.path));
-
-        final files = configFiles.isEmpty
-            ? ''
-            : '\n$tab${cyan.wrap('files')}:'
-                '\n${configFiles.map(fileString).join('\n')}';
-
-        final dirs = configDirs.isEmpty
-            ? ''
-            : '\n$tab${cyan.wrap('dirs')}:'
-                '\n${configDirs.map(dirString).join('\n')}';
+        final dirsString = 'dirs: ${yellow.wrap(brick.dirs.length.toString())}';
+        final filesString =
+            'files: ${yellow.wrap(brick.files.length.toString())}';
+        final varsString =
+            'vars: ${yellow.wrap(brick.allBrickVariables().length.toString())}';
+        final partialsString =
+            'partials: ${yellow.wrap(brick.partials.length.toString())}';
 
         logger.info(
-          '${lightYellow.wrap(brick.name)}'
-          '\n${tab}source: ${brick.source.sourceDir}'
-          '$files'
-          '$dirs\n',
-        );
-      } else {
-        logger.info(
-          '''
-${lightYellow.wrap(brick.name)}
-${tab}source: ${brick.source.sourceDir}
-$tab${cyan.wrap('files')}: ${brick.files.length}
-$tab${cyan.wrap('dirs')}: ${brick.dirs.length}\n''',
+          '$tab${darkGray.wrap('(configured)')} '
+          '$dirsString, $filesString, $partialsString, $varsString',
         );
       }
     }
-    logger.info('');
 
     return ExitCode.success.code;
   }
