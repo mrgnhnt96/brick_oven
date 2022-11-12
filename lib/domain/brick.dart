@@ -336,7 +336,11 @@ class Brick extends Equatable {
 
   /// checks the brick.yaml file to ensure it is in
   /// sync with the brick_oven.yaml file
-  void checkBrickYamlConfig() {
+  void checkBrickYamlConfig({required bool shouldSync}) {
+    if (!shouldSync) {
+      return;
+    }
+
     final config = brickYamlConfig;
     if (config == null) {
       return;
@@ -394,7 +398,11 @@ class Brick extends Equatable {
   /// writes the brick's files, from the [source]'s files.
   ///
   /// targets: [output] (bricks) -> [name] -> __brick__
-  void cook({String output = 'bricks', bool watch = false}) {
+  void cook({
+    String output = 'bricks',
+    bool watch = false,
+    bool sync = true,
+  }) {
     final names = <String>{};
 
     for (final partial in partials) {
@@ -529,7 +537,7 @@ class Brick extends Equatable {
     if (watch && watcher != null) {
       watcher
         ..addEvent(putInTheOven)
-        ..addEvent(checkBrickYamlConfig)
+        ..addEvent(() => checkBrickYamlConfig(shouldSync: sync))
         ..start();
 
       if (watcher.hasRun) {
@@ -538,6 +546,6 @@ class Brick extends Equatable {
     }
 
     putInTheOven();
-    checkBrickYamlConfig();
+    checkBrickYamlConfig(shouldSync: sync);
   }
 }

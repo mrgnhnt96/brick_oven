@@ -62,7 +62,11 @@ mixin OvenMixin on BrickCooker, BrickCookerArgs, ConfigWatcherMixin {
       }
 
       try {
-        brick.cook(output: outputDir ?? 'bricks', watch: isWatch);
+        brick.cook(
+          output: outputDir ?? 'bricks',
+          watch: isWatch,
+          sync: shouldSync,
+        );
       } on ConfigException catch (e) {
         logger
           ..warn(e.message)

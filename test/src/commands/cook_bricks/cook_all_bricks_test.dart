@@ -70,6 +70,28 @@ void main() {
       });
     });
 
+    group('#shouldSync', () {
+      test('returns true when watch flag is provided', () {
+        final command = TestCookAllBricks(
+          argResults: <String, dynamic>{'sync': true},
+          logger: mockLogger,
+          fileSystem: memoryFileSystem,
+        );
+
+        expect(command.shouldSync, isTrue);
+      });
+
+      test('returns false when watch flag is not provided', () {
+        final command = TestCookAllBricks(
+          argResults: <String, dynamic>{'sync': false},
+          logger: mockLogger,
+          fileSystem: memoryFileSystem,
+        );
+
+        expect(command.shouldSync, isFalse);
+      });
+    });
+
     group('#outputDir', () {
       test('returns the output dir when provided', () {
         final command = TestCookAllBricks(

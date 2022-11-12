@@ -81,6 +81,7 @@ extension ArgParserX on ArgParser {
   void addCookOptionsAndFlags() {
     addOutputOption();
     addWatchFlag();
+    addSyncFlag();
   }
 
   /// the output directory
@@ -91,6 +92,19 @@ extension ArgParserX on ArgParser {
       help: 'Sets the output directory',
       valueHelp: 'path',
       defaultsTo: 'bricks',
+    );
+  }
+
+  /// adds the sync flag to validate the brick.yaml file
+  void addSyncFlag() {
+    addFlag(
+      'sync',
+      abbr: 's',
+      help: 'Verifies that the brick.yaml file '
+          'is synced with the brick_oven.yaml file.\n'
+          'Only works if the `brick_config` key '
+          'is set in the brick_oven.yaml file.',
+      defaultsTo: true,
     );
   }
 

@@ -1199,12 +1199,22 @@ exclude:
       mockBricYamlConfig = MockBrickYamlConfig();
     });
 
+    test('returns when shouldSync is false', () {
+      Brick(
+        name: '',
+        source: const BrickSource.none(),
+        logger: mockLogger,
+      ).checkBrickYamlConfig(shouldSync: false);
+
+      expect(printLogs, isEmpty);
+    });
+
     test('returns when brickYamlConfig is null', () {
       Brick(
         name: '',
         source: const BrickSource.none(),
         logger: mockLogger,
-      ).checkBrickYamlConfig();
+      ).checkBrickYamlConfig(shouldSync: true);
 
       expect(printLogs, isEmpty);
     });
@@ -1218,7 +1228,7 @@ exclude:
         source: const BrickSource.none(),
         brickYamlConfig: mockBricYamlConfig,
         logger: mockLogger,
-      ).checkBrickYamlConfig();
+      ).checkBrickYamlConfig(shouldSync: true);
 
       verify(() => mockLogger.warn('Error reading `brick.yaml`')).called(1);
     });
@@ -1234,7 +1244,7 @@ exclude:
         source: const BrickSource.none(),
         brickYamlConfig: mockBricYamlConfig,
         logger: mockLogger,
-      ).checkBrickYamlConfig();
+      ).checkBrickYamlConfig(shouldSync: true);
 
       verify(
         () => mockLogger.warn(
@@ -1257,7 +1267,7 @@ exclude:
         source: const BrickSource.none(),
         brickYamlConfig: mockBricYamlConfig,
         logger: mockLogger,
-      ).checkBrickYamlConfig();
+      ).checkBrickYamlConfig(shouldSync: true);
 
       verifyNever(() => mockLogger.warn(any()));
       verifyNever(() => mockLogger.err(any()));
@@ -1282,7 +1292,7 @@ exclude:
           source: const BrickSource.none(),
           brickYamlConfig: mockBricYamlConfig,
           logger: mockLogger,
-        ).checkBrickYamlConfig();
+        ).checkBrickYamlConfig(shouldSync: true);
 
         verify(
           () => mockLogger.warn(
@@ -1320,7 +1330,7 @@ exclude:
               path: '',
             ),
           ],
-        ).checkBrickYamlConfig();
+        ).checkBrickYamlConfig(shouldSync: true);
 
         verify(
           () => mockLogger.warn(
