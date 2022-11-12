@@ -5,9 +5,11 @@ import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
+import 'package:brick_oven/utils/config_watcher_mixin.dart';
 import 'package:brick_oven/utils/extensions.dart';
 import 'package:brick_oven/utils/oven_mixin.dart';
 import 'package:file/memory.dart';
@@ -590,23 +592,21 @@ void main() {
   });
 }
 
-class TestOvenMixin extends BrickCooker with OvenMixin {
+class TestOvenMixin extends BrickOvenCommand
+    with BrickCooker, BrickCookerArgs, ConfigWatcherMixin, OvenMixin {
   TestOvenMixin({
     this.keyPressListener,
-    required this.logger,
+    required Logger logger,
     this.outputDir = '',
     required this.fileWatchers,
     this.isWatch = false,
-  });
+  }) : super(logger: logger);
 
   @override
   final bool isWatch;
 
   @override
   final KeyPressListener? keyPressListener;
-
-  @override
-  final Logger logger;
 
   @override
   final String outputDir;
@@ -623,6 +623,12 @@ class TestOvenMixin extends BrickCooker with OvenMixin {
 
     return super.watcher(path);
   }
+
+  @override
+  String get description => throw UnimplementedError();
+
+  @override
+  String get name => throw UnimplementedError();
 }
 
 class TextConfigException extends ConfigException {
