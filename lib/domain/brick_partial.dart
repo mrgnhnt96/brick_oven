@@ -138,7 +138,7 @@ class BrickPartial extends Equatable with FileReplacements {
       );
     } on ConfigException catch (e) {
       throw PartialException(
-        partial: path,
+        partial: sourceFile.path,
         reason: e.message,
       );
     }

@@ -274,7 +274,7 @@ class BrickFile extends Equatable with FileReplacements {
       );
     } on ConfigException catch (e) {
       throw FileException(
-        file: file.path,
+        file: sourceFile.path,
         reason: e.message,
       );
     }
