@@ -31,13 +31,13 @@ const expectedUsage = [
 
 const latestVersion = '0.0.0';
 
-final updateMessage = '''
+const updateMessage = '''
 
 +------------------------------------------------------------------------------------+
 |                                                                                    |
-|                   ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}                                  |
-|  ${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/mrgnhnt96/brick_oven/releases/tag/brick_oven-v$latestVersion')} |
-|                             Run ${cyan.wrap('brick_oven update')} to update                        |
+|                   Update available! $packageVersion \u2192 $latestVersion                                  |
+|  Changelog: https://github.com/mrgnhnt96/brick_oven/releases/tag/brick_oven-v$latestVersion |
+|                             Run brick_oven update to update                        |
 |                                                                                    |
 +------------------------------------------------------------------------------------+
 ''';
@@ -172,7 +172,7 @@ void main() {
         }),
       );
 
-      group('--help', () {
+      group('help', () {
         test(
           '--help outputs usage',
           overridePrint(() async {
