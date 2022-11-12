@@ -69,5 +69,5 @@ class ListCommand extends BrickOvenCommand {
   }
 
   /// whether to list the output in verbose mode
-  bool get isVerbose => argResults['verbose'] as bool? ?? false;
+  bool get isVerbose => argResults?['verbose'] as bool? ?? false;
 }
