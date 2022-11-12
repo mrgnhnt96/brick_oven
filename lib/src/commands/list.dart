@@ -1,14 +1,9 @@
 // ignore_for_file: prefer_interpolation_to_compose_strings
 
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
-import 'package:path/path.dart';
-
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/domain/brick_path.dart';
-import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/src/commands/brick_oven.dart';
 
 /// {@template lists_command}
 /// Lists the configured bricks within the config file
