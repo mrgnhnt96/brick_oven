@@ -686,6 +686,42 @@ exclude:
         brick.cook,
         throwsA(isA<BrickException>()),
       );
+
+      verify(() => mockProgress.fail(any())).called(1);
+    });
+
+    test('throws $Exception when partial #writeFile throws', () {
+      final mockPartial = MockBrickPartial();
+
+      when(() => mockPartial.fileName).thenReturn(fileName);
+      when(() => mockPartial.path).thenReturn(filePath);
+
+      when(
+        () => mockPartial.writeTargetFile(
+          targetDir: any(named: 'targetDir'),
+          logger: any(named: 'logger'),
+          fileSystem: any(named: 'fileSystem'),
+          partials: any(named: 'partials'),
+          sourceFile: any(named: 'sourceFile'),
+        ),
+      ).thenThrow(
+        Exception('error'),
+      );
+
+      final brick = Brick.memory(
+        name: 'Brick',
+        source: const BrickSource.none(),
+        logger: mockLogger,
+        fileSystem: fs,
+        partials: [mockPartial],
+      );
+
+      expect(
+        brick.cook,
+        throwsA(isA<Exception>()),
+      );
+
+      verify(() => mockProgress.fail(any())).called(1);
     });
 
     test('throws $BrickException when file #writefile throws', () {
@@ -730,6 +766,54 @@ exclude:
         brick.cook,
         throwsA(isA<BrickException>()),
       );
+
+      verify(() => mockProgress.fail(any())).called(1);
+    });
+
+    test('throws $Exception when file #writefile throws', () {
+      final mockFile = MockBrickFile();
+      final mockSource = MockSource();
+
+      when(
+        () =>
+            mockSource.mergeFilesAndConfig(any(), logger: any(named: 'logger')),
+      ).thenReturn([mockFile]);
+
+      when(
+        () => mockSource.fromSourcePath(any()),
+      ).thenReturn('');
+
+      when(() => mockFile.fileName).thenReturn(fileName);
+      when(() => mockFile.path).thenReturn(filePath);
+      when(() => mockFile.variables).thenReturn([]);
+
+      when(
+        () => mockFile.writeTargetFile(
+          targetDir: any(named: 'targetDir'),
+          logger: any(named: 'logger'),
+          fileSystem: any(named: 'fileSystem'),
+          partials: any(named: 'partials'),
+          sourceFile: any(named: 'sourceFile'),
+          dirs: any(named: 'dirs'),
+        ),
+      ).thenThrow(
+        Exception('error'),
+      );
+
+      final brick = Brick.memory(
+        name: 'Brick',
+        source: mockSource,
+        logger: mockLogger,
+        fileSystem: fs,
+        files: [mockFile],
+      );
+
+      expect(
+        brick.cook,
+        throwsA(isA<Exception>()),
+      );
+
+      verify(() => mockProgress.fail(any())).called(1);
     });
 
     test(
