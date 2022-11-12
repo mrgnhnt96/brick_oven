@@ -1,4 +1,3 @@
-import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_or_error.dart';
@@ -25,9 +24,6 @@ abstract class BrickOvenCommand extends Command<int> {
 
   /// the logger to be used for all logging
   final Logger logger;
-
-  @override
-  ArgResults get argResults => super.argResults!;
 
   /// gets the current working directory
   Directory get cwd {
