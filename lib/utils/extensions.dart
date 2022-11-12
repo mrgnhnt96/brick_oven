@@ -37,9 +37,9 @@ extension DateTimeX on DateTime {
 
 /// the extension for [Logger]
 extension LoggerX on Logger {
-  /// writes `\n⏲️  Preheating...`
+  /// writes `\n🔥  Preheating...`
   void preheat() {
-    info(cyan.wrap('\n⏲️  Preheating...'));
+    info(cyan.wrap('\n🔥  Preheating...'));
   }
 
   /// writes `Cooked!`

@@ -23,7 +23,7 @@ void main() {
         overridePrint(() {
           logger.preheat();
 
-          expect(printLogs, [('\n⏲️  Preheating...')]);
+          expect(printLogs, [('\n🔥  Preheating...')]);
         });
       });
 
@@ -32,7 +32,7 @@ void main() {
 
         mockLogger.preheat();
 
-        verify(() => mockLogger.info(cyan.wrap('\n⏲️  Preheating...')))
+        verify(() => mockLogger.info(cyan.wrap('\n🔥  Preheating...')))
             .called(1);
       });
     });
