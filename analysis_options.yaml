@@ -4,3 +4,6 @@ analyzer:
   errors:
     unused_element: ignore
     directives_ordering: ignore
+
+  exclude:
+      - lib/src/version.dart

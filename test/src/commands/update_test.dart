@@ -1,3 +1,4 @@
+import 'package:brick_oven/src/version.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
@@ -7,7 +8,6 @@ import 'package:universal_io/io.dart';
 
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/update.dart';
-import 'package:brick_oven/src/package_details.dart';
 import 'package:brick_oven/src/runner.dart';
 import '../../test_utils/fakes.dart';
 import '../../test_utils/mocks.dart';

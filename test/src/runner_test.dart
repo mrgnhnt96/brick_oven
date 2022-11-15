@@ -1,7 +1,7 @@
 import 'package:args/command_runner.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/src/package_details.dart';
 import 'package:brick_oven/src/runner.dart';
+import 'package:brick_oven/src/version.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -199,8 +199,7 @@ void main() {
           final result = await commandRunner.run(['--version']);
 
           expect(result, equals(ExitCode.success.code));
-          verify(() => logger.alert('\nbrick_oven: $packageVersion\n'))
-              .called(1);
+          verify(() => logger.alert(packageVersion)).called(1);
         });
       });
     });
