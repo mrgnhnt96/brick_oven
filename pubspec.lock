@@ -92,6 +92,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "7.2.7"
+  build_version:
+    dependency: "direct dev"
+    description:
+      name: build_version
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.1"
   built_collection:
     dependency: transitive
     description:
@@ -512,6 +519,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.4"
+  usage:
+    dependency: "direct main"
+    description:
+      name: usage
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.1.0"
   vector_math:
     dependency: transitive
     description:
