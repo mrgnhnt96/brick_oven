@@ -2,12 +2,14 @@
 
 import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/src/version.dart';
+import 'package:brick_oven/utils/extensions/analytics_extensions.dart';
+import 'package:brick_oven/utils/extensions/datetime_extensions.dart';
+import 'package:brick_oven/utils/extensions/logger_extensions.dart';
+import 'package:brick_oven/utils/extensions/brick_oven_runner_extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
-
-import 'package:brick_oven/utils/extensions.dart';
 
 import '../test_utils/mocks.dart';
 

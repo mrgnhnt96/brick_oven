@@ -8,7 +8,7 @@ import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:brick_oven/utils/config_watcher_mixin.dart';
-import 'package:brick_oven/utils/extensions.dart';
+import 'package:brick_oven/utils/extensions/arg_parser_extensions.dart';
 import 'package:brick_oven/utils/oven_mixin.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';

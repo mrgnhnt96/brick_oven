@@ -2,7 +2,7 @@ import 'package:args/command_runner.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/src/version.dart';
-import 'package:brick_oven/utils/extensions.dart';
+import 'package:brick_oven/utils/extensions/analytics_extensions.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';

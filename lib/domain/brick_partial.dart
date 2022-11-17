@@ -2,7 +2,7 @@ import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/extensions.dart';
+import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 import 'package:brick_oven/utils/file_replacements.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:equatable/equatable.dart';

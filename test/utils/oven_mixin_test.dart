@@ -10,7 +10,7 @@ import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:brick_oven/utils/config_watcher_mixin.dart';
-import 'package:brick_oven/utils/extensions.dart';
+import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import 'package:brick_oven/utils/oven_mixin.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
