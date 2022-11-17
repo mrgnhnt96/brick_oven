@@ -45,6 +45,7 @@ class BrickOvenRunner extends CommandRunner<int> {
         'analytics',
         help: 'Toggle anonymous usage statistics.',
         allowed: ['true', 'false'],
+        defaultsTo: 'true',
         allowedHelp: {
           'true': 'Enable anonymous usage statistics',
           'false': 'Disable anonymous usage statistics',
@@ -88,8 +89,6 @@ class BrickOvenRunner extends CommandRunner<int> {
   @override
   Future<int?> run(Iterable<String> args) async {
     try {
-      _analytics.askForConsent(_logger);
-
       final argResults = parse(args);
 
       final exitCode = await runCommand(argResults);
@@ -115,45 +114,41 @@ class BrickOvenRunner extends CommandRunner<int> {
 
   @override
   Future<int?> runCommand(ArgResults topLevelResults) async {
-    int? exitCode = ExitCode.unavailable.code;
+    Future<void> runCheckForUpdates() async {
+      if (!calledUpdate(topLevelResults)) {
+        await checkForUpdates(
+          updater: _pubUpdater,
+          logger: _logger,
+        );
+      }
+    }
+
+    if (topLevelResults['analytics'] != null) {
+      final optIn = topLevelResults['analytics'] == 'true';
+
+      _analytics.enabled = optIn;
+
+      _logger.info('analytics ${optIn ? 'enabled' : 'disabled'}.');
+
+      await runCheckForUpdates();
+
+      return ExitCode.success.code;
+    }
+
+    _analytics.askForConsent(_logger);
 
     if (topLevelResults['version'] == true) {
       _logger.alert(packageVersion);
-      exitCode = ExitCode.success.code;
-    } else if (topLevelResults['analytics'] != null) {
-      final optIn = topLevelResults['analytics'] == 'true';
-      _analytics.enabled = optIn;
-      _logger.info('analytics ${_analytics.enabled ? 'enabled' : 'disabled'}.');
-      exitCode = ExitCode.success.code;
-    } else {
-      exitCode = await super.runCommand(topLevelResults);
+
+      await runCheckForUpdates();
+
+      return ExitCode.success.code;
     }
 
-    if (topLevelResults.command?.name != UpdateCommand.commandName) {
-      await _checkForUpdates();
-    }
+    final result = await super.runCommand(topLevelResults);
 
-    return exitCode;
-  }
+    await runCheckForUpdates();
 
-  Future<void> _checkForUpdates() async {
-    try {
-      final latestVersion = await _pubUpdater.getLatestVersion(packageName);
-      final isUpToDate = packageVersion == latestVersion;
-      final updateMessage = '''
-
-+------------------------------------------------------------------------------------+
-|                                                                                    |
-|                   ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}                                  |
-|  ${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/mrgnhnt96/brick_oven/releases/tag/brick_oven-v$latestVersion')} |
-|                             Run ${cyan.wrap('brick_oven update')} to update                        |
-|                                                                                    |
-+------------------------------------------------------------------------------------+
-''';
-
-      if (!isUpToDate) {
-        _logger.info(updateMessage);
-      }
-    } catch (_) {}
+    return result ?? ExitCode.unavailable.code;
   }
 }

@@ -87,6 +87,9 @@ void main() {
       group('analytics', () {
         test('can be enabled', () async {
           final analytics = MockAnalytics();
+
+          when(() => analytics.firstRun).thenReturn(false);
+
           commandRunner = BrickOvenRunner(
             logger: mockLogger,
             pubUpdater: mockPubUpdater,
@@ -94,13 +97,20 @@ void main() {
             analytics: analytics,
           );
 
-          await commandRunner.run(['--analytics', 'true']);
+          final result = await commandRunner.run(['--analytics', 'true']);
 
           verify(() => analytics.enabled = true).called(1);
+
+          verify(() => mockLogger.info('analytics enabled.')).called(1);
+
+          expect(result, ExitCode.success.code);
         });
 
         test('can be disabled', () async {
           final analytics = MockAnalytics();
+
+          when(() => analytics.firstRun).thenReturn(false);
+
           commandRunner = BrickOvenRunner(
             logger: mockLogger,
             pubUpdater: mockPubUpdater,
@@ -108,13 +118,19 @@ void main() {
             analytics: analytics,
           );
 
-          await commandRunner.run(['--analytics', 'false']);
+          final result = await commandRunner.run(['--analytics', 'false']);
 
           verify(() => analytics.enabled = false).called(1);
+
+          verify(() => mockLogger.info('analytics disabled.')).called(1);
+
+          expect(result, ExitCode.success.code);
         });
 
         test('asks for consent when first time running', () async {
           final analytics = MockAnalytics();
+
+          when(() => analytics.firstRun).thenReturn(true);
 
           commandRunner = BrickOvenRunner(
             logger: mockLogger,
@@ -126,31 +142,15 @@ void main() {
           await commandRunner.run([]);
 
           verify(() => analytics.askForConsent(mockLogger)).called(1);
+
+          verify(
+            () => mockLogger.chooseOne(
+              AnalyticsX.formatAsk(),
+              choices: [AnalyticsX.yes, AnalyticsX.no],
+              defaultValue: AnalyticsX.yes,
+            ),
+          ).called(1);
         });
-      });
-
-      test('prompts for update when newer version exists', () async {
-        when(
-          () => mockPubUpdater.getLatestVersion(any()),
-        ).thenAnswer((_) async => latestVersion);
-
-        final result = await commandRunner.run(['--version']);
-
-        expect(result, equals(ExitCode.success.code));
-
-        verify(() => mockLogger.info(updateMessage)).called(1);
-      });
-
-      test('handles pub update errors gracefully', () async {
-        when(
-          () => mockPubUpdater.getLatestVersion(any()),
-        ).thenThrow(Exception('oops'));
-
-        final result = await commandRunner.run(['--version']);
-
-        expect(result, equals(ExitCode.success.code));
-
-        verifyNever(() => mockLogger.info(updateMessage));
       });
 
       test('handles $FormatException', () async {
