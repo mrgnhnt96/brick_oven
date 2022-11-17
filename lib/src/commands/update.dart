@@ -11,9 +11,9 @@ import 'package:brick_oven/src/commands/brick_oven.dart';
 class UpdateCommand extends BrickOvenCommand {
   /// {@macro update_command}
   UpdateCommand({
-    PubUpdater? pubUpdater,
+    required PubUpdater pubUpdater,
     required Logger logger,
-  })  : _pubUpdater = pubUpdater ?? PubUpdater(),
+  })  : _pubUpdater = pubUpdater,
         super(logger: logger);
 
   final PubUpdater _pubUpdater;
@@ -29,38 +29,37 @@ class UpdateCommand extends BrickOvenCommand {
 
   @override
   Future<int> run() async {
-    final updateCheckDone = logger.progress('Checking for updates');
+    final progress = logger.progress('Checking for updates');
     late final String latestVersion;
 
     try {
       latestVersion = await _pubUpdater.getLatestVersion(packageName);
     } catch (error) {
-      updateCheckDone.fail('Failed to get latest version');
+      progress.fail('Failed to get latest version');
 
       return ExitCode.software.code;
     }
 
-    updateCheckDone.update('Successfully checked for updates');
+    progress.update('Successfully checked for updates');
 
     final isUpToDate = packageVersion == latestVersion;
 
     if (isUpToDate) {
-      updateCheckDone.complete('brick_oven is already at the latest version.');
+      progress.complete('brick_oven is already at the latest version.');
 
       return ExitCode.success.code;
     }
 
     try {
-      updateCheckDone.update('Updating to $latestVersion');
+      progress.update('Updating to $latestVersion');
       await _pubUpdater.update(packageName: packageName);
     } catch (error) {
-      updateCheckDone.fail('Failed to update brick_oven');
+      progress.fail('Failed to update brick_oven');
 
       return ExitCode.software.code;
     }
 
-    updateCheckDone
-        .complete('Successfully updated brick_oven to $latestVersion');
+    progress.complete('Successfully updated brick_oven to $latestVersion');
 
     return ExitCode.success.code;
   }
