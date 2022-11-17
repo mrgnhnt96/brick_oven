@@ -34,6 +34,7 @@ bricks:
       );
     mockLogger = MockLogger();
     brickOvenCommand = CookBricksCommand(
+      analytics: MockAnalytics(),
       fileSystem: fs,
       logger: mockLogger,
     );
@@ -47,6 +48,7 @@ bricks:
     test('instanciate without an explicit file system or logger', () {
       expect(
         () => CookBricksCommand(
+          analytics: MockAnalytics(),
           fileSystem: fs,
           logger: mockLogger,
         ),
@@ -100,6 +102,7 @@ bricks:
 
       test('logs that config is bad', () {
         brickOvenCommand = CookBricksCommand(
+          analytics: MockAnalytics(),
           fileSystem: fs,
           logger: mockLogger,
         );

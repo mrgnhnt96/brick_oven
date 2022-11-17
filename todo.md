@@ -13,14 +13,14 @@
 ## BUGS
 
 - [ ] Make sure line breaks match the original file
-- [ ] write test for if variable is wrapped in {}
+- [x] write test for if variable is wrapped in {}
   - check logger for warning
 
 ## FEATURES
 
 - [ ] Possible unconverted variables within files
   - [ ] get all variables and check in files with all variables
-- [ ] Add flag to sync or not
+- [x] Add flag to sync or not
 - [ ] add mixpanel analytics
 
 <!-- FUTURE -->

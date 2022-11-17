@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
+import 'package:usage/usage_io.dart';
 import 'package:watcher/watcher.dart';
 
 import '../../../test_utils/fakes.dart';
@@ -36,6 +37,7 @@ void main() {
     command = CookAllBricks(
       logger: mockLogger,
       fileSystem: memoryFileSystem,
+      analytics: MockAnalytics(),
     );
   });
 
@@ -147,16 +149,20 @@ class TestCookAllBricks extends CookAllBricks {
     this.fileWatchers,
     Map<String, dynamic>? argResults,
     this.putInOvenOverride,
+    Analytics? analytics,
   })  : _argResults = argResults ?? <String, dynamic>{},
+        analytics = analytics ?? MockAnalytics(),
         super(
           logger: logger,
           fileSystem: fileSystem,
+          analytics: analytics ?? MockAnalytics(),
         );
 
   final Map<String, dynamic> _argResults;
   final List<FileWatcher?>? fileWatchers;
   final BrickOrError? bricksOrError;
   final ExitCode? putInOvenOverride;
+  final Analytics analytics;
 
   @override
   BrickOrError bricks() => bricksOrError ?? const BrickOrError({}, null);

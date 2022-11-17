@@ -5,6 +5,7 @@ import 'package:brick_oven/src/commands/list.dart';
 import 'package:brick_oven/src/commands/update.dart';
 import 'package:brick_oven/src/version.dart';
 import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:usage/usage_io.dart';
@@ -33,15 +34,44 @@ class BrickOvenRunner extends CommandRunner<int> {
               packageVersion,
             ),
         super(packageName, 'Generate your bricks 🧱 with this oven 🎛') {
-    argParser.addFlag(
-      'version',
-      negatable: false,
-      help: 'Print the current version',
+    argParser
+      ..addFlag(
+        'version',
+        negatable: false,
+        help: 'Print the current version',
+      )
+      ..addOption(
+        'analytics',
+        help: 'Toggle anonymous usage statistics.',
+        allowed: ['true', 'false'],
+        allowedHelp: {
+          'true': 'Enable anonymous usage statistics',
+          'false': 'Disable anonymous usage statistics',
+        },
+      );
+
+    addCommand(
+      CookBricksCommand(
+        logger: _logger,
+        fileSystem: fileSystem ?? const LocalFileSystem(),
+        analytics: _analytics,
+      ),
     );
 
-    addCommand(CookBricksCommand(logger: _logger, fileSystem: fileSystem));
-    addCommand(ListCommand(logger: _logger, fileSystem: fileSystem));
-    addCommand(UpdateCommand(pubUpdater: _pubUpdater, logger: _logger));
+    addCommand(
+      ListCommand(
+        logger: _logger,
+        fileSystem: fileSystem,
+        analytics: _analytics,
+      ),
+    );
+
+    addCommand(
+      UpdateCommand(
+        pubUpdater: _pubUpdater,
+        logger: _logger,
+      ),
+    );
   }
 
   final PubUpdater _pubUpdater;
@@ -50,6 +80,9 @@ class BrickOvenRunner extends CommandRunner<int> {
   final Logger _logger;
 
   final Analytics _analytics;
+
+  /// Standard timeout duration for the CLI.
+  static const timeout = Duration(milliseconds: 500);
 
   @override
   Future<int?> run(Iterable<String> args) async {
@@ -73,9 +106,6 @@ class BrickOvenRunner extends CommandRunner<int> {
       }
 
       final argResults = parse(args);
-      if (argResults['verbose'] == true) {
-        _logger.level = Level.verbose;
-      }
 
       final exitCode = await runCommand(argResults);
 
@@ -105,11 +135,16 @@ class BrickOvenRunner extends CommandRunner<int> {
     if (topLevelResults['version'] == true) {
       _logger.alert(packageVersion);
       exitCode = ExitCode.success.code;
+    } else if (topLevelResults['analytics'] != null) {
+      final optIn = topLevelResults['analytics'] == 'true';
+      _analytics.enabled = optIn;
+      _logger.info('analytics ${_analytics.enabled ? 'enabled' : 'disabled'}.');
+      exitCode = ExitCode.success.code;
     } else {
       exitCode = await super.runCommand(topLevelResults);
     }
 
-    if (topLevelResults.command?.name != 'update') {
+    if (topLevelResults.command?.name != UpdateCommand.commandName) {
       await _checkForUpdates();
     }
 

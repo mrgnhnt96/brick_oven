@@ -61,6 +61,7 @@ bricks:
       brick,
       fileSystem: memoryFileSystem,
       logger: mockLogger,
+      analytics: MockAnalytics(),
     );
   });
 
@@ -70,6 +71,8 @@ bricks:
         () => CookSingleBrick(
           brick,
           logger: mockLogger,
+          fileSystem: memoryFileSystem,
+          analytics: MockAnalytics(),
         ),
         returnsNormally,
       );
@@ -193,6 +196,8 @@ class TestCookSingleBrick extends CookSingleBrick {
         super(
           brick,
           logger: logger,
+          fileSystem: MemoryFileSystem(),
+          analytics: MockAnalytics(),
         );
 
   final Map<String, dynamic> _argResults;

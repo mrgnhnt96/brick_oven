@@ -23,13 +23,35 @@ void main() {
 
     test('displays description correctly', () {
       expect(
-        ListCommand(logger: mockLogger).description,
+        ListCommand(
+          logger: mockLogger,
+          analytics: MockAnalytics(),
+          fileSystem: MemoryFileSystem(),
+        ).description,
         'Lists all configured bricks from ${BrickOvenYaml.file}',
       );
     });
 
+    test('accepts alias ls', () {
+      expect(
+        ListCommand(
+          logger: mockLogger,
+          analytics: MockAnalytics(),
+          fileSystem: MemoryFileSystem(),
+        ).aliases,
+        ['ls'],
+      );
+    });
+
     test('displays name correctly', () {
-      expect(ListCommand(logger: mockLogger).name, 'list');
+      expect(
+        ListCommand(
+          logger: mockLogger,
+          analytics: MockAnalytics(),
+          fileSystem: MemoryFileSystem(),
+        ).name,
+        'list',
+      );
     });
 
     group('#isVerbose', () {
@@ -163,6 +185,7 @@ class TestListCommand extends ListCommand {
   }) : super(
           logger: logger,
           fileSystem: fileSystem,
+          analytics: MockAnalytics(),
         );
 
   final bool? verbose;

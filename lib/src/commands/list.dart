@@ -1,9 +1,13 @@
 // ignore_for_file: prefer_interpolation_to_compose_strings
 
+import 'dart:async';
+
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
+import 'package:brick_oven/src/runner.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:usage/usage_io.dart';
 
 /// {@template lists_command}
 /// Lists the configured bricks within the config file
@@ -12,8 +16,10 @@ class ListCommand extends BrickOvenCommand {
   /// {@macro lists_command}
   ListCommand({
     required Logger logger,
-    FileSystem? fileSystem,
-  }) : super(
+    required Analytics analytics,
+    required FileSystem? fileSystem,
+  })  : _analytics = analytics,
+        super(
           logger: logger,
           fileSystem: fileSystem,
         ) {
@@ -24,12 +30,17 @@ class ListCommand extends BrickOvenCommand {
     );
   }
 
+  final Analytics _analytics;
+
   @override
   String get description =>
       'Lists all configured bricks from ${BrickOvenYaml.file}';
 
   @override
   String get name => 'list';
+
+  @override
+  List<String> get aliases => ['ls'];
 
   @override
   Future<int> run() async {
@@ -64,6 +75,20 @@ class ListCommand extends BrickOvenCommand {
         );
       }
     }
+
+    unawaited(
+      _analytics.sendEvent(
+        'list',
+        'bricks',
+        value: ExitCode.success.code,
+        parameters: {
+          'bricks': bricks.toString(),
+          'verbose': isVerbose.toString(),
+        },
+      ),
+    );
+
+    await _analytics.waitForLastPing(timeout: BrickOvenRunner.timeout);
 
     return ExitCode.success.code;
   }

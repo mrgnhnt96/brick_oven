@@ -10,6 +10,7 @@ import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
+import 'package:usage/usage_io.dart';
 import 'package:watcher/watcher.dart';
 import 'package:file/file.dart' as file;
 
@@ -42,3 +43,5 @@ class MockBrickPartial extends Mock implements BrickPartial {}
 class MockBrickFile extends Mock implements BrickFile {}
 
 class MockFile extends Mock implements file.File {}
+
+class MockAnalytics extends Mock implements Analytics {}

@@ -5,6 +5,7 @@ import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:usage/usage_io.dart';
 
 /// {@template cook_bricks_command}
 /// Writes the bricks from the configuration file
@@ -12,13 +13,15 @@ import 'package:mason_logger/mason_logger.dart';
 class CookBricksCommand extends BrickOvenCommand with BrickCookerArgs {
   /// {@macro cook_bricks_command}
   CookBricksCommand({
-    FileSystem? fileSystem,
+    required FileSystem fileSystem,
     required Logger logger,
+    required Analytics analytics,
   }) : super(fileSystem: fileSystem, logger: logger) {
     addSubcommand(
       CookAllBricks(
         fileSystem: fileSystem,
         logger: logger,
+        analytics: analytics,
       ),
     );
 
@@ -39,6 +42,7 @@ class CookBricksCommand extends BrickOvenCommand with BrickCookerArgs {
           brick,
           fileSystem: fileSystem,
           logger: logger,
+          analytics: analytics,
         ),
       );
     }
