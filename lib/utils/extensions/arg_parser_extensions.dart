@@ -1,4 +1,5 @@
 import 'package:args/args.dart';
+import 'package:meta/meta.dart';
 
 /// extensions for [ArgParser]
 extension ArgParserX on ArgParser {
@@ -10,6 +11,7 @@ extension ArgParserX on ArgParser {
   }
 
   /// the output directory
+  @visibleForTesting
   void addOutputOption() {
     addOption(
       'output',
@@ -21,6 +23,7 @@ extension ArgParserX on ArgParser {
   }
 
   /// adds the sync flag to validate the brick.yaml file
+  @visibleForTesting
   void addSyncFlag() {
     addFlag(
       'sync',
@@ -34,6 +37,7 @@ extension ArgParserX on ArgParser {
   }
 
   /// watches the local source files
+  @visibleForTesting
   void addWatchFlag() {
     addFlag(
       'watch',
