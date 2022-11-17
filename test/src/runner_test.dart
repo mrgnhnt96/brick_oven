@@ -2,6 +2,7 @@ import 'package:args/command_runner.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/src/version.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -44,15 +45,15 @@ const updateMessage = '''
 
 void main() {
   group('$BrickOvenRunner', () {
-    late Logger logger;
-    late PubUpdater pubUpdater;
+    late Logger mockLogger;
+    late PubUpdater mockPubUpdater;
     late BrickOvenRunner commandRunner;
     late FileSystem fs;
 
     setUp(() {
       printLogs = [];
-      logger = MockLogger();
-      pubUpdater = MockPubUpdater();
+      mockLogger = MockLogger();
+      mockPubUpdater = MockPubUpdater();
       fs = MemoryFileSystem();
 
       fs.file(BrickOvenYaml.file)
@@ -60,12 +61,12 @@ void main() {
         ..writeAsStringSync('bricks:');
 
       when(
-        () => pubUpdater.getLatestVersion(any()),
+        () => mockPubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
 
       commandRunner = BrickOvenRunner(
-        logger: logger,
-        pubUpdater: pubUpdater,
+        logger: mockLogger,
+        pubUpdater: mockPubUpdater,
         fileSystem: fs,
       );
     });
@@ -83,35 +84,80 @@ void main() {
     });
 
     group('run', () {
+      group('analytics', () {
+        test('can be enabled', () async {
+          final analytics = MockAnalytics();
+          commandRunner = BrickOvenRunner(
+            logger: mockLogger,
+            pubUpdater: mockPubUpdater,
+            fileSystem: fs,
+            analytics: analytics,
+          );
+
+          await commandRunner.run(['--analytics', 'true']);
+
+          verify(() => analytics.enabled = true).called(1);
+        });
+
+        test('can be disabled', () async {
+          final analytics = MockAnalytics();
+          commandRunner = BrickOvenRunner(
+            logger: mockLogger,
+            pubUpdater: mockPubUpdater,
+            fileSystem: fs,
+            analytics: analytics,
+          );
+
+          await commandRunner.run(['--analytics', 'false']);
+
+          verify(() => analytics.enabled = false).called(1);
+        });
+
+        test('asks for consent when first time running', () async {
+          final analytics = MockAnalytics();
+
+          commandRunner = BrickOvenRunner(
+            logger: mockLogger,
+            pubUpdater: mockPubUpdater,
+            fileSystem: fs,
+            analytics: analytics,
+          );
+
+          await commandRunner.run([]);
+
+          verify(() => analytics.askForConsent(mockLogger)).called(1);
+        });
+      });
+
       test('prompts for update when newer version exists', () async {
         when(
-          () => pubUpdater.getLatestVersion(any()),
+          () => mockPubUpdater.getLatestVersion(any()),
         ).thenAnswer((_) async => latestVersion);
 
         final result = await commandRunner.run(['--version']);
 
         expect(result, equals(ExitCode.success.code));
 
-        verify(() => logger.info(updateMessage)).called(1);
+        verify(() => mockLogger.info(updateMessage)).called(1);
       });
 
       test('handles pub update errors gracefully', () async {
         when(
-          () => pubUpdater.getLatestVersion(any()),
+          () => mockPubUpdater.getLatestVersion(any()),
         ).thenThrow(Exception('oops'));
 
         final result = await commandRunner.run(['--version']);
 
         expect(result, equals(ExitCode.success.code));
 
-        verifyNever(() => logger.info(updateMessage));
+        verifyNever(() => mockLogger.info(updateMessage));
       });
 
       test('handles $FormatException', () async {
         const exception = FormatException('oops!');
         var isFirstInvocation = true;
 
-        when(() => logger.alert(any())).thenAnswer((_) {
+        when(() => mockLogger.alert(any())).thenAnswer((_) {
           if (isFirstInvocation) {
             isFirstInvocation = false;
             throw exception;
@@ -122,15 +168,15 @@ void main() {
 
         expect(result, equals(ExitCode.usage.code));
 
-        verify(() => logger.err(exception.message)).called(1);
-        verify(() => logger.info(commandRunner.usage)).called(1);
+        verify(() => mockLogger.err(exception.message)).called(1);
+        verify(() => mockLogger.info(commandRunner.usage)).called(1);
       });
 
       test('handles $UsageException', () async {
         final exception = UsageException('oops!', commandRunner.usage);
         var isFirstInvocation = true;
 
-        when(() => logger.alert(any())).thenAnswer((_) {
+        when(() => mockLogger.alert(any())).thenAnswer((_) {
           if (isFirstInvocation) {
             isFirstInvocation = false;
             throw exception;
@@ -141,15 +187,15 @@ void main() {
 
         expect(result, equals(ExitCode.usage.code));
 
-        verify(() => logger.err(exception.message)).called(1);
-        verify(() => logger.info(commandRunner.usage)).called(1);
+        verify(() => mockLogger.err(exception.message)).called(1);
+        verify(() => mockLogger.info(commandRunner.usage)).called(1);
       });
 
       test('handles other exceptions', () async {
         final exception = Exception('oops!');
         var isFirstInvocation = true;
 
-        when(() => logger.alert(any())).thenAnswer((_) {
+        when(() => mockLogger.alert(any())).thenAnswer((_) {
           if (isFirstInvocation) {
             isFirstInvocation = false;
             throw exception;
@@ -160,12 +206,12 @@ void main() {
 
         expect(result, equals(ExitCode.software.code));
 
-        verify(() => logger.err('$exception')).called(1);
+        verify(() => mockLogger.err('$exception')).called(1);
       });
 
       test(
         'handles no command',
-        overridePrint(() async {
+        () => overridePrint(() async {
           final result = await commandRunner.run([]);
 
           expect(printLogs, equals([expectedUsage.join()]));
@@ -176,22 +222,26 @@ void main() {
       group('help', () {
         test(
           '--help outputs usage',
-          overridePrint(() async {
-            final result = await commandRunner.run(['--help']);
+          () async {
+            await overridePrint(() async {
+              final result = await commandRunner.run(['--help']);
 
-            expect(printLogs, equals([expectedUsage.join()]));
-            expect(result, equals(ExitCode.success.code));
-          }),
+              expect(printLogs, equals([expectedUsage.join()]));
+              expect(result, equals(ExitCode.success.code));
+            });
+          },
         );
 
         test(
           '-h outputs usage',
-          overridePrint(() async {
-            final resultAbbr = await commandRunner.run(['-h']);
+          () {
+            overridePrint(() async {
+              final resultAbbr = await commandRunner.run(['-h']);
 
-            expect(printLogs, equals([expectedUsage.join()]));
-            expect(resultAbbr, equals(ExitCode.success.code));
-          }),
+              expect(printLogs, equals([expectedUsage.join()]));
+              expect(resultAbbr, equals(ExitCode.success.code));
+            });
+          },
         );
       });
 
@@ -200,7 +250,7 @@ void main() {
           final result = await commandRunner.run(['--version']);
 
           expect(result, equals(ExitCode.success.code));
-          verify(() => logger.alert(packageVersion)).called(1);
+          verify(() => mockLogger.alert(packageVersion)).called(1);
         });
       });
     });
