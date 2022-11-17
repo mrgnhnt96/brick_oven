@@ -4,6 +4,7 @@ import 'package:brick_oven/src/commands/cook_bricks/cook_bricks.dart';
 import 'package:brick_oven/src/commands/list.dart';
 import 'package:brick_oven/src/commands/update.dart';
 import 'package:brick_oven/src/version.dart';
+import 'package:brick_oven/utils/extensions.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -87,23 +88,7 @@ class BrickOvenRunner extends CommandRunner<int> {
   @override
   Future<int?> run(Iterable<String> args) async {
     try {
-      if (_analytics.firstRun) {
-        final response = _logger.prompt(
-          lightGray.wrap(
-            '''
-+---------------------------------------------------+
-|           Welcome to the Brick Oven!              |
-+---------------------------------------------------+
-| We would like to collect anonymous                |
-| usage statistics in order to improve the tool.    |
-| Would you like to opt-into help us improve? [y/n] |
-+---------------------------------------------------+\n''',
-          ),
-        );
-        final normalizedResponse = response.toLowerCase().trim();
-        _analytics.enabled =
-            normalizedResponse == 'y' || normalizedResponse == 'yes';
-      }
+      _analytics.askForConsent(_logger);
 
       final argResults = parse(args);
 
