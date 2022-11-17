@@ -70,16 +70,17 @@ void main() {
       );
     });
 
-    test(
-      'can be instantiated without an explicit pub updater instance',
-      () {
-        final commandRunner = BrickOvenRunner(
-          fileSystem: fs,
-          logger: MockLogger(),
-        );
-        expect(commandRunner, isNotNull);
-      },
-    );
+    test('can be instantiated without an explicit pub updater instance', () {
+      final commandRunner = BrickOvenRunner(
+        fileSystem: fs,
+        logger: MockLogger(),
+      );
+      expect(commandRunner, isNotNull);
+    });
+
+    test('time out is correct duration', () {
+      expect(BrickOvenRunner.timeout, const Duration(milliseconds: 500));
+    });
 
     group('run', () {
       test('prompts for update when newer version exists', () async {
