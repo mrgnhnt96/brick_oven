@@ -41,6 +41,8 @@ bricks:
     runner = BrickOvenRunner(
       fileSystem: fs,
       logger: mockLogger,
+      pubUpdater: MockPubUpdater(),
+      analytics: MockAnalytics(),
     );
   });
 

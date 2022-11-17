@@ -136,7 +136,12 @@ bricks:
       brickConfigFile = fs.file(BrickOvenYaml.file)..create(recursive: true);
       writeConfig();
 
-      runner = BrickOvenRunner(fileSystem: fs, logger: mockLogger);
+      runner = BrickOvenRunner(
+        fileSystem: fs,
+        logger: mockLogger,
+        pubUpdater: MockPubUpdater(),
+        analytics: MockAnalytics(),
+      );
     });
 
     test(

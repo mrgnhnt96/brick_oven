@@ -70,6 +70,7 @@ void main() {
         logger: logger,
         pubUpdater: pubUpdater,
         fileSystem: fs,
+        analytics: MockAnalytics(),
       );
     });
 
@@ -135,13 +136,13 @@ void main() {
     test('does not update when already on latest version', () async {
       when(
         () => pubUpdater.getLatestVersion(any()),
-      ).thenAnswer((_) async => packageVersion);
+      ).thenAnswer((_) => Future.value(packageVersion));
 
       when(() => logger.progress(any())).thenReturn(mockProgress);
 
       final result = await commandRunner.run(['update']);
 
-      expect(result, equals(ExitCode.success.code));
+      expect(result, ExitCode.success.code);
 
       verify(
         () => mockProgress

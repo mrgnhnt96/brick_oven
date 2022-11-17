@@ -26,7 +26,7 @@ void main() {
 +---------------------------------------------------+
 | We would like to collect anonymous                |
 | usage statistics in order to improve the tool.    |
-| Would you like to opt-into help us improve? [y/n] |
+| Opt-in to help us improve? 🥺 [y/n]               |
 +---------------------------------------------------+\n''';
 
       expect(AnalyticsX.ask, expected);

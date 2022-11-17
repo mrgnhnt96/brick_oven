@@ -7,15 +7,12 @@ import 'package:brick_oven/src/version.dart';
 import 'package:brick_oven/utils/extensions/analytics_extensions.dart';
 import 'package:brick_oven/utils/extensions/brick_oven_runner_extensions.dart';
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:usage/usage_io.dart';
 
 /// the name of the package
 const packageName = 'brick_oven';
-
-const _gaTrackingId = 'UA-134218670-3';
 
 /// {@template brick_oven_runner}
 /// Runs the brick_oven commands
@@ -24,17 +21,12 @@ class BrickOvenRunner extends CommandRunner<int> {
   /// {@macro brick_oven_runner}
   BrickOvenRunner({
     required Logger logger,
-    PubUpdater? pubUpdater,
-    FileSystem? fileSystem,
-    Analytics? analytics,
-  })  : _pubUpdater = pubUpdater ?? PubUpdater(),
+    required PubUpdater pubUpdater,
+    required FileSystem fileSystem,
+    required Analytics analytics,
+  })  : _pubUpdater = pubUpdater,
         _logger = logger,
-        _analytics = analytics ??
-            AnalyticsIO(
-              _gaTrackingId,
-              packageName,
-              packageVersion,
-            ),
+        _analytics = analytics,
         super(packageName, 'Generate your bricks 🧱 with this oven 🎛') {
     argParser
       ..addFlag(
@@ -56,7 +48,7 @@ class BrickOvenRunner extends CommandRunner<int> {
     addCommand(
       CookBricksCommand(
         logger: _logger,
-        fileSystem: fileSystem ?? const LocalFileSystem(),
+        fileSystem: fileSystem,
         analytics: _analytics,
       ),
     );

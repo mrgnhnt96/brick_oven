@@ -68,6 +68,7 @@ void main() {
         logger: mockLogger,
         pubUpdater: mockPubUpdater,
         fileSystem: fs,
+        analytics: MockAnalytics(),
       );
     });
 
@@ -75,6 +76,8 @@ void main() {
       final commandRunner = BrickOvenRunner(
         fileSystem: fs,
         logger: MockLogger(),
+        pubUpdater: MockPubUpdater(),
+        analytics: MockAnalytics(),
       );
       expect(commandRunner, isNotNull);
     });
