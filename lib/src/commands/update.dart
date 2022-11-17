@@ -22,7 +22,10 @@ class UpdateCommand extends BrickOvenCommand {
   final String description = 'Updates brick_oven to the latest version';
 
   @override
-  final String name = 'update';
+  final String name = commandName;
+
+  /// the name of the command
+  static const commandName = 'update';
 
   @override
   Future<int> run() async {

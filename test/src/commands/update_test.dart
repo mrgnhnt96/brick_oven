@@ -32,6 +32,7 @@ void main() {
 
     test('name displays correctly', () {
       expect(UpdateCommand(logger: mockLogger).name, 'update');
+      expect(UpdateCommand.commandName, 'update');
     });
   });
 
