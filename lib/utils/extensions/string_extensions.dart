@@ -7,8 +7,8 @@ extension StringX on String {
   static RegExp whitespacePattern = RegExp(r'^\S+$');
 
   /// checks if the [String] contains whitespace
-  bool containsWhitespace() => whitespacePattern.hasMatch(this);
+  bool containsWhitespace() => !whitespacePattern.hasMatch(this);
 
   /// checks if the [String] does not contain whitespace
-  bool doesNotContainWhitespace() => !containsWhitespace();
+  bool doesNotContainWhitespace() => containsWhitespace();
 }
