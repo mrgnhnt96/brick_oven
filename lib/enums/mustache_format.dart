@@ -70,12 +70,15 @@ extension MustacheFormatX on MustacheFormat {
   /// eg: {{#snakeCase}}This is the content{{/snakeCase}}
   String wrap(String content) {
     if (isFormat) {
-      assert(
-        wrappedPattern.hasMatch(content),
-        'Content must be wrapped with {{{}}} when formatting content',
-      );
+      final isWrapped = wrappedPattern.hasMatch(content);
 
-      return '{{#$name}}$content{{/$name}}';
+      var wrappedContent = content;
+
+      if (!isWrapped) {
+        wrappedContent = '{{{$content}}}';
+      }
+
+      return '{{#$name}}$wrappedContent{{/$name}}';
     }
 
     assert(
