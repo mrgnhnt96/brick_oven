@@ -5,7 +5,6 @@ import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:yaml/yaml.dart';
 
@@ -15,9 +14,9 @@ import 'package:yaml/yaml.dart';
 abstract class BrickOvenCommand extends Command<int> {
   /// {@macro brick_oven_command}
   BrickOvenCommand({
-    FileSystem? fileSystem,
+    required this.fileSystem,
     required this.logger,
-  }) : fileSystem = fileSystem ?? const LocalFileSystem();
+  });
 
   /// the file system to be used for all file operations
   final FileSystem fileSystem;
