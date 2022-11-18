@@ -4,7 +4,7 @@ Pattern _matcher([String? char]) {
 }
 
 /// The loops from Mustache
-enum MustacheLoops {
+enum MustacheSections {
   /// the start of a loop
   start,
 
@@ -15,10 +15,10 @@ enum MustacheLoops {
   invert,
 }
 
-/// extensions on lists of [MustacheLoops]
-extension ListMustacheLoopX on List<MustacheLoops> {
-  /// checks [str] if it contains any of the [MustacheLoops]
-  MustacheLoops? from(String? str) {
+/// extensions on lists of [MustacheSections]
+extension ListMustacheLoopX on List<MustacheSections> {
+  /// checks [str] if it contains any of the [MustacheSections]
+  MustacheSections? from(String? str) {
     if (str == null) return null;
 
     final pattern = _matcher();
@@ -38,48 +38,48 @@ extension ListMustacheLoopX on List<MustacheLoops> {
     return null;
   }
 
-  /// gets the configName of the [MustacheLoops]
+  /// gets the configName of the [MustacheSections]
   List<String> get configNames {
     return map((section) => section.configName).toList();
   }
 
-  /// retrieves the [MustacheLoops] from the [char]
-  MustacheLoops section(String char) {
+  /// retrieves the [MustacheSections] from the [char]
+  MustacheSections section(String char) {
     return firstWhere((section) => section.configName == char);
   }
 }
 
 /// extension on mustache loops
-extension MustacheLoopX on MustacheLoops {
+extension MustacheLoopX on MustacheSections {
   /// the letter(s) of the section
   String get configName {
     switch (this) {
-      case MustacheLoops.start:
+      case MustacheSections.start:
         return 'start';
-      case MustacheLoops.end:
+      case MustacheSections.end:
         return 'end';
-      case MustacheLoops.invert:
+      case MustacheSections.invert:
         return 'nstart';
     }
   }
 
   /// whether this section is the start
-  bool get isStart => this == MustacheLoops.start;
+  bool get isStart => this == MustacheSections.start;
 
   /// whether this section is the end
-  bool get isEnd => this == MustacheLoops.end;
+  bool get isEnd => this == MustacheSections.end;
 
   /// whether this section is inverted
-  bool get isInvert => this == MustacheLoops.invert;
+  bool get isInvert => this == MustacheSections.invert;
 
   /// the symbol of the section
   String get symbol {
     switch (this) {
-      case MustacheLoops.start:
+      case MustacheSections.start:
         return '#';
-      case MustacheLoops.end:
+      case MustacheSections.end:
         return '/';
-      case MustacheLoops.invert:
+      case MustacheSections.invert:
         return '^';
     }
   }

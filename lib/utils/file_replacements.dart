@@ -3,7 +3,7 @@ import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_tags.dart';
-import 'package:brick_oven/enums/mustache_loops.dart';
+import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -123,7 +123,7 @@ mixin FileReplacements {
       loopPattern(variable),
       (match) {
         final possibleLoop = match.group(1);
-        final loop = MustacheLoops.values.from(possibleLoop);
+        final loop = MustacheSections.values.from(possibleLoop);
 
         // if loop is found, then replace the content
         if (loop == null) {
