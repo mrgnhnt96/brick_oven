@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
-import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:file/file.dart';
@@ -20,15 +19,12 @@ void main() {
   late Logger mockLogger;
   late Progress mockProgress;
   late FileSystem memoryFileSystem;
+  late Analytics mockAnalytics;
 
   setUp(() {
     mockLogger = MockLogger();
-
     mockProgress = MockProgress();
-
-    when(() => mockProgress.complete(any())).thenReturn(voidCallback());
-    when(() => mockProgress.fail(any())).thenReturn(voidCallback());
-    when(() => mockProgress.update(any())).thenReturn(voidCallback());
+    mockAnalytics = MockAnalytics()..stubMethods();
 
     when(() => mockLogger.progress(any())).thenReturn(mockProgress);
 
@@ -37,7 +33,7 @@ void main() {
     command = CookAllBricks(
       logger: mockLogger,
       fileSystem: memoryFileSystem,
-      analytics: MockAnalytics(),
+      analytics: mockAnalytics,
     );
   });
 
@@ -50,92 +46,32 @@ void main() {
       expect(command.name, 'all');
     });
 
-    group('#isWatch', () {
-      test('returns true when watch flag is provided', () {
-        final command = TestCookAllBricks(
-          argResults: <String, dynamic>{'watch': true},
-          logger: mockLogger,
-          fileSystem: memoryFileSystem,
-        );
-
-        expect(command.isWatch, isTrue);
-      });
-
-      test('returns false when watch flag is not provided', () {
-        final command = TestCookAllBricks(
-          argResults: <String, dynamic>{'watch': false},
-          logger: mockLogger,
-          fileSystem: memoryFileSystem,
-        );
-
-        expect(command.isWatch, isFalse);
-      });
-    });
-
-    group('#shouldSync', () {
-      test('returns true when watch flag is provided', () {
-        final command = TestCookAllBricks(
-          argResults: <String, dynamic>{'sync': true},
-          logger: mockLogger,
-          fileSystem: memoryFileSystem,
-        );
-
-        expect(command.shouldSync, isTrue);
-      });
-
-      test('returns false when watch flag is not provided', () {
-        final command = TestCookAllBricks(
-          argResults: <String, dynamic>{'sync': false},
-          logger: mockLogger,
-          fileSystem: memoryFileSystem,
-        );
-
-        expect(command.shouldSync, isFalse);
-      });
-    });
-
-    group('#outputDir', () {
-      test('returns the output dir when provided', () {
-        final command = TestCookAllBricks(
-          argResults: <String, dynamic>{'output': 'output/dir'},
-          logger: mockLogger,
-          fileSystem: memoryFileSystem,
-        );
-
-        expect(command.outputDir, 'output/dir');
-      });
-
-      test('returns null when not provided', () {
-        final command = TestCookAllBricks(
-          argResults: <String, dynamic>{},
-          logger: mockLogger,
-          fileSystem: memoryFileSystem,
-        );
-
-        expect(command.outputDir, null);
-      });
-    });
-
     group('#run', () {
-      test('returns ${ExitCode.config.code} when bricks returns an error', () {
+      test('gracefully', () async {
         final command = TestCookAllBricks(
+          analytics: mockAnalytics,
+          bricksOrError: const BrickOrError({}, null),
+          logger: mockLogger,
+          fileSystem: memoryFileSystem,
+        );
+
+        final result = await command.run();
+
+        expect(result, ExitCode.success.code);
+      });
+
+      test('returns ${ExitCode.config.code} when bricks returns an error',
+          () async {
+        final command = TestCookAllBricks(
+          analytics: mockAnalytics,
           bricksOrError: const BrickOrError(null, 'error'),
           logger: mockLogger,
           fileSystem: memoryFileSystem,
         );
 
-        expect(command.run(), completion(ExitCode.config.code));
-      });
+        final result = await command.run();
 
-      test('returns gracefully', () {
-        final command = TestCookAllBricks(
-          bricksOrError: const BrickOrError({}, null),
-          logger: mockLogger,
-          fileSystem: memoryFileSystem,
-          putInOvenOverride: ExitCode.success,
-        );
-
-        expect(command.run(), completion(ExitCode.success.code));
+        expect(result, ExitCode.config.code);
       });
     });
   });
@@ -148,21 +84,17 @@ class TestCookAllBricks extends CookAllBricks {
     this.bricksOrError,
     this.fileWatchers,
     Map<String, dynamic>? argResults,
-    this.putInOvenOverride,
-    Analytics? analytics,
+    required Analytics analytics,
   })  : _argResults = argResults ?? <String, dynamic>{},
-        analytics = analytics ?? MockAnalytics(),
         super(
           logger: logger,
           fileSystem: fileSystem,
-          analytics: analytics ?? MockAnalytics(),
+          analytics: analytics,
         );
 
   final Map<String, dynamic> _argResults;
   final List<FileWatcher?>? fileWatchers;
   final BrickOrError? bricksOrError;
-  final ExitCode? putInOvenOverride;
-  final Analytics analytics;
 
   @override
   BrickOrError bricks() => bricksOrError ?? const BrickOrError({}, null);
@@ -178,15 +110,6 @@ class TestCookAllBricks extends CookAllBricks {
       return fileWatchers![_callCount++] ?? mock;
     }
     return super.watcher(path);
-  }
-
-  @override
-  Future<ExitCode> putInOven(Set<Brick> bricks) async {
-    if (putInOvenOverride != null) {
-      return putInOvenOverride!;
-    }
-
-    return super.putInOven(bricks);
   }
 
   @override
