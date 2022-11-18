@@ -127,7 +127,9 @@ void main() {
         verifyNever(mockKeyPressListener.listenToKeystrokes);
         verifyNever(() => mockFileWatcher.events);
         verifyNever(mockWatcher.start);
-        verify(() => mockBrick.cook(output: 'my_path')).called(1);
+        verify(
+          () => mockBrick.cook(output: 'my_path'),
+        ).called(1);
       });
 
       test('prints warning and error when $ConfigException is thrown',
@@ -600,10 +602,17 @@ class TestOvenMixin extends BrickOvenCommand
     this.outputDir = '',
     required this.fileWatchers,
     this.isWatch = false,
-  }) : super(logger: logger);
+    this.shouldSync = true,
+  }) : super(
+          logger: logger,
+          fileSystem: MemoryFileSystem(),
+        );
 
   @override
   final bool isWatch;
+
+  @override
+  final bool shouldSync;
 
   @override
   final KeyPressListener? keyPressListener;
