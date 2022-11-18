@@ -4,7 +4,7 @@ import 'dart:async';
 
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_partial.dart';
+import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
@@ -72,7 +72,7 @@ exclude:
         name: brickName,
         source: BrickSource(localPath: localPath),
         partials: [
-          BrickPartial(
+          Partial(
             path: partialPath,
             variables: const [Variable(name: 'one')],
           )
@@ -559,7 +559,7 @@ exclude:
             logger: mockLogger,
             fileSystem: fs,
             partials: [
-              BrickPartial(
+              Partial(
                 path: join(localPath, filePath),
               ),
             ],
@@ -643,10 +643,10 @@ exclude:
         logger: mockLogger,
         fileSystem: fs,
         partials: [
-          BrickPartial(
+          Partial(
             path: join(localPath, filePath),
           ),
-          BrickPartial(
+          Partial(
             path: join(localPath, 'to', filePath),
           ),
         ],
@@ -967,7 +967,7 @@ exclude:
           localPath: localPath,
           fileSystem: fs,
         ),
-        partials: [for (final file in files) BrickPartial(path: file)],
+        partials: [for (final file in files) Partial(path: file)],
         fileSystem: fs,
       );
 
@@ -1022,7 +1022,7 @@ exclude:
 
       test('partials', () {
         const file = 'file1.dart';
-        const partial = BrickPartial(path: file);
+        const partial = Partial(path: file);
 
         fs.file(join(localPath, file))
           ..createSync(recursive: true)
@@ -1094,7 +1094,7 @@ exclude:
           source: const BrickSource.none(),
           logger: mockLogger,
           partials: const [
-            BrickPartial(
+            Partial(
               path: '',
               variables: [
                 Variable(name: 'var1'),
@@ -1102,7 +1102,7 @@ exclude:
                 Variable(name: 'var3'),
               ],
             ),
-            BrickPartial(
+            Partial(
               path: '',
               variables: [
                 Variable(name: 'var4'),

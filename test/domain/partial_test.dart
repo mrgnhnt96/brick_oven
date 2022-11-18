@@ -9,34 +9,34 @@ import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
-import 'package:brick_oven/domain/brick_partial.dart';
+import 'package:brick_oven/domain/partial.dart';
 import 'package:yaml/yaml.dart';
 
 import '../test_utils/mocks.dart';
 
 void main() {
   test('can be instanciated', () {
-    expect(() => const BrickPartial(path: 'path'), returnsNormally);
+    expect(() => const Partial(path: 'path'), returnsNormally);
   });
 
   group('#fromYaml', () {
     test('throws $ConfigException if yaml is error', () {
       expect(
-        () => BrickPartial.fromYaml(const YamlError('err'), 'path'),
+        () => Partial.fromYaml(const YamlError('err'), 'path'),
         throwsA(isA<ConfigException>()),
       );
     });
 
-    test('returns $BrickPartial when yaml is null', () {
+    test('returns $Partial when yaml is null', () {
       expect(
-        BrickPartial.fromYaml(const YamlNone(), 'path'),
-        const BrickPartial(path: 'path'),
+        Partial.fromYaml(const YamlNone(), 'path'),
+        const Partial(path: 'path'),
       );
     });
 
-    test('returns $BrickPartial when yaml is invalid', () {
+    test('returns $Partial when yaml is invalid', () {
       expect(
-        () => BrickPartial.fromYaml(const YamlString('hiii'), 'path'),
+        () => Partial.fromYaml(const YamlString('hiii'), 'path'),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -48,7 +48,7 @@ vars: ${1}
 ''';
         final yaml = YamlValue.from(loadYaml(content));
         expect(
-          () => BrickPartial.fromYaml(yaml, 'path'),
+          () => Partial.fromYaml(yaml, 'path'),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -59,7 +59,7 @@ vars: hiii
 ''';
         final yaml = YamlValue.from(loadYaml(content));
         expect(
-          () => BrickPartial.fromYaml(yaml, 'path'),
+          () => Partial.fromYaml(yaml, 'path'),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -71,23 +71,23 @@ vars:
 ''';
         final yaml = YamlValue.from(loadYaml(content));
         expect(
-          () => BrickPartial.fromYaml(yaml, 'path'),
+          () => Partial.fromYaml(yaml, 'path'),
           throwsA(isA<ConfigException>()),
         );
       });
 
-      test('returns $BrickPartial when vars is null', () {
+      test('returns $Partial when vars is null', () {
         const content = '''
 vars:
 ''';
         final yaml = YamlValue.from(loadYaml(content));
         expect(
-          BrickPartial.fromYaml(yaml, 'path'),
-          const BrickPartial(path: 'path'),
+          Partial.fromYaml(yaml, 'path'),
+          const Partial(path: 'path'),
         );
       });
 
-      test('returns $BrickPartial when vars are valid', () {
+      test('returns $Partial when vars are valid', () {
         const content = '''
 vars:
   some:
@@ -96,8 +96,8 @@ vars:
 ''';
         final yaml = YamlValue.from(loadYaml(content));
         expect(
-          BrickPartial.fromYaml(yaml, 'path'),
-          const BrickPartial(
+          Partial.fromYaml(yaml, 'path'),
+          const Partial(
             path: 'path',
             variables: [
               Variable(name: 'some'),
@@ -110,33 +110,33 @@ vars:
   });
 
   test('#name returns file name without extension', () {
-    const instance = BrickPartial(path: 'path/to/file.dart');
+    const instance = Partial(path: 'path/to/file.dart');
 
     expect(instance.name, 'file');
   });
 
   group('#fileName', () {
     test('returns the file name with extension', () {
-      const instance = BrickPartial(path: 'path/to/file.dart');
+      const instance = Partial(path: 'path/to/file.dart');
 
       expect(instance.fileName, 'file.dart');
     });
 
     test('returns the file name with generated extension', () {
-      const instance = BrickPartial(path: 'path/to/file.g.dart');
+      const instance = Partial(path: 'path/to/file.g.dart');
 
       expect(instance.fileName, 'file.g.dart');
     });
   });
 
   test('#toPartialFile, returns formatted partial file', () {
-    const instance = BrickPartial(path: 'path/to/file.dart');
+    const instance = Partial(path: 'path/to/file.dart');
 
     expect(instance.toPartialFile(), '{{~ file.dart }}');
   });
 
   test('#toPartialInput returns formatted partial input', () {
-    const instance = BrickPartial(path: 'path/to/file.dart');
+    const instance = Partial(path: 'path/to/file.dart');
 
     expect(instance.toPartialInput(), '{{> file.dart }}');
   });
@@ -176,7 +176,7 @@ vars:
     });
 
     test('writes file on target dir root', () {
-      const instance = BrickPartial(path: 'path/to/file.dart');
+      const instance = Partial(path: 'path/to/file.dart');
 
       instance.writeTargetFile(
         additionalVariables: [],
@@ -192,7 +192,7 @@ vars:
   });
 }
 
-class TestBrickPartial extends BrickPartial {
+class TestBrickPartial extends Partial {
   const TestBrickPartial(String path) : super(path: path);
 
   @override
@@ -200,7 +200,7 @@ class TestBrickPartial extends BrickPartial {
     required File targetFile,
     required File sourceFile,
     required List<Variable> variables,
-    required List<BrickPartial> partials,
+    required List<Partial> partials,
     required FileSystem? fileSystem,
     required Logger logger,
   }) {

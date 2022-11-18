@@ -1,7 +1,7 @@
 // ignore_for_file: cascade_invocations
 
 import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_partial.dart';
+import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/name.dart';
@@ -719,7 +719,7 @@ class TestBrickFile extends BrickFile {
     required File targetFile,
     required File sourceFile,
     required List<Variable> variables,
-    required List<BrickPartial> partials,
+    required List<Partial> partials,
     required FileSystem? fileSystem,
     required Logger logger,
   }) {

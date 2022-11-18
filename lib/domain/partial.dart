@@ -11,21 +11,21 @@ import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart';
 
-part 'brick_partial.g.dart';
+part 'partial.g.dart';
 
-/// {@template brick_partial}
+/// {@template partial}
 /// A partial is a template that can be re-used within files
 /// {@endtemplate}
 @autoequal
-class BrickPartial extends Equatable with FileReplacements {
-  /// {@macro brick_partial}
-  const BrickPartial({
+class Partial extends Equatable with FileReplacements {
+  /// {@macro partial}
+  const Partial({
     required this.path,
     this.variables = const [],
   });
 
-  /// {@macro brick_partial}
-  factory BrickPartial.fromYaml(YamlValue yaml, String path) {
+  /// {@macro partial}
+  factory Partial.fromYaml(YamlValue yaml, String path) {
     if (yaml.isError()) {
       throw PartialException(
         partial: path,
@@ -34,7 +34,7 @@ class BrickPartial extends Equatable with FileReplacements {
     }
 
     if (yaml.isNone()) {
-      return BrickPartial(path: path);
+      return Partial(path: path);
     }
 
     if (!yaml.isYaml()) {
@@ -56,7 +56,7 @@ class BrickPartial extends Equatable with FileReplacements {
     }
 
     if (varsYaml.isNone()) {
-      return BrickPartial(path: path);
+      return Partial(path: path);
     }
 
     if (!varsYaml.isYaml()) {
@@ -85,7 +85,7 @@ class BrickPartial extends Equatable with FileReplacements {
       }
     }
 
-    return BrickPartial(
+    return Partial(
       path: path,
       variables: variables,
     );
@@ -118,7 +118,7 @@ class BrickPartial extends Equatable with FileReplacements {
   FileWriteResult writeTargetFile({
     required String targetDir,
     required File sourceFile,
-    required List<BrickPartial> partials,
+    required List<Partial> partials,
     required List<Variable> additionalVariables,
     required FileSystem? fileSystem,
     required Logger logger,

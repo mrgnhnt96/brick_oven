@@ -3,7 +3,7 @@ import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_or_error.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/domain/brick_partial.dart';
+import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/name.dart';
@@ -125,7 +125,7 @@ void main() {
                     ],
                   ),
                 ],
-                partials: const [BrickPartial(path: 'header.md')],
+                partials: const [Partial(path: 'header.md')],
               ),
               Brick.memory(
                 name: 'package_2',
@@ -149,7 +149,7 @@ void main() {
                     ],
                   ),
                 ],
-                partials: const [BrickPartial(path: 'header.md')],
+                partials: const [Partial(path: 'header.md')],
               )
             },
             null,

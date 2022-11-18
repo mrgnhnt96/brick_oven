@@ -1,6 +1,6 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:brick_oven/domain/brick_partial.dart';
+import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -38,9 +38,9 @@ partial.do_not_replace
 ''';
 
       const partials = [
-        BrickPartial(path: 'path/to/replace_me.dart'),
-        BrickPartial(path: 'path/to/replace_me_too.md'),
-        BrickPartial(path: 'path/to/replace_me_three'),
+        Partial(path: 'path/to/replace_me.dart'),
+        Partial(path: 'path/to/replace_me_too.md'),
+        Partial(path: 'path/to/replace_me_three'),
       ];
 
       final result = testFileReplacements.checkForPartials(
@@ -483,7 +483,7 @@ partial.page
 
       const variable = Variable(placeholder: '_VAR_', name: 'var');
       const section = Variable(placeholder: '_SECTION_', name: 'section');
-      const partial = BrickPartial(path: 'path/page.md');
+      const partial = Partial(path: 'path/page.md');
 
       sourceFile.writeAsStringSync(content);
 

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_partial.dart';
+import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
@@ -38,7 +38,7 @@ class MockStdout extends Mock implements Stdout {}
 
 class MockStdin extends Mock implements Stdin {}
 
-class MockBrickPartial extends Mock implements BrickPartial {}
+class MockBrickPartial extends Mock implements Partial {}
 
 class MockBrickFile extends Mock implements BrickFile {}
 

@@ -1,7 +1,7 @@
 import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/domain/brick_partial.dart';
+import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
@@ -126,7 +126,7 @@ class Brick extends Equatable {
 
     final partialsData = YamlValue.from(data.remove('partials'));
 
-    List<BrickPartial> partials() {
+    List<Partial> partials() {
       if (partialsData.isNone()) {
         return [];
       }
@@ -138,12 +138,12 @@ class Brick extends Equatable {
         );
       }
 
-      final partials = <BrickPartial>[];
+      final partials = <Partial>[];
 
       for (final entry in partialsData.asYaml().value.entries) {
         final path = entry.key as String;
 
-        final partial = BrickPartial.fromYaml(
+        final partial = Partial.fromYaml(
           YamlValue.from(entry.value),
           path,
         );
@@ -267,7 +267,7 @@ class Brick extends Equatable {
   final List<BrickFile> files;
 
   /// the configured partials that will be imported to the [source] files
-  final List<BrickPartial> partials;
+  final List<Partial> partials;
 
   /// paths to be excluded from the [source]
   final List<String> exclude;
