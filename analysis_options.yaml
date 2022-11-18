@@ -7,3 +7,4 @@ analyzer:
 
   exclude:
       - lib/src/version.dart
+      - example/main.dart

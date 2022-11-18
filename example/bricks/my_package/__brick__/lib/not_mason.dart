@@ -1,1 +1,0 @@
-// this class is not mason, but still needs to be generated
