@@ -28,7 +28,7 @@ void main() {
 
     setUp(() {
       mockLogger = MockLogger();
-      mockAnalytics = MockAnalytics();
+      mockAnalytics = MockAnalytics()..stubMethods();
 
       listCommand = ListCommand(
         logger: mockLogger,
@@ -60,19 +60,21 @@ void main() {
 
     group('#isVerbose', () {
       test('returns true when verbose is provided', () {
-        final command = TestListCommand(verbose: true);
+        final command =
+            TestListCommand(analytics: mockAnalytics, verbose: true);
 
         expect(command.isVerbose, true);
       });
 
       test('returns false when verbose is not provided', () {
-        final command = TestListCommand();
+        final command = TestListCommand(analytics: mockAnalytics);
 
         expect(command.isVerbose, isFalse);
       });
 
       test('returns false when verbose is provided false', () {
-        final command = TestListCommand(verbose: false);
+        final command =
+            TestListCommand(analytics: mockAnalytics, verbose: false);
 
         expect(command.isVerbose, false);
       });
@@ -80,6 +82,7 @@ void main() {
 
     test('prints error when configuration is bad and exits with 78', () async {
       final command = TestListCommand(
+        analytics: mockAnalytics,
         logger: mockLogger,
       )..brickOrErrorResponse = const BrickOrError(null, 'bad config');
 
@@ -94,9 +97,10 @@ void main() {
     group('brick_oven list', () {
       ListCommand listCommand({required bool verbose}) {
         return TestListCommand(
+          analytics: mockAnalytics,
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
-          verbose: false,
+          verbose: verbose,
         )..brickOrErrorResponse = BrickOrError(
             {
               Brick.memory(
@@ -154,28 +158,12 @@ void main() {
 
       setUp(() {
         printLogs = [];
+      });
 
-        test(
-          'writes config from ${BrickOvenYaml.file}',
-          () async {
-            final result = await listCommand(verbose: false).run();
-
-            expect(result, ExitCode.success.code);
-
-            verify(
-              () => mockLogger.info('package_1: example/lib'),
-            ).called(1);
-
-            verify(
-              () => mockLogger.info('package_2: example/lib'),
-            ).called(1);
-          },
-        );
-
-        test('--verbose writes config from ${BrickOvenYaml.file}', () async {
-          final result = await listCommand(verbose: true).run();
-
-          expect(result, ExitCode.success.code);
+      test(
+        'writes config from ${BrickOvenYaml.file}',
+        () async {
+          final result = await listCommand(verbose: false).run();
 
           verify(
             () => mockLogger.info('package_1: example/lib'),
@@ -186,10 +174,60 @@ void main() {
           ).called(1);
 
           verify(
-            () => mockLogger
-                .info('  (configured) dirs: 1, files: 1, partials: 1, vars: 2'),
-          ).called(2);
-        });
+            () => mockAnalytics.sendEvent(
+              'list',
+              'simple',
+              value: 0,
+              parameters: {
+                'bricks': '2',
+              },
+            ),
+          ).called(1);
+
+          verify(
+            () => mockAnalytics.waitForLastPing(
+              timeout: any(named: 'timeout'),
+            ),
+          ).called(1);
+
+          expect(result, ExitCode.success.code);
+        },
+      );
+
+      test('--verbose writes config from ${BrickOvenYaml.file}', () async {
+        final result = await listCommand(verbose: true).run();
+
+        verify(
+          () => mockLogger.info('package_1: example/lib'),
+        ).called(1);
+
+        verify(
+          () => mockLogger.info('package_2: example/lib'),
+        ).called(1);
+
+        verify(
+          () => mockLogger
+              .info('  (configured) dirs: 1, files: 1, partials: 1, vars: 2'),
+        ).called(2);
+
+        verify(
+          () => mockAnalytics.sendEvent(
+            'list',
+            'verbose',
+            value: 0,
+            parameters: {
+              'bricks': '2',
+            },
+          ),
+        ).called(1);
+
+        verify(
+          () => mockAnalytics.waitForLastPing(
+            timeout: any(named: 'timeout'),
+          ),
+        ).called(1);
+
+        expect(result, ExitCode.success.code);
       });
     });
   });
@@ -200,10 +238,11 @@ class TestListCommand extends ListCommand {
     this.verbose,
     FileSystem? fileSystem,
     Logger? logger,
+    required Analytics analytics,
   }) : super(
           logger: logger ?? MockLogger(),
           fileSystem: fileSystem ?? MemoryFileSystem(),
-          analytics: MockAnalytics(),
+          analytics: analytics,
         );
 
   final bool? verbose;
