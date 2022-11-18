@@ -1,6 +1,6 @@
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/enums/mustache_tags.dart';
+import 'package:brick_oven/enums/mustache_tag.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
@@ -53,7 +53,7 @@ format: snake
           equals(
             const Name(
               'name',
-              format: MustacheTags.snakeCase,
+              tag: MustacheTag.snakeCase,
             ),
           ),
         );
@@ -101,24 +101,6 @@ $key:
         expect(
           const Name('name', prefix: 'prefix', suffix: 'suffix').simple,
           equals('prefix{name}suffix'),
-        );
-      });
-    });
-
-    group('#format', () {
-      test('prepends the prefix and appends the suffix', () {
-        expect(
-          const Name('name', prefix: 'prefix', suffix: 'suffix')
-              .formatWith(MustacheTags.camelCase),
-          contains('prefix{{{name}}}suffix'),
-        );
-      });
-
-      test('formats the with the mustache format', () {
-        expect(
-          const Name('name', prefix: 'prefix', suffix: 'suffix')
-              .formatWith(MustacheTags.snakeCase),
-          equals('{{#snakeCase}}prefix{{{name}}}suffix{{/snakeCase}}'),
         );
       });
     });

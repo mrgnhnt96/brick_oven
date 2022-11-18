@@ -2,8 +2,8 @@ import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/enums/mustache_tags.dart';
-import 'package:brick_oven/enums/mustache_sections.dart';
+import 'package:brick_oven/enums/mustache_tag.dart';
+import 'package:brick_oven/enums/mustache_section.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -124,7 +124,7 @@ mixin FileReplacements {
       sectionPattern(variable),
       (match) {
         final possibleSection = match.group(1);
-        final section = MustacheSections.values.from(possibleSection);
+        final section = MustacheSection.values.from(possibleSection);
 
         // if section is found, then replace the content
         if (section == null) {
@@ -222,20 +222,20 @@ mixin FileReplacements {
           isVariableUsed = true;
         }
 
-        final possibleFormat = match.group(2);
+        final possibleTag = match.group(2);
 
-        final format = MustacheTags.values.findFrom(possibleFormat);
+        final tag = MustacheTag.values.findFrom(possibleTag);
 
-        if (format == null) {
-          if (possibleFormat != null) {
-            suffix = possibleFormat;
+        if (tag == null) {
+          if (possibleTag != null) {
+            suffix = possibleTag;
           }
 
           result = '{{${variable.name}}}';
         } else {
           // format the variable
-          suffix = MustacheTags.values.suffixFrom(possibleFormat) ?? '';
-          result = format.wrap(variable.name);
+          suffix = MustacheTag.values.suffixFrom(possibleTag) ?? '';
+          result = tag.wrap(variable.name);
         }
 
         isVariableUsed = true;

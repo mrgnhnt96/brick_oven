@@ -1,223 +1,223 @@
 import 'package:test/test.dart';
 
-import 'package:brick_oven/enums/mustache_tags.dart';
+import 'package:brick_oven/enums/mustache_tag.dart';
 
 void main() {
-  const formats = [
-    MustacheTags.camelCase,
-    MustacheTags.constantCase,
-    MustacheTags.dotCase,
-    MustacheTags.headerCase,
-    MustacheTags.lowerCase,
-    MustacheTags.mustacheCase,
-    MustacheTags.pascalCase,
-    MustacheTags.paramCase,
-    MustacheTags.pathCase,
-    MustacheTags.sentenceCase,
-    MustacheTags.snakeCase,
-    MustacheTags.titleCase,
-    MustacheTags.upperCase,
+  const tags = [
+    MustacheTag.camelCase,
+    MustacheTag.constantCase,
+    MustacheTag.dotCase,
+    MustacheTag.headerCase,
+    MustacheTag.lowerCase,
+    MustacheTag.mustacheCase,
+    MustacheTag.pascalCase,
+    MustacheTag.paramCase,
+    MustacheTag.pathCase,
+    MustacheTag.sentenceCase,
+    MustacheTag.snakeCase,
+    MustacheTag.titleCase,
+    MustacheTag.upperCase,
   ];
 
-  const nonFormats = [
-    MustacheTags.escaped,
-    MustacheTags.unescaped,
-    MustacheTags.if_,
-    MustacheTags.ifNot,
-    MustacheTags.endIf,
+  const nonTags = [
+    MustacheTag.escaped,
+    MustacheTag.unescaped,
+    MustacheTag.if_,
+    MustacheTag.ifNot,
+    MustacheTag.endIf,
   ];
 
   const suffix = 'ASDF';
 
-  const formatsWithoutSuffixes = {
-    MustacheTags.camelCase: [
+  const tagsWithoutSuffixes = {
+    MustacheTag.camelCase: [
       'camelCase',
       'camelcase',
       'camel',
     ],
-    MustacheTags.constantCase: [
+    MustacheTag.constantCase: [
       'constantCase',
       'constantcase',
       'constant',
     ],
-    MustacheTags.dotCase: [
+    MustacheTag.dotCase: [
       'dotCase',
       'dotcase',
       'dot',
     ],
-    MustacheTags.headerCase: [
+    MustacheTag.headerCase: [
       'headerCase',
       'headercase',
       'header',
     ],
-    MustacheTags.lowerCase: [
+    MustacheTag.lowerCase: [
       'lowerCase',
       'lowercase',
       'lower',
     ],
-    MustacheTags.mustacheCase: [
+    MustacheTag.mustacheCase: [
       'mustacheCase',
       'mustachecase',
       'mustache',
     ],
-    MustacheTags.pascalCase: [
+    MustacheTag.pascalCase: [
       'pascalCase',
       'pascalcase',
       'pascal',
     ],
-    MustacheTags.paramCase: [
+    MustacheTag.paramCase: [
       'paramCase',
       'paramcase',
       'param',
     ],
-    MustacheTags.pathCase: [
+    MustacheTag.pathCase: [
       'pathCase',
       'pathcase',
       'path',
     ],
-    MustacheTags.sentenceCase: [
+    MustacheTag.sentenceCase: [
       'sentenceCase',
       'sentencecase',
       'sentence',
     ],
-    MustacheTags.snakeCase: [
+    MustacheTag.snakeCase: [
       'snakeCase',
       'snakecase',
       'snake',
     ],
-    MustacheTags.titleCase: [
+    MustacheTag.titleCase: [
       'titleCase',
       'titlecase',
       'title',
     ],
-    MustacheTags.upperCase: [
+    MustacheTag.upperCase: [
       'upperCase',
       'uppercase',
       'upper',
     ],
-    MustacheTags.escaped: [
+    MustacheTag.escaped: [
       'escaped',
     ],
-    MustacheTags.unescaped: [
+    MustacheTag.unescaped: [
       'unescaped',
     ],
-    MustacheTags.if_: [
+    MustacheTag.if_: [
       'if',
     ],
-    MustacheTags.ifNot: [
+    MustacheTag.ifNot: [
       'ifNot',
       'ifnot',
     ],
-    MustacheTags.endIf: [
+    MustacheTag.endIf: [
       'endIf',
       'endif',
     ],
   };
 
-  const formatsWithSuffixes = {
-    MustacheTags.camelCase: [
+  const tagsWithSuffixes = {
+    MustacheTag.camelCase: [
       'camelCase$suffix',
       'camelcase$suffix',
       'camel$suffix',
     ],
-    MustacheTags.constantCase: [
+    MustacheTag.constantCase: [
       'constantCase$suffix',
       'constantCase$suffix',
       'constant$suffix',
     ],
-    MustacheTags.dotCase: [
+    MustacheTag.dotCase: [
       'dotCase$suffix',
       'dotcase$suffix',
       'dot$suffix',
     ],
-    MustacheTags.headerCase: [
+    MustacheTag.headerCase: [
       'headerCase$suffix',
       'headercase$suffix',
       'header$suffix',
     ],
-    MustacheTags.lowerCase: [
+    MustacheTag.lowerCase: [
       'lowerCase$suffix',
       'lowercase$suffix',
       'lower$suffix',
     ],
-    MustacheTags.mustacheCase: [
+    MustacheTag.mustacheCase: [
       'mustacheCase$suffix',
       'mustacheCase$suffix',
       'mustache$suffix',
     ],
-    MustacheTags.pascalCase: [
+    MustacheTag.pascalCase: [
       'pascalCase$suffix',
       'pascalcase$suffix',
       'pascal$suffix',
     ],
-    MustacheTags.paramCase: [
+    MustacheTag.paramCase: [
       'paramCase$suffix',
       'paramcase$suffix',
       'param$suffix',
     ],
-    MustacheTags.pathCase: [
+    MustacheTag.pathCase: [
       'pathCase$suffix',
       'pathcase$suffix',
       'path$suffix',
     ],
-    MustacheTags.sentenceCase: [
+    MustacheTag.sentenceCase: [
       'sentenceCase$suffix',
       'sentenceCase$suffix',
       'sentence$suffix',
     ],
-    MustacheTags.snakeCase: [
+    MustacheTag.snakeCase: [
       'snakeCase$suffix',
       'snakecase$suffix',
       'snake$suffix',
     ],
-    MustacheTags.titleCase: [
+    MustacheTag.titleCase: [
       'titleCase$suffix',
       'titlecase$suffix',
       'title$suffix',
     ],
-    MustacheTags.upperCase: [
+    MustacheTag.upperCase: [
       'upperCase$suffix',
       'uppercase$suffix',
       'upper$suffix',
     ],
-    MustacheTags.escaped: [
+    MustacheTag.escaped: [
       'escaped$suffix',
     ],
-    MustacheTags.unescaped: [
+    MustacheTag.unescaped: [
       'unescaped$suffix',
     ],
-    MustacheTags.if_: [
+    MustacheTag.if_: [
       'if$suffix',
     ],
-    MustacheTags.ifNot: [
+    MustacheTag.ifNot: [
       'ifNot$suffix',
       'ifnot$suffix',
     ],
-    MustacheTags.endIf: [
+    MustacheTag.endIf: [
       'endIf$suffix',
       'endif$suffix',
     ],
   };
 
-  const allFormats = [...formats, ...nonFormats];
+  const allTags = [...tags, ...nonTags];
 
-  test('MustacheFormat.values', () {
-    final formatsWithSuffixesKeys = formatsWithSuffixes.keys.toList();
-    final formatsWithoutSuffixesKeys = formatsWithoutSuffixes.keys.toList();
+  test('MustacheTag.values', () {
+    final tagsWithSuffixesKeys = tagsWithSuffixes.keys.toList();
+    final tagsWithoutSuffixesKeys = tagsWithoutSuffixes.keys.toList();
 
-    for (final value in MustacheTags.values) {
-      expect(allFormats, contains(value));
-      expect(formatsWithSuffixesKeys, contains(value));
-      expect(formatsWithoutSuffixesKeys, contains(value));
+    for (final value in MustacheTag.values) {
+      expect(allTags, contains(value));
+      expect(tagsWithSuffixesKeys, contains(value));
+      expect(tagsWithoutSuffixesKeys, contains(value));
     }
   });
 
-  group('MustacheFormatX', () {
+  group('MustacheTagX', () {
     group('#wrappedPattern', () {
       test('is correct value', () {
         final expected = RegExp(r'\S*\{{2,3}\S+\}{2,3}\S*');
 
-        expect(MustacheFormatX.wrappedPattern, expected);
+        expect(MustacheTagX.wrappedPattern, expected);
       });
 
       test('matches', () {
@@ -232,103 +232,100 @@ void main() {
         ];
 
         for (final match in matches) {
-          expect(MustacheFormatX.wrappedPattern.hasMatch(match), isTrue);
+          expect(MustacheTagX.wrappedPattern.hasMatch(match), isTrue);
         }
       });
     });
 
     group('#wrap', () {
       test('throws assertion when content is configured correctly', () {
-        for (final format in formats) {
-          expect(() => format.wrap('foo'), returnsNormally);
-          expect(() => format.wrap('{{foo}}'), returnsNormally);
-          expect(() => format.wrap('{{{foo}}}'), returnsNormally);
+        for (final tag in tags) {
+          expect(() => tag.wrap('foo'), returnsNormally);
+          expect(() => tag.wrap('{{foo}}'), returnsNormally);
+          expect(() => tag.wrap('{{{foo}}}'), returnsNormally);
         }
 
-        for (final format in nonFormats) {
+        for (final tag in nonTags) {
           expect(
-            () => format.wrap('{{foo}}'),
+            () => tag.wrap('{{foo}}'),
             throwsA(isA<AssertionError>()),
           );
           expect(
-            () => format.wrap('{{{foo}}}'),
+            () => tag.wrap('{{{foo}}}'),
             throwsA(isA<AssertionError>()),
           );
           expect(
-            () => format.wrap('foo'),
+            () => tag.wrap('foo'),
             returnsNormally,
           );
         }
       });
 
-      test('formats the content correctly', () {
-        for (final format in formats) {
+      test('tags the content correctly', () {
+        for (final tag in tags) {
           expect(
-            format.wrap('{{{sup_dude}}}'),
-            '{{#${format.name}}}{{{sup_dude}}}{{/${format.name}}}',
+            tag.wrap('{{{sup_dude}}}'),
+            '{{#${tag.name}}}{{{sup_dude}}}{{/${tag.name}}}',
           );
 
           expect(
-            format.wrap('{{sup_dude}}'),
-            '{{#${format.name}}}{{sup_dude}}{{/${format.name}}}',
+            tag.wrap('{{sup_dude}}'),
+            '{{#${tag.name}}}{{sup_dude}}{{/${tag.name}}}',
           );
         }
 
-        const nonFormatExpected = {
-          MustacheTags.escaped: '{{{DUDE}}}',
-          MustacheTags.unescaped: '{{DUDE}}',
-          MustacheTags.if_: '{{#DUDE}}',
-          MustacheTags.ifNot: '{{^DUDE}}',
-          MustacheTags.endIf: '{{/DUDE}}',
+        const nonTagExpected = {
+          MustacheTag.escaped: '{{{DUDE}}}',
+          MustacheTag.unescaped: '{{DUDE}}',
+          MustacheTag.if_: '{{#DUDE}}',
+          MustacheTag.ifNot: '{{^DUDE}}',
+          MustacheTag.endIf: '{{/DUDE}}',
         };
 
-        for (final format in nonFormats) {
+        for (final tag in nonTags) {
           expect(
-            format.wrap('DUDE'),
-            nonFormatExpected[format],
+            tag.wrap('DUDE'),
+            nonTagExpected[tag],
           );
         }
       });
     });
 
-    test('#isFormat returns true when the value is a format type', () {
-      for (final format in formats) {
-        expect(format.isFormat, isTrue);
+    test('#isTag returns true when the value is a tag type', () {
+      for (final tag in tags) {
+        expect(tag.isFormat, isTrue);
       }
 
-      for (final format in nonFormats) {
-        expect(format.isFormat, isFalse);
+      for (final tag in nonTags) {
+        expect(tag.isFormat, isFalse);
       }
     });
 
     test('#isValue is correct for all values', () {
       final values = {
-        MustacheTags.camelCase: () => MustacheTags.camelCase.isCamelCase,
-        MustacheTags.constantCase: () =>
-            MustacheTags.constantCase.isConstantCase,
-        MustacheTags.dotCase: () => MustacheTags.dotCase.isDotCase,
-        MustacheTags.headerCase: () => MustacheTags.headerCase.isHeaderCase,
-        MustacheTags.lowerCase: () => MustacheTags.lowerCase.isLowerCase,
-        MustacheTags.mustacheCase: () =>
-            MustacheTags.mustacheCase.isMustacheCase,
-        MustacheTags.pascalCase: () => MustacheTags.pascalCase.isPascalCase,
-        MustacheTags.paramCase: () => MustacheTags.paramCase.isParamCase,
-        MustacheTags.pathCase: () => MustacheTags.pathCase.isPathCase,
-        MustacheTags.sentenceCase: () =>
-            MustacheTags.sentenceCase.isSentenceCase,
-        MustacheTags.snakeCase: () => MustacheTags.snakeCase.isSnakeCase,
-        MustacheTags.titleCase: () => MustacheTags.titleCase.isTitleCase,
-        MustacheTags.upperCase: () => MustacheTags.upperCase.isUpperCase,
-        MustacheTags.escaped: () => MustacheTags.escaped.isEscaped,
-        MustacheTags.unescaped: () => MustacheTags.unescaped.isUnescaped,
-        MustacheTags.if_: () => MustacheTags.if_.isIf,
-        MustacheTags.ifNot: () => MustacheTags.ifNot.isIfNot,
-        MustacheTags.endIf: () => MustacheTags.endIf.isEndIf,
+        MustacheTag.camelCase: () => MustacheTag.camelCase.isCamelCase,
+        MustacheTag.constantCase: () => MustacheTag.constantCase.isConstantCase,
+        MustacheTag.dotCase: () => MustacheTag.dotCase.isDotCase,
+        MustacheTag.headerCase: () => MustacheTag.headerCase.isHeaderCase,
+        MustacheTag.lowerCase: () => MustacheTag.lowerCase.isLowerCase,
+        MustacheTag.mustacheCase: () => MustacheTag.mustacheCase.isMustacheCase,
+        MustacheTag.pascalCase: () => MustacheTag.pascalCase.isPascalCase,
+        MustacheTag.paramCase: () => MustacheTag.paramCase.isParamCase,
+        MustacheTag.pathCase: () => MustacheTag.pathCase.isPathCase,
+        MustacheTag.sentenceCase: () => MustacheTag.sentenceCase.isSentenceCase,
+        MustacheTag.snakeCase: () => MustacheTag.snakeCase.isSnakeCase,
+        MustacheTag.titleCase: () => MustacheTag.titleCase.isTitleCase,
+        MustacheTag.upperCase: () => MustacheTag.upperCase.isUpperCase,
+        MustacheTag.escaped: () => MustacheTag.escaped.isEscaped,
+        MustacheTag.unescaped: () => MustacheTag.unescaped.isUnescaped,
+        MustacheTag.if_: () => MustacheTag.if_.isIf,
+        MustacheTag.ifNot: () => MustacheTag.ifNot.isIfNot,
+        MustacheTag.endIf: () => MustacheTag.endIf.isEndIf,
       };
 
       final keys = values.keys;
 
-      for (final key in MustacheTags.values) {
+      for (final key in MustacheTag.values) {
         expect(keys, contains(key));
       }
 
@@ -341,48 +338,48 @@ void main() {
   group('ListMustacheX', () {
     group('#findFrom', () {
       test('returns when the correct enum for value', () {
-        final keys = formatsWithoutSuffixes.keys;
+        final keys = tagsWithoutSuffixes.keys;
 
         for (final key in keys) {
-          for (final value in formatsWithoutSuffixes[key]!) {
-            final result = MustacheTags.values.findFrom(value);
+          for (final value in tagsWithoutSuffixes[key]!) {
+            final result = MustacheTag.values.findFrom(value);
             expect(result, key);
           }
         }
       });
 
       test('returns appropriate value when provided with suffixes', () {
-        final keys = formatsWithSuffixes.keys;
+        final keys = tagsWithSuffixes.keys;
 
         for (final key in keys) {
-          for (final value in formatsWithSuffixes[key]!) {
-            final result = MustacheTags.values.findFrom(value);
+          for (final value in tagsWithSuffixes[key]!) {
+            final result = MustacheTag.values.findFrom(value);
             expect(result, key);
           }
         }
       });
 
       test('returns null when value is not found', () {
-        expect(MustacheTags.values.findFrom('nothing'), isNull);
-        expect(MustacheTags.values.findFrom(null), isNull);
+        expect(MustacheTag.values.findFrom('nothing'), isNull);
+        expect(MustacheTag.values.findFrom(null), isNull);
       });
     });
 
     group('#suffixFrom', () {
       test('returns the suffix for the provided value', () {
-        final keys = formatsWithSuffixes.keys;
+        final keys = tagsWithSuffixes.keys;
 
         for (final key in keys) {
-          for (final value in formatsWithSuffixes[key]!) {
-            final result = MustacheTags.values.suffixFrom(value);
+          for (final value in tagsWithSuffixes[key]!) {
+            final result = MustacheTag.values.suffixFrom(value);
             expect(result, suffix);
           }
         }
       });
 
       test('returns null when value is not found', () {
-        expect(MustacheTags.values.suffixFrom('nothing'), isNull);
-        expect(MustacheTags.values.suffixFrom(null), isNull);
+        expect(MustacheTag.values.suffixFrom('nothing'), isNull);
+        expect(MustacheTag.values.suffixFrom(null), isNull);
       });
     });
   });

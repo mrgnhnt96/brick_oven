@@ -1,70 +1,70 @@
 import 'package:test/test.dart';
 
-import 'package:brick_oven/enums/mustache_sections.dart';
+import 'package:brick_oven/enums/mustache_section.dart';
 
 void main() {
-  group('$MustacheSections', () {
+  group('$MustacheSection', () {
     group('#configName', () {
       test('returns the name of the start config', () {
-        expect(MustacheSections.start.configName, 'start');
+        expect(MustacheSection.start.configName, 'start');
       });
 
       test('returns the name of the end config', () {
-        expect(MustacheSections.end.configName, 'end');
+        expect(MustacheSection.end.configName, 'end');
       });
 
       test('returns the name of the invert config', () {
-        expect(MustacheSections.invert.configName, 'nstart');
+        expect(MustacheSection.invert.configName, 'nstart');
       });
     });
 
     test('#isStart', () {
-      expect(MustacheSections.start.isStart, isTrue);
-      expect(MustacheSections.end.isStart, isFalse);
-      expect(MustacheSections.invert.isStart, isFalse);
+      expect(MustacheSection.start.isStart, isTrue);
+      expect(MustacheSection.end.isStart, isFalse);
+      expect(MustacheSection.invert.isStart, isFalse);
     });
 
     test('#isEnd', () {
-      expect(MustacheSections.start.isEnd, isFalse);
-      expect(MustacheSections.end.isEnd, isTrue);
-      expect(MustacheSections.invert.isEnd, isFalse);
+      expect(MustacheSection.start.isEnd, isFalse);
+      expect(MustacheSection.end.isEnd, isTrue);
+      expect(MustacheSection.invert.isEnd, isFalse);
     });
 
     test('#isInvert', () {
-      expect(MustacheSections.start.isInvert, isFalse);
-      expect(MustacheSections.end.isInvert, isFalse);
-      expect(MustacheSections.invert.isInvert, isTrue);
+      expect(MustacheSection.start.isInvert, isFalse);
+      expect(MustacheSection.end.isInvert, isFalse);
+      expect(MustacheSection.invert.isInvert, isTrue);
     });
 
     group('#symbol', () {
       test('returns the symbol of the start section', () {
-        expect(MustacheSections.start.symbol, '#');
+        expect(MustacheSection.start.symbol, '#');
       });
 
       test('returns the symbol of the end section', () {
-        expect(MustacheSections.end.symbol, '/');
+        expect(MustacheSection.end.symbol, '/');
       });
 
       test('returns the symbol of the invert section', () {
-        expect(MustacheSections.invert.symbol, '^');
+        expect(MustacheSection.invert.symbol, '^');
       });
     });
 
     group('#matcher', () {
       test('returns the matcher of the start section', () {
         expect(
-          MustacheSections.start.matcher,
+          MustacheSection.start.matcher,
           RegExp(r'((?!\w)(\s))?(start)$'),
         );
       });
 
       test('returns the matcher of the end section', () {
-        expect(MustacheSections.end.matcher, RegExp(r'((?!\w)(\s))?(end)$'));
+        expect(MustacheSection.end.matcher, RegExp(r'((?!\w)(\s))?(end)$'));
       });
 
       test('returns the matcher of the invert section', () {
         expect(
-          MustacheSections.invert.matcher,
+          MustacheSection.invert.matcher,
           RegExp(r'((?!\w)(\s))?(nstart)$'),
         );
       });
@@ -74,21 +74,21 @@ void main() {
       const defaultValue = 'hello';
       test('returns the format of the start section', () {
         expect(
-          MustacheSections.start.format(defaultValue),
+          MustacheSection.start.format(defaultValue),
           '{{#$defaultValue}}',
         );
       });
 
       test('returns the format of the end section', () {
         expect(
-          MustacheSections.end.format(defaultValue),
+          MustacheSection.end.format(defaultValue),
           '{{/$defaultValue}}',
         );
       });
 
       test('returns the format of the invert section', () {
         expect(
-          MustacheSections.invert.format(defaultValue),
+          MustacheSection.invert.format(defaultValue),
           '{{^$defaultValue}}',
         );
       });
@@ -96,20 +96,20 @@ void main() {
   });
 
   group('MustacheSectionList', () {
-    const sections = MustacheSections.values;
+    const sections = MustacheSection.values;
 
     group('#from', () {
-      test('returns the $MustacheSections from strings', () {
+      test('returns the $MustacheSection from strings', () {
         final sects = {
-          'start': MustacheSections.start,
-          'end': MustacheSections.end,
-          'nstart': MustacheSections.invert,
-          ' start': MustacheSections.start,
-          ' end': MustacheSections.end,
-          ' nstart': MustacheSections.invert,
-          'a start': MustacheSections.start,
-          'a end': MustacheSections.end,
-          'a nstart': MustacheSections.invert,
+          'start': MustacheSection.start,
+          'end': MustacheSection.end,
+          'nstart': MustacheSection.invert,
+          ' start': MustacheSection.start,
+          ' end': MustacheSection.end,
+          ' nstart': MustacheSection.invert,
+          'a start': MustacheSection.start,
+          'a end': MustacheSection.end,
+          'a nstart': MustacheSection.invert,
         };
 
         for (final sect in sects.entries) {
@@ -126,9 +126,9 @@ void main() {
 
     group('#section', () {
       test('returns the section from the config name', () {
-        expect(sections.section('start'), MustacheSections.start);
-        expect(sections.section('end'), MustacheSections.end);
-        expect(sections.section('nstart'), MustacheSections.invert);
+        expect(sections.section('start'), MustacheSection.start);
+        expect(sections.section('end'), MustacheSection.end);
+        expect(sections.section('nstart'), MustacheSection.invert);
       });
 
       test('returns null if the config name is not found', () {

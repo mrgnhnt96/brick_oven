@@ -7,7 +7,7 @@ import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/enums/mustache_tags.dart';
+import 'package:brick_oven/enums/mustache_tag.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -392,7 +392,7 @@ yooooo:
     test('formats the name to mustache format when provided', () {
       const instance = BrickFile.config(
         defaultPath,
-        name: Name(name, format: MustacheTags.snakeCase),
+        name: Name(name, tag: MustacheTag.snakeCase),
       );
 
       expect(
@@ -447,7 +447,7 @@ yooooo:
           () {
         const instance = BrickFile.config(
           defaultPath,
-          name: Name(name, format: MustacheTags.snakeCase),
+          name: Name(name, tag: MustacheTag.snakeCase),
           includeIf: 'check',
         );
 
@@ -486,7 +486,7 @@ yooooo:
           () {
         const instance = BrickFile.config(
           defaultPath,
-          name: Name(name, format: MustacheTags.snakeCase),
+          name: Name(name, tag: MustacheTag.snakeCase),
           includeIfNot: 'check',
         );
 
