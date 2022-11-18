@@ -1,5 +1,6 @@
 import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
+import 'package:brick_oven/domain/replacement_result.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
@@ -7,6 +8,7 @@ import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:meta/meta.dart';
 
 /// {@template file_replacements}
 /// the methods to replace variables and partials in a file
@@ -42,7 +44,7 @@ mixin FileReplacements {
     var content = sourceFile.readAsStringSync();
 
     final variablesResult =
-        _writeVariables(variables: variables, content: content);
+        writeVariables(variables: variables, content: content);
     content = variablesResult.content;
 
     usedVariables.addAll(variablesResult.used);
@@ -71,7 +73,7 @@ mixin FileReplacements {
     );
   }
 
-  _ReplacementResult _writePartials({
+  ReplacementResult _writePartials({
     required String content,
     required Iterable<BrickPartial> partials,
   }) {
@@ -90,10 +92,12 @@ mixin FileReplacements {
       }
     }
 
-    return _ReplacementResult(content: newContent, used: partialsUsed);
+    return ReplacementResult(content: newContent, used: partialsUsed);
   }
 
-  _ReplacementResult _writeVariables({
+  /// writes the [variables] to the [content]
+  @visibleForTesting
+  ReplacementResult writeVariables({
     required List<Variable> variables,
     required String content,
   }) {
@@ -114,7 +118,7 @@ mixin FileReplacements {
       usedVariables.addAll(variableResult.used);
     }
 
-    return _ReplacementResult(
+    return ReplacementResult(
       content: newContent,
       used: usedVariables,
     );
@@ -124,7 +128,7 @@ mixin FileReplacements {
   Pattern _variablePattern(Variable variable) =>
       RegExp(r'([\w-{#^/]*)' '${variable.placeholder}' r'([\w}]*)');
 
-  _ReplacementResult _checkForLoops(
+  ReplacementResult _checkForLoops(
     String content,
     Variable variable,
   ) {
@@ -174,7 +178,7 @@ mixin FileReplacements {
       },
     );
 
-    return _ReplacementResult(
+    return ReplacementResult(
       content: clean,
       used: {
         if (isVariableUsed) variable.name,
@@ -182,7 +186,7 @@ mixin FileReplacements {
     );
   }
 
-  _ReplacementResult _checkForVariables(
+  ReplacementResult _checkForVariables(
     String content,
     Variable variable,
   ) {
@@ -262,22 +266,11 @@ mixin FileReplacements {
       return '$prefix$result$suffix';
     });
 
-    return _ReplacementResult(
+    return ReplacementResult(
       content: newContent,
       used: {
         if (isVariableUsed) variable.name,
       },
     );
   }
-}
-
-class _ReplacementResult {
-  const _ReplacementResult({
-    required this.content,
-    required this.used,
-  });
-
-  final String content;
-
-  final Set<String> used;
 }
