@@ -11,7 +11,7 @@ import 'package:pub_updater/pub_updater.dart';
 extension BrickOvenRunnerX on BrickOvenRunner {
   /// whether the user passed the 'update' command
   bool calledUpdate(ArgResults results) {
-    return results.command?.name != UpdateCommand.commandName;
+    return results.command?.name == UpdateCommand.commandName;
   }
 
   /// the message to display when the user can update to the latest version
