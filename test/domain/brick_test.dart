@@ -196,6 +196,14 @@ brick_config: brick.yaml
       });
     });
 
+    test('#defaultVariables has correct values', () {
+      const expected = [
+        Variable(name: '.', placeholder: '_INDEX_VALUE_'),
+      ];
+
+      expect(Brick.defaultVariables, expected);
+    });
+
     group('exclude', () {
       test('when type is not a list or string', () {
         final yaml = loadYaml('''
@@ -669,6 +677,7 @@ exclude:
           fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
+          additionalVariables: any(named: 'additionalVariables'),
         ),
       ).thenThrow(
         const PartialException(partial: 'this one', reason: 'for no reason'),
@@ -703,6 +712,7 @@ exclude:
           fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
+          additionalVariables: any(named: 'additionalVariables'),
         ),
       ).thenThrow(
         Exception('error'),
@@ -743,6 +753,7 @@ exclude:
 
       when(
         () => mockFile.writeTargetFile(
+          additionalVariables: any(named: 'additionalVariables'),
           targetDir: any(named: 'targetDir'),
           logger: any(named: 'logger'),
           fileSystem: any(named: 'fileSystem'),
@@ -789,6 +800,7 @@ exclude:
 
       when(
         () => mockFile.writeTargetFile(
+          additionalVariables: any(named: 'additionalVariables'),
           targetDir: any(named: 'targetDir'),
           logger: any(named: 'logger'),
           fileSystem: any(named: 'fileSystem'),
@@ -979,6 +991,60 @@ exclude:
           isFalse,
         );
       }
+    });
+
+    group('#defaultVariables write', () {
+      test('files', () {
+        const filePath = 'file1.dart';
+        const file = BrickFile(filePath);
+
+        fs.file(join(localPath, filePath))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('_INDEX_VALUE_');
+
+        final targetFile = fs.file(join(brickPath, file.path));
+
+        Brick.memory(
+          name: brickName,
+          logger: mockLogger,
+          source: BrickSource.memory(
+            localPath: localPath,
+            fileSystem: fs,
+          ),
+          files: const [file],
+          fileSystem: fs,
+        ).cook();
+
+        const expected = '{{.}}';
+
+        expect(targetFile.readAsStringSync(), expected);
+      });
+
+      test('partials', () {
+        const file = 'file1.dart';
+        const partial = BrickPartial(path: file);
+
+        fs.file(join(localPath, file))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('_INDEX_VALUE_');
+
+        final targetFile = fs.file(join(brickPath, partial.toPartialFile()));
+
+        Brick.memory(
+          name: brickName,
+          logger: mockLogger,
+          source: BrickSource.memory(
+            localPath: localPath,
+            fileSystem: fs,
+          ),
+          partials: const [partial],
+          fileSystem: fs,
+        ).cook();
+
+        const expected = '{{.}}';
+
+        expect(targetFile.readAsStringSync(), expected);
+      });
     });
   });
 

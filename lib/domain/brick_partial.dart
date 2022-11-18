@@ -119,6 +119,7 @@ class BrickPartial extends Equatable with FileReplacements {
     required String targetDir,
     required File sourceFile,
     required List<BrickPartial> partials,
+    required List<Variable> additionalVariables,
     required FileSystem? fileSystem,
     required Logger logger,
   }) {
@@ -131,7 +132,7 @@ class BrickPartial extends Equatable with FileReplacements {
       return writeFile(
         targetFile: file,
         sourceFile: sourceFile,
-        variables: variables,
+        variables: [...variables, ...additionalVariables],
         partials: partials,
         fileSystem: fileSystem,
         logger: logger,

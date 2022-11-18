@@ -164,6 +164,7 @@ vars:
 
       expect(
         () => instance.writeTargetFile(
+          additionalVariables: [],
           partials: [],
           sourceFile: sourceFile,
           targetDir: '',
@@ -178,6 +179,7 @@ vars:
       const instance = BrickPartial(path: 'path/to/file.dart');
 
       instance.writeTargetFile(
+        additionalVariables: [],
         targetDir: targetDir,
         sourceFile: sourceFile,
         partials: [],

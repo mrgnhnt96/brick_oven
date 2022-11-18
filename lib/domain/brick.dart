@@ -6,6 +6,7 @@ import 'package:brick_oven/domain/brick_path.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
+import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
@@ -283,6 +284,11 @@ class Brick extends Equatable {
   @ignoreAutoequal
   final Logger _logger;
 
+  /// variables used not provided by the user
+  static List<Variable> get defaultVariables => [
+        const Variable(name: '.', placeholder: '_INDEX_VALUE_'),
+      ];
+
   @override
   List<Object?> get props => _$props;
 
@@ -464,6 +470,7 @@ class Brick extends Equatable {
             partials: partials,
             fileSystem: _fileSystem,
             logger: _logger,
+            additionalVariables: defaultVariables,
           );
         } on ConfigException catch (e) {
           fail('file', file.path);
@@ -490,6 +497,7 @@ class Brick extends Equatable {
             partials: partials,
             fileSystem: _fileSystem,
             logger: _logger,
+            additionalVariables: defaultVariables,
           );
         } on ConfigException catch (e) {
           fail('partial', partial.path);

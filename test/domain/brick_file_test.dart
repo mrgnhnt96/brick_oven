@@ -601,6 +601,7 @@ yooooo:
 
       expect(
         () => instance.writeTargetFile(
+          additionalVariables: [],
           partials: [],
           sourceFile: sourceFile,
           dirs: [],
@@ -616,6 +617,7 @@ yooooo:
       const instance = BrickFile.config(defaultFile);
 
       instance.writeTargetFile(
+        additionalVariables: [],
         partials: [],
         sourceFile: sourceFile,
         dirs: [],
@@ -633,6 +635,7 @@ yooooo:
       const instance = BrickFile.config(defaultFile);
 
       instance.writeTargetFile(
+        additionalVariables: [],
         partials: [],
         sourceFile: sourceFile,
         dirs: [],
@@ -657,6 +660,7 @@ yooooo:
       final dir = brickPath(name: replacement, path: join('path', 'to'));
 
       instance.writeTargetFile(
+        additionalVariables: [],
         partials: [],
         sourceFile: sourceFile,
         dirs: [dir],
@@ -682,6 +686,7 @@ yooooo:
           BrickFile.config(defaultPath, name: const Name(replacement));
 
       instance.writeTargetFile(
+        additionalVariables: [],
         partials: [],
         sourceFile: sourceFile,
         dirs: [],
