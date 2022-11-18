@@ -43,19 +43,18 @@ mixin FileReplacements {
 
     var content = sourceFile.readAsStringSync();
 
-    final variablesResult =
-        writeVariables(variables: variables, content: content);
+    final variablesResult = writeVariables(
+      variables: variables,
+      content: content,
+    );
     content = variablesResult.content;
-
     usedVariables.addAll(variablesResult.used);
 
-    final partialsResult = _writePartials(partials: partials, content: content);
+    final partialsResult = writePartials(partials: partials, content: content);
     content = partialsResult.content;
-
     usedPartials.addAll(partialsResult.used);
 
     final variableNames = variables.map((v) => v.name).toSet();
-
     final unusedVariables = variableNames.difference(usedVariables);
 
     if (unusedVariables.isNotEmpty) {
@@ -73,7 +72,9 @@ mixin FileReplacements {
     );
   }
 
-  ContentReplacement _writePartials({
+  /// writes the [partials] to the [content]
+  @visibleForTesting
+  ContentReplacement writePartials({
     required String content,
     required Iterable<BrickPartial> partials,
   }) {
@@ -107,13 +108,13 @@ mixin FileReplacements {
 
     for (final variable in variables) {
       // formats the content
-      final loopResult = _checkForLoops(newContent, variable);
+      final loopResult = checkForLoops(newContent, variable);
       newContent = loopResult.content;
       if (loopResult.used.isNotEmpty) {
         usedVariables.addAll(loopResult.used);
       }
 
-      final variableResult = _checkForVariables(newContent, variable);
+      final variableResult = checkForVariables(newContent, variable);
       newContent = variableResult.content;
       usedVariables.addAll(variableResult.used);
     }
@@ -124,18 +125,26 @@ mixin FileReplacements {
     );
   }
 
-  Pattern _loopPattern() => RegExp('.*$_loopSetUp' r'({{.[\w-+$\.]+}}).*');
-  Pattern _variablePattern(Variable variable) =>
+  /// the pattern to find loops (sections) within the content
+  @visibleForTesting
+  Pattern loopPattern() => RegExp('.*$_loopSetUp' r'({{.[\w-+$\.]+}}).*');
+
+  /// the pattern to find variables within the content
+  @visibleForTesting
+  Pattern variablePattern(Variable variable) =>
       RegExp(r'([\w-{#^/]*)' '${variable.placeholder}' r'([\w}]*)');
 
-  ContentReplacement _checkForLoops(
+  /// checks the [content] for loops (sections) and replaces them with the
+  /// [variable]'s value
+  @visibleForTesting
+  ContentReplacement checkForLoops(
     String content,
     Variable variable,
   ) {
     var isVariableUsed = false;
 
     final setUpLoops =
-        content.replaceAllMapped(_variablePattern(variable), (match) {
+        content.replaceAllMapped(variablePattern(variable), (match) {
       final possibleLoop = match.group(1);
       final loop = MustacheLoops.values.from(possibleLoop);
 
@@ -152,7 +161,7 @@ mixin FileReplacements {
     });
 
     // remove the loop setup and all pre/post content
-    final looped = setUpLoops.replaceAllMapped(_loopPattern(), (match) {
+    final looped = setUpLoops.replaceAllMapped(loopPattern(), (match) {
       return match.group(1)!;
     });
 
@@ -186,14 +195,16 @@ mixin FileReplacements {
     );
   }
 
-  ContentReplacement _checkForVariables(
+  /// replaces the [variable] in the [content]
+  @visibleForTesting
+  ContentReplacement checkForVariables(
     String content,
     Variable variable,
   ) {
     var isVariableUsed = false;
 
     final newContent =
-        content.replaceAllMapped(_variablePattern(variable), (match) {
+        content.replaceAllMapped(variablePattern(variable), (match) {
       final possibleSection = match.group(1);
       MustacheSections? section;
       String result;
@@ -207,7 +218,7 @@ mixin FileReplacements {
         if (section == null) {
           if (possibleSection.isNotEmpty) {
             final additionalVariables =
-                _checkForVariables(possibleSection, variable);
+                checkForVariables(possibleSection, variable);
 
             if (additionalVariables.used.isNotEmpty) {
               isVariableUsed = true;
