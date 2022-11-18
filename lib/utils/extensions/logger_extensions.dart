@@ -1,5 +1,6 @@
 import 'package:brick_oven/utils/extensions/datetime_extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:meta/meta.dart';
 
 /// the extension for [Logger]
 extension LoggerX on Logger {
@@ -29,14 +30,36 @@ extension LoggerX on Logger {
     info('\n📁  File changed ${darkGray.wrap('($brickName)')}');
   }
 
-  /// writes `\n👀 Watching local files...`
+  /// writes the listen to files message
   void watching() {
     info(lightYellow.wrap('\n👀 Watching config & source files...'));
   }
 
+  /// writes the exit message
+  void exiting() {
+    info('\nExiting...');
+  }
+
+  /// writes the restart message
+  void restart() {
+    info('\nRestarting...');
+  }
+
   /// writes `Press q to quit...`
   void keyStrokes() {
+    quit();
+    reload();
+  }
+
+  /// writes the q to quit message
+  @visibleForTesting
+  void quit() {
     info(darkGray.wrap('Press q to quit...'));
+  }
+
+  /// writes the reload message
+  @visibleForTesting
+  void reload() {
     info(darkGray.wrap('Press r to reload...'));
   }
 }
