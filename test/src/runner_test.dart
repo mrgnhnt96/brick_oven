@@ -232,6 +232,34 @@ void main() {
         expect(result, ExitCode.success.code);
         verify(() => mockLogger.alert(packageVersion)).called(1);
       });
+
+      group('#checkForUpdates', () {
+        test('when analytics command is provided', () async {
+          await commandRunner.run(['--analytics', 'true']);
+
+          verify(() => mockPubUpdater.getLatestVersion(any())).called(1);
+        });
+
+        test('when version command is provided', () async {
+          await commandRunner.run(['--version']);
+
+          verify(() => mockPubUpdater.getLatestVersion(any())).called(1);
+        });
+
+        test('when other command is provided', () async {
+          await commandRunner.run(['list']);
+
+          verify(() => mockPubUpdater.getLatestVersion(any())).called(1);
+        });
+
+        test('not when update command is provided', () async {
+          await commandRunner.run(['update']);
+
+          // this succeeds because mockLogger is not stubbing `progress` which is causing
+          // an exception to be thrown. Meaning that `getLatestVersion` is never called
+          verifyNever(() => mockPubUpdater.getLatestVersion(any()));
+        });
+      });
     });
   });
 }
