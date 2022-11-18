@@ -11,24 +11,6 @@ void main() {
     expect(instance, isNotNull);
   });
 
-  group('#whiteSpacePattern', () {
-    test('has correct value', () {
-      expect(Variable.whiteSpacePattern, RegExp(r'^\S+$'));
-    });
-
-    test('matches', () {
-      const matches = [
-        '123',
-        'abc',
-        r'<>(){}[].-_+=!@#\$%^&*',
-      ];
-
-      for (final match in matches) {
-        expect(Variable.whiteSpacePattern.hasMatch(match), isTrue);
-      }
-    });
-  });
-
   group('#fromYaml', () {
     test('throws $ConfigException when incorrect type', () {
       final yaml = loadYaml('''

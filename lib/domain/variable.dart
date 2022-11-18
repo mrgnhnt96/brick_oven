@@ -1,8 +1,8 @@
 import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/extensions/string_extensions.dart';
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
 
 part 'variable.g.dart';
 
@@ -41,14 +41,14 @@ class Variable extends Equatable {
 
     final placeholder = yaml.asString().value.trim();
 
-    if (placeholder.isNotEmpty && !whiteSpacePattern.hasMatch(placeholder)) {
+    if (placeholder.isNotEmpty && placeholder.containsWhitespace()) {
       throw VariableException(
         variable: name,
         reason: 'Placeholder cannot contain whitespace',
       );
     }
 
-    if (name.isNotEmpty && !whiteSpacePattern.hasMatch(name)) {
+    if (name.isNotEmpty && name.containsWhitespace()) {
       throw VariableException(
         variable: name,
         reason: 'Name cannot contain whitespace',
@@ -60,10 +60,6 @@ class Variable extends Equatable {
       placeholder: placeholder,
     );
   }
-
-  /// the pattern to use when checking for whitespace
-  @visibleForTesting
-  static RegExp whiteSpacePattern = RegExp(r'^\S+$');
 
   /// the name of variable to replace [placeholder]
   ///
