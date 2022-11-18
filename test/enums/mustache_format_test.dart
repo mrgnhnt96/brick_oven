@@ -20,7 +20,8 @@ void main() {
   ];
 
   const nonFormats = [
-    MustacheFormat.escape,
+    MustacheFormat.escaped,
+    MustacheFormat.unescaped,
     MustacheFormat.if_,
     MustacheFormat.ifNot,
     MustacheFormat.endIf,
@@ -94,8 +95,11 @@ void main() {
       'uppercase',
       'upper',
     ],
-    MustacheFormat.escape: [
-      'escape',
+    MustacheFormat.escaped: [
+      'escaped',
+    ],
+    MustacheFormat.unescaped: [
+      'unescaped',
     ],
     MustacheFormat.if_: [
       'if',
@@ -176,8 +180,11 @@ void main() {
       'uppercase$suffix',
       'upper$suffix',
     ],
-    MustacheFormat.escape: [
-      'escape$suffix',
+    MustacheFormat.escaped: [
+      'escaped$suffix',
+    ],
+    MustacheFormat.unescaped: [
+      'unescaped$suffix',
     ],
     MustacheFormat.if_: [
       'if$suffix',
@@ -194,30 +201,84 @@ void main() {
 
   const allFormats = [...formats, ...nonFormats];
 
+  test('MustacheFormat.values', () {
+    final formatsWithSuffixesKeys = formatsWithSuffixes.keys.toList();
+    final formatsWithoutSuffixesKeys = formatsWithoutSuffixes.keys.toList();
+
+    for (final value in MustacheFormat.values) {
+      expect(allFormats, contains(value));
+      expect(formatsWithSuffixesKeys, contains(value));
+      expect(formatsWithoutSuffixesKeys, contains(value));
+    }
+  });
+
   group('MustacheFormatX', () {
-    group('#toMustache', () {
-      test('throws assertion when content is not wrapped with brackets', () {
-        expect(
-          () => MustacheFormat.camelCase.toMustache('content'),
-          throwsA(isA<AssertionError>()),
-        );
+    group('#wrappedPattern', () {
+      test('is correct value', () {
+        final expected = RegExp(r'\S*\{{2,3}\S+\}{2,3}\S*');
+
+        expect(MustacheFormatX.wrappedPattern, expected);
+      });
+
+      test('matches', () {
+        const matches = [
+          'prefix{{foo}}',
+          'prefix{{foo}}suffix',
+          '{{foo}}suffix',
+          '{{foo}}',
+          '{{foo}}}',
+          '{{{foo}}}',
+          '{{{foo}}',
+        ];
+
+        for (final match in matches) {
+          expect(MustacheFormatX.wrappedPattern.hasMatch(match), isTrue);
+        }
+      });
+    });
+
+    group('#wrap', () {
+      test('throws assertion when content is configured correctly', () {
+        for (final format in formats) {
+          expect(
+            () => format.wrap('foo'),
+            throwsA(isA<AssertionError>()),
+          );
+        }
+
+        for (final format in nonFormats) {
+          expect(
+            () => format.wrap('{{foo}}'),
+            throwsA(isA<AssertionError>()),
+          );
+        }
       });
 
       test('formats the content correctly', () {
-        for (final format in MustacheFormat.values) {
-          const content = '{{{sup_dude}}}';
-
-          if (format.isEscape) {
-            expect(
-              format.toMustache(content),
-              content,
-            );
-            continue;
-          }
+        for (final format in formats) {
+          expect(
+            format.wrap('{{{sup_dude}}}'),
+            '{{#${format.name}}}{{{sup_dude}}}{{/${format.name}}}',
+          );
 
           expect(
-            format.toMustache(content),
-            '{{#${format.name}}}$content{{/${format.name}}}',
+            format.wrap('{{sup_dude}}'),
+            '{{#${format.name}}}{{sup_dude}}{{/${format.name}}}',
+          );
+        }
+
+        const nonFormatExpected = {
+          MustacheFormat.escaped: '{{{DUDE}}}',
+          MustacheFormat.unescaped: '{{DUDE}}',
+          MustacheFormat.if_: '{{#DUDE}}',
+          MustacheFormat.ifNot: '{{^DUDE}}',
+          MustacheFormat.endIf: '{{/DUDE}}',
+        };
+
+        for (final format in nonFormats) {
+          expect(
+            format.wrap('DUDE'),
+            nonFormatExpected[format],
           );
         }
       });
@@ -230,12 +291,6 @@ void main() {
 
       for (final format in nonFormats) {
         expect(format.isFormat, isFalse);
-      }
-
-      const allValues = MustacheFormat.values;
-
-      for (final format in allValues) {
-        expect(allFormats, contains(format));
       }
     });
 
@@ -257,7 +312,8 @@ void main() {
         MustacheFormat.snakeCase: () => MustacheFormat.snakeCase.isSnakeCase,
         MustacheFormat.titleCase: () => MustacheFormat.titleCase.isTitleCase,
         MustacheFormat.upperCase: () => MustacheFormat.upperCase.isUpperCase,
-        MustacheFormat.escape: () => MustacheFormat.escape.isEscape,
+        MustacheFormat.escaped: () => MustacheFormat.escaped.isEscaped,
+        MustacheFormat.unescaped: () => MustacheFormat.unescaped.isUnescaped,
         MustacheFormat.if_: () => MustacheFormat.if_.isIf,
         MustacheFormat.ifNot: () => MustacheFormat.ifNot.isIfNot,
         MustacheFormat.endIf: () => MustacheFormat.endIf.isEndIf,
@@ -280,10 +336,6 @@ void main() {
       test('returns when the correct enum for value', () {
         final keys = formatsWithoutSuffixes.keys;
 
-        for (final key in MustacheFormat.values) {
-          expect(keys, contains(key));
-        }
-
         for (final key in keys) {
           for (final value in formatsWithoutSuffixes[key]!) {
             final result = MustacheFormat.values.findFrom(value);
@@ -294,10 +346,6 @@ void main() {
 
       test('returns appropriate value when provided with suffixes', () {
         final keys = formatsWithSuffixes.keys;
-
-        for (final key in MustacheFormat.values) {
-          expect(keys, contains(key));
-        }
 
         for (final key in keys) {
           for (final value in formatsWithSuffixes[key]!) {
@@ -316,10 +364,6 @@ void main() {
     group('#suffixFrom', () {
       test('returns the suffix for the provided value', () {
         final keys = formatsWithSuffixes.keys;
-
-        for (final key in MustacheFormat.values) {
-          expect(keys, contains(key));
-        }
 
         for (final key in keys) {
           for (final value in formatsWithSuffixes[key]!) {
