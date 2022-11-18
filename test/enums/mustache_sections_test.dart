@@ -53,7 +53,9 @@ void main() {
     group('#matcher', () {
       test('returns the matcher of the start section', () {
         expect(
-            MustacheSections.start.matcher, RegExp(r'((?!\w)(\s))?(start)$'));
+          MustacheSections.start.matcher,
+          RegExp(r'((?!\w)(\s))?(start)$'),
+        );
       });
 
       test('returns the matcher of the end section', () {
@@ -62,7 +64,9 @@ void main() {
 
       test('returns the matcher of the invert section', () {
         expect(
-            MustacheSections.invert.matcher, RegExp(r'((?!\w)(\s))?(nstart)$'));
+          MustacheSections.invert.matcher,
+          RegExp(r'((?!\w)(\s))?(nstart)$'),
+        );
       });
     });
 

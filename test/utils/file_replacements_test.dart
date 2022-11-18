@@ -57,13 +57,13 @@ partial.do_not_replace
     });
   });
 
-  group('#checkForLoops', () {
-    group('#loopSetupPattern', () {
+  group('#checkForSections', () {
+    group('#sectionSetupPattern', () {
       test('is correct value', () {
         final expected =
-            RegExp('.*${FileReplacements.loopSetUp}' r'({{[\^#/]\S+}}).*');
+            RegExp('.*${FileReplacements.sectionSetUp}' r'({{[\^#/]\S+}}).*');
 
-        expect(testFileReplacements.loopSetupPattern, expected);
+        expect(testFileReplacements.sectionSetupPattern, expected);
       });
 
       test('matches', () {
@@ -75,22 +75,22 @@ partial.do_not_replace
         ];
 
         for (final match in matches) {
-          final content = '${FileReplacements.loopSetUp}$match';
+          final content = '${FileReplacements.sectionSetUp}$match';
           expect(
-            testFileReplacements.loopSetupPattern.hasMatch(content),
+            testFileReplacements.sectionSetupPattern.hasMatch(content),
             isTrue,
           );
         }
       });
     });
 
-    group('#loopPattern', () {
+    group('#sectionPattern', () {
       const variable = Variable(name: 'name', placeholder: '_NAME_');
 
       test('is correct value', () {
         final expected = RegExp(r'(\w+)' '${variable.placeholder}');
 
-        expect(testFileReplacements.loopPattern(variable), expected);
+        expect(testFileReplacements.sectionPattern(variable), expected);
       });
 
       test('matches', () {
@@ -105,7 +105,7 @@ partial.do_not_replace
           final content = '$match${variable.placeholder}';
 
           final matches =
-              testFileReplacements.loopPattern(variable).allMatches(content);
+              testFileReplacements.sectionPattern(variable).allMatches(content);
 
           expect(matches.length, 1);
 
@@ -117,11 +117,11 @@ partial.do_not_replace
       });
     });
 
-    test('returns original content if loop is not found', () {
+    test('returns original content if section is not found', () {
       const content = 'content';
       const expected = ContentReplacement(content: content, used: {});
 
-      final result = testFileReplacements.checkForLoops(
+      final result = testFileReplacements.checkForSections(
         content,
         const Variable(name: 'name', placeholder: 'value'),
       );
@@ -129,7 +129,7 @@ partial.do_not_replace
       expect(result, expected);
     });
 
-    test('returns new content when loop is found', () {
+    test('returns new content when section is found', () {
       const content = '''
 start_NAME_
 some content
@@ -181,7 +181,7 @@ fake_NAME_
         used: {'name'},
       );
 
-      final result = testFileReplacements.checkForLoops(
+      final result = testFileReplacements.checkForSections(
         content,
         variable,
       );
@@ -464,11 +464,11 @@ before text {{name}} after text
       verifyNoMoreInteractions(mockLogger);
     });
 
-    test('writes loops, variables, and partials', () {
+    test('writes sections, variables, and partials', () {
       const content = '''
 _VAR_ _VAR_ _VAR_
 
-start_LOOP_
+start_SECTION_
 
 partial.page
 ''';
@@ -476,13 +476,13 @@ partial.page
       const expectedContent = '''
 {{var}} {{var}} {{var}}
 
-{{#loop}}
+{{#section}}
 
 {{> page.md }}
 ''';
 
       const variable = Variable(placeholder: '_VAR_', name: 'var');
-      const loop = Variable(placeholder: '_LOOP_', name: 'loop');
+      const section = Variable(placeholder: '_SECTION_', name: 'section');
       const partial = BrickPartial(path: 'path/page.md');
 
       sourceFile.writeAsStringSync(content);
@@ -491,7 +491,7 @@ partial.page
         partials: [partial],
         sourceFile: sourceFile,
         targetFile: targetFile,
-        variables: [variable, loop],
+        variables: [variable, section],
         fileSystem: fileSystem,
         logger: mockLogger,
       );

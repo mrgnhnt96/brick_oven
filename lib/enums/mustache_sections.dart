@@ -3,20 +3,20 @@ Pattern _matcher([String? char]) {
   return RegExp(r'((?!\w)(\s))?(' '$str' r')$');
 }
 
-/// The loops from Mustache
+/// The sections from Mustache
 enum MustacheSections {
-  /// the start of a loop
+  /// the start of a section
   start,
 
-  /// the end of a loop
+  /// the end of a section
   end,
 
-  /// the inverted start of a loop
+  /// the inverted start of a section
   invert,
 }
 
 /// extensions on lists of [MustacheSections]
-extension ListMustacheLoopX on List<MustacheSections> {
+extension ListMustacheSectionX on List<MustacheSections> {
   /// checks [str] if it contains any of the [MustacheSections]
   MustacheSections? from(String? str) {
     if (str == null) return null;
@@ -49,8 +49,8 @@ extension ListMustacheLoopX on List<MustacheSections> {
   }
 }
 
-/// extension on mustache loops
-extension MustacheLoopX on MustacheSections {
+/// extension on mustache sections
+extension MustacheSectionX on MustacheSections {
   /// the letter(s) of the section
   String get configName {
     switch (this) {

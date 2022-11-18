@@ -13,9 +13,9 @@ import 'package:meta/meta.dart';
 /// the methods to replace variables and partials in a file
 /// {@endtemplate}
 mixin FileReplacements {
-  /// the placeholder when replacing loops
+  /// the placeholder when replacing sections
   @visibleForTesting
-  static const loopSetUp = '---set-up-loop---';
+  static const sectionSetUp = '---set-up-section---';
 
   /// writes the [targetFile] content using the [sourceFile]'s content and
   /// replacing the [variables] and [partials] with their configured values
@@ -46,10 +46,10 @@ mixin FileReplacements {
 
     for (final variable in variables) {
       // formats the content
-      final loopResult = checkForLoops(content, variable);
-      content = loopResult.content;
-      if (loopResult.used.isNotEmpty) {
-        usedVariables.addAll(loopResult.used);
+      final sectionResult = checkForSections(content, variable);
+      content = sectionResult.content;
+      if (sectionResult.used.isNotEmpty) {
+        usedVariables.addAll(sectionResult.used);
       }
 
       final variableResult = checkForVariables(content, variable);
@@ -104,50 +104,51 @@ mixin FileReplacements {
     return ContentReplacement(content: newContent, used: partialsUsed);
   }
 
-  /// the pattern to find loops (sections) within the content
+  /// the pattern to find sections (sections) within the content
   @visibleForTesting
-  RegExp get loopSetupPattern => RegExp('.*$loopSetUp' r'({{[\^#/]\S+}}).*');
+  RegExp get sectionSetupPattern =>
+      RegExp('.*$sectionSetUp' r'({{[\^#/]\S+}}).*');
 
-  /// the pattern to find loops within the content
+  /// the pattern to find sections within the content
   @visibleForTesting
-  RegExp loopPattern(Variable variable) =>
+  RegExp sectionPattern(Variable variable) =>
       RegExp(r'(\w+)' '${variable.placeholder}');
 
-  /// checks the [content] for loops (sections) and replaces them with the
+  /// checks the [content] for sections (sections) and replaces them with the
   /// [variable]'s value
   @visibleForTesting
-  ContentReplacement checkForLoops(String content, Variable variable) {
+  ContentReplacement checkForSections(String content, Variable variable) {
     var isVariableUsed = false;
 
-    final setUpLoops = content.replaceAllMapped(
-      loopPattern(variable),
+    final setUpSections = content.replaceAllMapped(
+      sectionPattern(variable),
       (match) {
-        final possibleLoop = match.group(1);
-        final loop = MustacheSections.values.from(possibleLoop);
+        final possibleSection = match.group(1);
+        final section = MustacheSections.values.from(possibleSection);
 
-        // if loop is found, then replace the content
-        if (loop == null) {
+        // if section is found, then replace the content
+        if (section == null) {
           return match.group(0)!;
         }
 
         isVariableUsed = true;
 
-        final formattedLoop = loop.format(variable.name);
+        final formattedSection = section.format(variable.name);
 
-        return '$loopSetUp$formattedLoop';
+        return '$sectionSetUp$formattedSection';
       },
     );
 
-    // remove the loop setup and all pre/post content
-    final looped = setUpLoops.replaceAllMapped(
-      loopSetupPattern,
+    // remove the section setup and all pre/post content
+    final sectioned = setUpSections.replaceAllMapped(
+      sectionSetupPattern,
       (match) {
         return match.group(1)!;
       },
     );
 
-    // remove all extra linebreaks before & after the loop
-    final _ = looped.replaceAllMapped(
+    // remove all extra linebreaks before & after the section
+    final _ = sectioned.replaceAllMapped(
       RegExp(r'(\n*)({{[#^/][\w-]+}})$(\n*)', multiLine: true),
       (match) {
         var before = '';
@@ -169,7 +170,7 @@ mixin FileReplacements {
     );
 
     return ContentReplacement(
-      content: looped,
+      content: sectioned,
       used: {
         if (isVariableUsed) variable.name,
       },
