@@ -1,8 +1,12 @@
+import 'package:autoequal/autoequal.dart';
 import 'package:equatable/equatable.dart';
+
+part 'content_replacement.g.dart';
 
 /// {@template replacement_result}
 /// The result of content replacement
 /// {@endtemplate}
+@autoequal
 class ContentReplacement extends Equatable {
   /// {@macro replacement_result}
   const ContentReplacement({
@@ -17,5 +21,5 @@ class ContentReplacement extends Equatable {
   final Set<String> used;
 
   @override
-  List<Object?> get props => [content, used];
+  List<Object?> get props => _$props;
 }
