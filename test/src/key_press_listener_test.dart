@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:brick_oven/src/key_press_listener.dart';
+import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -149,7 +150,7 @@ void main() {
 
         expect(hasExited, isTrue);
         expect(exitCode, 0);
-        verify(() => mockLogger.info('\nExiting...')).called(1);
+        verify(mockLogger.exiting).called(1);
       });
 
       test('"r" logs and exits with code 75', () {
