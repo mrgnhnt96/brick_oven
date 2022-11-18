@@ -74,10 +74,6 @@ void main() {
     group('run', () {
       group('analytics', () {
         test('can be enabled', () async {
-          final mockAnalytics = MockAnalytics();
-
-          when(() => mockAnalytics.firstRun).thenReturn(false);
-
           commandRunner = BrickOvenRunner(
             logger: mockLogger,
             pubUpdater: mockPubUpdater,
@@ -96,8 +92,6 @@ void main() {
 
         test('can be disabled', () async {
           final analytics = MockAnalytics();
-
-          when(() => analytics.firstRun).thenReturn(false);
 
           commandRunner = BrickOvenRunner(
             logger: mockLogger,
@@ -198,8 +192,6 @@ void main() {
       });
 
       test('handles no command', () async {
-        when(() => mockAnalytics.firstRun).thenReturn(false);
-
         await overridePrint(() async {
           final result = await commandRunner.run([]);
 
@@ -209,10 +201,6 @@ void main() {
       });
 
       group('help', () {
-        setUp(() {
-          when(() => mockAnalytics.firstRun).thenReturn(false);
-        });
-
         test(
           '--help outputs usage',
           () async {
@@ -239,8 +227,6 @@ void main() {
       });
 
       test('--version outputs current version', () async {
-        when(() => mockAnalytics.firstRun).thenReturn(false);
-
         final result = await commandRunner.run(['--version']);
 
         expect(result, ExitCode.success.code);
