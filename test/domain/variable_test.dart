@@ -7,7 +7,7 @@ import 'package:yaml/yaml.dart';
 
 void main() {
   test('can be instanciated', () {
-    const instance = Variable(name: 'Scooby Doo', placeholder: 'placeholder');
+    const instance = Variable(name: 'scooby_doo', placeholder: 'placeholder');
 
     expect(instance, isNotNull);
   });
@@ -32,19 +32,19 @@ key: value
     });
 
     test('returns successfully when string provided', () {
-      const expected = Variable(name: 'Scooby Doo', placeholder: '_PET_');
+      const expected = Variable(name: 'scooby_doo', placeholder: '_PET_');
 
       expect(
-        Variable.fromYaml(const YamlValue.string('_PET_'), 'Scooby Doo'),
+        Variable.fromYaml(const YamlValue.string('_PET_'), 'scooby_doo'),
         expected,
       );
     });
 
     test('returns successfully when null provided', () {
-      const expected = Variable(name: 'Scooby Doo', placeholder: 'Scooby Doo');
+      const expected = Variable(name: 'scooby_doo', placeholder: 'scooby_doo');
 
       expect(
-        Variable.fromYaml(const YamlValue.none(), 'Scooby Doo'),
+        Variable.fromYaml(const YamlValue.none(), 'scooby_doo'),
         expected,
       );
     });
@@ -52,11 +52,11 @@ key: value
 
   group('#formatName', () {
     test('returns the formatted name', () {
-      const variable = Variable(name: 'Scooby Doo');
+      const variable = Variable(name: 'scooby_doo');
 
       expect(
         variable.formatName(MustacheFormat.camelCase),
-        '{{#camelCase}}{{{Scooby Doo}}}{{/camelCase}}',
+        '{{#camelCase}}{{{scooby_doo}}}{{/camelCase}}',
       );
     });
   });
