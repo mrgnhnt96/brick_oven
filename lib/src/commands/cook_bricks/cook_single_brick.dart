@@ -58,6 +58,7 @@ class CookSingleBrick extends BrickOvenCommand
         value: result.code,
         parameters: {
           'bricks': 1.toString(),
+          'sync': shouldSync.toString(),
         },
       ),
     );

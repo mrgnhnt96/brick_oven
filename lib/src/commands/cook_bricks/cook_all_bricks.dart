@@ -60,6 +60,7 @@ class CookAllBricks extends BrickOvenCommand
         value: result.code,
         parameters: {
           'bricks': bricks.length.toString(),
+          'sync': shouldSync.toString(),
         },
       ),
     );
