@@ -45,3 +45,22 @@ class MockBrickFile extends Mock implements BrickFile {}
 class MockFile extends Mock implements file.File {}
 
 class MockAnalytics extends Mock implements Analytics {}
+
+extension MockAnalyticsX on MockAnalytics {
+  void stubMethods() {
+    when(() => firstRun).thenReturn(false);
+
+    when(
+      () => sendEvent(
+        any(),
+        any(),
+        label: any(named: 'label'),
+        parameters: any(named: 'parameters'),
+        value: any(named: 'value'),
+      ),
+    ).thenAnswer((_) => Future.value());
+
+    when(() => waitForLastPing(timeout: any(named: 'timeout')))
+        .thenAnswer((_) => Future.value());
+  }
+}
