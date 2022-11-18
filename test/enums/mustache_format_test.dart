@@ -240,16 +240,23 @@ void main() {
     group('#wrap', () {
       test('throws assertion when content is configured correctly', () {
         for (final format in formats) {
-          expect(
-            () => format.wrap('foo'),
-            throwsA(isA<AssertionError>()),
-          );
+          expect(() => format.wrap('foo'), returnsNormally);
+          expect(() => format.wrap('{{foo}}'), returnsNormally);
+          expect(() => format.wrap('{{{foo}}}'), returnsNormally);
         }
 
         for (final format in nonFormats) {
           expect(
             () => format.wrap('{{foo}}'),
             throwsA(isA<AssertionError>()),
+          );
+          expect(
+            () => format.wrap('{{{foo}}}'),
+            throwsA(isA<AssertionError>()),
+          );
+          expect(
+            () => format.wrap('foo'),
+            returnsNormally,
           );
         }
       });
