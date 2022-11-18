@@ -4,7 +4,7 @@ import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -20,13 +20,13 @@ class MockSource extends Mock implements BrickSource {}
 
 class MockKeyPressListener extends Mock implements KeyPressListener {}
 
-class MockWatcher extends Mock implements BrickWatcher {}
+class MockWatcher extends Mock implements SourceWatcher {}
 
 class MockLogger extends Mock implements Logger {}
 
 class MockPubUpdater extends Mock implements PubUpdater {}
 
-class MockBrickWatcher extends Mock implements BrickWatcher {}
+class MockBrickWatcher extends Mock implements SourceWatcher {}
 
 class MockProgress extends Mock implements Progress {}
 

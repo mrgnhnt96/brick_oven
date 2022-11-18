@@ -1,7 +1,7 @@
 import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_dir.dart';
-import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
@@ -24,7 +24,7 @@ class BrickSource extends Equatable {
   BrickSource({
     required this.localPath,
   })  : _fileSystem = const LocalFileSystem(),
-        watcher = localPath != null ? BrickWatcher(localPath) : null;
+        watcher = localPath != null ? SourceWatcher(localPath) : null;
 
   /// parses the [value] into the appropriate type of source
   factory BrickSource.fromString(String value) {
@@ -126,7 +126,7 @@ class BrickSource extends Equatable {
   final String? localPath;
 
   /// Watches the local files, and updates on events
-  final BrickWatcher? watcher;
+  final SourceWatcher? watcher;
 
   @ignoreAutoequal
   final FileSystem _fileSystem;

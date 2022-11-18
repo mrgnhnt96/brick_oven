@@ -7,23 +7,23 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
-part 'brick_watcher.g.dart';
+part 'source_watcher.g.dart';
 
 /// the function that happens on the file event
 typedef OnEvent = void Function();
 
-/// {@template brick_watcher}
+/// {@template source_watcher}
 /// Watches the local files, and updates on events
 /// {@endtemplate}
 @autoequal
-class BrickWatcher extends Equatable {
-  /// {@macro brick_watcher}
-  BrickWatcher(this.dirPath) : _watcher = DirectoryWatcher(dirPath);
+class SourceWatcher extends Equatable {
+  /// {@macro source_watcher}
+  SourceWatcher(this.dirPath) : _watcher = DirectoryWatcher(dirPath);
 
   /// allows to set the watcher
   /// to be used only for testing
   @visibleForTesting
-  BrickWatcher.config({
+  SourceWatcher.config({
     required this.dirPath,
     required DirectoryWatcher watcher,
   }) : _watcher = watcher;

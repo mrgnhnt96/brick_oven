@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
@@ -82,7 +82,7 @@ void main() {
         BrickSource.memory(
           localPath: '',
           fileSystem: memoryFileSystem,
-          watcher: BrickWatcher.config(
+          watcher: SourceWatcher.config(
             dirPath: '',
             watcher: testDirectoryWatcher,
           ),

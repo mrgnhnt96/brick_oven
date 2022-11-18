@@ -7,7 +7,7 @@ import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/domain/brick_yaml_data.dart';
 import 'package:brick_oven/domain/name.dart';
@@ -276,7 +276,7 @@ exclude:
     'watcher',
     () {
       late FileSystem fs;
-      late BrickWatcher mockWatcher;
+      late SourceWatcher mockWatcher;
       late TestDirectoryWatcher testDirectoryWatcher;
       late Logger mockLogger;
       late Progress mockProgress;
@@ -369,7 +369,7 @@ exclude:
             source: BrickSource.memory(
               localPath: localPath,
               fileSystem: fs,
-              watcher: BrickWatcher.config(
+              watcher: SourceWatcher.config(
                 dirPath: localPath,
                 watcher: testDirectoryWatcher,
               ),
@@ -411,7 +411,7 @@ exclude:
             source: BrickSource.memory(
               localPath: localPath,
               fileSystem: fs,
-              watcher: BrickWatcher.config(
+              watcher: SourceWatcher.config(
                 dirPath: localPath,
                 watcher: testDirectoryWatcher,
               ),
@@ -450,7 +450,7 @@ exclude:
             source: BrickSource.memory(
               localPath: localPath,
               fileSystem: fs,
-              watcher: BrickWatcher.config(
+              watcher: SourceWatcher.config(
                 dirPath: localPath,
                 watcher: testDirectoryWatcher,
               ),
@@ -580,7 +580,7 @@ exclude:
           source: BrickSource.memory(
             localPath: localPath,
             fileSystem: fs,
-            watcher: BrickWatcher.config(
+            watcher: SourceWatcher.config(
               dirPath: localPath,
               watcher: testDirectoryWatcher,
             ),

@@ -1,4 +1,4 @@
-import 'package:brick_oven/domain/brick_watcher.dart';
+import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 import 'package:watcher/watcher.dart';
@@ -6,14 +6,14 @@ import 'package:watcher/watcher.dart';
 import '../test_utils/test_directory_watcher.dart';
 
 void main() {
-  group('$BrickWatcher', () {
-    late BrickWatcher watcher;
+  group('$SourceWatcher', () {
+    late SourceWatcher watcher;
     late TestDirectoryWatcher testDirectoryWatcher;
 
     setUp(() {
       testDirectoryWatcher = TestDirectoryWatcher();
 
-      watcher = BrickWatcher.config(
+      watcher = SourceWatcher.config(
         dirPath: 'some/path',
         watcher: testDirectoryWatcher,
       );
@@ -26,7 +26,7 @@ void main() {
     group('#config', () {
       test('should create an instance without explicit logger', () {
         expect(
-          () => BrickWatcher.config(
+          () => SourceWatcher.config(
             dirPath: 'my/test/path',
             watcher: MockDirectoryWatcher(),
           ),
@@ -36,7 +36,7 @@ void main() {
     });
 
     test('can be initiated', () {
-      expect(() => BrickWatcher(''), returnsNormally);
+      expect(() => SourceWatcher(''), returnsNormally);
     });
 
     group('#isRunning', () {
