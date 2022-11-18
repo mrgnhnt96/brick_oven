@@ -147,6 +147,8 @@ nstart_NAME_
 last content
 end_NAME_
 
+fake_NAME_
+
 start_NAME_ end_NAME_
 ''';
 
@@ -168,6 +170,8 @@ other content //
 {{^name}}
 last content
 {{/name}}
+
+fake_NAME_
 
 {{/name}}
 ''';
