@@ -192,8 +192,6 @@ void main() {
         verify(() => mockLogger.err('Could not cook brick: BRICK')).called(1);
       });
     });
-
-    group('write to file system', () {});
   });
 
   group('watch', () {
@@ -275,10 +273,8 @@ void main() {
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press q to quit...')))
-            .called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press r to reload...')))
-            .called(1);
+        verify(mockLogger.quit).called(1);
+        verify(mockLogger.reload).called(1);
 
         verify(() => mockFileWatcher.events).called(1);
 
@@ -291,7 +287,7 @@ void main() {
 
         verify(() => mockBrick.cook(output: 'my_path', watch: true)).called(1);
 
-        verify(() => mockLogger.info('\nExiting...')).called(1);
+        verify(mockLogger.exiting).called(1);
 
         final exitCode = await exitCompleter.future;
         // expects success because `q` was pressed
@@ -341,10 +337,8 @@ void main() {
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press q to quit...')))
-            .called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press r to reload...')))
-            .called(1);
+        verify(mockLogger.quit).called(1);
+        verify(mockLogger.reload).called(1);
 
         testFileWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
 
@@ -400,10 +394,8 @@ void main() {
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press q to quit...')))
-            .called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press r to reload...')))
-            .called(1);
+        verify(mockLogger.quit).called(1);
+        verify(mockLogger.reload).called(1);
 
         verify(mockWatcher.start).called(1);
         verify(() => mockWatcher.addEvent(any(), runBefore: true)).called(2);
@@ -468,10 +460,8 @@ void main() {
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press q to quit...')))
-            .called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press r to reload...')))
-            .called(1);
+        verify(mockLogger.quit).called(1);
+        verify(mockLogger.reload).called(1);
 
         testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
 
@@ -482,16 +472,14 @@ void main() {
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press q to quit...')))
-            .called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press r to reload...')))
-            .called(1);
+        verify(mockLogger.quit).called(1);
+        verify(mockLogger.reload).called(1);
 
         keyController.add('q'.codeUnits);
 
         await Future<void>.delayed(Duration.zero);
 
-        verify(() => mockLogger.info('\nExiting...')).called(1);
+        verify(mockLogger.exiting).called(1);
 
         final exitCode = await exitCompleter.future;
         // expects success because `q` was pressed
@@ -538,10 +526,8 @@ void main() {
         verify(mockLogger.watching).called(1);
 
         // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press q to quit...')))
-            .called(1);
-        verify(() => mockLogger.info(darkGray.wrap('Press r to reload...')))
-            .called(1);
+        verify(mockLogger.quit).called(1);
+        verify(mockLogger.reload).called(1);
 
         await Future<void>.delayed(Duration.zero);
 
@@ -582,7 +568,7 @@ void main() {
 
         await Future<void>.delayed(Duration.zero);
 
-        verify(() => mockLogger.info('\nExiting...')).called(1);
+        verify(mockLogger.exiting).called(1);
 
         final exitCode = await exitCompleter.future;
         // expects success because `q` was pressed
