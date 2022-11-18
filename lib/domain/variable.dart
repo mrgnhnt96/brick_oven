@@ -58,6 +58,6 @@ class Variable extends Equatable {
   ///
   /// [format] determines which case to wrap the values
   String formatName(MustacheFormat format) {
-    return format.toMustache('{{{$name}}}');
+    return format.wrap('{{{$name}}}');
   }
 }

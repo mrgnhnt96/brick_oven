@@ -104,7 +104,7 @@ class Name extends Equatable {
   /// gets the name of the file with formatting to mustache
   String get formatted {
     if (format != null) {
-      return format!.toMustache(_toVariable);
+      return format!.wrap(_toVariable);
     }
 
     return _toVariable;
@@ -119,6 +119,6 @@ class Name extends Equatable {
 
   /// gets the name of the file with formatting to mustache from [format]
   String formatWith(MustacheFormat format) {
-    return format.toMustache(_toVariable);
+    return format.wrap(_toVariable);
   }
 }
