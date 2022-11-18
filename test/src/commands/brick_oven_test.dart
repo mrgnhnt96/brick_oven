@@ -1,6 +1,6 @@
 import 'package:args/args.dart';
 import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_or_error.dart';
+import 'package:brick_oven/domain/bricks_or_error.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:file/file.dart';
@@ -60,7 +60,7 @@ bricks:
 
         expect(
           brickOvenCommand.bricks(),
-          const BrickOrError(null, 'Invalid brick oven configuration file'),
+          const BricksOrError(null, 'Invalid brick oven configuration file'),
         );
       });
 
@@ -69,12 +69,12 @@ bricks:
         () {
           expect(
             brickOvenCommand.bricks(),
-            const BrickOrError(null, 'No ${BrickOvenYaml.file} file found'),
+            const BricksOrError(null, 'No ${BrickOvenYaml.file} file found'),
           );
         },
       );
 
-      test('return $BrickOrError with error yaml has bad syntax', () {
+      test('return $BricksOrError with error yaml has bad syntax', () {
         const content = '''
 bricks:
   some:
@@ -92,7 +92,7 @@ bricks:
         );
       });
 
-      test('return $BrickOrError with error when extra keys are provided', () {
+      test('return $BricksOrError with error when extra keys are provided', () {
         const content = '''
 bricks:
   first:
@@ -113,7 +113,7 @@ second:
         );
       });
 
-      test('return $BrickOrError error when source is null in sub config file',
+      test('return $BricksOrError error when source is null in sub config file',
           () {
         const path = 'path/to';
         const file = 'file';
@@ -138,7 +138,7 @@ source:
         );
       });
 
-      test('return $BrickOrError error when config file does not exist', () {
+      test('return $BricksOrError error when config file does not exist', () {
         const path = 'path/to/first';
         const content = '''
 bricks:
@@ -149,7 +149,7 @@ bricks:
 
         final result = brickOvenCommand.bricks();
 
-        expect(result, const BrickOrError(<Brick>{}, null));
+        expect(result, const BricksOrError(<Brick>{}, null));
 
         verify(
           () => mockLogger.warn(
@@ -158,7 +158,7 @@ bricks:
         );
       });
 
-      test('return $BrickOrError error when config file is not type map', () {
+      test('return $BricksOrError error when config file is not type map', () {
         const path = 'path/to/first';
         const content = '''
 bricks:
@@ -178,7 +178,7 @@ bricks:
         );
       });
 
-      test('return $BrickOrError error when brick is not correct type', () {
+      test('return $BricksOrError error when brick is not correct type', () {
         const content = '''
 bricks:
   first: ${123}

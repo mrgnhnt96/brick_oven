@@ -1,5 +1,5 @@
 import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_or_error.dart';
+import 'package:brick_oven/domain/bricks_or_error.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:test/test.dart';
@@ -14,7 +14,7 @@ void main() {
   });
 
   test('can be instanciated', () {
-    expect(() => const BrickOrError(null, null), returnsNormally);
+    expect(() => const BricksOrError(null, null), returnsNormally);
   });
 
   group('#bricks', () {
@@ -27,13 +27,13 @@ void main() {
         )
       };
 
-      final brickOrError = BrickOrError(bricks, null);
+      final brickOrError = BricksOrError(bricks, null);
 
       expect(brickOrError.bricks, bricks);
     });
 
     test('throws an error when value is error', () {
-      const brickOrError = BrickOrError(null, 'error');
+      const brickOrError = BricksOrError(null, 'error');
 
       expect(() => brickOrError.bricks, throwsA(isA<Error>()));
     });
@@ -41,7 +41,7 @@ void main() {
 
   group('#error', () {
     test('return the error when value is error', () {
-      const brickOrError = BrickOrError(null, 'error');
+      const brickOrError = BricksOrError(null, 'error');
 
       expect(brickOrError.error, 'error');
     });
@@ -55,7 +55,7 @@ void main() {
         )
       };
 
-      final brickOrError = BrickOrError(bricks, null);
+      final brickOrError = BricksOrError(bricks, null);
 
       expect(() => brickOrError.error, throwsA(isA<Error>()));
     });
@@ -63,7 +63,7 @@ void main() {
 
   group('#isError', () {
     test('return true when value is error', () {
-      const brickOrError = BrickOrError(null, 'error');
+      const brickOrError = BricksOrError(null, 'error');
 
       expect(brickOrError.isError, true);
     });
@@ -77,7 +77,7 @@ void main() {
         )
       };
 
-      final brickOrError = BrickOrError(bricks, null);
+      final brickOrError = BricksOrError(bricks, null);
 
       expect(brickOrError.isError, false);
     });
@@ -93,13 +93,13 @@ void main() {
         )
       };
 
-      final brickOrError = BrickOrError(bricks, null);
+      final brickOrError = BricksOrError(bricks, null);
 
       expect(brickOrError.isBricks, true);
     });
 
     test('return false when value is error', () {
-      const brickOrError = BrickOrError(null, 'error');
+      const brickOrError = BricksOrError(null, 'error');
 
       expect(brickOrError.isBricks, false);
     });

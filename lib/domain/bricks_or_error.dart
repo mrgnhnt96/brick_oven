@@ -2,15 +2,15 @@ import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/brick.dart';
 import 'package:equatable/equatable.dart';
 
-part 'brick_or_error.g.dart';
+part 'bricks_or_error.g.dart';
 
 /// returns the bricks or the error that occurred
 /// when parsing the configuration file
 @autoequal
-class BrickOrError extends Equatable {
+class BricksOrError extends Equatable {
   /// returns the bricks or the error that occurred
   /// when parsing the configuration file
-  const BrickOrError(this._bricks, this._error);
+  const BricksOrError(this._bricks, this._error);
 
   final Set<Brick>? _bricks;
   final String? _error;

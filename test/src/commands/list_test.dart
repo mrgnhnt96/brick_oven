@@ -1,7 +1,7 @@
 import 'package:args/args.dart';
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_or_error.dart';
+import 'package:brick_oven/domain/bricks_or_error.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/brick_dir.dart';
@@ -84,7 +84,7 @@ void main() {
       final command = TestListCommand(
         analytics: mockAnalytics,
         logger: mockLogger,
-      )..brickOrErrorResponse = const BrickOrError(null, 'bad config');
+      )..brickOrErrorResponse = const BricksOrError(null, 'bad config');
 
       verifyNever(() => mockLogger.err(any()));
 
@@ -101,7 +101,7 @@ void main() {
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
           verbose: verbose,
-        )..brickOrErrorResponse = BrickOrError(
+        )..brickOrErrorResponse = BricksOrError(
             {
               Brick.memory(
                 name: 'package_1',
@@ -248,11 +248,11 @@ class TestListCommand extends ListCommand {
   final bool? verbose;
 
   @override
-  BrickOrError bricks() {
+  BricksOrError bricks() {
     return brickOrErrorResponse ?? super.bricks();
   }
 
-  BrickOrError? brickOrErrorResponse;
+  BricksOrError? brickOrErrorResponse;
 
   @override
   ArgResults get argResults => FakeArgResults(

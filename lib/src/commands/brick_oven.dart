@@ -1,6 +1,6 @@
 import 'package:args/command_runner.dart';
 import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_or_error.dart';
+import 'package:brick_oven/domain/bricks_or_error.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -30,11 +30,11 @@ abstract class BrickOvenCommand extends Command<int> {
   }
 
   /// gets the bricks brick oven configuration file
-  BrickOrError bricks() {
+  BricksOrError bricks() {
     final configFile = BrickOvenYaml.findNearest(cwd);
 
     if (configFile == null) {
-      return const BrickOrError(null, 'No ${BrickOvenYaml.file} file found');
+      return const BricksOrError(null, 'No ${BrickOvenYaml.file} file found');
     }
 
     YamlValue config;
@@ -42,11 +42,11 @@ abstract class BrickOvenCommand extends Command<int> {
     try {
       config = YamlValue.from(loadYaml(configFile.readAsStringSync()));
     } catch (e) {
-      return BrickOrError(null, 'Invalid configuration, $e');
+      return BricksOrError(null, 'Invalid configuration, $e');
     }
 
     if (config.isError() || !config.isYaml()) {
-      return const BrickOrError(null, 'Invalid brick oven configuration file');
+      return const BricksOrError(null, 'Invalid brick oven configuration file');
     }
 
     final bricks = <Brick>{};
@@ -56,7 +56,7 @@ abstract class BrickOvenCommand extends Command<int> {
     final bricksYaml = YamlValue.from(data.remove('bricks'));
 
     if (!bricksYaml.isYaml()) {
-      return const BrickOrError(null, 'Bricks must be of type `Map`');
+      return const BricksOrError(null, 'Bricks must be of type `Map`');
     }
 
     try {
@@ -82,7 +82,7 @@ abstract class BrickOvenCommand extends Command<int> {
           final yamlValue = YamlValue.from(loadYaml(file.readAsStringSync()));
 
           if (!yamlValue.isYaml()) {
-            return BrickOrError(
+            return BricksOrError(
               null,
               'Brick configuration file must be of '
               'type `Map` | ($name) -- $path',
@@ -97,15 +97,15 @@ abstract class BrickOvenCommand extends Command<int> {
             reason: 'Expected `Map` or '
                 '`String` (path to brick configuration file)',
           );
-          return BrickOrError(null, err.message);
+          return BricksOrError(null, err.message);
         }
 
         bricks.add(Brick.fromYaml(yaml, name, configPath: configPath));
       }
     } on ConfigException catch (e) {
-      return BrickOrError(null, e.message);
+      return BricksOrError(null, e.message);
     } catch (e) {
-      return const BrickOrError(null, 'Invalid brick configuration');
+      return const BricksOrError(null, 'Invalid brick configuration');
     }
 
     if (data.keys.isNotEmpty) {
@@ -113,8 +113,8 @@ abstract class BrickOvenCommand extends Command<int> {
         'Invalid ${BrickOvenYaml.file} config:\n'
         'Unknown keys: "${data.keys.join('", "')}"',
       );
-      return BrickOrError(null, error.message);
+      return BricksOrError(null, error.message);
     }
-    return BrickOrError(bricks, null);
+    return BricksOrError(bricks, null);
   }
 }

@@ -4,7 +4,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_or_error.dart';
+import 'package:brick_oven/domain/bricks_or_error.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
@@ -58,7 +58,7 @@ void main() {
         test('when shouldSync and isWatch are default values', () async {
           final command = TestCookAllBricks(
             analytics: mockAnalytics,
-            bricksOrError: BrickOrError({mockBrick}, null),
+            bricksOrError: BricksOrError({mockBrick}, null),
             logger: mockLogger,
             fileSystem: memoryFileSystem,
           );
@@ -96,7 +96,7 @@ void main() {
           test('is false', () async {
             final command = TestCookAllBricks(
               analytics: mockAnalytics,
-              bricksOrError: BrickOrError({mockBrick}, null),
+              bricksOrError: BricksOrError({mockBrick}, null),
               logger: mockLogger,
               shouldSync: false,
               fileSystem: memoryFileSystem,
@@ -144,7 +144,7 @@ void main() {
           test('is true', () async {
             final command = TestCookAllBricks(
               analytics: mockAnalytics,
-              bricksOrError: BrickOrError({mockBrick}, null),
+              bricksOrError: BricksOrError({mockBrick}, null),
               logger: mockLogger,
               shouldSync: true,
               fileSystem: memoryFileSystem,
@@ -231,7 +231,7 @@ void main() {
           test('is false', () async {
             final command = TestCookAllBricks(
               analytics: mockAnalytics,
-              bricksOrError: BrickOrError({mockBrick}, null),
+              bricksOrError: BricksOrError({mockBrick}, null),
               logger: mockLogger,
               isWatch: false,
               fileSystem: memoryFileSystem,
@@ -280,7 +280,7 @@ void main() {
           test('is true', () async {
             final command = TestCookAllBricks(
               analytics: mockAnalytics,
-              bricksOrError: BrickOrError({mockBrick}, null),
+              bricksOrError: BricksOrError({mockBrick}, null),
               logger: mockLogger,
               isWatch: true,
               fileSystem: memoryFileSystem,
@@ -340,7 +340,7 @@ void main() {
       test('when error occurs when parsing bricks', () async {
         final command = TestCookAllBricks(
           analytics: mockAnalytics,
-          bricksOrError: const BrickOrError(null, 'error'),
+          bricksOrError: const BricksOrError(null, 'error'),
           logger: mockLogger,
           fileSystem: memoryFileSystem,
         );
@@ -358,7 +358,7 @@ void main() {
 
         final command = TestCookAllBricks(
           analytics: mockAnalytics,
-          bricksOrError: BrickOrError({mockBrick}, null),
+          bricksOrError: BricksOrError({mockBrick}, null),
           logger: mockLogger,
           fileSystem: memoryFileSystem,
         );
@@ -402,7 +402,7 @@ void main() {
 
         final command = TestCookAllBricks(
           analytics: mockAnalytics,
-          bricksOrError: BrickOrError({mockBrick}, null),
+          bricksOrError: BricksOrError({mockBrick}, null),
           logger: mockLogger,
           fileSystem: memoryFileSystem,
         );
@@ -469,7 +469,7 @@ class TestCookAllBricks extends CookAllBricks {
 
   final Map<String, dynamic> _argResults;
 
-  final BrickOrError? bricksOrError;
+  final BricksOrError? bricksOrError;
   final bool? _isWatch;
   final bool? _shouldSync;
 
@@ -480,7 +480,7 @@ class TestCookAllBricks extends CookAllBricks {
   bool get shouldSync => _shouldSync ?? super.shouldSync;
 
   @override
-  BrickOrError bricks() => bricksOrError ?? const BrickOrError({}, null);
+  BricksOrError bricks() => bricksOrError ?? const BricksOrError({}, null);
 
   @override
   Future<bool> watchForConfigChanges(
