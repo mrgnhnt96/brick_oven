@@ -61,7 +61,7 @@ class Name extends Equatable {
       name = getValue('value') ?? backup;
       prefix = getValue('prefix');
       suffix = getValue('suffix');
-      format = MustacheFormat.values.getMustacheValue(getValue('format'));
+      format = MustacheFormat.values.findFrom(getValue('format'));
 
       if (nameConfig.isNotEmpty) {
         throw VariableException(
