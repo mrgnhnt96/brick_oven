@@ -11,6 +11,24 @@ void main() {
     expect(instance, isNotNull);
   });
 
+  group('#whiteSpacePattern', () {
+    test('has correct value', () {
+      expect(Variable.whiteSpacePattern, RegExp(r'^\S+$'));
+    });
+
+    test('matches', () {
+      const matches = [
+        '123',
+        'abc',
+        r'<>(){}[].-_+=!@#\$%^&*',
+      ];
+
+      for (final match in matches) {
+        expect(Variable.whiteSpacePattern.hasMatch(match), isTrue);
+      }
+    });
+  });
+
   group('#fromYaml', () {
     test('throws $ConfigException when incorrect type', () {
       final yaml = loadYaml('''
@@ -30,13 +48,52 @@ key: value
       );
     });
 
-    test('returns successfully when string provided', () {
-      const expected = Variable(name: 'scooby_doo', placeholder: '_PET_');
+    test('throws $ConfigException when placeholder or name contains whitespace',
+        () {
+      const throwValues = [
+        'some text',
+        'just - testing',
+        'just\ntesting',
+        'just\ttesting',
+      ];
+
+      for (final value in throwValues) {
+        expect(
+          () => Variable.fromYaml(YamlValue.from(value), ''),
+          throwsA(isA<ConfigException>()),
+        );
+
+        expect(
+          () => Variable.fromYaml(YamlValue.from('alright'), value),
+          throwsA(isA<ConfigException>()),
+        );
+      }
 
       expect(
-        Variable.fromYaml(const YamlValue.string('_PET_'), 'scooby_doo'),
-        expected,
+        () => Variable.fromYaml(YamlValue.from(''), ''),
+        returnsNormally,
       );
+    });
+
+    test('returns successfully when string provided', () {
+      const successValues = [
+        '',
+        'this',
+        'this-is',
+        r'<>(){}[].-_+=!@#\$%^&*',
+      ];
+
+      for (final value in successValues) {
+        expect(
+          () => Variable.fromYaml(YamlValue.from(value), ''),
+          returnsNormally,
+        );
+
+        expect(
+          () => Variable.fromYaml(const YamlValue.none(), value),
+          returnsNormally,
+        );
+      }
     });
 
     test('returns successfully when null provided', () {
