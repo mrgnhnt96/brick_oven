@@ -211,6 +211,11 @@ last content
             '',
             'snakeCase}',
           ],
+          'a$placeholder': [
+            placeholder,
+            '',
+            '',
+          ],
         };
 
         for (final match in matches.entries) {
@@ -243,7 +248,73 @@ last content
       });
     });
 
-    test('returns', () {});
+    group('throws $VariableException', () {
+      test('when variables starts or ends with a bracket', () {
+        const contents = [
+          '{{{_NAME_}}}',
+          '{{_NAME_}}',
+          '{_NAME_}',
+          '{_NAME_',
+          '_NAME_}',
+        ];
+
+        for (final content in contents) {
+          const variable = Variable(name: 'name', placeholder: '_NAME_');
+
+          expect(
+            () => testFileReplacements.checkForVariables(
+              content,
+              variable,
+            ),
+            throwsA(isA<VariableException>()),
+          );
+        }
+      });
+    });
+
+    test('returns original content when variable is not found', () {
+      const content = 'content';
+      const expected = ContentReplacement(content: content, used: {});
+
+      final result = testFileReplacements.checkForVariables(
+        content,
+        const Variable(name: 'name', placeholder: '_NAME_'),
+      );
+
+      expect(result, expected);
+    });
+
+    test('returns new content when variable is found', () {
+      const variable = Variable(name: 'name', placeholder: '_NAME_');
+
+      const content = '''
+_NAME_
+prefix_NAME_
+_NAME_suffix
+_NAME_escaped
+_NAME_escapedsuffix
+''';
+
+      const expectedContent = '''
+{{name}}
+prefix{{name}}
+{{name}}suffix
+{{{name}}}
+{{{name}}}suffix
+''';
+
+      const expected = ContentReplacement(
+        content: expectedContent,
+        used: {'name'},
+      );
+
+      final result = testFileReplacements.checkForVariables(
+        content,
+        variable,
+      );
+
+      expect(result, expected);
+    });
   });
 
   group('#variables', () {

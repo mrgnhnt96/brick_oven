@@ -138,10 +138,7 @@ mixin FileReplacements {
   /// checks the [content] for loops (sections) and replaces them with the
   /// [variable]'s value
   @visibleForTesting
-  ContentReplacement checkForLoops(
-    String content,
-    Variable variable,
-  ) {
+  ContentReplacement checkForLoops(String content, Variable variable) {
     var isVariableUsed = false;
 
     final setUpLoops = content.replaceAllMapped(
@@ -212,47 +209,30 @@ mixin FileReplacements {
     final newContent = content.replaceAllMapped(
       variablePattern(variable),
       (match) {
-        final possibleSection = match.group(1);
+        final completeMatch = match.group(0)!;
+
+        final startsWithBracket = RegExp(r'^\{+').hasMatch(match.group(1)!);
+        final endsWithBracket = RegExp(r'\}+$').hasMatch(match.group(2)!);
+
+        if (startsWithBracket || endsWithBracket) {
+          throw VariableException(
+            variable: completeMatch,
+            reason: 'Please remove curly braces from variable '
+                '`$completeMatch` '
+                'This will cause unexpected behavior '
+                'when creating the brick',
+          );
+        }
+
         String result;
         var suffix = '';
-        var prefix = '';
-
-        // check for section or loop
-        if (possibleSection != null && possibleSection.isNotEmpty) {
-          if (possibleSection.isNotEmpty) {
-            final additionalVariables =
-                checkForVariables(possibleSection, variable);
-
-            if (additionalVariables.used.isNotEmpty) {
-              isVariableUsed = true;
-            }
-
-            prefix = additionalVariables.content;
-          }
-        }
-
-        if (possibleSection?.startsWith(RegExp(r'{{[\^#\\]')) == false) {
-          final completeMatch = match.group(0);
-
-          if (completeMatch != null && completeMatch.isNotEmpty) {
-            if (completeMatch.startsWith('{') || completeMatch.endsWith('}')) {
-              throw VariableException(
-                variable: completeMatch,
-                reason: 'Please remove curly braces from variable '
-                    '`$completeMatch` '
-                    'This will cause unexpected behavior '
-                    'when creating the brick',
-              );
-            }
-          }
-        }
 
         final possibleFormat = match.group(2);
 
         final format = MustacheFormat.values.findFrom(possibleFormat);
 
         if (format == null) {
-          if (possibleFormat != null && possibleFormat.isNotEmpty) {
+          if (possibleFormat != null) {
             suffix = possibleFormat;
           }
 
@@ -260,16 +240,12 @@ mixin FileReplacements {
         } else {
           // format the variable
           suffix = MustacheFormat.values.suffixFrom(possibleFormat) ?? '';
-          result = variable.formatName(format);
-        }
-
-        if (prefix.startsWith(RegExp('{{[#^/]')) || suffix.endsWith('}}')) {
-          return match.group(0)!;
+          result = format.wrap(variable.name);
         }
 
         isVariableUsed = true;
 
-        return '$prefix$result$suffix';
+        return '$result$suffix';
       },
     );
 
