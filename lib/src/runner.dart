@@ -38,7 +38,6 @@ class BrickOvenRunner extends CommandRunner<int> {
         'analytics',
         help: 'Toggle anonymous usage statistics.',
         allowed: ['true', 'false'],
-        defaultsTo: 'true',
         allowedHelp: {
           'true': 'Enable anonymous usage statistics',
           'false': 'Disable anonymous usage statistics',
@@ -80,24 +79,22 @@ class BrickOvenRunner extends CommandRunner<int> {
   static const timeout = Duration(milliseconds: 500);
 
   @override
-  Future<int?> run(Iterable<String> args) async {
+  Future<int> run(Iterable<String> args) async {
     try {
       final argResults = parse(args);
 
       final exitCode = await runCommand(argResults);
 
-      return exitCode ?? ExitCode.success.code;
+      return exitCode;
     } on FormatException catch (e) {
       _logger
         ..err(e.message)
-        ..info('')
-        ..info(usage);
+        ..info('\n$usage');
       return ExitCode.usage.code;
     } on UsageException catch (e) {
       _logger
         ..err(e.message)
-        ..info('')
-        ..info(usage);
+        ..info('\n$usage');
       return ExitCode.usage.code;
     } catch (error) {
       _logger.err('$error');
@@ -106,7 +103,7 @@ class BrickOvenRunner extends CommandRunner<int> {
   }
 
   @override
-  Future<int?> runCommand(ArgResults topLevelResults) async {
+  Future<int> runCommand(ArgResults topLevelResults) async {
     Future<void> runCheckForUpdates() async {
       if (!calledUpdate(topLevelResults)) {
         await checkForUpdates(
@@ -142,6 +139,6 @@ class BrickOvenRunner extends CommandRunner<int> {
 
     await runCheckForUpdates();
 
-    return result ?? ExitCode.unavailable.code;
+    return result ?? ExitCode.success.code;
   }
 }
