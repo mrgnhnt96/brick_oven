@@ -16,77 +16,113 @@ void main() {
   });
 
   group('LoggerX', () {
-    group('#preheat', () {
-      test('calls info', () {
-        verifyNever(() => mockLogger.info(any()));
+    test('#preheat calls info', () {
+      verifyNever(() => mockLogger.info(any()));
 
-        mockLogger.preheat();
+      mockLogger.preheat();
 
-        verify(() => mockLogger.info('\n🔥  Preheating...')).called(1);
-      });
+      verify(() => mockLogger.info('\n🔥  Preheating...')).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
-    group('#configChanged', () {
-      test('calls info', () {
-        verifyNever(() => mockLogger.info(any()));
+    test('#configChanged calls info', () {
+      verifyNever(() => mockLogger.info(any()));
 
-        mockLogger.configChanged();
+      mockLogger.configChanged();
 
-        verify(() => mockLogger.info('\n🔧  Configuration changed')).called(1);
-      });
+      verify(() => mockLogger.info('\n🔧  Configuration changed')).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
-    group('#fileChanged', () {
-      test('calls info', () {
-        verifyNever(() => mockLogger.info(any()));
+    test('#fileChanged calls info', () {
+      verifyNever(() => mockLogger.info(any()));
 
-        mockLogger.fileChanged('brick');
+      mockLogger.fileChanged('brick');
 
-        verify(
-          () => mockLogger.info('\n📁  File changed (brick)'),
-        ).called(1);
-      });
+      verify(
+        () => mockLogger.info('\n📁  File changed (brick)'),
+      ).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
-    group('#watching', () {
-      test('calls info', () {
-        verifyNever(() => mockLogger.info(any()));
+    test('#watching calls info', () {
+      verifyNever(() => mockLogger.info(any()));
 
-        mockLogger.watching();
+      mockLogger.watching();
 
-        verify(
-          () => mockLogger.info('\n👀 Watching config & source files...'),
-        ).called(1);
-      });
+      verify(
+        () => mockLogger.info('\n👀 Watching config & source files...'),
+      ).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
-    group('#dingDing', () {
-      test('calls info', () {
-        verifyNever(() => mockLogger.info(any()));
+    test('#exiting calls info', () {
+      verifyNever(() => mockLogger.info(any()));
 
-        final date = DateTime(2021, 1, 1, 12);
-        mockLogger.dingDing(date);
+      mockLogger.exiting();
 
-        verify(
-          () => mockLogger.info('🔔  Ding Ding! (${date.formatted})'),
-        ).called(1);
-      });
+      verify(() => mockLogger.info('\nExiting...')).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
-    group('#keyStrokes', () {
-      test('calls info', () {
-        verifyNever(() => mockLogger.info(any()));
+    test('#restart calls info', () {
+      verifyNever(() => mockLogger.info(any()));
 
-        mockLogger.keyStrokes();
+      mockLogger.restart();
 
-        verify(
-          () => mockLogger.info('Press q to quit...'),
-        ).called(1);
+      verify(() => mockLogger.info('\nRestarting...')).called(1);
 
-        verify(
-          () => mockLogger.info('Press r to reload...'),
-        ).called(1);
-      });
+      verifyNoMoreInteractions(mockLogger);
+    });
+
+    test('#dingDing calls info', () {
+      verifyNever(() => mockLogger.info(any()));
+
+      final date = DateTime(2021, 1, 1, 12);
+      mockLogger.dingDing(date);
+
+      verify(
+        () => mockLogger.info('🔔  Ding Ding! (${date.formatted})'),
+      ).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+    });
+
+    test('#keyStrokes calls info', () {
+      verifyNever(() => mockLogger.info(any()));
+
+      mockLogger.keyStrokes();
+
+      verify(mockLogger.quit).called(1);
+
+      verify(mockLogger.reload).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+    });
+
+    test('#quit calls info', () {
+      verifyNever(() => mockLogger.info(any()));
+
+      mockLogger.quit();
+
+      verify(() => mockLogger.info('Press q to quit...')).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+    });
+
+    test('#reload calls info', () {
+      verifyNever(() => mockLogger.info(any()));
+
+      mockLogger.reload();
+
+      verify(() => mockLogger.info('Press r to reload...')).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
     });
   });
 }
