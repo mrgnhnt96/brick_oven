@@ -716,6 +716,7 @@ class TestBrickFile extends BrickFile {
 
   @override
   FileWriteResult writeFile({
+    required List<Variable> ignoreVariablesIfNotPresent,
     required File targetFile,
     required File sourceFile,
     required List<Variable> variables,

@@ -403,6 +403,7 @@ before text {{name}} after text
       sourceFile.writeAsStringSync('hello from this side');
 
       testFileReplacements.writeFile(
+        ignoreVariablesIfNotPresent: [],
         partials: [],
         variables: [],
         sourceFile: sourceFile,
@@ -423,6 +424,7 @@ before text {{name}} after text
       sourceFile.writeAsStringSync('replace: _HELLO_');
 
       testFileReplacements.writeFile(
+        ignoreVariablesIfNotPresent: [],
         partials: [],
         sourceFile: sourceFile,
         targetFile: targetFile,
@@ -449,6 +451,7 @@ before text {{name}} after text
       sourceFile.deleteSync();
 
       testFileReplacements.writeFile(
+        ignoreVariablesIfNotPresent: [],
         partials: [],
         sourceFile: sourceFile,
         targetFile: targetFile,
@@ -496,6 +499,7 @@ partial.page.md
       sourceFile.writeAsStringSync(content);
 
       testFileReplacements.writeFile(
+        ignoreVariablesIfNotPresent: [],
         partials: [partial],
         sourceFile: sourceFile,
         targetFile: targetFile,

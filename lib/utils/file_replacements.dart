@@ -23,6 +23,7 @@ mixin FileReplacements {
     required File targetFile,
     required File sourceFile,
     required List<Variable> variables,
+    required List<Variable> ignoreVariablesIfNotPresent,
     required List<Partial> partials,
     required FileSystem? fileSystem,
     required Logger logger,
@@ -61,6 +62,8 @@ mixin FileReplacements {
         checkForPartials(partials: partials, content: content);
     content = partialsResult.content;
     usedPartials.addAll(partialsResult.used);
+
+    usedVariables.addAll(ignoreVariablesIfNotPresent.map((v) => v.name));
 
     final variableNames = variables.map((v) => v.name).toSet();
     final unusedVariables = variableNames.difference(usedVariables);

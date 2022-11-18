@@ -261,6 +261,7 @@ class BrickFile extends Equatable with FileReplacements {
         targetFile: file,
         sourceFile: sourceFile,
         variables: [...variables, ...additionalVariables],
+        ignoreVariablesIfNotPresent: additionalVariables,
         partials: partials,
         fileSystem: fileSystem,
         logger: logger,
