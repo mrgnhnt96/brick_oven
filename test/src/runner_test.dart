@@ -1,3 +1,4 @@
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/runner.dart';
@@ -9,51 +10,45 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
+import 'package:usage/usage_io.dart';
 
 import '../test_utils/mocks.dart';
 import '../test_utils/print_override.dart';
 
-const expectedUsage = [
-  'Generate your bricks 🧱 with this oven 🎛\n',
-  '\n',
-  'Usage: brick_oven <command> [arguments]\n',
-  '\n',
-  'Global options:\n',
-  '-h, --help       Print this usage information.\n',
-  '    --version    Print the current version\n',
-  '\n',
-  'Available commands:\n',
-  '  cook     Cook 👨‍🍳 bricks from the config file\n',
-  '  list     Lists all configured bricks from brick_oven.yaml\n',
-  '  update   Updates brick_oven to the latest version\n',
-  '\n',
-  'Run "brick_oven help <command>" for more information about a command.',
-];
+const expectedUsage = '''
+Generate your bricks 🧱 with this oven 🎛
 
-const latestVersion = '0.0.0';
+Usage: brick_oven <command> [arguments]
 
-const updateMessage = '''
+Global options:
+-h, --help           Print this usage information.
+    --version        Print the current version
+    --analytics      Toggle anonymous usage statistics.
 
-+------------------------------------------------------------------------------------+
-|                                                                                    |
-|                   Update available! $packageVersion \u2192 $latestVersion                                  |
-|  Changelog: https://github.com/mrgnhnt96/brick_oven/releases/tag/brick_oven-v$latestVersion |
-|                             Run brick_oven update to update                        |
-|                                                                                    |
-+------------------------------------------------------------------------------------+
-''';
+          [false]    Disable anonymous usage statistics
+          [true]     Enable anonymous usage statistics
+
+Available commands:
+  cook     Cook 👨‍🍳 bricks from the config file
+  list     Lists all configured bricks from brick_oven.yaml
+  update   Updates brick_oven to the latest version
+
+Run "brick_oven help <command>" for more information about a command.''';
 
 void main() {
   group('$BrickOvenRunner', () {
     late Logger mockLogger;
     late PubUpdater mockPubUpdater;
+    late Analytics mockAnalytics;
     late BrickOvenRunner commandRunner;
     late FileSystem fs;
 
     setUp(() {
       printLogs = [];
+
       mockLogger = MockLogger();
       mockPubUpdater = MockPubUpdater();
+      mockAnalytics = MockAnalytics()..stubMethods();
       fs = MemoryFileSystem();
 
       fs.file(BrickOvenYaml.file)
@@ -62,24 +57,14 @@ void main() {
 
       when(
         () => mockPubUpdater.getLatestVersion(any()),
-      ).thenAnswer((_) async => packageVersion);
+      ).thenAnswer((_) => Future.value(packageVersion));
 
       commandRunner = BrickOvenRunner(
         logger: mockLogger,
         pubUpdater: mockPubUpdater,
         fileSystem: fs,
-        analytics: MockAnalytics(),
+        analytics: mockAnalytics,
       );
-    });
-
-    test('can be instantiated without an explicit pub updater instance', () {
-      final commandRunner = BrickOvenRunner(
-        fileSystem: fs,
-        logger: MockLogger(),
-        pubUpdater: MockPubUpdater(),
-        analytics: MockAnalytics(),
-      );
-      expect(commandRunner, isNotNull);
     });
 
     test('time out is correct duration', () {
@@ -89,20 +74,20 @@ void main() {
     group('run', () {
       group('analytics', () {
         test('can be enabled', () async {
-          final analytics = MockAnalytics();
+          final mockAnalytics = MockAnalytics();
 
-          when(() => analytics.firstRun).thenReturn(false);
+          when(() => mockAnalytics.firstRun).thenReturn(false);
 
           commandRunner = BrickOvenRunner(
             logger: mockLogger,
             pubUpdater: mockPubUpdater,
             fileSystem: fs,
-            analytics: analytics,
+            analytics: mockAnalytics,
           );
 
           final result = await commandRunner.run(['--analytics', 'true']);
 
-          verify(() => analytics.enabled = true).called(1);
+          verify(() => mockAnalytics.enabled = true).called(1);
 
           verify(() => mockLogger.info('analytics enabled.')).called(1);
 
@@ -131,20 +116,20 @@ void main() {
         });
 
         test('asks for consent when first time running', () async {
-          final analytics = MockAnalytics();
+          final mockAnalytics = MockAnalytics();
 
-          when(() => analytics.firstRun).thenReturn(true);
+          when(() => mockAnalytics.firstRun).thenReturn(true);
 
           commandRunner = BrickOvenRunner(
             logger: mockLogger,
             pubUpdater: mockPubUpdater,
             fileSystem: fs,
-            analytics: analytics,
+            analytics: mockAnalytics,
           );
 
           await commandRunner.run([]);
 
-          verify(() => analytics.askForConsent(mockLogger)).called(1);
+          verify(() => mockAnalytics.askForConsent(mockLogger)).called(1);
 
           verify(
             () => mockLogger.chooseOne(
@@ -158,79 +143,84 @@ void main() {
 
       test('handles $FormatException', () async {
         const exception = FormatException('oops!');
-        var isFirstInvocation = true;
 
-        when(() => mockLogger.alert(any())).thenAnswer((_) {
-          if (isFirstInvocation) {
-            isFirstInvocation = false;
+        final commandRunner = TestBrickOvenRunner(
+          logger: mockLogger,
+          fileSystem: fs,
+          onRun: () {
             throw exception;
-          }
-        });
+          },
+        );
 
-        final result = await commandRunner.run(['--version']);
+        final result = await commandRunner.run([]);
 
-        expect(result, equals(ExitCode.usage.code));
+        expect(result, ExitCode.usage.code);
 
         verify(() => mockLogger.err(exception.message)).called(1);
-        verify(() => mockLogger.info(commandRunner.usage)).called(1);
+        verify(() => mockLogger.info('\n${commandRunner.usage}')).called(1);
       });
 
       test('handles $UsageException', () async {
-        final exception = UsageException('oops!', commandRunner.usage);
-        var isFirstInvocation = true;
+        final exception = UsageException('oops!', 'usage');
 
-        when(() => mockLogger.alert(any())).thenAnswer((_) {
-          if (isFirstInvocation) {
-            isFirstInvocation = false;
+        final commandRunner = TestBrickOvenRunner(
+          logger: mockLogger,
+          fileSystem: fs,
+          onRun: () {
             throw exception;
-          }
-        });
+          },
+        );
 
-        final result = await commandRunner.run(['--version']);
+        final result = await commandRunner.run([]);
 
-        expect(result, equals(ExitCode.usage.code));
+        expect(result, ExitCode.usage.code);
 
         verify(() => mockLogger.err(exception.message)).called(1);
-        verify(() => mockLogger.info(commandRunner.usage)).called(1);
+        verify(() => mockLogger.info('\n${commandRunner.usage}')).called(1);
       });
 
       test('handles other exceptions', () async {
         final exception = Exception('oops!');
-        var isFirstInvocation = true;
 
-        when(() => mockLogger.alert(any())).thenAnswer((_) {
-          if (isFirstInvocation) {
-            isFirstInvocation = false;
+        final commandRunner = TestBrickOvenRunner(
+          logger: mockLogger,
+          fileSystem: fs,
+          onRun: () {
             throw exception;
-          }
-        });
+          },
+        );
 
-        final result = await commandRunner.run(['--version']);
+        final result = await commandRunner.run([]);
 
-        expect(result, equals(ExitCode.software.code));
+        expect(result, ExitCode.software.code);
 
         verify(() => mockLogger.err('$exception')).called(1);
       });
 
-      test(
-        'handles no command',
-        () => overridePrint(() async {
+      test('handles no command', () async {
+        when(() => mockAnalytics.firstRun).thenReturn(false);
+
+        await overridePrint(() async {
           final result = await commandRunner.run([]);
 
-          expect(printLogs, equals([expectedUsage.join()]));
+          expect(printLogs, equals([expectedUsage]));
           expect(result, equals(ExitCode.success.code));
-        }),
-      );
+        });
+      });
 
       group('help', () {
+        setUp(() {
+          when(() => mockAnalytics.firstRun).thenReturn(false);
+        });
+
         test(
           '--help outputs usage',
           () async {
             await overridePrint(() async {
               final result = await commandRunner.run(['--help']);
 
-              expect(printLogs, equals([expectedUsage.join()]));
-              expect(result, equals(ExitCode.success.code));
+              expect(printLogs, [expectedUsage]);
+              expect(result, ExitCode.success.code);
             });
           },
         );
@@ -241,21 +231,43 @@ void main() {
             overridePrint(() async {
               final resultAbbr = await commandRunner.run(['-h']);
 
-              expect(printLogs, equals([expectedUsage.join()]));
-              expect(resultAbbr, equals(ExitCode.success.code));
+              expect(printLogs, [expectedUsage]);
+              expect(resultAbbr, ExitCode.success.code);
             });
           },
         );
       });
 
-      group('--version', () {
-        test('outputs current version', () async {
-          final result = await commandRunner.run(['--version']);
+      test('--version outputs current version', () async {
+        when(() => mockAnalytics.firstRun).thenReturn(false);
 
-          expect(result, equals(ExitCode.success.code));
-          verify(() => mockLogger.alert(packageVersion)).called(1);
-        });
+        final result = await commandRunner.run(['--version']);
+
+        expect(result, ExitCode.success.code);
+        verify(() => mockLogger.alert(packageVersion)).called(1);
       });
     });
   });
+}
+
+class TestBrickOvenRunner extends BrickOvenRunner {
+  TestBrickOvenRunner({
+    required Logger logger,
+    required FileSystem fileSystem,
+    required this.onRun,
+  }) : super(
+          logger: logger,
+          pubUpdater: MockPubUpdater(),
+          fileSystem: fileSystem,
+          analytics: MockAnalytics(),
+        );
+
+  final void Function() onRun;
+
+  @override
+  Future<int> runCommand(ArgResults topLevelResults) async {
+    onRun();
+
+    return 0;
+  }
 }
