@@ -79,11 +79,10 @@ class ListCommand extends BrickOvenCommand {
     unawaited(
       _analytics.sendEvent(
         'list',
-        'bricks',
+        isVerbose ? 'verbose' : 'simple',
         value: ExitCode.success.code,
         parameters: {
-          'bricks': bricks.toString(),
-          'verbose': isVerbose.toString(),
+          'bricks': bricks.length.toString(),
         },
       ),
     );
