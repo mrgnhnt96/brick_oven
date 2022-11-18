@@ -4,7 +4,6 @@ import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
-import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -14,7 +13,9 @@ import 'package:meta/meta.dart';
 /// the methods to replace variables and partials in a file
 /// {@endtemplate}
 mixin FileReplacements {
-  static const _loopSetUp = '---set-up-loop---';
+  /// the placeholder when replacing loops
+  @visibleForTesting
+  static const loopSetUp = '---set-up-loop---';
 
   /// writes the [targetFile] content using the [sourceFile]'s content and
   /// replacing the [variables] and [partials] with their configured values
@@ -83,7 +84,7 @@ mixin FileReplacements {
     final partialsUsed = <String>{};
 
     for (final partial in partials) {
-      final partialPattern = RegExp('.*partial.${partial.name}.*');
+      final partialPattern = RegExp(r'.*\bpartial\.' '${partial.name}' r'\b.*');
       final compareContent = newContent;
       newContent =
           newContent.replaceAll(partialPattern, partial.toPartialInput());
@@ -127,12 +128,12 @@ mixin FileReplacements {
 
   /// the pattern to find loops (sections) within the content
   @visibleForTesting
-  Pattern loopPattern() => RegExp('.*$_loopSetUp' r'({{.[\w-+$\.]+}}).*');
+  RegExp get loopPattern => RegExp('.*$loopSetUp' r'({{[\^#\\]\S+}}).*');
 
   /// the pattern to find variables within the content
   @visibleForTesting
-  Pattern variablePattern(Variable variable) =>
-      RegExp(r'([\w-{#^/]*)' '${variable.placeholder}' r'([\w}]*)');
+  RegExp variablePattern(Variable variable) =>
+      RegExp('({*)' '${variable.placeholder}' r'(\w*}*)');
 
   /// checks the [content] for loops (sections) and replaces them with the
   /// [variable]'s value
@@ -143,30 +144,35 @@ mixin FileReplacements {
   ) {
     var isVariableUsed = false;
 
-    final setUpLoops =
-        content.replaceAllMapped(variablePattern(variable), (match) {
-      final possibleLoop = match.group(1);
-      final loop = MustacheLoops.values.from(possibleLoop);
+    final setUpLoops = content.replaceAllMapped(
+      variablePattern(variable),
+      (match) {
+        final possibleLoop = match.group(1);
+        final loop = MustacheLoops.values.from(possibleLoop);
 
-      // if loop is found, then replace the content
-      if (loop == null) {
-        return match.group(0)!;
-      }
+        // if loop is found, then replace the content
+        if (loop == null) {
+          return match.group(0)!;
+        }
 
-      isVariableUsed = true;
+        isVariableUsed = true;
 
-      final formattedLoop = loop.format(variable.name);
+        final formattedLoop = loop.format(variable.name);
 
-      return '$_loopSetUp$formattedLoop';
-    });
+        return '$loopSetUp$formattedLoop';
+      },
+    );
 
     // remove the loop setup and all pre/post content
-    final looped = setUpLoops.replaceAllMapped(loopPattern(), (match) {
-      return match.group(1)!;
-    });
+    final looped = setUpLoops.replaceAllMapped(
+      loopPattern,
+      (match) {
+        return match.group(1)!;
+      },
+    );
 
     // remove all extra linebreaks before & after the loop
-    final clean = looped.replaceAllMapped(
+    final _ = looped.replaceAllMapped(
       RegExp(r'(\n*)({{[#^/][\w-]+}})$(\n*)', multiLine: true),
       (match) {
         var before = '';
@@ -188,7 +194,7 @@ mixin FileReplacements {
     );
 
     return ContentReplacement(
-      content: clean,
+      content: looped,
       used: {
         if (isVariableUsed) variable.name,
       },
@@ -203,19 +209,16 @@ mixin FileReplacements {
   ) {
     var isVariableUsed = false;
 
-    final newContent =
-        content.replaceAllMapped(variablePattern(variable), (match) {
-      final possibleSection = match.group(1);
-      MustacheSections? section;
-      String result;
-      var suffix = '';
-      var prefix = '';
+    final newContent = content.replaceAllMapped(
+      variablePattern(variable),
+      (match) {
+        final possibleSection = match.group(1);
+        String result;
+        var suffix = '';
+        var prefix = '';
 
-      // check for section or loop
-      if (possibleSection != null && possibleSection.isNotEmpty) {
-        section = MustacheSections.values.from(possibleSection);
-
-        if (section == null) {
+        // check for section or loop
+        if (possibleSection != null && possibleSection.isNotEmpty) {
           if (possibleSection.isNotEmpty) {
             final additionalVariables =
                 checkForVariables(possibleSection, variable);
@@ -226,56 +229,49 @@ mixin FileReplacements {
 
             prefix = additionalVariables.content;
           }
-        } else {
-          prefix = prefix.replaceAll(section.matcher, '');
         }
-      }
 
-      if (section == null &&
-          possibleSection?.startsWith(RegExp(r'{{[\^#\\]')) == false) {
-        final completeMatch = match.group(0);
+        if (possibleSection?.startsWith(RegExp(r'{{[\^#\\]')) == false) {
+          final completeMatch = match.group(0);
 
-        if (completeMatch != null && completeMatch.isNotEmpty) {
-          if (completeMatch.startsWith('{') || completeMatch.endsWith('}')) {
-            throw VariableException(
-              variable: completeMatch,
-              reason: 'Please remove curly braces from variable '
-                  '`$completeMatch` '
-                  'This will cause unexpected behavior '
-                  'when creating the brick',
-            );
+          if (completeMatch != null && completeMatch.isNotEmpty) {
+            if (completeMatch.startsWith('{') || completeMatch.endsWith('}')) {
+              throw VariableException(
+                variable: completeMatch,
+                reason: 'Please remove curly braces from variable '
+                    '`$completeMatch` '
+                    'This will cause unexpected behavior '
+                    'when creating the brick',
+              );
+            }
           }
         }
-      }
 
-      final possibleFormat = match.group(2);
+        final possibleFormat = match.group(2);
 
-      final format = MustacheFormat.values.getMustacheValue(possibleFormat);
+        final format = MustacheFormat.values.findFrom(possibleFormat);
 
-      if (format == null) {
-        if (possibleFormat != null && possibleFormat.isNotEmpty) {
-          suffix = possibleFormat;
-        }
+        if (format == null) {
+          if (possibleFormat != null && possibleFormat.isNotEmpty) {
+            suffix = possibleFormat;
+          }
 
-        if (section == null) {
           result = '{{${variable.name}}}';
         } else {
-          result = section.format(variable.name);
+          // format the variable
+          suffix = MustacheFormat.values.suffixFrom(possibleFormat) ?? '';
+          result = variable.formatName(format);
         }
-      } else {
-        // format the variable
-        suffix = MustacheFormat.values.getSuffix(possibleFormat) ?? '';
-        result = variable.formatName(format);
-      }
 
-      if (prefix.startsWith(RegExp('{{[#^/]')) || suffix.endsWith('}}')) {
-        return match.group(0)!;
-      }
+        if (prefix.startsWith(RegExp('{{[#^/]')) || suffix.endsWith('}}')) {
+          return match.group(0)!;
+        }
 
-      isVariableUsed = true;
+        isVariableUsed = true;
 
-      return '$prefix$result$suffix';
-    });
+        return '$prefix$result$suffix';
+      },
+    );
 
     return ContentReplacement(
       content: newContent,
