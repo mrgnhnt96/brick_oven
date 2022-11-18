@@ -124,7 +124,7 @@ mixin FileReplacements {
       sectionPattern(variable),
       (match) {
         final possibleSection = match.group(1);
-        final section = MustacheSection.values.from(possibleSection);
+        final section = MustacheSection.values.findFrom(possibleSection);
 
         // if section is found, then replace the content
         if (section == null) {

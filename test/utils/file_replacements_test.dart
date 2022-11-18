@@ -95,9 +95,11 @@ partial.do_not_replace
 
       test('matches', () {
         const matches = {
-          'start',
-          'end',
-          'nstart',
+          'if',
+          'endIf',
+          'endif',
+          'ifNot',
+          'ifnot',
           'something',
         };
 
@@ -131,25 +133,25 @@ partial.do_not_replace
 
     test('returns new content when section is found', () {
       const content = '''
-start_NAME_
+if_NAME_
 some content
-end_NAME_
+endIf_NAME_
 
-// start_NAME_
+// if_NAME_
 // some more content
-// end_NAME_
+// endif_NAME_
 
-start_NAME_ //
+if_NAME_ //
 other content //
-end_NAME_ //
+EndIf_NAME_ //
 
-nstart_NAME_
+ifNot_NAME_
 last content
-end_NAME_
+endiF_NAME_
 
 fake_NAME_
 
-start_NAME_ end_NAME_
+if_NAME_ ENDIF_NAME_
 ''';
 
       const variable = Variable(name: 'name', placeholder: '_NAME_');
@@ -466,18 +468,24 @@ before text {{name}} after text
 
     test('writes sections, variables, and partials', () {
       const content = '''
-_VAR_ _VAR_ _VAR_
+_VAR_ _VAR_snake _VAR_escaped
 
-start_SECTION_
+if_SECTION_
+ifNot_SECTION_
+endIf_SECTION_
 
 partial.page
+partial.page.md
 ''';
 
       const expectedContent = '''
-{{var}} {{var}} {{var}}
+{{var}} {{#snakeCase}}{{{var}}}{{/snakeCase}} {{{var}}}
 
 {{#section}}
+{{^section}}
+{{/section}}
 
+{{> page.md }}
 {{> page.md }}
 ''';
 

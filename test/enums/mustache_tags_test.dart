@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
 
 void main() {
-  const tags = [
+  const formatTags = [
     MustacheTag.camelCase,
     MustacheTag.constantCase,
     MustacheTag.dotCase,
@@ -19,7 +19,7 @@ void main() {
     MustacheTag.upperCase,
   ];
 
-  const nonTags = [
+  const nonFormatTags = [
     MustacheTag.escaped,
     MustacheTag.unescaped,
     MustacheTag.if_,
@@ -199,7 +199,7 @@ void main() {
     ],
   };
 
-  const allTags = [...tags, ...nonTags];
+  const allTags = [...formatTags, ...nonFormatTags];
 
   test('MustacheTag.values', () {
     final tagsWithSuffixesKeys = tagsWithSuffixes.keys.toList();
@@ -239,13 +239,13 @@ void main() {
 
     group('#wrap', () {
       test('throws assertion when content is configured correctly', () {
-        for (final tag in tags) {
+        for (final tag in formatTags) {
           expect(() => tag.wrap('foo'), returnsNormally);
           expect(() => tag.wrap('{{foo}}'), returnsNormally);
           expect(() => tag.wrap('{{{foo}}}'), returnsNormally);
         }
 
-        for (final tag in nonTags) {
+        for (final tag in nonFormatTags) {
           expect(
             () => tag.wrap('{{foo}}'),
             throwsA(isA<AssertionError>()),
@@ -262,7 +262,7 @@ void main() {
       });
 
       test('tags the content correctly', () {
-        for (final tag in tags) {
+        for (final tag in formatTags) {
           expect(
             tag.wrap('{{{sup_dude}}}'),
             '{{#${tag.name}}}{{{sup_dude}}}{{/${tag.name}}}',
@@ -274,7 +274,7 @@ void main() {
           );
         }
 
-        const nonTagExpected = {
+        const nonFormatTagExpected = {
           MustacheTag.escaped: '{{{DUDE}}}',
           MustacheTag.unescaped: '{{DUDE}}',
           MustacheTag.if_: '{{#DUDE}}',
@@ -282,21 +282,21 @@ void main() {
           MustacheTag.endIf: '{{/DUDE}}',
         };
 
-        for (final tag in nonTags) {
+        for (final tag in nonFormatTags) {
           expect(
             tag.wrap('DUDE'),
-            nonTagExpected[tag],
+            nonFormatTagExpected[tag],
           );
         }
       });
     });
 
     test('#isTag returns true when the value is a tag type', () {
-      for (final tag in tags) {
+      for (final tag in formatTags) {
         expect(tag.isFormat, isTrue);
       }
 
-      for (final tag in nonTags) {
+      for (final tag in nonFormatTags) {
         expect(tag.isFormat, isFalse);
       }
     });
