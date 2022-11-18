@@ -13,37 +13,7 @@ import 'package:test/test.dart';
 import '../test_utils/mocks.dart';
 
 void main() {
-  late MockLogger mockLogger;
-  late FileSystem fileSystem;
-  late File sourceFile;
-  late File targetFile;
-  const sourceFilePath = 'source.dart';
-  const targetFilePath = 'target.dart';
-  const defaultContent = 'content';
   const testFileReplacements = _TestFileReplacements();
-
-  setUp(() {
-    mockLogger = MockLogger();
-    fileSystem = MemoryFileSystem();
-    sourceFile = fileSystem.file(sourceFilePath)
-      ..createSync(recursive: true)
-      ..writeAsStringSync(defaultContent);
-
-    targetFile = fileSystem.file(targetFilePath);
-  });
-
-  test('copies file when no variables or partials are provided', () {
-    testFileReplacements.writeFile(
-      partials: [],
-      variables: [],
-      sourceFile: sourceFile,
-      targetFile: targetFile,
-      fileSystem: fileSystem,
-      logger: mockLogger,
-    );
-
-    expect(targetFile.readAsStringSync(), defaultContent);
-  });
 
   group('#checkForPartials', () {
     test('replaces partial placeholder with partial value', () {
@@ -407,52 +377,123 @@ before text {{name}} after text
     });
   });
 
-  test('prints warning if excess variables exist', () {
-    verifyNever(() => mockLogger.warn(any()));
+  group('#writeFile', () {
+    late MockLogger mockLogger;
+    late FileSystem fileSystem;
+    late File sourceFile;
+    late File targetFile;
+    const sourceFilePath = 'source.dart';
+    const targetFilePath = 'target.dart';
 
-    const variable = Variable(placeholder: '_HELLO_', name: 'hello');
-    const extraVariable = Variable(placeholder: '_GOODBYE_', name: 'goodbye');
+    setUp(() {
+      mockLogger = MockLogger();
+      fileSystem = MemoryFileSystem();
+      sourceFile = fileSystem.file(sourceFilePath)..createSync(recursive: true);
 
-    sourceFile.writeAsStringSync('replace: _HELLO_');
+      targetFile = fileSystem.file(targetFilePath);
+    });
 
-    testFileReplacements.writeFile(
-      partials: [],
-      sourceFile: sourceFile,
-      targetFile: targetFile,
-      variables: [variable, extraVariable],
-      fileSystem: fileSystem,
-      logger: mockLogger,
-    );
+    test('copies file when no variables or partials are provided', () {
+      sourceFile.writeAsStringSync('hello from this side');
 
-    verify(
-      () => mockLogger.warn(
-        'Unused variables ("${extraVariable.name}") in `${sourceFile.path}`',
-      ),
-    ).called(1);
-  });
+      testFileReplacements.writeFile(
+        partials: [],
+        variables: [],
+        sourceFile: sourceFile,
+        targetFile: targetFile,
+        fileSystem: fileSystem,
+        logger: mockLogger,
+      );
 
-  test('prints warning if file does not exist', () {
-    verifyNever(() => mockLogger.warn(any()));
+      expect(targetFile.readAsStringSync(), 'hello from this side');
+    });
 
-    const variable = Variable(placeholder: '_HELLO_', name: 'hello');
-    const extraVariable = Variable(placeholder: '_GOODBYE_', name: 'goodbye');
+    test('prints warning if excess variables exist', () {
+      verifyNever(() => mockLogger.warn(any()));
 
-    sourceFile.deleteSync();
+      const variable = Variable(placeholder: '_HELLO_', name: 'hello');
+      const extraVariable = Variable(placeholder: '_GOODBYE_', name: 'goodbye');
 
-    testFileReplacements.writeFile(
-      partials: [],
-      sourceFile: sourceFile,
-      targetFile: targetFile,
-      variables: [variable, extraVariable],
-      fileSystem: fileSystem,
-      logger: mockLogger,
-    );
+      sourceFile.writeAsStringSync('replace: _HELLO_');
 
-    verify(
-      () => mockLogger.warn(
-        'source file does not exist: ${sourceFile.path}',
-      ),
-    ).called(1);
+      testFileReplacements.writeFile(
+        partials: [],
+        sourceFile: sourceFile,
+        targetFile: targetFile,
+        variables: [variable, extraVariable],
+        fileSystem: fileSystem,
+        logger: mockLogger,
+      );
+
+      verify(
+        () => mockLogger.warn(
+          'Unused variables ("${extraVariable.name}") in `${sourceFile.path}`',
+        ),
+      ).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+    });
+
+    test('prints warning if file does not exist', () {
+      verifyNever(() => mockLogger.warn(any()));
+
+      const variable = Variable(placeholder: '_HELLO_', name: 'hello');
+      const extraVariable = Variable(placeholder: '_GOODBYE_', name: 'goodbye');
+
+      sourceFile.deleteSync();
+
+      testFileReplacements.writeFile(
+        partials: [],
+        sourceFile: sourceFile,
+        targetFile: targetFile,
+        variables: [variable, extraVariable],
+        fileSystem: fileSystem,
+        logger: mockLogger,
+      );
+
+      verify(
+        () => mockLogger.warn(
+          'source file does not exist: ${sourceFile.path}',
+        ),
+      ).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+    });
+
+    test('writes loops, variables, and partials', () {
+      const content = '''
+_VAR_ _VAR_ _VAR_
+
+start_LOOP_
+
+partial.page
+''';
+
+      const expectedContent = '''
+{{var}} {{var}} {{var}}
+
+{{#loop}}
+
+{{> page.md }}
+''';
+
+      const variable = Variable(placeholder: '_VAR_', name: 'var');
+      const loop = Variable(placeholder: '_LOOP_', name: 'loop');
+      const partial = BrickPartial(path: 'path/page.md');
+
+      sourceFile.writeAsStringSync(content);
+
+      testFileReplacements.writeFile(
+        partials: [partial],
+        sourceFile: sourceFile,
+        targetFile: targetFile,
+        variables: [variable, loop],
+        fileSystem: fileSystem,
+        logger: mockLogger,
+      );
+
+      expect(targetFile.readAsStringSync(), expectedContent);
+    });
   });
 }
 
