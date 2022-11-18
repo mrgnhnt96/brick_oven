@@ -14,11 +14,6 @@ import '../test_utils/mocks.dart';
 
 void main() {
   late MockLogger mockLogger;
-
-  setUp(() {
-    mockLogger = MockLogger();
-  });
-
   late FileSystem fileSystem;
   late File sourceFile;
   late File targetFile;
@@ -28,6 +23,7 @@ void main() {
   const instance = _TestFileReplacements();
 
   setUp(() {
+    mockLogger = MockLogger();
     fileSystem = MemoryFileSystem();
     sourceFile = fileSystem.file(sourceFilePath)
       ..createSync(recursive: true)
