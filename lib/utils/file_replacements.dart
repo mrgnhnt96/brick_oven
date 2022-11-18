@@ -44,14 +44,21 @@ mixin FileReplacements {
 
     var content = sourceFile.readAsStringSync();
 
-    final variablesResult = writeVariables(
-      variables: variables,
-      content: content,
-    );
-    content = variablesResult.content;
-    usedVariables.addAll(variablesResult.used);
+    for (final variable in variables) {
+      // formats the content
+      final loopResult = checkForLoops(content, variable);
+      content = loopResult.content;
+      if (loopResult.used.isNotEmpty) {
+        usedVariables.addAll(loopResult.used);
+      }
 
-    final partialsResult = writePartials(partials: partials, content: content);
+      final variableResult = checkForVariables(content, variable);
+      content = variableResult.content;
+      usedVariables.addAll(variableResult.used);
+    }
+
+    final partialsResult =
+        checkForPartials(partials: partials, content: content);
     content = partialsResult.content;
     usedPartials.addAll(partialsResult.used);
 
@@ -75,7 +82,7 @@ mixin FileReplacements {
 
   /// writes the [partials] to the [content]
   @visibleForTesting
-  ContentReplacement writePartials({
+  ContentReplacement checkForPartials({
     required String content,
     required Iterable<BrickPartial> partials,
   }) {
@@ -97,43 +104,14 @@ mixin FileReplacements {
     return ContentReplacement(content: newContent, used: partialsUsed);
   }
 
-  /// writes the [variables] to the [content]
-  @visibleForTesting
-  ContentReplacement writeVariables({
-    required List<Variable> variables,
-    required String content,
-  }) {
-    var newContent = content;
-
-    final usedVariables = <String>{};
-
-    for (final variable in variables) {
-      // formats the content
-      final loopResult = checkForLoops(newContent, variable);
-      newContent = loopResult.content;
-      if (loopResult.used.isNotEmpty) {
-        usedVariables.addAll(loopResult.used);
-      }
-
-      final variableResult = checkForVariables(newContent, variable);
-      newContent = variableResult.content;
-      usedVariables.addAll(variableResult.used);
-    }
-
-    return ContentReplacement(
-      content: newContent,
-      used: usedVariables,
-    );
-  }
-
   /// the pattern to find loops (sections) within the content
   @visibleForTesting
-  RegExp get loopPattern => RegExp('.*$loopSetUp' r'({{[\^#\\]\S+}}).*');
+  RegExp get loopSetupPattern => RegExp('.*$loopSetUp' r'({{[\^#/]\S+}}).*');
 
-  /// the pattern to find variables within the content
+  /// the pattern to find loops within the content
   @visibleForTesting
-  RegExp variablePattern(Variable variable) =>
-      RegExp('({*)' '${variable.placeholder}' r'(\w*}*)');
+  RegExp loopPattern(Variable variable) =>
+      RegExp(r'(\w+)' '${variable.placeholder}');
 
   /// checks the [content] for loops (sections) and replaces them with the
   /// [variable]'s value
@@ -142,7 +120,7 @@ mixin FileReplacements {
     var isVariableUsed = false;
 
     final setUpLoops = content.replaceAllMapped(
-      variablePattern(variable),
+      loopPattern(variable),
       (match) {
         final possibleLoop = match.group(1);
         final loop = MustacheLoops.values.from(possibleLoop);
@@ -162,7 +140,7 @@ mixin FileReplacements {
 
     // remove the loop setup and all pre/post content
     final looped = setUpLoops.replaceAllMapped(
-      loopPattern,
+      loopSetupPattern,
       (match) {
         return match.group(1)!;
       },
@@ -198,6 +176,11 @@ mixin FileReplacements {
     );
   }
 
+  /// the pattern to find variables within the content
+  @visibleForTesting
+  RegExp variablePattern(Variable variable) =>
+      RegExp(r'(\{*\S*)' '${variable.placeholder}' r'(\w*\}*)');
+
   /// replaces the [variable] in the [content]
   @visibleForTesting
   ContentReplacement checkForVariables(
@@ -211,8 +194,14 @@ mixin FileReplacements {
       (match) {
         final completeMatch = match.group(0)!;
 
-        final startsWithBracket = RegExp(r'^\{+').hasMatch(match.group(1)!);
+        final startsWithBracket =
+            RegExp(r'^\{+(?![/^#])$').hasMatch(match.group(1)!);
+        final isTag = RegExp(r'^\{+[/^#]').hasMatch(match.group(1)!);
         final endsWithBracket = RegExp(r'\}+$').hasMatch(match.group(2)!);
+
+        if (isTag && endsWithBracket) {
+          return completeMatch;
+        }
 
         if (startsWithBracket || endsWithBracket) {
           throw VariableException(
@@ -226,6 +215,11 @@ mixin FileReplacements {
 
         String result;
         var suffix = '';
+        final prefixResult = checkForVariables(match.group(1)!, variable);
+        final prefix = prefixResult.content;
+        if (prefixResult.used.isNotEmpty) {
+          isVariableUsed = true;
+        }
 
         final possibleFormat = match.group(2);
 
@@ -245,7 +239,7 @@ mixin FileReplacements {
 
         isVariableUsed = true;
 
-        return '$result$suffix';
+        return '$prefix$result$suffix';
       },
     );
 
