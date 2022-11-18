@@ -17,7 +17,7 @@ class ListCommand extends BrickOvenCommand {
   ListCommand({
     required Logger logger,
     required Analytics analytics,
-    required FileSystem? fileSystem,
+    required FileSystem fileSystem,
   })  : _analytics = analytics,
         super(
           logger: logger,
