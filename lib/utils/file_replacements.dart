@@ -2,7 +2,7 @@ import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/enums/mustache_tags.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
@@ -223,7 +223,7 @@ mixin FileReplacements {
 
         final possibleFormat = match.group(2);
 
-        final format = MustacheFormat.values.findFrom(possibleFormat);
+        final format = MustacheTags.values.findFrom(possibleFormat);
 
         if (format == null) {
           if (possibleFormat != null) {
@@ -233,7 +233,7 @@ mixin FileReplacements {
           result = '{{${variable.name}}}';
         } else {
           // format the variable
-          suffix = MustacheFormat.values.suffixFrom(possibleFormat) ?? '';
+          suffix = MustacheTags.values.suffixFrom(possibleFormat) ?? '';
           result = format.wrap(variable.name);
         }
 

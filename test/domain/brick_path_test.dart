@@ -1,4 +1,4 @@
-import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/enums/mustache_tags.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
@@ -237,7 +237,7 @@ name: name
       const original = '/path/to/other/file.png';
       final brick = BrickPath(
         path: 'path',
-        name: const Name(replacement, format: MustacheFormat.snakeCase),
+        name: const Name(replacement, format: MustacheTags.snakeCase),
       );
 
       expect(
@@ -533,7 +533,7 @@ name: name
 
         final brick = BrickPath(
           path: 'foo',
-          name: const Name(replacement, format: MustacheFormat.snakeCase),
+          name: const Name(replacement, format: MustacheTags.snakeCase),
           includeIf: 'check',
         );
         path = brick.apply(path, originalPath: originalPath);
@@ -587,7 +587,7 @@ name: name
 
         final brick = BrickPath(
           path: 'foo',
-          name: const Name(replacement, format: MustacheFormat.snakeCase),
+          name: const Name(replacement, format: MustacheTags.snakeCase),
           includeIfNot: 'check',
         );
         path = brick.apply(path, originalPath: originalPath);

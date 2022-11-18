@@ -1,6 +1,6 @@
 import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/enums/mustache_format.dart';
+import 'package:brick_oven/enums/mustache_tags.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 import 'package:equatable/equatable.dart';
@@ -29,7 +29,7 @@ class Name extends Equatable {
     String? name;
     String? prefix;
     String? suffix;
-    MustacheFormat? format;
+    MustacheTags? format;
 
     if (value.isError()) {
       throw VariableException(
@@ -61,7 +61,7 @@ class Name extends Equatable {
       name = getValue('value') ?? backup;
       prefix = getValue('prefix');
       suffix = getValue('suffix');
-      format = MustacheFormat.values.findFrom(getValue('format'));
+      format = MustacheTags.values.findFrom(getValue('format'));
 
       if (nameConfig.isNotEmpty) {
         throw VariableException(
@@ -83,7 +83,7 @@ class Name extends Equatable {
   }
 
   /// the format of the name
-  final MustacheFormat? format;
+  final MustacheTags? format;
 
   /// the prefix of the name
   final String prefix;
@@ -118,7 +118,7 @@ class Name extends Equatable {
   }
 
   /// gets the name of the file with formatting to mustache from [format]
-  String formatWith(MustacheFormat format) {
+  String formatWith(MustacheTags format) {
     return format.wrap(_toVariable);
   }
 }

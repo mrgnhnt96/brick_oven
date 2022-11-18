@@ -3,7 +3,7 @@
 import 'package:meta/meta.dart';
 
 /// the formats that Mustache supports
-enum MustacheFormat {
+enum MustacheTags {
   /// camelCase
   camelCase,
 
@@ -60,7 +60,7 @@ enum MustacheFormat {
 }
 
 /// the extensions for Mustache
-extension MustacheFormatX on MustacheFormat {
+extension MustacheFormatX on MustacheTags {
   /// the pattern to match if content is wrapped with brackets
   @visibleForTesting
   static RegExp get wrappedPattern => RegExp(r'\S*\{{2,3}\S+\}{2,3}\S*');
@@ -128,65 +128,65 @@ extension MustacheFormatX on MustacheFormat {
     return false;
   }
 
-  /// whether the format is [MustacheFormat.escaped]
-  bool get isEscaped => this == MustacheFormat.escaped;
+  /// whether the format is [MustacheTags.escaped]
+  bool get isEscaped => this == MustacheTags.escaped;
 
-  /// whether the format is [MustacheFormat.unescaped]
-  bool get isUnescaped => this == MustacheFormat.unescaped;
+  /// whether the format is [MustacheTags.unescaped]
+  bool get isUnescaped => this == MustacheTags.unescaped;
 
-  /// whether the format is [MustacheFormat.if_]
-  bool get isIf => this == MustacheFormat.if_;
+  /// whether the format is [MustacheTags.if_]
+  bool get isIf => this == MustacheTags.if_;
 
-  /// whether the format is [MustacheFormat.ifNot]
-  bool get isIfNot => this == MustacheFormat.ifNot;
+  /// whether the format is [MustacheTags.ifNot]
+  bool get isIfNot => this == MustacheTags.ifNot;
 
-  /// whether the format is [MustacheFormat.endIf]
-  bool get isEndIf => this == MustacheFormat.endIf;
+  /// whether the format is [MustacheTags.endIf]
+  bool get isEndIf => this == MustacheTags.endIf;
 
-  /// whether the value is [MustacheFormat.camelCase]
-  bool get isCamelCase => this == MustacheFormat.camelCase;
+  /// whether the value is [MustacheTags.camelCase]
+  bool get isCamelCase => this == MustacheTags.camelCase;
 
-  /// whether the value is [MustacheFormat.constantCase]
-  bool get isConstantCase => this == MustacheFormat.constantCase;
+  /// whether the value is [MustacheTags.constantCase]
+  bool get isConstantCase => this == MustacheTags.constantCase;
 
-  /// whether the value is [MustacheFormat.dotCase]
-  bool get isDotCase => this == MustacheFormat.dotCase;
+  /// whether the value is [MustacheTags.dotCase]
+  bool get isDotCase => this == MustacheTags.dotCase;
 
-  /// whether the value is [MustacheFormat.headerCase]
-  bool get isHeaderCase => this == MustacheFormat.headerCase;
+  /// whether the value is [MustacheTags.headerCase]
+  bool get isHeaderCase => this == MustacheTags.headerCase;
 
-  /// whether the value is [MustacheFormat.lowerCase]
-  bool get isLowerCase => this == MustacheFormat.lowerCase;
+  /// whether the value is [MustacheTags.lowerCase]
+  bool get isLowerCase => this == MustacheTags.lowerCase;
 
-  /// whether the value is [MustacheFormat.mustacheCase]
-  bool get isMustacheCase => this == MustacheFormat.mustacheCase;
+  /// whether the value is [MustacheTags.mustacheCase]
+  bool get isMustacheCase => this == MustacheTags.mustacheCase;
 
-  /// whether the value is [MustacheFormat.pascalCase]
-  bool get isPascalCase => this == MustacheFormat.pascalCase;
+  /// whether the value is [MustacheTags.pascalCase]
+  bool get isPascalCase => this == MustacheTags.pascalCase;
 
-  /// whether the value is [MustacheFormat.paramCase]
-  bool get isParamCase => this == MustacheFormat.paramCase;
+  /// whether the value is [MustacheTags.paramCase]
+  bool get isParamCase => this == MustacheTags.paramCase;
 
-  /// whether the value is [MustacheFormat.pathCase]
-  bool get isPathCase => this == MustacheFormat.pathCase;
+  /// whether the value is [MustacheTags.pathCase]
+  bool get isPathCase => this == MustacheTags.pathCase;
 
-  /// whether the value is [MustacheFormat.sentenceCase]
-  bool get isSentenceCase => this == MustacheFormat.sentenceCase;
+  /// whether the value is [MustacheTags.sentenceCase]
+  bool get isSentenceCase => this == MustacheTags.sentenceCase;
 
-  /// whether the value is [MustacheFormat.snakeCase]
-  bool get isSnakeCase => this == MustacheFormat.snakeCase;
+  /// whether the value is [MustacheTags.snakeCase]
+  bool get isSnakeCase => this == MustacheTags.snakeCase;
 
-  /// whether the value is [MustacheFormat.titleCase]
-  bool get isTitleCase => this == MustacheFormat.titleCase;
+  /// whether the value is [MustacheTags.titleCase]
+  bool get isTitleCase => this == MustacheTags.titleCase;
 
-  /// whether the value is [MustacheFormat.upperCase]
-  bool get isUpperCase => this == MustacheFormat.upperCase;
+  /// whether the value is [MustacheTags.upperCase]
+  bool get isUpperCase => this == MustacheTags.upperCase;
 }
 
 /// extension on [List<MustacheFormat>]
-extension ListMustacheX on List<MustacheFormat> {
+extension ListMustacheX on List<MustacheTags> {
   /// loops through looking for a matched [value], return null if not found
-  MustacheFormat? findFrom(String? value) {
+  MustacheTags? findFrom(String? value) {
     if (value == null) {
       return null;
     }
@@ -212,7 +212,7 @@ extension ListMustacheX on List<MustacheFormat> {
     return null;
   }
 
-  /// returns the suffix of the [value] by removing the [MustacheFormat]
+  /// returns the suffix of the [value] by removing the [MustacheTags]
   String? suffixFrom(String? value) {
     if (value == null) {
       return null;
