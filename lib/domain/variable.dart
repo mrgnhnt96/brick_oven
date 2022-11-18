@@ -1,6 +1,5 @@
 import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
 
@@ -53,11 +52,4 @@ class Variable extends Equatable {
 
   @override
   List<Object?> get props => _$props;
-
-  /// formats [name] by wrapping it with mustache
-  ///
-  /// [format] determines which case to wrap the values
-  String formatName(MustacheFormat format) {
-    return format.wrap('{{{$name}}}');
-  }
 }

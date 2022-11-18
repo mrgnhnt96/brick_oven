@@ -1,6 +1,5 @@
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
@@ -46,17 +45,6 @@ key: value
       expect(
         Variable.fromYaml(const YamlValue.none(), 'scooby_doo'),
         expected,
-      );
-    });
-  });
-
-  group('#formatName', () {
-    test('returns the formatted name', () {
-      const variable = Variable(name: 'scooby_doo');
-
-      expect(
-        variable.formatName(MustacheFormat.camelCase),
-        '{{#camelCase}}{{{scooby_doo}}}{{/camelCase}}',
       );
     });
   });
