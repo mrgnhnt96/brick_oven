@@ -1,22 +1,22 @@
+import 'package:args/command_runner.dart';
 import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
 
-import 'package:brick_oven/src/commands/brick_oven.dart';
-
 /// {@template update_command}
 /// `mason update` command which updates mason.
 /// {@endtemplate}
-class UpdateCommand extends BrickOvenCommand {
+class UpdateCommand extends Command<int> {
   /// {@macro update_command}
   UpdateCommand({
     required PubUpdater pubUpdater,
     required Logger logger,
   })  : _pubUpdater = pubUpdater,
-        super(logger: logger);
+        _logger = logger;
 
   final PubUpdater _pubUpdater;
+  final Logger _logger;
 
   @override
   final String description = 'Updates brick_oven to the latest version';
@@ -29,7 +29,7 @@ class UpdateCommand extends BrickOvenCommand {
 
   @override
   Future<int> run() async {
-    final progress = logger.progress('Checking for updates');
+    final progress = _logger.progress('Checking for updates');
     late final String latestVersion;
 
     try {
