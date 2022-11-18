@@ -7,23 +7,23 @@ import 'package:path/path.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 
-part 'brick_path.g.dart';
+part 'brick_dir.g.dart';
 
-/// {@template brick_path}
+/// {@template brick_dir}
 /// The configuration of the path that will be updated to mustache
 /// {@endtemplate}
 @autoequal
-class BrickPath extends Equatable {
-  /// {@macro brick_path}
-  factory BrickPath({
+class BrickDir extends Equatable {
+  /// {@macro brick_dir}
+  factory BrickDir({
     required String path,
     Name? name,
     String? includeIf,
     String? includeIfNot,
   }) {
-    final cleanPath = BrickPath.cleanPath(path);
+    final cleanPath = BrickDir.cleanPath(path);
 
-    return BrickPath._(
+    return BrickDir._(
       name: name,
       originalPath: path,
       path: cleanPath,
@@ -33,7 +33,7 @@ class BrickPath extends Equatable {
     );
   }
 
-  const BrickPath._({
+  const BrickDir._({
     required this.name,
     required this.path,
     required this.placeholder,
@@ -43,7 +43,7 @@ class BrickPath extends Equatable {
   });
 
   /// parses the [yaml]
-  factory BrickPath.fromYaml(YamlValue yaml, String path) {
+  factory BrickDir.fromYaml(YamlValue yaml, String path) {
     if (yaml.isError()) {
       throw DirectoryException(
         directory: path,
@@ -69,7 +69,7 @@ class BrickPath extends Equatable {
     if (yaml.isString()) {
       final name = Name(yaml.asString().value);
 
-      return BrickPath(
+      return BrickDir(
         name: name,
         path: path,
       );
@@ -133,7 +133,7 @@ class BrickPath extends Equatable {
       );
     }
 
-    return BrickPath(
+    return BrickDir(
       path: path,
       name: name,
       includeIf: includeIf,
@@ -195,11 +195,11 @@ class BrickPath extends Equatable {
     }
 
     // ignore: parameter_assignments
-    path = BrickPath.cleanPath(path);
+    path = BrickDir.cleanPath(path);
 
     final replacement = name?.formatted;
 
-    final pathParts = BrickPath.separatePath(path);
+    final pathParts = BrickDir.separatePath(path);
 
     if (pathParts.length < configuredParts.length) {
       return path;
@@ -232,7 +232,7 @@ class BrickPath extends Equatable {
 
   /// separates the path into segments
   static List<String> separatePath(String path) {
-    final cleanPath = BrickPath.cleanPath(path);
+    final cleanPath = BrickDir.cleanPath(path);
     final pathParts = cleanPath.split(separatorPattern)
       ..removeWhere((part) => part.isEmpty);
 
@@ -250,6 +250,6 @@ extension _StringX on String {
 
     final str = normalize(this);
 
-    return str.replaceAll(BrickPath.leadingAndTrailingSlashPattern, '');
+    return str.replaceAll(BrickDir.leadingAndTrailingSlashPattern, '');
   }
 }

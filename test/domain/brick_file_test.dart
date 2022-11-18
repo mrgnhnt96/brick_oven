@@ -2,7 +2,7 @@
 
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
@@ -579,11 +579,11 @@ yooooo:
     const sourceFilePath = 'source.dart';
     const content = 'content';
 
-    BrickPath brickPath({
+    BrickDir brickPath({
       String? name,
       String? path,
     }) {
-      return BrickPath(
+      return BrickDir(
         name: Name(name ?? 'name'),
         path: path ?? defaultPath,
       );

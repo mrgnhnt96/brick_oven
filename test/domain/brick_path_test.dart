@@ -3,7 +3,7 @@ import 'package:brick_oven/src/exception.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
-import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:yaml/yaml.dart';
@@ -12,31 +12,30 @@ void main() {
   const highestLevel = 'dir';
   const dirPath = 'path/to/some/$highestLevel';
 
-  group('$BrickPath unnamed ctor', () {
+  group('$BrickDir unnamed ctor', () {
     test('can be instanciated', () {
       expect(
-        () => BrickPath(name: const Name(highestLevel), path: dirPath),
+        () => BrickDir(name: const Name(highestLevel), path: dirPath),
         returnsNormally,
       );
     });
 
     test('removes leading and trailing slashes from path', () {
-      final brickPath = BrickPath(name: const Name('name'), path: '/$dirPath');
+      final brickPath = BrickDir(name: const Name('name'), path: '/$dirPath');
 
       expect(brickPath.path, dirPath);
 
-      final brickPath2 =
-          BrickPath(name: const Name('name'), path: './$dirPath');
+      final brickPath2 = BrickDir(name: const Name('name'), path: './$dirPath');
 
       expect(brickPath2.path, dirPath);
 
-      final brickPath3 = BrickPath(name: const Name('name'), path: '$dirPath/');
+      final brickPath3 = BrickDir(name: const Name('name'), path: '$dirPath/');
 
       expect(brickPath3.path, dirPath);
     });
 
     test('placeholder is the highest level from path', () {
-      final brickPath = BrickPath(name: const Name('name'), path: '/$dirPath');
+      final brickPath = BrickDir(name: const Name('name'), path: '/$dirPath');
 
       expect(brickPath.placeholder, highestLevel);
     });
@@ -45,14 +44,14 @@ void main() {
   group('#fromYaml', () {
     test('throws $ConfigException when yaml is error', () {
       expect(
-        () => BrickPath.fromYaml(const YamlValue.error('error'), dirPath),
+        () => BrickDir.fromYaml(const YamlValue.error('error'), dirPath),
         throwsA(isA<ConfigException>()),
       );
     });
 
     test('throws $ConfigException when path points to a file', () {
       expect(
-        () => BrickPath.fromYaml(const YamlValue.none(), '$dirPath/file.dart'),
+        () => BrickDir.fromYaml(const YamlValue.none(), '$dirPath/file.dart'),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -64,7 +63,7 @@ path: path
 ''') as YamlMap;
 
       expect(
-        () => BrickPath.fromYaml(YamlValue.yaml(yaml), dirPath),
+        () => BrickDir.fromYaml(YamlValue.yaml(yaml), dirPath),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -74,7 +73,7 @@ path: path
 include_if: check
 ''') as YamlMap;
 
-      final instance = BrickPath.fromYaml(YamlValue.from(yaml), dirPath);
+      final instance = BrickDir.fromYaml(YamlValue.from(yaml), dirPath);
 
       expect(instance.includeIf, 'check');
     });
@@ -84,21 +83,21 @@ include_if: check
 include_if_not: check
 ''') as YamlMap;
 
-      final instance = BrickPath.fromYaml(YamlValue.from(yaml), dirPath);
+      final instance = BrickDir.fromYaml(YamlValue.from(yaml), dirPath);
 
       expect(instance.includeIfNot, 'check');
     });
 
     test('throws $ConfigException when null is provided', () {
       expect(
-        () => BrickPath.fromYaml(const YamlValue.none(), dirPath),
+        () => BrickDir.fromYaml(const YamlValue.none(), dirPath),
         throwsA(isA<ConfigException>()),
       );
     });
 
     test('throws $ConfigException when yaml is not a map', () {
       expect(
-        () => BrickPath.fromYaml(YamlValue.list(YamlList()), dirPath),
+        () => BrickDir.fromYaml(YamlValue.list(YamlList()), dirPath),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -110,7 +109,7 @@ name:
 ''') as YamlMap;
 
       expect(
-        () => BrickPath.fromYaml(YamlValue.from(yaml), dirPath),
+        () => BrickDir.fromYaml(YamlValue.from(yaml), dirPath),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -124,7 +123,7 @@ include_if_not: check
 ''') as YamlMap;
 
       expect(
-        () => BrickPath.fromYaml(YamlValue.from(yaml), dirPath),
+        () => BrickDir.fromYaml(YamlValue.from(yaml), dirPath),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -137,7 +136,7 @@ include_if:
 ''') as YamlMap;
 
       expect(
-        () => BrickPath.fromYaml(YamlValue.from(yaml), dirPath),
+        () => BrickDir.fromYaml(YamlValue.from(yaml), dirPath),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -151,7 +150,7 @@ include_if_not:
 ''') as YamlMap;
 
       expect(
-        () => BrickPath.fromYaml(YamlValue.from(yaml), dirPath),
+        () => BrickDir.fromYaml(YamlValue.from(yaml), dirPath),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -161,7 +160,7 @@ include_if_not:
 name: name
 ''') as YamlMap;
 
-      final brickPath = BrickPath.fromYaml(YamlValue.yaml(yaml), dirPath);
+      final brickPath = BrickDir.fromYaml(YamlValue.yaml(yaml), dirPath);
 
       expect(brickPath.name?.value, 'name');
     });
@@ -191,26 +190,26 @@ name: name
 
   group('#separatorPattern', () {
     test('returns a RegExp', () {
-      expect(BrickPath.separatorPattern, isA<RegExp>());
+      expect(BrickDir.separatorPattern, isA<RegExp>());
     });
 
     test('#separatePath separates path into segments', () {
       for (final path in paths.keys) {
         final segments = paths[path];
 
-        expect(BrickPath.separatePath(path).length, segments);
+        expect(BrickDir.separatePath(path).length, segments);
       }
     });
   });
 
   group('#leadingAndTrailingSlashPattern', () {
     test('returns a RegExp', () {
-      expect(BrickPath.leadingAndTrailingSlashPattern, isA<RegExp>());
+      expect(BrickDir.leadingAndTrailingSlashPattern, isA<RegExp>());
     });
 
     test('#cleanPath removes slashes from beginning and end of path', () {
       for (final path in paths.keys) {
-        final cleanPath = BrickPath.cleanPath(path);
+        final cleanPath = BrickDir.cleanPath(path);
         separator;
 
         expect(cleanPath, isNot(startsWith('/')));
@@ -224,7 +223,7 @@ name: name
   test('#configuredParts returns segmented path', () {
     for (final path in paths.keys) {
       final segments = paths[path];
-      final brickPath = BrickPath(name: const Name('name'), path: path);
+      final brickPath = BrickDir(name: const Name('name'), path: path);
 
       expect(brickPath.configuredParts.length, segments);
     }
@@ -235,7 +234,7 @@ name: name
 
     test('formats the path when provided', () {
       const original = '/path/to/other/file.png';
-      final brick = BrickPath(
+      final brick = BrickDir(
         path: 'path',
         name: const Name(replacement, tag: MustacheTag.snakeCase),
       );
@@ -248,7 +247,7 @@ name: name
 
     group('return original path when', () {
       test('parts do not match', () {
-        final path = BrickPath(path: '/path/to/some');
+        final path = BrickDir(path: '/path/to/some');
 
         const original = '/path/to/other/file.png';
         final result = path.apply(original, originalPath: original);
@@ -256,7 +255,7 @@ name: name
       });
 
       test('brick path is not a directory', () {
-        final path = BrickPath(path: '/path/to/some/file.png');
+        final path = BrickDir(path: '/path/to/some/file.png');
         const original = '/path/to/some/file.png';
         final result = path.apply(original, originalPath: original);
 
@@ -273,7 +272,7 @@ name: name
             const dir = 'path';
             const filePath = '/to/some/file.png';
 
-            final path = BrickPath(
+            final path = BrickDir(
               path: dir,
               name: const Name(replacement),
             );
@@ -286,7 +285,7 @@ name: name
           });
 
           test('as non starting position', () {
-            final path = BrickPath(path: 'to');
+            final path = BrickDir(path: 'to');
             const original = 'path/to/some/file.png';
             final result = path.apply(original, originalPath: original);
 
@@ -299,7 +298,7 @@ name: name
             const dir = '/path';
             const filePath = '/to/some/file.png';
 
-            final path = BrickPath(
+            final path = BrickDir(
               path: dir,
               name: const Name(replacement),
             );
@@ -311,7 +310,7 @@ name: name
           });
 
           test('as non starting position', () {
-            final path = BrickPath(
+            final path = BrickDir(
               path: '/to',
               name: const Name(replacement),
             );
@@ -327,7 +326,7 @@ name: name
             const dir = 'path/';
             const filePath = '/to/some/file.png';
 
-            final path = BrickPath(
+            final path = BrickDir(
               path: dir,
               name: const Name(replacement),
             );
@@ -339,7 +338,7 @@ name: name
           });
 
           test('as non starting position', () {
-            final path = BrickPath(path: 'to/');
+            final path = BrickDir(path: 'to/');
             const original = 'path/to/some/file.png';
             final result = path.apply(original, originalPath: original);
 
@@ -354,7 +353,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo',
           name: const Name(replacement),
         );
@@ -370,7 +369,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo/bar',
           name: const Name(replacement),
         );
@@ -386,7 +385,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo/bar/baz';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo/bar/baz',
           name: const Name(replacement),
         );
@@ -404,7 +403,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo/bar/baz/foo',
           name: const Name(replacement),
         );
@@ -420,7 +419,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo/bar/baz/foo/bar',
           name: const Name(replacement),
         );
@@ -436,7 +435,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo/bar/baz';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo/bar/baz/foo/bar/baz',
           name: const Name(replacement),
         );
@@ -455,14 +454,14 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo',
           name: const Name(replacement),
         );
         path = brick.apply(path, originalPath: originalPath);
 
         final brick2 =
-            BrickPath(path: 'foo/bar/baz/foo', name: const Name(replacement2));
+            BrickDir(path: 'foo/bar/baz/foo', name: const Name(replacement2));
         path = brick2.apply(path, originalPath: originalPath);
 
         expect(
@@ -475,14 +474,14 @@ name: name
         const originalPath = 'foo/bar/baz/foo/bar';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo',
           name: const Name(replacement),
         );
         path = brick.apply(path, originalPath: originalPath);
 
         final brick2 =
-            BrickPath(path: 'foo/bar', name: const Name(replacement2));
+            BrickDir(path: 'foo/bar', name: const Name(replacement2));
         path = brick2.apply(path, originalPath: originalPath);
 
         expect(
@@ -497,7 +496,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo',
           includeIf: 'check',
         );
@@ -513,7 +512,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo',
           name: const Name(replacement),
           includeIf: 'check',
@@ -531,7 +530,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo',
           name: const Name(replacement, tag: MustacheTag.snakeCase),
           includeIf: 'check',
@@ -550,7 +549,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo',
           includeIfNot: 'check',
         );
@@ -566,7 +565,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo',
           name: const Name(replacement),
           includeIfNot: 'check',
@@ -585,7 +584,7 @@ name: name
         const originalPath = 'foo/bar/baz/foo';
         var path = originalPath;
 
-        final brick = BrickPath(
+        final brick = BrickDir(
           path: 'foo',
           name: const Name(replacement, tag: MustacheTag.snakeCase),
           includeIfNot: 'check',

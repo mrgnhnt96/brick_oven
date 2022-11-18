@@ -1,6 +1,6 @@
 import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
@@ -224,7 +224,7 @@ class BrickFile extends Equatable with FileReplacements {
   FileWriteResult writeTargetFile({
     required String targetDir,
     required File sourceFile,
-    required List<BrickPath> dirs,
+    required List<BrickDir> dirs,
     required List<Variable> additionalVariables,
     required List<Partial> partials,
     required FileSystem? fileSystem,

@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
@@ -66,7 +66,7 @@ exclude:
       final result = Brick.fromYaml(YamlValue.from(yaml), brickName);
 
       final brick = Brick(
-        dirs: [BrickPath(name: const Name(dirName), path: dirPath)],
+        dirs: [BrickDir(name: const Name(dirName), path: dirPath)],
         files: [BrickFile(filePath, name: const Name(fileName))],
         exclude: const [excludeDir],
         name: brickName,
@@ -1186,8 +1186,8 @@ exclude:
           source: const BrickSource.none(),
           logger: mockLogger,
           dirs: [
-            BrickPath(name: const Name('name1'), path: ''),
-            BrickPath(name: const Name('name2'), path: ''),
+            BrickDir(name: const Name('name1'), path: ''),
+            BrickDir(name: const Name('name2'), path: ''),
           ],
         );
 
@@ -1206,11 +1206,11 @@ exclude:
           source: const BrickSource.none(),
           logger: mockLogger,
           dirs: [
-            BrickPath(
+            BrickDir(
               path: '',
               includeIf: 'var1',
             ),
-            BrickPath(
+            BrickDir(
               path: '',
               includeIf: 'var2',
             ),
@@ -1232,11 +1232,11 @@ exclude:
           source: const BrickSource.none(),
           logger: mockLogger,
           dirs: [
-            BrickPath(
+            BrickDir(
               path: '',
               includeIfNot: 'var1',
             ),
-            BrickPath(
+            BrickDir(
               path: '',
               includeIfNot: 'var2',
             ),
@@ -1390,7 +1390,7 @@ exclude:
           brickYamlConfig: mockBricYamlConfig,
           logger: mockLogger,
           dirs: [
-            BrickPath(
+            BrickDir(
               name: const Name('var1'),
               includeIf: 'var2',
               path: '',

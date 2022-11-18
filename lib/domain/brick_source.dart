@@ -1,6 +1,6 @@
 import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/brick_watcher.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -46,7 +46,7 @@ class BrickSource extends Equatable {
     final configDir = dirname(configPath ?? '');
 
     if (yaml.isString()) {
-      final path = BrickPath.cleanPath(join(configDir, yaml.asString().value));
+      final path = BrickDir.cleanPath(join(configDir, yaml.asString().value));
 
       return BrickSource.fromString(path);
     }
@@ -57,7 +57,7 @@ class BrickSource extends Equatable {
       final localPath = YamlValue.from(data.remove('path'));
 
       if (localPath.isNone()) {
-        final path = BrickPath.cleanPath(configDir);
+        final path = BrickDir.cleanPath(configDir);
         if (path.isEmpty) {
           return const BrickSource.none();
         }
@@ -83,7 +83,7 @@ class BrickSource extends Equatable {
       }
 
       final path =
-          BrickPath.cleanPath(join(configDir, localPath.asString().value));
+          BrickDir.cleanPath(join(configDir, localPath.asString().value));
 
       if (path.isEmpty) {
         return const BrickSource.none();
@@ -96,7 +96,7 @@ class BrickSource extends Equatable {
       return handleYaml(yaml.asYaml().value);
     }
 
-    final path = BrickPath.cleanPath(configDir);
+    final path = BrickDir.cleanPath(configDir);
 
     if (path.isEmpty) {
       return const BrickSource.none();

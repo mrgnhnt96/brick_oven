@@ -2,7 +2,7 @@ import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/brick_path.dart';
+import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
@@ -105,7 +105,7 @@ class Brick extends Equatable {
 
     final pathsData = YamlValue.from(data.remove('dirs'));
 
-    Iterable<BrickPath> paths() sync* {
+    Iterable<BrickDir> paths() sync* {
       if (pathsData.isNone()) {
         return;
       }
@@ -120,7 +120,7 @@ class Brick extends Equatable {
       for (final entry in pathsData.asYaml().value.entries) {
         final path = entry.key as String;
 
-        yield BrickPath.fromYaml(YamlValue.from(entry.value), path);
+        yield BrickDir.fromYaml(YamlValue.from(entry.value), path);
       }
     }
 
@@ -211,7 +211,7 @@ class Brick extends Equatable {
     }
 
     if (brickYamlPath != null) {
-      final dir = BrickPath.cleanPath(dirname(configPath ?? ''));
+      final dir = BrickDir.cleanPath(dirname(configPath ?? ''));
       brickYamlConfig = BrickYamlConfig(path: join(dir, brickYamlPath));
     }
 
@@ -261,7 +261,7 @@ class Brick extends Equatable {
   final String? configPath;
 
   /// the configured directories that will alter/update the paths of the [source] files
-  final List<BrickPath> dirs;
+  final List<BrickDir> dirs;
 
   /// the configured files that will alter/update the [source] files
   final List<BrickFile> files;
@@ -298,9 +298,9 @@ class Brick extends Equatable {
   /// - [files]
   ///   - [BrickFile.variables]
   /// - [dirs]
-  ///   - [BrickPath.name]
-  ///   - [BrickPath.includeIf]
-  ///   - [BrickPath.includeIfNot]
+  ///   - [BrickDir.name]
+  ///   - [BrickDir.includeIf]
+  ///   - [BrickDir.includeIfNot]
   Set<String> allBrickVariables() {
     final variables = <String>{};
 
