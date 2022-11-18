@@ -1,4 +1,3 @@
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
@@ -28,9 +27,8 @@ class CookBricksCommand extends BrickOvenCommand with BrickCookerArgs {
     final bricksOrError = this.bricks();
 
     if (bricksOrError.isError) {
-      logger
-        ..warn(bricksOrError.error)
-        ..err('Error reading ${BrickOvenYaml.file}');
+      _subBricksWarning =
+          '\n[WARNING] Unable to load bricks\n${bricksOrError.error}';
       return;
     }
 
@@ -53,4 +51,9 @@ class CookBricksCommand extends BrickOvenCommand with BrickCookerArgs {
 
   @override
   String get name => 'cook';
+
+  String? _subBricksWarning;
+
+  @override
+  String? get usageFooter => _subBricksWarning;
 }
