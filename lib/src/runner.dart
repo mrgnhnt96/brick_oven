@@ -64,6 +64,7 @@ class BrickOvenRunner extends CommandRunner<int> {
       UpdateCommand(
         pubUpdater: _pubUpdater,
         logger: _logger,
+        analytics: _analytics,
       ),
     );
   }
