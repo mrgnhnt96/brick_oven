@@ -1,5 +1,7 @@
 // ignore_for_file: parameter_assignments
 
+import 'package:meta/meta.dart';
+
 /// the formats that Mustache supports
 enum MustacheFormat {
   /// camelCase
@@ -42,7 +44,10 @@ enum MustacheFormat {
   upperCase,
 
   /// no format, but wrapped with `{{{}}}`
-  escape,
+  escaped,
+
+  /// no format, but wrapped with `{{{}}}`
+  unescaped,
 
   /// start of an inverted inline section
   ifNot,
@@ -56,20 +61,49 @@ enum MustacheFormat {
 
 /// the extensions for Mustache
 extension MustacheFormatX on MustacheFormat {
+  /// the pattern to match if content is wrapped with brackets
+  @visibleForTesting
+  static RegExp get wrappedPattern => RegExp(r'\S*\{{2,3}\S+\}{2,3}\S*');
+
   /// Wraps the [content] with mustache
   ///
   /// eg: {{#snakeCase}}This is the content{{/snakeCase}}
-  String toMustache(String content) {
-    assert(
-      content.contains('{{{') && content.contains('}}}'),
-      'Content must be wrapped with {{{}}}',
-    );
+  String wrap(String content) {
+    if (isFormat) {
+      assert(
+        wrappedPattern.hasMatch(content),
+        'Content must be wrapped with {{{}}} when formatting content',
+      );
 
-    if (isEscape) {
-      return content;
+      return '{{#$name}}$content{{/$name}}';
     }
 
-    return '{{#$name}}$content{{/$name}}';
+    assert(
+      !wrappedPattern.hasMatch(content),
+      'Content must not be wrapped with {{{}}} when not formatting content',
+    );
+
+    if (isEscaped) {
+      return '{{{$content}}}';
+    }
+
+    if (isUnescaped) {
+      return '{{$content}}';
+    }
+
+    if (isIf) {
+      return '{{#$content}}';
+    }
+
+    if (isIfNot) {
+      return '{{^$content}}';
+    }
+
+    if (isEndIf) {
+      return '{{/$content}}';
+    }
+
+    return content;
   }
 
   /// whether the value is a format type
@@ -91,8 +125,11 @@ extension MustacheFormatX on MustacheFormat {
     return false;
   }
 
-  /// whether the format is [MustacheFormat.escape]
-  bool get isEscape => this == MustacheFormat.escape;
+  /// whether the format is [MustacheFormat.escaped]
+  bool get isEscaped => this == MustacheFormat.escaped;
+
+  /// whether the format is [MustacheFormat.unescaped]
+  bool get isUnescaped => this == MustacheFormat.unescaped;
 
   /// whether the format is [MustacheFormat.if_]
   bool get isIf => this == MustacheFormat.if_;
