@@ -1,6 +1,6 @@
 import 'package:brick_oven/domain/brick_partial.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
-import 'package:brick_oven/domain/replacement_result.dart';
+import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_format.dart';
 import 'package:brick_oven/enums/mustache_loops.dart';
@@ -73,7 +73,7 @@ mixin FileReplacements {
     );
   }
 
-  ReplacementResult _writePartials({
+  ContentReplacement _writePartials({
     required String content,
     required Iterable<BrickPartial> partials,
   }) {
@@ -92,12 +92,12 @@ mixin FileReplacements {
       }
     }
 
-    return ReplacementResult(content: newContent, used: partialsUsed);
+    return ContentReplacement(content: newContent, used: partialsUsed);
   }
 
   /// writes the [variables] to the [content]
   @visibleForTesting
-  ReplacementResult writeVariables({
+  ContentReplacement writeVariables({
     required List<Variable> variables,
     required String content,
   }) {
@@ -118,7 +118,7 @@ mixin FileReplacements {
       usedVariables.addAll(variableResult.used);
     }
 
-    return ReplacementResult(
+    return ContentReplacement(
       content: newContent,
       used: usedVariables,
     );
@@ -128,7 +128,7 @@ mixin FileReplacements {
   Pattern _variablePattern(Variable variable) =>
       RegExp(r'([\w-{#^/]*)' '${variable.placeholder}' r'([\w}]*)');
 
-  ReplacementResult _checkForLoops(
+  ContentReplacement _checkForLoops(
     String content,
     Variable variable,
   ) {
@@ -178,7 +178,7 @@ mixin FileReplacements {
       },
     );
 
-    return ReplacementResult(
+    return ContentReplacement(
       content: clean,
       used: {
         if (isVariableUsed) variable.name,
@@ -186,7 +186,7 @@ mixin FileReplacements {
     );
   }
 
-  ReplacementResult _checkForVariables(
+  ContentReplacement _checkForVariables(
     String content,
     Variable variable,
   ) {
@@ -266,7 +266,7 @@ mixin FileReplacements {
       return '$prefix$result$suffix';
     });
 
-    return ReplacementResult(
+    return ContentReplacement(
       content: newContent,
       used: {
         if (isVariableUsed) variable.name,

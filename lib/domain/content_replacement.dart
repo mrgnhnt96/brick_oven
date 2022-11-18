@@ -3,9 +3,9 @@ import 'package:equatable/equatable.dart';
 /// {@template replacement_result}
 /// The result of content replacement
 /// {@endtemplate}
-class ReplacementResult extends Equatable {
+class ContentReplacement extends Equatable {
   /// {@macro replacement_result}
-  const ReplacementResult({
+  const ContentReplacement({
     required this.content,
     required this.used,
   });
