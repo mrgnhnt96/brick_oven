@@ -8,6 +8,7 @@ import 'package:test/test.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_bricks.dart';
 import 'package:brick_oven/src/runner.dart';
+import 'package:usage/usage_io.dart';
 
 import '../../../test_utils/mocks.dart';
 
@@ -47,17 +48,6 @@ bricks:
   });
 
   group('$CookBricksCommand', () {
-    test('instanciate without an explicit file system or logger', () {
-      expect(
-        () => CookBricksCommand(
-          analytics: MockAnalytics(),
-          fileSystem: fs,
-          logger: mockLogger,
-        ),
-        returnsNormally,
-      );
-    });
-
     test('contains all keys for cook', () {
       expect(
         runner.commands['cook']?.subcommands.keys,
@@ -94,25 +84,38 @@ bricks:
     });
 
     group('when configuration is bad', () {
+      late Analytics mockAnalytics;
+
       setUp(() {
+        mockAnalytics = MockAnalytics();
+
         const badConfig = '';
+
+        when(() => mockAnalytics.firstRun).thenReturn(false);
+
+        when(() => mockAnalytics.sendEvent(any(), any()))
+            .thenAnswer((_) => Future.value());
+        when(
+          () => mockAnalytics.waitForLastPing(timeout: any(named: 'timeout')),
+        ).thenAnswer((_) => Future.value());
 
         fs.file(BrickOvenYaml.file)
           ..createSync()
           ..writeAsStringSync(badConfig);
       });
 
-      test('logs that config is bad', () {
+      test('add usage footer that config is bad', () {
         brickOvenCommand = CookBricksCommand(
-          analytics: MockAnalytics(),
+          analytics: mockAnalytics,
           fileSystem: fs,
           logger: mockLogger,
         );
 
-        verify(() => mockLogger.warn(any())).called(1);
-
-        verify(() => mockLogger.err('Error reading ${BrickOvenYaml.file}'))
-            .called(1);
+        expect(
+          brickOvenCommand.usageFooter,
+          '\n[WARNING] Unable to load bricks\n'
+          'Invalid brick oven configuration file',
+        );
       });
     });
   });
