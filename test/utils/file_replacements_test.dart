@@ -1,8 +1,8 @@
 // ignore_for_file: cascade_invocations
 
 import 'package:brick_oven/domain/brick_partial.dart';
+import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/enums/mustache_sections.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/file_replacements.dart';
 import 'package:file/file.dart';
@@ -20,7 +20,7 @@ void main() {
   const sourceFilePath = 'source.dart';
   const targetFilePath = 'target.dart';
   const defaultContent = 'content';
-  const instance = _TestFileReplacements();
+  const testFileReplacements = _TestFileReplacements();
 
   setUp(() {
     mockLogger = MockLogger();
@@ -33,7 +33,7 @@ void main() {
   });
 
   test('copies file when no variables or partials are provided', () {
-    instance.writeFile(
+    testFileReplacements.writeFile(
       partials: [],
       variables: [],
       sourceFile: sourceFile,
@@ -43,6 +43,207 @@ void main() {
     );
 
     expect(targetFile.readAsStringSync(), defaultContent);
+  });
+
+  group('#writePartials', () {
+    test('replaces partial placeholder with partial value', () {
+      const content = '''
+partial.do_not_replace
+{{> partial }}
+
+// partial.replace_me
+partial.replace_me_too //
+''';
+
+      const expectedContent = '''
+partial.do_not_replace
+{{> partial }}
+
+{{> replace_me }}
+{{> replace_me_too }}
+''';
+
+      const partials = [
+        BrickPartial(path: 'path/to/replace_me'),
+        BrickPartial(path: 'path/to/replace_me_too'),
+        BrickPartial(path: 'path/to/replace_me_three'),
+      ];
+
+      final result = testFileReplacements.writePartials(
+        content: content,
+        partials: partials,
+      );
+
+      const expected = ContentReplacement(
+        content: expectedContent,
+        used: {'path/to/replace_me', 'path/to/replace_me_too'},
+      );
+
+      expect(result, expected);
+    });
+  });
+
+  group('#checkForLoops', () {
+    group('#loopPattern', () {
+      test('is correct value', () {
+        final expected =
+            RegExp('.*${FileReplacements.loopSetUp}' r'({{[\^#\\]\S+}}).*');
+
+        expect(testFileReplacements.loopPattern, expected);
+      });
+
+      test('matches', () {
+        const matches = [
+          '{{^asdf}}',
+          '{{#asdf}}',
+          r'{{\asdf}}',
+          r'{{#.,<>$({})}}',
+        ];
+
+        for (final match in matches) {
+          final content = '${FileReplacements.loopSetUp}$match';
+          expect(testFileReplacements.loopPattern.hasMatch(content), isTrue);
+        }
+      });
+    });
+
+    test('returns original content if loop is not found', () {
+      const content = 'content';
+      const expected = ContentReplacement(content: content, used: {});
+
+      final result = testFileReplacements.checkForLoops(
+        content,
+        const Variable(name: 'name', placeholder: 'value'),
+      );
+
+      expect(result, expected);
+    });
+
+    test('returns new content when loop is found', () {
+      const content = '''
+start_NAME_
+some content
+end_NAME_
+
+// start_NAME_
+// some more content
+// end_NAME_
+
+start_NAME_ //
+other content //
+end_NAME_ //
+
+nstart_NAME_
+last content
+end_NAME_
+''';
+
+      const variable = Variable(name: 'name', placeholder: '_NAME_');
+
+      const expectedContent = '''
+{{#name}}
+some content
+{{/name}}
+
+{{#name}}
+// some more content
+{{/name}}
+
+{{#name}}
+other content //
+{{/name}}
+
+{{^name}}
+last content
+{{/name}}
+''';
+
+      const expected = ContentReplacement(
+        content: expectedContent,
+        used: {'name'},
+      );
+
+      final result = testFileReplacements.checkForLoops(
+        content,
+        variable,
+      );
+
+      expect(result, expected);
+    });
+  });
+
+  group('#checkForVariables', () {
+    group('#variablePattern', () {
+      const placeholder = '_PEANUT_';
+      const variable = Variable(name: 'peanut', placeholder: placeholder);
+
+      test('is correct value', () {
+        final expected = RegExp('({*)' '$placeholder' r'(\w*}*)');
+
+        expect(testFileReplacements.variablePattern(variable), expected);
+      });
+
+      test('matches', () {
+        const matches = {
+          placeholder: ['', ''],
+          '${placeholder}snake': ['', 'snake'],
+          '${placeholder}snakeCase': ['', 'snakeCase'],
+          '${placeholder}snake}': ['', 'snake}'],
+          '${placeholder}snakeCase}': ['', 'snakeCase}'],
+          '{${placeholder}snake': ['{', 'snake'],
+          '{${placeholder}snakeCase': ['{', 'snakeCase'],
+          '{$placeholder': ['{', ''],
+          '{{$placeholder': ['{{', ''],
+          '{$placeholder}': ['{', '}'],
+          '{{$placeholder}}': ['{{', '}}'],
+          '$placeholder}': ['', '}'],
+          '$placeholder}}': ['', '}}'],
+        };
+
+        const otherMatches = {
+          '${placeholder}snake}a': [
+            '${placeholder}snake}',
+            '',
+            'snake}',
+          ],
+          '${placeholder}snakeCase}a': [
+            '${placeholder}snakeCase}',
+            '',
+            'snakeCase}',
+          ],
+        };
+
+        for (final match in matches.entries) {
+          final matches = testFileReplacements
+              .variablePattern(variable)
+              .allMatches(match.key);
+
+          expect(matches.length, 1);
+
+          final matchResult = matches.first;
+
+          expect(matchResult.group(0), match.key);
+          expect(matchResult.group(1), match.value[0]);
+          expect(matchResult.group(2), match.value[1]);
+        }
+
+        for (final match in otherMatches.entries) {
+          final matches = testFileReplacements
+              .variablePattern(variable)
+              .allMatches(match.key);
+
+          expect(matches.length, 1);
+
+          final matchResult = matches.first;
+
+          expect(matchResult.group(0), match.value[0]);
+          expect(matchResult.group(1), match.value[1]);
+          expect(matchResult.group(2), match.value[2]);
+        }
+      });
+    });
+
+    test('returns', () {});
   });
 
   group('#variables', () {
@@ -55,7 +256,7 @@ void main() {
 
       sourceFile.writeAsStringSync(content);
 
-      instance.writeFile(
+      testFileReplacements.writeFile(
         partials: [],
         sourceFile: sourceFile,
         targetFile: targetFile,
@@ -93,7 +294,7 @@ void main() {
 
       for (final content in contents.entries) {
         sourceFile.writeAsStringSync(content.key);
-        instance.writeFile(
+        testFileReplacements.writeFile(
           partials: [],
           sourceFile: sourceFile,
           targetFile: targetFile,
@@ -117,7 +318,7 @@ void main() {
 
       sourceFile.writeAsStringSync(content);
 
-      instance.writeFile(
+      testFileReplacements.writeFile(
         partials: [],
         sourceFile: sourceFile,
         targetFile: targetFile,
@@ -143,7 +344,7 @@ void main() {
 
       sourceFile.writeAsStringSync(content);
 
-      instance.writeFile(
+      testFileReplacements.writeFile(
         partials: [],
         sourceFile: sourceFile,
         targetFile: targetFile,
@@ -198,7 +399,7 @@ void main() {
             for (final content in contents.entries) {
               sourceFile.writeAsStringSync(content.key);
 
-              instance.writeFile(
+              testFileReplacements.writeFile(
                 partials: [],
                 sourceFile: sourceFile,
                 targetFile: targetFile,
@@ -221,7 +422,7 @@ void main() {
             for (final content in contents.entries) {
               sourceFile.writeAsStringSync(content.key);
 
-              instance.writeFile(
+              testFileReplacements.writeFile(
                 partials: [],
                 sourceFile: sourceFile,
                 targetFile: targetFile,
@@ -244,7 +445,7 @@ void main() {
             for (final content in contents.entries) {
               sourceFile.writeAsStringSync(content.key);
 
-              instance.writeFile(
+              testFileReplacements.writeFile(
                 partials: [],
                 sourceFile: sourceFile,
                 targetFile: targetFile,
@@ -272,7 +473,7 @@ void main() {
             for (final content in contents.entries) {
               sourceFile.writeAsStringSync(content.key);
 
-              instance.writeFile(
+              testFileReplacements.writeFile(
                 partials: [],
                 sourceFile: sourceFile,
                 targetFile: targetFile,
@@ -300,7 +501,7 @@ void main() {
             for (final content in contents.entries) {
               sourceFile.writeAsStringSync(content.key);
 
-              instance.writeFile(
+              testFileReplacements.writeFile(
                 partials: [],
                 sourceFile: sourceFile,
                 targetFile: targetFile,
@@ -319,59 +520,18 @@ void main() {
       }
     });
 
-    group('sections', () {
-      const newName = 'new-name';
-      const placeholder = 'MEEEEE';
-
-      for (final section in MustacheSections.values) {
-        Map<String, String> getContent() {
-          return {
-            '${section.configName}$placeholder':
-                '{{${section.symbol}$newName}}',
-          };
-        }
-
-        group('(${section.name})', () {
-          test(
-            'replaces variable placeholder',
-            () {
-              final contents = getContent();
-
-              for (final content in contents.entries) {
-                const variable =
-                    Variable(name: newName, placeholder: placeholder);
-
-                sourceFile.writeAsStringSync(content.key);
-
-                instance.writeFile(
-                  partials: [],
-                  sourceFile: sourceFile,
-                  targetFile: targetFile,
-                  variables: [variable],
-                  fileSystem: fileSystem,
-                  logger: mockLogger,
-                );
-
-                expect(targetFile.readAsStringSync(), content.value);
-              }
-            },
-          );
-        });
-      }
-    });
-
     test(
       'replaces variable placeholder with section end syntax',
       () {
         const newName = 'new-name';
         const placeholder = 'MEEEEE';
-        const content = 'replace: n$placeholder';
+        const content = 'replace: ${placeholder}ifNot';
 
         const variable = Variable(name: newName, placeholder: placeholder);
 
         sourceFile.writeAsStringSync(content);
 
-        instance.writeFile(
+        testFileReplacements.writeFile(
           partials: [],
           sourceFile: sourceFile,
           targetFile: targetFile,
@@ -396,7 +556,7 @@ void main() {
         sourceFile.writeAsStringSync(content);
 
         void writeFile() {
-          instance.writeFile(
+          testFileReplacements.writeFile(
             partials: [],
             sourceFile: sourceFile,
             targetFile: targetFile,
@@ -440,7 +600,7 @@ void main() {
     for (final loop in loops.keys) {
       sourceFile.writeAsStringSync(loop);
 
-      instance.writeFile(
+      testFileReplacements.writeFile(
         partials: [],
         sourceFile: sourceFile,
         targetFile: targetFile,
@@ -463,7 +623,7 @@ void main() {
 
         sourceFile.writeAsStringSync(content);
 
-        instance.writeFile(
+        testFileReplacements.writeFile(
           partials: [partial],
           sourceFile: sourceFile,
           targetFile: targetFile,
@@ -483,7 +643,7 @@ void main() {
 
         sourceFile.writeAsStringSync(content);
 
-        instance.writeFile(
+        testFileReplacements.writeFile(
           partials: [partial],
           sourceFile: sourceFile,
           targetFile: targetFile,
@@ -505,7 +665,7 @@ void main() {
 
     sourceFile.writeAsStringSync('replace: _HELLO_');
 
-    instance.writeFile(
+    testFileReplacements.writeFile(
       partials: [],
       sourceFile: sourceFile,
       targetFile: targetFile,
@@ -529,7 +689,7 @@ void main() {
 
     sourceFile.deleteSync();
 
-    instance.writeFile(
+    testFileReplacements.writeFile(
       partials: [],
       sourceFile: sourceFile,
       targetFile: targetFile,
