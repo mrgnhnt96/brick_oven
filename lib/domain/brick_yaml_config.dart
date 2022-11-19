@@ -3,7 +3,7 @@ import 'package:brick_oven/domain/brick_yaml_data.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
-import 'package:file/local.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:yaml/yaml.dart';
 
 part 'brick_yaml_config.g.dart';
@@ -16,8 +16,8 @@ class BrickYamlConfig extends Equatable {
   /// {@macro brick_yaml_config}
   const BrickYamlConfig({
     required this.path,
-    FileSystem? fileSystem,
-  }) : _fileSystem = fileSystem ?? const LocalFileSystem();
+    required FileSystem fileSystem,
+  }) : _fileSystem = fileSystem;
 
   /// the path to the brick.yaml file
   final String path;
@@ -30,16 +30,18 @@ class BrickYamlConfig extends Equatable {
 
   /// the data within the brick.yaml file
   // ignore: library_private_types_in_public_api
-  BrickYamlData? data() {
+  BrickYamlData? data({required Logger logger}) {
     final file = _fileSystem.file(path);
 
     if (!file.existsSync()) {
+      logger.warn('`brick.yaml` not found at $path');
       return null;
     }
 
     final yaml = YamlValue.from(loadYaml(file.readAsStringSync()));
 
     if (!yaml.isYaml()) {
+      logger.warn('Error reading `brick.yaml`');
       return null;
     }
 

@@ -100,7 +100,15 @@ abstract class BrickOvenCommand extends Command<int> {
           return BricksOrError(null, err.message);
         }
 
-        bricks.add(Brick.fromYaml(yaml, name, configPath: configPath));
+        bricks.add(
+          Brick.fromYaml(
+            yaml,
+            name,
+            configPath: configPath,
+            fileSystem: fileSystem,
+            logger: logger,
+          ),
+        );
       }
     } on ConfigException catch (e) {
       return BricksOrError(null, e.message);

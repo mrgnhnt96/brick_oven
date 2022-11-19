@@ -11,7 +11,6 @@ import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
@@ -34,10 +33,11 @@ class Brick extends Equatable {
     this.brickYamlConfig,
     this.exclude = const [],
     required Logger logger,
-  })  : _fileSystem = const LocalFileSystem(),
+    required FileSystem fileSystem,
+  })  : _fileSystem = fileSystem,
         _logger = logger;
 
-  Brick._fromYaml({
+  const Brick._fromYaml({
     required this.name,
     required this.source,
     required this.files,
@@ -46,14 +46,18 @@ class Brick extends Equatable {
     required this.configPath,
     required this.brickYamlConfig,
     required this.partials,
-  })  : _fileSystem = const LocalFileSystem(),
-        _logger = Logger();
+    required FileSystem fileSystem,
+    required Logger logger,
+  })  : _fileSystem = fileSystem,
+        _logger = logger;
 
   /// parses [yaml]
   factory Brick.fromYaml(
     YamlValue yaml,
     String name, {
     String? configPath,
+    required FileSystem fileSystem,
+    required Logger logger,
   }) {
     if (yaml.isError()) {
       throw BrickException(
@@ -76,6 +80,7 @@ class Brick extends Equatable {
       source = BrickSource.fromYaml(
         YamlValue.from(data.remove('source')),
         configPath: configPath,
+        fileSystem: fileSystem,
       );
     } on ConfigException catch (e) {
       throw BrickException(brick: name, reason: e.message);
@@ -212,7 +217,10 @@ class Brick extends Equatable {
 
     if (brickYamlPath != null) {
       final dir = BrickDir.cleanPath(dirname(configPath ?? ''));
-      brickYamlConfig = BrickYamlConfig(path: join(dir, brickYamlPath));
+      brickYamlConfig = BrickYamlConfig(
+        path: join(dir, brickYamlPath),
+        fileSystem: fileSystem,
+      );
     }
 
     if (data.isNotEmpty) {
@@ -231,6 +239,8 @@ class Brick extends Equatable {
       exclude: exclude().toList(),
       configPath: configPath,
       brickYamlConfig: brickYamlConfig,
+      fileSystem: fileSystem,
+      logger: logger,
     );
   }
 
@@ -352,10 +362,9 @@ class Brick extends Equatable {
       return;
     }
 
-    final brickYaml = config.data();
+    final brickYaml = config.data(logger: _logger);
 
     if (brickYaml == null) {
-      _logger.warn('Error reading `brick.yaml`');
       return;
     }
 
@@ -407,7 +416,7 @@ class Brick extends Equatable {
   void cook({
     String output = 'bricks',
     bool watch = false,
-    bool sync = true,
+    bool shouldSync = true,
   }) {
     final names = <String>{};
 
@@ -545,7 +554,7 @@ class Brick extends Equatable {
     if (watch && watcher != null) {
       watcher
         ..addEvent(putInTheOven)
-        ..addEvent(() => checkBrickYamlConfig(shouldSync: sync))
+        ..addEvent(() => checkBrickYamlConfig(shouldSync: shouldSync))
         ..start();
 
       if (watcher.hasRun) {
@@ -554,6 +563,6 @@ class Brick extends Equatable {
     }
 
     putInTheOven();
-    checkBrickYamlConfig(shouldSync: sync);
+    checkBrickYamlConfig(shouldSync: shouldSync);
   }
 }

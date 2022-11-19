@@ -7,7 +7,6 @@ import 'package:brick_oven/utils/file_replacements.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart';
 
@@ -120,11 +119,9 @@ class Partial extends Equatable with FileReplacements {
     required File sourceFile,
     required List<Partial> partials,
     required List<Variable> additionalVariables,
-    required FileSystem? fileSystem,
+    required FileSystem fileSystem,
     required Logger logger,
   }) {
-    fileSystem ??= const LocalFileSystem();
-
     final file = fileSystem.file(join(targetDir, toPartialFile()))
       ..createSync(recursive: true);
 

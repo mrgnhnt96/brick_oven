@@ -1,15 +1,14 @@
 import 'package:autoequal/autoequal.dart';
-import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/brick_dir.dart';
+import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/name.dart';
+import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/file_replacements.dart';
-import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p show extension;
@@ -227,10 +226,9 @@ class BrickFile extends Equatable with FileReplacements {
     required List<BrickDir> dirs,
     required List<Variable> additionalVariables,
     required List<Partial> partials,
-    required FileSystem? fileSystem,
+    required FileSystem fileSystem,
     required Logger logger,
   }) {
-    fileSystem ??= const LocalFileSystem();
     var newPath = path;
     newPath = newPath.replaceAll(basename(newPath), '');
     newPath = join(newPath, fileName);

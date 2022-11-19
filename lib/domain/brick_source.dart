@@ -1,13 +1,12 @@
 import 'package:autoequal/autoequal.dart';
-import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_dir.dart';
+import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
@@ -23,18 +22,26 @@ class BrickSource extends Equatable {
   /// {@macro brick_source}
   BrickSource({
     required this.localPath,
-  })  : _fileSystem = const LocalFileSystem(),
+    required FileSystem fileSystem,
+  })  : _fileSystem = fileSystem,
         watcher = localPath != null ? SourceWatcher(localPath) : null;
 
   /// parses the [value] into the appropriate type of source
-  factory BrickSource.fromString(String value) {
-    return BrickSource(localPath: value);
+  factory BrickSource.fromString(
+    String value, {
+    required FileSystem fileSystem,
+  }) {
+    return BrickSource(
+      localPath: value,
+      fileSystem: fileSystem,
+    );
   }
 
   /// parse [yaml] into the source
   factory BrickSource.fromYaml(
     YamlValue yaml, {
     String? configPath,
+    required FileSystem fileSystem,
   }) {
     if (yaml.isError()) {
       throw const SourceException(
@@ -48,7 +55,10 @@ class BrickSource extends Equatable {
     if (yaml.isString()) {
       final path = BrickDir.cleanPath(join(configDir, yaml.asString().value));
 
-      return BrickSource.fromString(path);
+      return BrickSource.fromString(
+        path,
+        fileSystem: fileSystem,
+      );
     }
 
     BrickSource handleYaml(YamlMap yaml) {
@@ -59,7 +69,7 @@ class BrickSource extends Equatable {
       if (localPath.isNone()) {
         final path = BrickDir.cleanPath(configDir);
         if (path.isEmpty) {
-          return const BrickSource.none();
+          return BrickSource.none(fileSystem: fileSystem);
         }
 
         throw SourceException(
@@ -86,10 +96,13 @@ class BrickSource extends Equatable {
           BrickDir.cleanPath(join(configDir, localPath.asString().value));
 
       if (path.isEmpty) {
-        return const BrickSource.none();
+        return BrickSource.none(fileSystem: fileSystem);
       }
 
-      return BrickSource.fromString(path);
+      return BrickSource.fromString(
+        path,
+        fileSystem: fileSystem,
+      );
     }
 
     if (yaml.isYaml()) {
@@ -99,7 +112,7 @@ class BrickSource extends Equatable {
     final path = BrickDir.cleanPath(configDir);
 
     if (path.isEmpty) {
-      return const BrickSource.none();
+      return BrickSource.none(fileSystem: fileSystem);
     }
 
     throw SourceException(
@@ -117,9 +130,10 @@ class BrickSource extends Equatable {
   }) : _fileSystem = fileSystem;
 
   /// creates and empty source
-  const BrickSource.none()
-      : localPath = null,
-        _fileSystem = const LocalFileSystem(),
+  const BrickSource.none({
+    required FileSystem fileSystem,
+  })  : localPath = null,
+        _fileSystem = fileSystem,
         watcher = null;
 
   /// the local path of the source files
