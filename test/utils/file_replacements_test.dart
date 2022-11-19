@@ -420,15 +420,17 @@ before text {{name}} after text
 
       const variable = Variable(placeholder: '_HELLO_', name: 'hello');
       const extraVariable = Variable(placeholder: '_GOODBYE_', name: 'goodbye');
+      const ignoredVariable =
+          Variable(placeholder: '_NO_ONE_CARES_', name: 'lol');
 
       sourceFile.writeAsStringSync('replace: _HELLO_');
 
       testFileReplacements.writeFile(
-        ignoreVariablesIfNotPresent: [],
+        ignoreVariablesIfNotPresent: [ignoredVariable],
         partials: [],
         sourceFile: sourceFile,
         targetFile: targetFile,
-        variables: [variable, extraVariable],
+        variables: [variable, extraVariable, ignoredVariable],
         fileSystem: fileSystem,
         logger: mockLogger,
       );
