@@ -7,6 +7,7 @@ import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
+import 'package:brick_oven/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
@@ -62,5 +63,12 @@ extension MockAnalyticsX on MockAnalytics {
 
     when(() => waitForLastPing(timeout: any(named: 'timeout')))
         .thenAnswer((_) => Future.value());
+  }
+}
+
+extension PubUpdaterX on MockPubUpdater {
+  void stubMethods() {
+    when(() => getLatestVersion(any()))
+        .thenAnswer((_) => Future.value(packageVersion));
   }
 }
