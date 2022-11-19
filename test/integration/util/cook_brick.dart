@@ -12,15 +12,12 @@ import '../../test_utils/mocks.dart';
 
 /// [brickName] will be used for
 /// - Accessing fixture files
-///   - test/e2e/fixtures/[brickName]
+///   - test/integration/fixtures/[brickName]
 /// - Accessing source files
-///   - test/e2e/sources/[brickName]
+///   - test/integration/sources/[brickName]
 /// - Accessing running command
 ///   - brick_oven cook [brickName]
-Future<void> cookBrick(
-  String brickName, {
-  bool syncWithBrickYaml = true,
-}) async {
+Future<void> cookBrick(String brickName) async {
   final mockLogger = MockLogger();
   final mockProgress = MockProgress();
   final mockPubUpdater = MockPubUpdater()..stubMethods();
@@ -51,15 +48,11 @@ Future<void> cookBrick(
       ..writeAsStringSync(file.readAsStringSync());
   }
 
-  if (syncWithBrickYaml) {
-    final brickYamlContent = localFileSystem
-        .file(join(brickFixturePath, 'brick.yaml'))
-        .readAsStringSync();
+  final brickYamlContent = localFileSystem
+      .file(join(brickFixturePath, 'brick.yaml'))
+      .readAsStringSync();
 
-    memoryFileSystem
-        .file(join('brick.yaml'))
-        .writeAsStringSync(brickYamlContent);
-  }
+  memoryFileSystem.file(join('brick.yaml')).writeAsStringSync(brickYamlContent);
 
   final brickOven = BrickOvenRunner(
     analytics: mockAnalytics,
