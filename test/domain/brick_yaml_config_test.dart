@@ -2,17 +2,30 @@ import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/domain/brick_yaml_data.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
+
+import '../test_utils/mocks.dart';
 
 void main() {
   late FileSystem memoryFS;
+  late Logger mockLogger;
 
   setUp(() {
+    mockLogger = MockLogger();
+
     memoryFS = MemoryFileSystem();
   });
 
   test('can be instanciated', () {
-    expect(() => const BrickYamlConfig(path: 'brick.yaml'), returnsNormally);
+    expect(
+      () => BrickYamlConfig(
+        path: 'brick.yaml',
+        fileSystem: memoryFS,
+      ),
+      returnsNormally,
+    );
   });
 
   group('#data', () {
@@ -22,7 +35,13 @@ void main() {
         fileSystem: memoryFS,
       );
 
-      expect(config.data(), isNull);
+      expect(config.data(logger: mockLogger), isNull);
+
+      verify(
+        () => mockLogger.warn('`brick.yaml` not found at does_not_exist.yaml'),
+      ).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     test('return null when config file is not yaml', () {
@@ -33,7 +52,13 @@ void main() {
 
       memoryFS.file('brick.yaml').writeAsStringSync('not yaml');
 
-      expect(config.data(), isNull);
+      expect(config.data(logger: mockLogger), isNull);
+
+      verify(
+        () => mockLogger.warn('Error reading `brick.yaml`'),
+      ).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     test('returns data of config file', () {
@@ -57,13 +82,18 @@ vars:
         vars: ['var1', 'var2'],
       );
 
-      expect(config.data(), data);
+      expect(config.data(logger: mockLogger), data);
+
+      verifyNoMoreInteractions(mockLogger);
     });
   });
 
   group('#props', () {
     test('instances are equal', () {
-      const instance = BrickYamlConfig(path: 'brick.yaml');
+      final instance = BrickYamlConfig(
+        path: 'brick.yaml',
+        fileSystem: MemoryFileSystem(),
+      );
 
       expect(instance.props.length, 1);
     });

@@ -8,6 +8,7 @@ import 'package:brick_oven/domain/bricks_or_error.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
+import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -86,9 +87,8 @@ void main() {
           ).called(1);
 
           verify(
-            () => mockAnalytics.waitForLastPing(
-              timeout: any(named: 'timeout'),
-            ),
+            () =>
+                mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
           ).called(1);
 
           expect(result, ExitCode.success.code);
@@ -113,7 +113,7 @@ void main() {
             verify(
               () => mockBrick.cook(
                 output: any(named: 'output'),
-                sync: false,
+                shouldSync: false,
                 watch: false,
               ),
             ).called(1);
@@ -136,7 +136,7 @@ void main() {
 
             verify(
               () => mockAnalytics.waitForLastPing(
-                timeout: any(named: 'timeout'),
+                timeout: BrickOvenRunner.timeout,
               ),
             ).called(1);
 
@@ -161,7 +161,7 @@ void main() {
             verify(
               () => mockBrick.cook(
                 output: any(named: 'output'),
-                sync: true,
+                shouldSync: true,
                 watch: false,
               ),
             ).called(1);
@@ -184,7 +184,7 @@ void main() {
 
             verify(
               () => mockAnalytics.waitForLastPing(
-                timeout: any(named: 'timeout'),
+                timeout: BrickOvenRunner.timeout,
               ),
             ).called(1);
 
@@ -249,7 +249,7 @@ void main() {
             verify(
               () => mockBrick.cook(
                 output: any(named: 'output'),
-                sync: true,
+                shouldSync: true,
                 watch: false,
               ),
             ).called(1);
@@ -272,7 +272,7 @@ void main() {
 
             verify(
               () => mockAnalytics.waitForLastPing(
-                timeout: any(named: 'timeout'),
+                timeout: BrickOvenRunner.timeout,
               ),
             ).called(1);
 
@@ -298,7 +298,7 @@ void main() {
             verify(
               () => mockBrick.cook(
                 output: any(named: 'output'),
-                sync: true,
+                shouldSync: true,
                 watch: true,
               ),
             ).called(1);
@@ -327,7 +327,7 @@ void main() {
 
             verify(
               () => mockAnalytics.waitForLastPing(
-                timeout: any(named: 'timeout'),
+                timeout: BrickOvenRunner.timeout,
               ),
             ).called(1);
 
@@ -396,9 +396,7 @@ void main() {
         ).called(1);
 
         verify(
-          () => mockAnalytics.waitForLastPing(
-            timeout: any(named: 'timeout'),
-          ),
+          () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
         ).called(1);
 
         verify(() => mockBrick.name).called(1);
@@ -451,9 +449,7 @@ void main() {
         ).called(1);
 
         verify(
-          () => mockAnalytics.waitForLastPing(
-            timeout: any(named: 'timeout'),
-          ),
+          () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
         ).called(1);
 
         expect(result, ExitCode.success.code);

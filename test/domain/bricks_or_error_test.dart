@@ -1,6 +1,7 @@
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/bricks_or_error.dart';
 import 'package:brick_oven/domain/brick_source.dart';
+import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -23,8 +24,12 @@ void main() {
       final bricks = {
         Brick(
           name: 'brick',
-          source: BrickSource.fromString('source'),
+          source: BrickSource.fromString(
+            'source',
+            fileSystem: MemoryFileSystem(),
+          ),
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
         )
       };
 
@@ -53,8 +58,12 @@ void main() {
       final bricks = {
         Brick(
           name: 'brick',
-          source: BrickSource.fromString('source'),
+          source: BrickSource.fromString(
+            'source',
+            fileSystem: MemoryFileSystem(),
+          ),
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
         )
       };
 
@@ -77,8 +86,12 @@ void main() {
       final bricks = {
         Brick(
           name: 'brick',
-          source: BrickSource.fromString('source'),
+          source: BrickSource.fromString(
+            'source',
+            fileSystem: MemoryFileSystem(),
+          ),
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
         )
       };
 
@@ -95,8 +108,12 @@ void main() {
       final bricks = {
         Brick(
           name: 'brick',
-          source: BrickSource.fromString('source'),
+          source: BrickSource.fromString(
+            'source',
+            fileSystem: MemoryFileSystem(),
+          ),
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
         )
       };
 

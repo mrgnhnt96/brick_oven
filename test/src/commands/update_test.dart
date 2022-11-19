@@ -162,9 +162,7 @@ void main() {
       ).called(1);
 
       verify(
-        () => mockAnalytics.waitForLastPing(
-          timeout: any(named: 'timeout'),
-        ),
+        () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
       ).called(1);
 
       expect(result, equals(ExitCode.success.code));
@@ -205,9 +203,7 @@ void main() {
       ).called(1);
 
       verify(
-        () => mockAnalytics.waitForLastPing(
-          timeout: any(named: 'timeout'),
-        ),
+        () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
       ).called(1);
 
       expect(result, ExitCode.success.code);

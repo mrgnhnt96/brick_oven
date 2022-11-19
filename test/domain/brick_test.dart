@@ -33,6 +33,8 @@ void main() {
 
   setUp(() {
     mockLogger = MockLogger();
+
+    registerFallbackValue(mockLogger);
   });
 
   const brickName = 'super_awesome';
@@ -63,20 +65,29 @@ exclude:
   - $excludeDir
 ''');
 
-      final result = Brick.fromYaml(YamlValue.from(yaml), brickName);
+      final result = Brick.fromYaml(
+        YamlValue.from(yaml),
+        brickName,
+        fileSystem: MemoryFileSystem(),
+        logger: mockLogger,
+      );
 
       final brick = Brick(
         dirs: [BrickDir(name: const Name(dirName), path: dirPath)],
         files: [BrickFile(filePath, name: const Name(fileName))],
         exclude: const [excludeDir],
         name: brickName,
-        source: BrickSource(localPath: localPath),
+        source: BrickSource(
+          localPath: localPath,
+          fileSystem: MemoryFileSystem(),
+        ),
         partials: [
           Partial(
             path: partialPath,
             variables: const [Variable(name: 'one')],
           )
         ],
+        fileSystem: MemoryFileSystem(),
         logger: mockLogger,
       );
 
@@ -88,9 +99,16 @@ exclude:
     group('throws $BrickException', () {
       test('when yaml is error', () {
         expect(
-          () => Brick.fromYaml(const YamlValue.error('error'), brickName),
+          () => Brick.fromYaml(
+            const YamlValue.error('error'),
+            brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
+          ),
           throwsA(isA<BrickException>()),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('when yaml is not map', () {
@@ -98,9 +116,13 @@ exclude:
           () => Brick.fromYaml(
             const YamlValue.string('Jar Jar Binks'),
             brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
           ),
           throwsA(isA<BrickException>()),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('when source is incorrect type', () {
@@ -109,9 +131,16 @@ source: ${1}
 ''');
 
         expect(
-          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+          () => Brick.fromYaml(
+            YamlValue.from(yaml),
+            brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
+          ),
           throwsA(isA<BrickException>()),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('when extra keys are provided', () {
@@ -120,9 +149,16 @@ vars:
 ''');
 
         expect(
-          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+          () => Brick.fromYaml(
+            YamlValue.from(yaml),
+            brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
+          ),
           throwsA(isA<BrickException>()),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('when dirs is not a map', () {
@@ -132,9 +168,16 @@ dirs:
 ''');
 
         expect(
-          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+          () => Brick.fromYaml(
+            YamlValue.from(yaml),
+            brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
+          ),
           throwsA(isA<BrickException>()),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('when files is not a map', () {
@@ -144,9 +187,16 @@ files:
 ''');
 
         expect(
-          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+          () => Brick.fromYaml(
+            YamlValue.from(yaml),
+            brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
+          ),
           throwsA(isA<FileException>()),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('when partials is not a map', () {
@@ -156,9 +206,16 @@ partials:
 ''');
 
         expect(
-          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+          () => Brick.fromYaml(
+            YamlValue.from(yaml),
+            brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
+          ),
           throwsA(isA<BrickException>()),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       group('brick config', () {
@@ -169,9 +226,16 @@ brick_config:
 ''');
 
           expect(
-            () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+            () => Brick.fromYaml(
+              YamlValue.from(yaml),
+              brickName,
+              fileSystem: MemoryFileSystem(),
+              logger: mockLogger,
+            ),
             throwsA(isA<BrickException>()),
           );
+
+          verifyNoMoreInteractions(mockLogger);
         });
 
         test('runs gracefully when brick config is null', () {
@@ -180,9 +244,16 @@ brick_config:
 ''');
 
           expect(
-            () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+            () => Brick.fromYaml(
+              YamlValue.from(yaml),
+              brickName,
+              fileSystem: MemoryFileSystem(),
+              logger: mockLogger,
+            ),
             returnsNormally,
           );
+
+          verifyNoMoreInteractions(mockLogger);
         });
 
         test('returns provided brick config', () {
@@ -191,9 +262,19 @@ brick_config: brick.yaml
 ''');
 
           expect(
-            Brick.fromYaml(YamlValue.from(yaml), brickName).brickYamlConfig,
-            const BrickYamlConfig(path: 'brick.yaml'),
+            Brick.fromYaml(
+              YamlValue.from(yaml),
+              brickName,
+              fileSystem: MemoryFileSystem(),
+              logger: mockLogger,
+            ).brickYamlConfig,
+            BrickYamlConfig(
+              path: 'brick.yaml',
+              fileSystem: MemoryFileSystem(),
+            ),
           );
+
+          verifyNoMoreInteractions(mockLogger);
         });
       });
     });
@@ -215,9 +296,16 @@ exclude:
 ''');
 
         expect(
-          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+          () => Brick.fromYaml(
+            YamlValue.from(yaml),
+            brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
+          ),
           throwsA(isA<BrickException>()),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('parses list', () {
@@ -228,14 +316,25 @@ exclude:
 ''');
 
         expect(
-          Brick.fromYaml(YamlValue.from(yaml), brickName),
+          Brick.fromYaml(
+            YamlValue.from(yaml),
+            brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
+          ),
           Brick(
             exclude: const [excludeDir],
             name: brickName,
-            source: BrickSource(localPath: localPath),
+            source: BrickSource(
+              localPath: localPath,
+              fileSystem: MemoryFileSystem(),
+            ),
+            fileSystem: MemoryFileSystem(),
             logger: mockLogger,
           ),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('parses string', () {
@@ -245,14 +344,25 @@ exclude: $excludeDir
 ''');
 
         expect(
-          Brick.fromYaml(YamlValue.from(yaml), brickName),
+          Brick.fromYaml(
+            YamlValue.from(yaml),
+            brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
+          ),
           Brick(
             exclude: const [excludeDir],
             name: brickName,
-            source: BrickSource(localPath: localPath),
+            source: BrickSource(
+              localPath: localPath,
+              fileSystem: MemoryFileSystem(),
+            ),
             logger: mockLogger,
+            fileSystem: MemoryFileSystem(),
           ),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('throws $BrickException non strings are provided', () {
@@ -266,9 +376,16 @@ exclude:
 ''');
 
         expect(
-          () => Brick.fromYaml(YamlValue.from(yaml), brickName),
+          () => Brick.fromYaml(
+            YamlValue.from(yaml),
+            brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
+          ),
           throwsA(isA<BrickException>()),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
     });
   });
@@ -566,7 +683,9 @@ exclude:
 
           final brick = Brick.memory(
             name: 'BRICK',
-            source: const BrickSource.none(),
+            source: BrickSource.none(
+              fileSystem: MemoryFileSystem(),
+            ),
             logger: mockLogger,
             fileSystem: fs,
             files: [
@@ -602,7 +721,9 @@ exclude:
 
           final brick = Brick.memory(
             name: 'BRICK',
-            source: const BrickSource.none(),
+            source: BrickSource.none(
+              fileSystem: MemoryFileSystem(),
+            ),
             logger: mockLogger,
             fileSystem: fs,
             partials: [
@@ -689,12 +810,15 @@ exclude:
 
       registerFallbackValue(MockLogger());
       registerFallbackValue(MockFile());
+      registerFallbackValue(MemoryFileSystem());
     });
 
     test('throws $BrickException when duplicate partials exist', () {
       final brick = Brick.memory(
         name: 'Brick',
-        source: const BrickSource.none(),
+        source: BrickSource.none(
+          fileSystem: MemoryFileSystem(),
+        ),
         logger: mockLogger,
         fileSystem: fs,
         partials: [
@@ -743,7 +867,9 @@ exclude:
 
       final brick = Brick.memory(
         name: 'Brick',
-        source: const BrickSource.none(),
+        source: BrickSource.none(
+          fileSystem: MemoryFileSystem(),
+        ),
         logger: mockLogger,
         fileSystem: fs,
         partials: [mockPartial],
@@ -801,7 +927,9 @@ exclude:
 
       final brick = Brick.memory(
         name: 'Brick',
-        source: const BrickSource.none(),
+        source: BrickSource.none(
+          fileSystem: MemoryFileSystem(),
+        ),
         logger: mockLogger,
         fileSystem: fs,
         partials: [mockPartial],
@@ -1278,8 +1406,11 @@ exclude:
       test('gets #variables from files', () {
         final brick = Brick(
           name: '',
-          source: const BrickSource.none(),
+          source: BrickSource.none(
+            fileSystem: MemoryFileSystem(),
+          ),
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
           files: const [
             BrickFile.config(
               '',
@@ -1318,8 +1449,11 @@ exclude:
       test('gets #variables from partials', () {
         final brick = Brick(
           name: '',
-          source: const BrickSource.none(),
+          source: BrickSource.none(
+            fileSystem: MemoryFileSystem(),
+          ),
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
           partials: const [
             Partial(
               path: '',
@@ -1358,8 +1492,11 @@ exclude:
       test('gets #includeIf', () {
         final brick = Brick(
           name: '',
-          source: const BrickSource.none(),
+          source: BrickSource.none(
+            fileSystem: MemoryFileSystem(),
+          ),
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
           files: const [
             BrickFile.config(
               '',
@@ -1386,8 +1523,11 @@ exclude:
       test('gets #includeIfNot', () {
         final brick = Brick(
           name: '',
-          source: const BrickSource.none(),
+          source: BrickSource.none(
+            fileSystem: MemoryFileSystem(),
+          ),
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
           files: const [
             BrickFile.config(
               '',
@@ -1416,8 +1556,11 @@ exclude:
       test('gets #names', () {
         final brick = Brick(
           name: '',
-          source: const BrickSource.none(),
+          source: BrickSource.none(
+            fileSystem: MemoryFileSystem(),
+          ),
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
           dirs: [
             BrickDir(name: const Name('name1'), path: ''),
             BrickDir(name: const Name('name2'), path: ''),
@@ -1438,8 +1581,11 @@ exclude:
       test('gets #includeIf', () {
         final brick = Brick(
           name: '',
-          source: const BrickSource.none(),
+          source: BrickSource.none(
+            fileSystem: MemoryFileSystem(),
+          ),
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
           dirs: [
             BrickDir(
               path: '',
@@ -1466,8 +1612,11 @@ exclude:
       test('gets #includeIfNot', () {
         final brick = Brick(
           name: '',
-          source: const BrickSource.none(),
+          source: BrickSource.none(
+            fileSystem: MemoryFileSystem(),
+          ),
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
           dirs: [
             BrickDir(
               path: '',
@@ -1503,8 +1652,11 @@ exclude:
     test('returns when shouldSync is false', () {
       Brick(
         name: '',
-        source: const BrickSource.none(),
+        source: BrickSource.none(
+          fileSystem: MemoryFileSystem(),
+        ),
         logger: mockLogger,
+        fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: false);
 
       expect(printLogs, isEmpty);
@@ -1513,38 +1665,46 @@ exclude:
     test('returns when brickYamlConfig is null', () {
       Brick(
         name: '',
-        source: const BrickSource.none(),
+        source: BrickSource.none(
+          fileSystem: MemoryFileSystem(),
+        ),
         logger: mockLogger,
+        fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
 
       expect(printLogs, isEmpty);
     });
 
     test('warns when data returns null in reading brick.yaml file', () {
-      when(mockBricYamlConfig.data).thenReturn(null);
+      when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+          .thenReturn(null);
       verifyNever(() => mockLogger.warn(any()));
 
       Brick(
         name: '',
-        source: const BrickSource.none(),
+        source: BrickSource.none(
+          fileSystem: MemoryFileSystem(),
+        ),
         brickYamlConfig: mockBricYamlConfig,
         logger: mockLogger,
+        fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
-
-      verify(() => mockLogger.warn('Error reading `brick.yaml`')).called(1);
     });
 
     test('warns when names are not in sync', () {
-      when(mockBricYamlConfig.data)
+      when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
           .thenReturn(const BrickYamlData(name: 'Master Skywalker', vars: []));
 
       verifyNever(() => mockLogger.warn(any()));
 
       Brick(
         name: 'Master Yoda',
-        source: const BrickSource.none(),
+        source: BrickSource.none(
+          fileSystem: MemoryFileSystem(),
+        ),
         brickYamlConfig: mockBricYamlConfig,
         logger: mockLogger,
+        fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
 
       verify(
@@ -1558,16 +1718,19 @@ exclude:
     });
 
     test('alerts when brick.yaml is in sync', () {
-      when(mockBricYamlConfig.data)
+      when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
           .thenReturn(const BrickYamlData(name: 'Count Dooku', vars: []));
 
       verifyNever(() => mockLogger.info(any()));
 
       Brick(
         name: 'Count Dooku',
-        source: const BrickSource.none(),
+        source: BrickSource.none(
+          fileSystem: MemoryFileSystem(),
+        ),
         brickYamlConfig: mockBricYamlConfig,
         logger: mockLogger,
+        fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
 
       verifyNever(() => mockLogger.warn(any()));
@@ -1578,7 +1741,8 @@ exclude:
 
     group('alerts when brick.yaml is in out of sync', () {
       test('when brick.yaml contains extra variables', () {
-        when(mockBricYamlConfig.data).thenReturn(
+        when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+            .thenReturn(
           const BrickYamlData(
             name: 'Count Dooku',
             vars: ['var1', 'var2'],
@@ -1590,9 +1754,12 @@ exclude:
 
         Brick(
           name: 'Count Dooku',
-          source: const BrickSource.none(),
+          source: BrickSource.none(
+            fileSystem: MemoryFileSystem(),
+          ),
           brickYamlConfig: mockBricYamlConfig,
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
         ).checkBrickYamlConfig(shouldSync: true);
 
         verify(
@@ -1609,7 +1776,8 @@ exclude:
       });
 
       test('when brick_oven.yaml contains extra variables', () {
-        when(mockBricYamlConfig.data).thenReturn(
+        when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+            .thenReturn(
           const BrickYamlData(
             name: 'Count Dooku',
             vars: [],
@@ -1621,9 +1789,12 @@ exclude:
 
         Brick(
           name: 'Count Dooku',
-          source: const BrickSource.none(),
+          source: BrickSource.none(
+            fileSystem: MemoryFileSystem(),
+          ),
           brickYamlConfig: mockBricYamlConfig,
           logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
           dirs: [
             BrickDir(
               name: const Name('var1'),

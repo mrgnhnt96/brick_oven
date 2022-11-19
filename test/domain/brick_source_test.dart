@@ -40,14 +40,15 @@ void main() {
   }
 
   test('can be instanciated', () {
-    final instance = BrickSource(localPath: 'test');
+    final instance =
+        BrickSource(localPath: 'test', fileSystem: MemoryFileSystem());
 
     expect(instance, isA<BrickSource>());
   });
 
   group('#none', () {
     test('local path is null', () {
-      const instance = BrickSource.none();
+      final instance = BrickSource.none(fileSystem: MemoryFileSystem());
 
       expect(instance.localPath, isNull);
     });
@@ -61,7 +62,10 @@ void main() {
         final yaml = loadYaml('''
 $path
 ''') as String;
-        final instance = BrickSource.fromYaml(YamlValue.from(yaml));
+        final instance = BrickSource.fromYaml(
+          YamlValue.from(yaml),
+          fileSystem: MemoryFileSystem(),
+        );
 
         expect(instance.localPath, path);
       });
@@ -75,6 +79,7 @@ $path
         final instance = BrickSource.fromYaml(
           YamlValue.from(yaml),
           configPath: 'path/to/config.yaml',
+          fileSystem: MemoryFileSystem(),
         );
 
         expect(instance.localPath, 'path/to');
@@ -87,6 +92,7 @@ $path
           return BrickSource.fromYaml(
             YamlValue.from(null),
             configPath: 'path/to/config.yaml',
+            fileSystem: MemoryFileSystem(),
           );
         }
 
@@ -104,6 +110,7 @@ path:
           return BrickSource.fromYaml(
             YamlValue.from(yaml),
             configPath: 'path/to/config.yaml',
+            fileSystem: MemoryFileSystem(),
           );
         }
 
@@ -115,7 +122,10 @@ path:
 path: $path
 ''') as YamlMap;
 
-        final instance = BrickSource.fromYaml(YamlValue.yaml(yaml));
+        final instance = BrickSource.fromYaml(
+          YamlValue.yaml(yaml),
+          fileSystem: MemoryFileSystem(),
+        );
 
         expect(instance.localPath, path);
       });
@@ -129,14 +139,20 @@ extra: key
 ''') as YamlMap;
 
         expect(
-          () => BrickSource.fromYaml(YamlValue.yaml(yaml)),
+          () => BrickSource.fromYaml(
+            YamlValue.yaml(yaml),
+            fileSystem: MemoryFileSystem(),
+          ),
           throwsA(isA<ConfigException>()),
         );
       });
 
       test('should throw $ConfigException when yaml is error', () {
         expect(
-          () => BrickSource.fromYaml(const YamlError('error')),
+          () => BrickSource.fromYaml(
+            const YamlError('error'),
+            fileSystem: MemoryFileSystem(),
+          ),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -146,7 +162,10 @@ extra: key
 path:
 ''') as YamlMap;
 
-        final instance = BrickSource.fromYaml(YamlValue.from(yaml));
+        final instance = BrickSource.fromYaml(
+          YamlValue.from(yaml),
+          fileSystem: MemoryFileSystem(),
+        );
 
         expect(instance.localPath, isNull);
       });
@@ -158,13 +177,19 @@ path:
 ''') as YamlMap;
 
         expect(
-          () => BrickSource.fromYaml(YamlValue.yaml(yaml)),
+          () => BrickSource.fromYaml(
+            YamlValue.yaml(yaml),
+            fileSystem: MemoryFileSystem(),
+          ),
           throwsA(isA<ConfigException>()),
         );
       });
 
       test('should return null when not provided', () {
-        final instance = BrickSource.fromYaml(const YamlValue.none());
+        final instance = BrickSource.fromYaml(
+          const YamlValue.none(),
+          fileSystem: MemoryFileSystem(),
+        );
 
         expect(instance.localPath, isNull);
       });
@@ -173,7 +198,7 @@ path:
 
   group('#files', () {
     test('should return no files when no source is provided', () {
-      const instance = BrickSource.none();
+      final instance = BrickSource.none(fileSystem: MemoryFileSystem());
 
       expect(instance.files(), isEmpty);
     });
@@ -232,7 +257,10 @@ path:
     });
 
     test('should return no config file when source files do not exist', () {
-      final source = BrickSource(localPath: localPath);
+      final source = BrickSource(
+        localPath: localPath,
+        fileSystem: MemoryFileSystem(),
+      );
 
       final configFiles = ['file1.dart', 'file2.dart'].map(BrickFile.new);
 
@@ -370,7 +398,10 @@ path:
 
   group('#fromSourcePath', () {
     test('should join source dir with files path', () {
-      final source = BrickSource(localPath: localPath);
+      final source = BrickSource(
+        localPath: localPath,
+        fileSystem: MemoryFileSystem(),
+      );
       const fileName = 'file.dart';
 
       const file = BrickFile(fileName);

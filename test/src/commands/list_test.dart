@@ -9,6 +9,7 @@ import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/src/commands/list.dart';
+import 'package:brick_oven/src/runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -133,7 +134,10 @@ void main() {
             {
               Brick.memory(
                 name: 'package_1',
-                source: BrickSource.fromString('example/lib'),
+                source: BrickSource.fromString(
+                  'example/lib',
+                  fileSystem: MemoryFileSystem(),
+                ),
                 fileSystem: MemoryFileSystem(),
                 logger: mockLogger,
                 dirs: [
@@ -157,7 +161,10 @@ void main() {
               ),
               Brick.memory(
                 name: 'package_2',
-                source: BrickSource.fromString('example/lib'),
+                source: BrickSource.fromString(
+                  'example/lib',
+                  fileSystem: MemoryFileSystem(),
+                ),
                 fileSystem: MemoryFileSystem(),
                 logger: mockLogger,
                 dirs: [
@@ -213,9 +220,8 @@ void main() {
           ).called(1);
 
           verify(
-            () => mockAnalytics.waitForLastPing(
-              timeout: any(named: 'timeout'),
-            ),
+            () =>
+                mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
           ).called(1);
 
           expect(result, ExitCode.success.code);
@@ -253,9 +259,7 @@ void main() {
         ).called(1);
 
         verify(
-          () => mockAnalytics.waitForLastPing(
-            timeout: any(named: 'timeout'),
-          ),
+          () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
         ).called(1);
 
         expect(result, ExitCode.success.code);
