@@ -2,10 +2,18 @@
 
 import 'package:test/test.dart';
 
+import 'util/cook_all.dart';
 import 'util/cook_brick.dart';
 
 void main() {
-  group('cook single brick runs gracefully', () {
-    test('bio', () => cookBrick('bio'));
+  group('cook runs gracefully', () {
+    const bricks = [
+      'bio',
+    ];
+
+    for (final brick in bricks) {
+      test('$brick cook (single)', () => cookBrick(brick));
+      test('$brick cook (all)', () => cookAll(brick));
+    }
   });
 }
