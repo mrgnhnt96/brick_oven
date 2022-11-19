@@ -12,6 +12,7 @@ import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
@@ -611,6 +612,8 @@ yooooo:
         ),
         throwsA(isA<FileException>()),
       );
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     test('writes a file on the root level', () {
@@ -629,6 +632,8 @@ yooooo:
       final newFile = fileSystem.file(defaultFile);
 
       expect(newFile.existsSync(), isTrue);
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     test('writes a file on a nested level', () {
@@ -650,6 +655,8 @@ yooooo:
           defaultFile,
         ),
       );
+
+      verifyNoMoreInteractions(mockLogger);
 
       expect(newFile.existsSync(), isTrue);
     });
@@ -677,6 +684,8 @@ yooooo:
         ),
       );
 
+      verifyNoMoreInteractions(mockLogger);
+
       expect(newFile.existsSync(), isTrue);
     });
 
@@ -702,6 +711,8 @@ yooooo:
           '{{{$replacement}}}.dart',
         ),
       );
+
+      verifyNoMoreInteractions(mockLogger);
 
       expect(newFile.existsSync(), isTrue);
     });

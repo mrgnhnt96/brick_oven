@@ -227,6 +227,8 @@ path:
       for (final file in mergedFiles) {
         expect(fakePaths, contains('$localPath$separator${file.path}'));
       }
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     test('should return no config file when source files do not exist', () {
@@ -240,14 +242,25 @@ path:
       final mergedFiles =
           source.mergeFilesAndConfig(configFiles, logger: mockLogger);
 
-      verify(() => mockLogger.info(any())).called(2);
-      verify(() => mockLogger.warn(any())).called(2);
+      verify(() => mockLogger.info('')).called(2);
+      verify(
+        () => mockLogger.warn(
+          'The configured file "file1.dart" does not exist within local_path',
+        ),
+      ).called(1);
+      verify(
+        () => mockLogger.warn(
+          'The configured file "file2.dart" does not exist within local_path',
+        ),
+      ).called(1);
 
       expect(mergedFiles, hasLength(0));
 
       for (final file in mergedFiles) {
         expect(configFiles, isNot(contains(file)));
       }
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     test('should return all config files', () {
@@ -273,6 +286,8 @@ path:
       for (final file in mergedFiles) {
         expect(configFiles, contains(file));
       }
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     test('should return merged config files onto source files', () {
@@ -347,6 +362,8 @@ path:
         expect(brickFiles.length, 2);
         expect(brickFiles[0].path, 'file1.dart');
         expect(brickFiles[1].path, 'file2.dart');
+
+        verifyNoMoreInteractions(mockLogger);
       },
     );
   });
