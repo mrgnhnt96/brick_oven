@@ -335,7 +335,8 @@ exclude:
 
           expect(targetFile.existsSync(), isTrue);
 
-          verify(() => mockLogger.progress(any())).called(1);
+          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+              .called(1);
 
           verifyNoMoreInteractions(mockLogger);
           verifyNoMoreInteractions(mockWatcher);
@@ -374,7 +375,8 @@ exclude:
           verify(mockWatcher.start).called(1);
           verify(() => mockWatcher.hasRun).called(1);
 
-          verify(() => mockLogger.progress(any())).called(1);
+          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+              .called(1);
 
           verifyNoMoreInteractions(mockLogger);
           verifyNoMoreInteractions(mockWatcher);
@@ -421,7 +423,8 @@ exclude:
           expect(targetFile.readAsStringSync(), newContent);
           expect(testBrick.source.watcher?.isRunning, isTrue);
 
-          verify(() => mockLogger.progress(any())).called(1);
+          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+              .called(1);
 
           verifyNoMoreInteractions(mockLogger);
         });
@@ -463,7 +466,8 @@ exclude:
           expect(targetFile.readAsStringSync(), content);
 
           expect(testBrick.source.watcher?.isRunning, isTrue);
-          verify(() => mockLogger.progress(any())).called(1);
+          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+              .called(1);
 
           verifyNoMoreInteractions(mockLogger);
         });
@@ -509,7 +513,8 @@ exclude:
 
           expect(testBrick.source.watcher?.isRunning, isTrue);
 
-          verify(() => mockLogger.progress(any())).called(1);
+          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+              .called(1);
 
           verifyNoMoreInteractions(mockLogger);
         });
@@ -544,7 +549,8 @@ exclude:
 
           expect(testBrick.source.watcher?.isRunning, isNull);
 
-          verify(() => mockLogger.progress(any())).called(1);
+          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+              .called(1);
 
           verifyNoMoreInteractions(mockLogger);
         });
@@ -576,11 +582,11 @@ exclude:
 
           verify(() => mockLogger.warn('Unused variables ("hello") in BRICK'))
               .called(1);
-          verify(() => mockLogger.progress(any())).called(1);
+          verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
           verify(() => mockLogger.info('')).called(1);
           verify(
             () => mockLogger.warn(
-              'The configured file "path/to/director_of_shield/nick_fury.dart" does not exist within ',
+              'The configured file "$filePath" does not exist within ',
             ),
           ).called(1);
 
@@ -612,7 +618,7 @@ exclude:
           verify(
             () => mockLogger.warn('Unused partials ("$fileName") in BRICK'),
           ).called(1);
-          verify(() => mockLogger.progress(any())).called(1);
+          verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
 
           verifyNoMoreInteractions(mockLogger);
         });
@@ -656,7 +662,8 @@ exclude:
 
         expect(testBrick.source.watcher?.isRunning, isFalse);
 
-        verify(() => mockLogger.progress(any())).called(1);
+        verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+            .called(1);
 
         verifyNoMoreInteractions(mockLogger);
       });
@@ -712,6 +719,7 @@ exclude:
       );
 
       verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
     });
 
     test('throws $BrickException when partial #writeFile throws', () {
@@ -746,8 +754,12 @@ exclude:
         throwsA(isA<BrickException>()),
       );
 
-      verify(() => mockProgress.fail(any())).called(1);
-      verify(() => mockLogger.progress(any())).called(1);
+      verify(
+        () => mockProgress.fail(
+          '(Brick) Failed to write partial: $filePath',
+        ),
+      ).called(1);
+      verify(() => mockLogger.progress('Writing Brick: Brick')).called(1);
 
       verify(() => mockPartial.path).called(3);
       verify(() => mockPartial.fileName).called(2);
@@ -800,8 +812,12 @@ exclude:
         throwsA(isA<Exception>()),
       );
 
-      verify(() => mockProgress.fail(any())).called(1);
-      verify(() => mockLogger.progress(any())).called(1);
+      verify(
+        () => mockProgress.fail(
+          '(Brick) Failed to write partial: $filePath',
+        ),
+      ).called(1);
+      verify(() => mockLogger.progress('Writing Brick: Brick')).called(1);
       verify(() => mockPartial.path).called(3);
       verify(() => mockPartial.fileName).called(2);
 
@@ -865,8 +881,9 @@ exclude:
         throwsA(isA<BrickException>()),
       );
 
-      verify(() => mockProgress.fail(any())).called(1);
-      verify(() => mockLogger.progress(any())).called(1);
+      verify(() => mockProgress.fail('(Brick) Failed to write file: $filePath'))
+          .called(1);
+      verify(() => mockLogger.progress('Writing Brick: Brick')).called(1);
       verify(() => mockFile.path).called(3);
       verify(
         () => mockFile.writeTargetFile(
@@ -885,8 +902,7 @@ exclude:
         () => mockSource.mergeFilesAndConfig([mockFile], logger: mockLogger),
       ).called(1);
       verify(
-        () => mockSource
-            .fromSourcePath('path/to/director_of_shield/nick_fury.dart'),
+        () => mockSource.fromSourcePath(filePath),
       ).called(1);
 
       verifyNoMoreInteractions(mockLogger);
@@ -939,8 +955,9 @@ exclude:
         throwsA(isA<Exception>()),
       );
 
-      verify(() => mockProgress.fail(any())).called(1);
-      verify(() => mockLogger.progress(any())).called(1);
+      verify(() => mockProgress.fail('(Brick) Failed to write file: $filePath'))
+          .called(1);
+      verify(() => mockLogger.progress('Writing Brick: Brick')).called(1);
       verify(() => mockFile.path).called(3);
       verify(
         () => mockFile.writeTargetFile(
@@ -959,8 +976,7 @@ exclude:
         () => mockSource.mergeFilesAndConfig([mockFile], logger: mockLogger),
       ).called(1);
       verify(
-        () => mockSource
-            .fromSourcePath('path/to/director_of_shield/nick_fury.dart'),
+        () => mockSource.fromSourcePath(filePath),
       ).called(1);
 
       verifyNoMoreInteractions(mockLogger);
@@ -997,9 +1013,13 @@ exclude:
 
       expect(targetFile.existsSync(), isTrue);
 
-      verify(() => mockLogger.progress(any())).called(1);
+      verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+          .called(1);
+      verify(() => mockProgress.complete('super_awesome: cooked 1 file'))
+          .called(1);
 
       verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
     });
 
     test('uses provided path for output when provided', () {
@@ -1032,9 +1052,13 @@ exclude:
 
       expect(targetFile.existsSync(), isTrue);
 
-      verify(() => mockLogger.progress(any())).called(1);
+      verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+          .called(1);
+      verify(() => mockProgress.complete('super_awesome: cooked 1 file'))
+          .called(1);
 
       verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
     });
 
     test('deletes directory if exists', () {
@@ -1065,11 +1089,15 @@ exclude:
 
       testBrick.cook();
 
-      verify(() => mockLogger.progress(any())).called(1);
-
       expect(fakeUnneededFile.existsSync(), isFalse);
 
+      verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+          .called(1);
+      verify(() => mockProgress.complete('super_awesome: cooked 1 file'))
+          .called(1);
+
       verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
     });
 
     test('loops through files to write', () {
@@ -1102,9 +1130,14 @@ exclude:
         expect(fs.file(join(brickPath, file.path)).existsSync(), isTrue);
       }
 
-      verify(() => mockLogger.progress(any())).called(1);
+      verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+          .called(1);
+
+      verify(() => mockProgress.complete('super_awesome: cooked 3 files'))
+          .called(1);
 
       verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
     });
 
     test('loops through partials to write', () {
@@ -1148,14 +1181,19 @@ exclude:
         );
       }
 
-      verify(() => mockLogger.progress(any())).called(1);
+      verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+          .called(1);
       verify(
         () => mockLogger.warn(
           'Unused partials ("file1.dart", "file2.dart", "file3.dart") in super_awesome',
         ),
       ).called(1);
 
+      verify(() => mockProgress.complete('super_awesome: cooked 3 files'))
+          .called(1);
+
       verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
     });
 
     group('#defaultVariables write', () {
@@ -1184,9 +1222,14 @@ exclude:
 
         expect(targetFile.readAsStringSync(), expected);
 
-        verify(() => mockLogger.progress(any())).called(1);
+        verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+            .called(1);
+
+        verify(() => mockProgress.complete('super_awesome: cooked 1 file'))
+            .called(1);
 
         verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockProgress);
       });
 
       test('partials', () {
@@ -1214,13 +1257,18 @@ exclude:
 
         expect(targetFile.readAsStringSync(), expected);
 
-        verify(() => mockLogger.progress(any())).called(1);
+        verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+            .called(1);
         verify(
           () => mockLogger
               .warn('Unused partials ("file1.dart") in super_awesome'),
         ).called(1);
 
+        verify(() => mockProgress.complete('super_awesome: cooked 1 file'))
+            .called(1);
+
         verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockProgress);
       });
     });
   });

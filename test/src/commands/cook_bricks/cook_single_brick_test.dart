@@ -25,15 +25,11 @@ void main() {
   late CookSingleBrick cookSingleBrickCommand;
   late Brick brick;
   late Logger mockLogger;
-  late Progress mockProgress;
   late Analytics mockAnalytics;
 
   setUp(() {
     mockLogger = MockLogger();
     mockAnalytics = MockAnalytics()..stubMethods();
-    mockProgress = MockProgress();
-
-    when(() => mockLogger.progress(any())).thenReturn(mockProgress);
 
     brick = Brick(
       source: BrickSource(localPath: 'path/to/first'),
@@ -55,6 +51,9 @@ void main() {
         cookSingleBrickCommand.description,
         'Cook the brick: ${brick.name}',
       );
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('name is cook', () {

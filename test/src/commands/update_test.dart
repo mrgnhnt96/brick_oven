@@ -39,17 +39,27 @@ void main() {
     test('description displays correctly', () {
       expect(
         updateCommand.description,
-        'Updates brick_oven to the latest version',
+        'Updates $packageName to the latest version',
       );
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('name displays correctly', () {
       expect(updateCommand.name, 'update');
       expect(UpdateCommand.commandName, 'update');
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(mockAnalytics);
     });
   });
 
-  group('brick_oven update', () {
+  group('$packageName update', () {
     test('handles pub latest version query errors', () async {
       when(
         () => mockPubUpdater.getLatestVersion(any()),
@@ -61,9 +71,17 @@ void main() {
 
       verify(() => mockLogger.progress('Checking for updates')).called(1);
       verify(() => mockProgress.fail('Failed to get latest version'));
+      verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
       verifyNever(
-        () => mockPubUpdater.update(packageName: any(named: 'packageName')),
+        () => mockPubUpdater.update(
+          packageName: any(named: 'packageName'),
+        ),
       );
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('handles pub update errors', () async {
@@ -80,10 +98,32 @@ void main() {
       expect(result, equals(ExitCode.software.code));
 
       verify(() => mockLogger.progress('Checking for updates')).called(1);
-      verify(() => mockProgress.fail('Failed to update brick_oven'));
+      verify(() => mockProgress.fail('Failed to update $packageName'));
+      verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
       verify(
-        () => mockPubUpdater.update(packageName: any(named: 'packageName')),
+        () => mockPubUpdater.update(packageName: packageName),
       ).called(1);
+
+      verify(() => mockProgress.update('Successfully checked for updates'))
+          .called(1);
+      verify(() => mockProgress.update('Updating to $latestVersion')).called(1);
+
+      verify(
+        () => mockAnalytics.sendEvent(
+          'update',
+          'success',
+          value: 0,
+          parameters: {
+            'old version': packageVersion,
+            'new version': latestVersion,
+          },
+        ),
+      ).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('updates when newer version exists', () async {
@@ -101,10 +141,11 @@ void main() {
       verify(() => mockProgress.update('Successfully checked for updates'))
           .called(1);
       verify(() => mockProgress.update('Updating to $latestVersion')).called(1);
+      verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
       verify(() => mockPubUpdater.update(packageName: packageName)).called(1);
       verify(
         () => mockProgress.complete(
-          'Successfully updated brick_oven to $latestVersion',
+          'Successfully updated $packageName to $latestVersion',
         ),
       ).called(1);
 
@@ -127,6 +168,11 @@ void main() {
       ).called(1);
 
       expect(result, equals(ExitCode.success.code));
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('does not update when already on latest version', () async {
@@ -136,10 +182,14 @@ void main() {
 
       final result = await updateCommand.run();
 
+      verify(() => mockLogger.progress('Checking for updates')).called(1);
+      verify(() => mockProgress.update('Successfully checked for updates'))
+          .called(1);
       verify(
         () => mockProgress
-            .complete('brick_oven is already at the latest version.'),
+            .complete('$packageName is already at the latest version.'),
       ).called(1);
+      verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
       verifyNever(() => mockLogger.progress('Updating to $latestVersion'));
       verifyNever(() => mockPubUpdater.update(packageName: packageName));
 
@@ -161,6 +211,11 @@ void main() {
       ).called(1);
 
       expect(result, ExitCode.success.code);
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(mockAnalytics);
     });
   });
 }

@@ -22,7 +22,6 @@ import '../../../test_utils/mocks.dart';
 void main() {
   late CookAllBricks command;
   late Logger mockLogger;
-  late Progress mockProgress;
   late FileSystem memoryFileSystem;
   late Analytics mockAnalytics;
   late Brick mockBrick;
@@ -30,10 +29,7 @@ void main() {
   setUp(() {
     mockBrick = MockBrick();
     mockLogger = MockLogger();
-    mockProgress = MockProgress();
     mockAnalytics = MockAnalytics()..stubMethods();
-
-    when(() => mockLogger.progress(any())).thenReturn(mockProgress);
 
     memoryFileSystem = MemoryFileSystem();
 
@@ -47,10 +43,16 @@ void main() {
   group('$CookAllBricks', () {
     test('description displays correctly', () {
       expect(command.description, 'Cook all bricks');
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('name displays correctly', () {
       expect(command.name, 'all');
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockAnalytics);
     });
 
     group('#run', () {
@@ -90,6 +92,10 @@ void main() {
           ).called(1);
 
           expect(result, ExitCode.success.code);
+
+          verifyNoMoreInteractions(mockBrick);
+          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(mockAnalytics);
         });
 
         group('when #shouldSync', () {
@@ -350,6 +356,9 @@ void main() {
         verify(() => mockLogger.err('error')).called(1);
 
         expect(result, ExitCode.config.code);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockAnalytics);
       });
 
       test('when unknown error occurs', () async {
@@ -391,6 +400,12 @@ void main() {
             timeout: any(named: 'timeout'),
           ),
         ).called(1);
+
+        verify(() => mockBrick.name).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockBrick);
+        verifyNoMoreInteractions(mockAnalytics);
 
         expect(result, ExitCode.success.code);
       });
@@ -442,6 +457,12 @@ void main() {
         ).called(1);
 
         expect(result, ExitCode.success.code);
+
+        verify(() => mockBrick.name).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockBrick);
+        verifyNoMoreInteractions(mockAnalytics);
       });
     });
   });

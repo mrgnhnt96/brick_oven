@@ -28,6 +28,7 @@ void main() {
 
       when(() => mockStdin.hasTerminal).thenReturn(true);
       when(() => mockStdout.supportsAnsiEscapes).thenReturn(true);
+
       mockLogger = MockLogger();
       keyPressListener = KeyPressListener(
         stdin: mockStdin,
@@ -40,33 +41,32 @@ void main() {
       ).thenAnswer((_) => const Stream.empty());
     });
 
-    test(
-      'returns null when stdin has no termainal',
-      () {
-        when(() => mockStdin.hasTerminal).thenReturn(false);
+    test('returns null when stdin has no termainal', () {
+      when(() => mockStdin.hasTerminal).thenReturn(false);
 
-        expect(() => keyPressListener.listenToKeystrokes(), returnsNormally);
-      },
-    );
+      expect(() => keyPressListener.listenToKeystrokes(), returnsNormally);
 
-    test(
-      'sets up key listener',
-      () async {
-        verifyNever(mockStdin.asBroadcastStream);
-        verifyNever(() => mockLogger.info(any()));
+      verifyNoMoreInteractions(mockLogger);
+    });
 
-        keyPressListener.listenToKeystrokes();
+    test('sets up key listener', () async {
+      verifyNever(mockStdin.asBroadcastStream);
+      verifyNever(() => mockLogger.info(any()));
 
-        verify(() => mockLogger.info(any())).called(2);
+      keyPressListener.listenToKeystrokes();
 
-        verify(() => mockStdin.lineMode = false).called(1);
-        verify(() => mockStdin.echoMode = false).called(1);
+      verify(mockLogger.quit).called(1);
+      verify(mockLogger.reload).called(1);
 
-        await Future<void>.delayed(Duration.zero);
+      verify(() => mockStdin.lineMode = false).called(1);
+      verify(() => mockStdin.echoMode = false).called(1);
 
-        verify(mockStdin.asBroadcastStream).called(1);
-      },
-    );
+      await Future<void>.delayed(Duration.zero);
+
+      verify(mockStdin.asBroadcastStream).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+    });
 
     group('#keyListener', () {
       test('throws state error when stdin does not have terminal', () {
@@ -76,6 +76,8 @@ void main() {
           () => keyPressListener.keyListener(keys: {'': () {}} as KeyMap),
           throwsStateError,
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('sets line and echo mode to false', () {
@@ -83,6 +85,8 @@ void main() {
 
         verify(() => mockStdin.lineMode = false).called(1);
         verify(() => mockStdin.echoMode = false).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('listens for key presses', () async {
@@ -112,6 +116,8 @@ void main() {
 
         expect(qPressed, isTrue);
         expect(escPressed, isTrue);
+
+        verifyNoMoreInteractions(mockLogger);
       });
     });
 
@@ -128,6 +134,11 @@ void main() {
       expect(instance.listenToKeystrokes, returnsNormally);
       expect(instance.listenToKeystrokes, returnsNormally);
       expect(instance.listenToKeystrokes, returnsNormally);
+
+      verify(mockLogger.quit).called(4);
+      verify(mockLogger.reload).called(4);
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     group('#keyPresses', () {
@@ -151,6 +162,8 @@ void main() {
         expect(hasExited, isTrue);
         expect(exitCode, 0);
         verify(mockLogger.exiting).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('"r" logs and exits with code 75', () {
@@ -172,7 +185,9 @@ void main() {
 
         expect(hasExited, isTrue);
         expect(exitCode, 75);
-        verify(() => mockLogger.info('\nRestarting...')).called(1);
+        verify(() => mockLogger.restart()).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('"esc" logs', () {
@@ -183,7 +198,10 @@ void main() {
 
         action!.call();
 
-        verify(() => mockLogger.info(any())).called(2);
+        verify(mockLogger.quit).called(1);
+        verify(mockLogger.reload).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
       });
     });
   });

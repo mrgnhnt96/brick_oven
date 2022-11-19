@@ -51,6 +51,8 @@ bricks:
         final bricks = brickOvenCommand.bricks().bricks;
         expect(bricks, isNotNull);
         expect(bricks.length, 3);
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('returns error when when ${BrickOvenYaml.file} is bad', () {
@@ -62,17 +64,18 @@ bricks:
           brickOvenCommand.bricks(),
           const BricksOrError(null, 'Invalid brick oven configuration file'),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
-      test(
-        'returns error when ${BrickOvenYaml.file} does not exist',
-        () {
-          expect(
-            brickOvenCommand.bricks(),
-            const BricksOrError(null, 'No ${BrickOvenYaml.file} file found'),
-          );
-        },
-      );
+      test('returns error when ${BrickOvenYaml.file} does not exist', () {
+        expect(
+          brickOvenCommand.bricks(),
+          const BricksOrError(null, 'No ${BrickOvenYaml.file} file found'),
+        );
+
+        verifyNoMoreInteractions(mockLogger);
+      });
 
       test('return $BricksOrError with error yaml has bad syntax', () {
         const content = '''
@@ -90,6 +93,8 @@ bricks:
           result.error,
           startsWith('Invalid configuration, '),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('return $BricksOrError with error when extra keys are provided', () {
@@ -111,6 +116,8 @@ second:
           'Invalid brick_oven.yaml config:\n'
           'Unknown keys: "second"',
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('return $BricksOrError error when source is null in sub config file',
@@ -136,6 +143,8 @@ source:
           result.error,
           contains('`source` value is required in sub config files'),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('return $BricksOrError error when config file does not exist', () {
@@ -156,6 +165,8 @@ bricks:
             'Brick configuration file not found | (first) -- $path.yaml',
           ),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('return $BricksOrError error when config file is not type map', () {
@@ -176,6 +187,8 @@ bricks:
           brickOvenCommand.bricks().error,
           contains('Brick configuration file must be of type'),
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('return $BricksOrError error when brick is not correct type', () {
@@ -194,6 +207,8 @@ bricks:
           'Invalid brick config: "first"\n'
           'Reason: Expected `Map` or `String` (path to brick configuration file)',
         );
+
+        verifyNoMoreInteractions(mockLogger);
       });
     });
 
@@ -203,6 +218,8 @@ bricks:
 
         expect(cwd, isNotNull);
         expect(cwd.path, fs.currentDirectory.path);
+
+        verifyNoMoreInteractions(mockLogger);
       });
     });
   });

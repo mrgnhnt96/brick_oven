@@ -3,6 +3,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
@@ -17,6 +18,8 @@ void main() {
   late CookBricksCommand brickOvenCommand;
   late CommandRunner<void> runner;
   late Logger mockLogger;
+  late Analytics mockAnalytics;
+  late PubUpdater mockPubUpdater;
 
   setUp(() {
     fs = MemoryFileSystem();
@@ -33,17 +36,22 @@ bricks:
     source: path/to/third
 ''',
       );
+
     mockLogger = MockLogger();
+    mockAnalytics = MockAnalytics();
+    mockPubUpdater = MockPubUpdater();
+
     brickOvenCommand = CookBricksCommand(
-      analytics: MockAnalytics(),
+      analytics: mockAnalytics,
       fileSystem: fs,
       logger: mockLogger,
     );
+
     runner = BrickOvenRunner(
       fileSystem: fs,
       logger: mockLogger,
-      pubUpdater: MockPubUpdater(),
-      analytics: MockAnalytics(),
+      pubUpdater: mockPubUpdater,
+      analytics: mockAnalytics,
     );
   });
 
@@ -58,6 +66,10 @@ bricks:
           'third',
         ],
       );
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockAnalytics);
+      verifyNoMoreInteractions(mockPubUpdater);
     });
 
     test('description displays correctly', () {
@@ -65,10 +77,18 @@ bricks:
         brickOvenCommand.description,
         'Cook 👨‍🍳 bricks from the config file',
       );
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockAnalytics);
+      verifyNoMoreInteractions(mockPubUpdater);
     });
 
     test('name is cook', () {
       expect(brickOvenCommand.name, 'cook');
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockAnalytics);
+      verifyNoMoreInteractions(mockPubUpdater);
     });
 
     test('contains all sub brick commands', () {
@@ -81,6 +101,10 @@ bricks:
           'third',
         ]),
       );
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockAnalytics);
+      verifyNoMoreInteractions(mockPubUpdater);
     });
 
     group('when configuration is bad', () {
@@ -116,6 +140,9 @@ bricks:
           '\n[WARNING] Unable to load bricks\n'
           'Invalid brick oven configuration file',
         );
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockAnalytics);
       });
     });
   });
