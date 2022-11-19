@@ -64,7 +64,7 @@ void main() {
     });
 
     group('default $KeyPressListener', () {
-      test('calls toExit with ExitCode.tempFail when key is pressed', () async {
+      test('calls toExit  when key is pressed', () async {
         final instance = TestOvenMixin(
           logger: mockLogger,
           fileWatchers: {},
@@ -97,600 +97,592 @@ void main() {
   });
 
   group('cook', () {
-    group('mock', () {
-      late Brick mockBrick;
-      late BrickSource mockBrickSource;
-      late SourceWatcher mockSourceWatcher;
-      late FileWatcher mockFileWatcher;
-      late KeyPressListener mockKeyPressListener;
+    late Brick mockBrick;
+    late BrickSource mockBrickSource;
+    late SourceWatcher mockSourceWatcher;
+    late FileWatcher mockFileWatcher;
+    late KeyPressListener mockKeyPressListener;
 
-      setUp(() {
-        mockBrick = MockBrick();
-        mockBrickSource = MockBrickSource();
-        mockSourceWatcher = MockSourceWatcher();
-        mockFileWatcher = MockFileWatcher();
-        mockKeyPressListener = MockKeyPressListener();
+    setUp(() {
+      mockBrick = MockBrick();
+      mockBrickSource = MockBrickSource();
+      mockSourceWatcher = MockSourceWatcher();
+      mockFileWatcher = MockFileWatcher();
+      mockKeyPressListener = MockKeyPressListener();
 
-        when(() => mockBrick.source).thenReturn(mockBrickSource);
-        when(() => mockBrickSource.watcher).thenReturn(mockSourceWatcher);
-      });
+      when(() => mockBrick.source).thenReturn(mockBrickSource);
+      when(() => mockBrickSource.watcher).thenReturn(mockSourceWatcher);
+    });
 
-      test('runs gracefully', () async {
-        final oven = TestOvenMixin(
-          keyPressListener: mockKeyPressListener,
-          logger: mockLogger,
-          outputDir: 'my_path',
-          fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
-        );
+    test('runs gracefully', () async {
+      final oven = TestOvenMixin(
+        keyPressListener: mockKeyPressListener,
+        logger: mockLogger,
+        outputDir: 'my_path',
+        fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
+      );
 
-        final result = await oven.putInOven({mockBrick});
-        expect(result.code, ExitCode.success.code);
+      final result = await oven.putInOven({mockBrick});
+      expect(result.code, ExitCode.success.code);
 
-        verify(mockLogger.preheat).called(1);
-        // this could possibly fail since this prints the time
-        verify(mockLogger.dingDing).called(1);
+      verify(mockLogger.preheat).called(1);
+      // this could possibly fail since this prints the time
+      verify(mockLogger.dingDing).called(1);
 
-        verifyNever(mockKeyPressListener.listenToKeystrokes);
-        verifyNever(() => mockFileWatcher.events);
-        verifyNever(mockSourceWatcher.start);
-        verify(
-          () => mockBrick.cook(output: 'my_path'),
-        ).called(1);
+      verifyNever(mockKeyPressListener.listenToKeystrokes);
+      verifyNever(() => mockFileWatcher.events);
+      verifyNever(mockSourceWatcher.start);
+      verify(
+        () => mockBrick.cook(output: 'my_path'),
+      ).called(1);
 
-        verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockBrick);
-        verifyNoMoreInteractions(mockBrickSource);
-        verifyNoMoreInteractions(mockSourceWatcher);
-        verifyNoMoreInteractions(mockFileWatcher);
-        verifyNoMoreInteractions(mockKeyPressListener);
-      });
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockBrick);
+      verifyNoMoreInteractions(mockBrickSource);
+      verifyNoMoreInteractions(mockSourceWatcher);
+      verifyNoMoreInteractions(mockFileWatcher);
+      verifyNoMoreInteractions(mockKeyPressListener);
+    });
 
-      test('prints warning and error when $ConfigException is thrown',
-          () async {
-        when(() => mockBrick.name).thenReturn('BRICK');
+    test('prints warning and error when $ConfigException is thrown', () async {
+      when(() => mockBrick.name).thenReturn('BRICK');
 
-        when(() => mockBrick.cook(output: any(named: 'output')))
-            .thenThrow(TextConfigException('my error'));
+      when(() => mockBrick.cook(output: any(named: 'output')))
+          .thenThrow(TextConfigException('my error'));
 
-        final oven = TestOvenMixin(
-          keyPressListener: mockKeyPressListener,
-          logger: mockLogger,
-          outputDir: 'my_path',
-          fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
-        );
+      final oven = TestOvenMixin(
+        keyPressListener: mockKeyPressListener,
+        logger: mockLogger,
+        outputDir: 'my_path',
+        fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
+      );
 
-        final result = await oven.putInOven({mockBrick});
-        expect(result.code, ExitCode.success.code);
+      final result = await oven.putInOven({mockBrick});
+      expect(result.code, ExitCode.success.code);
 
-        verify(mockLogger.preheat).called(1);
-        // this could possibly fail since this prints the time
-        verify(mockLogger.dingDing).called(1);
+      verify(mockLogger.preheat).called(1);
+      // this could possibly fail since this prints the time
+      verify(mockLogger.dingDing).called(1);
 
-        verifyNever(mockKeyPressListener.listenToKeystrokes);
-        verifyNever(() => mockFileWatcher.events);
-        verifyNever(mockSourceWatcher.start);
-        verify(() => mockBrick.cook(output: 'my_path')).called(1);
+      verifyNever(mockKeyPressListener.listenToKeystrokes);
+      verifyNever(() => mockFileWatcher.events);
+      verifyNever(mockSourceWatcher.start);
+      verify(() => mockBrick.cook(output: 'my_path')).called(1);
 
-        verify(() => mockLogger.warn('my error')).called(1);
-        verify(() => mockLogger.err('Could not cook brick: BRICK')).called(1);
-        verify(() => mockBrick.name).called(1);
+      verify(() => mockLogger.warn('my error')).called(1);
+      verify(() => mockLogger.err('Could not cook brick: BRICK')).called(1);
+      verify(() => mockBrick.name).called(1);
 
-        verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockBrick);
-        verifyNoMoreInteractions(mockBrickSource);
-        verifyNoMoreInteractions(mockSourceWatcher);
-        verifyNoMoreInteractions(mockFileWatcher);
-        verifyNoMoreInteractions(mockKeyPressListener);
-      });
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockBrick);
+      verifyNoMoreInteractions(mockBrickSource);
+      verifyNoMoreInteractions(mockSourceWatcher);
+      verifyNoMoreInteractions(mockFileWatcher);
+      verifyNoMoreInteractions(mockKeyPressListener);
+    });
 
-      test('prints warning and error when $Exception is thrown', () async {
-        when(() => mockBrick.name).thenReturn('BRICK');
+    test('prints warning and error when $Exception is thrown', () async {
+      when(() => mockBrick.name).thenReturn('BRICK');
 
-        when(() => mockBrick.cook(output: any(named: 'output')))
-            .thenThrow(Exception('my error'));
+      when(() => mockBrick.cook(output: any(named: 'output')))
+          .thenThrow(Exception('my error'));
 
-        final oven = TestOvenMixin(
-          keyPressListener: mockKeyPressListener,
-          logger: mockLogger,
-          outputDir: 'my_path',
-          fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
-        );
+      final oven = TestOvenMixin(
+        keyPressListener: mockKeyPressListener,
+        logger: mockLogger,
+        outputDir: 'my_path',
+        fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
+      );
 
-        final result = await oven.putInOven({mockBrick});
-        expect(result.code, ExitCode.success.code);
+      final result = await oven.putInOven({mockBrick});
+      expect(result.code, ExitCode.success.code);
 
-        verify(mockLogger.preheat).called(1);
-        // this could possibly fail since this prints the time
-        verify(mockLogger.dingDing).called(1);
+      verify(mockLogger.preheat).called(1);
+      // this could possibly fail since this prints the time
+      verify(mockLogger.dingDing).called(1);
 
-        verifyNever(mockKeyPressListener.listenToKeystrokes);
-        verifyNever(() => mockFileWatcher.events);
-        verifyNever(mockSourceWatcher.start);
-        verify(() => mockBrick.cook(output: 'my_path')).called(1);
+      verifyNever(mockKeyPressListener.listenToKeystrokes);
+      verifyNever(() => mockFileWatcher.events);
+      verifyNever(mockSourceWatcher.start);
+      verify(() => mockBrick.cook(output: 'my_path')).called(1);
 
-        verify(() => mockLogger.warn('Unknown error: Exception: my error'))
-            .called(1);
-        verify(() => mockLogger.err('Could not cook brick: BRICK')).called(1);
+      verify(() => mockLogger.warn('Unknown error: Exception: my error'))
+          .called(1);
+      verify(() => mockLogger.err('Could not cook brick: BRICK')).called(1);
 
-        verify(() => mockBrick.name).called(1);
+      verify(() => mockBrick.name).called(1);
 
-        verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockBrick);
-        verifyNoMoreInteractions(mockBrickSource);
-        verifyNoMoreInteractions(mockSourceWatcher);
-        verifyNoMoreInteractions(mockFileWatcher);
-        verifyNoMoreInteractions(mockKeyPressListener);
-      });
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockBrick);
+      verifyNoMoreInteractions(mockBrickSource);
+      verifyNoMoreInteractions(mockSourceWatcher);
+      verifyNoMoreInteractions(mockFileWatcher);
+      verifyNoMoreInteractions(mockKeyPressListener);
     });
   });
 
   group('watch', () {
-    group('mock', () {
-      late Stdin mockStdin;
-      late Logger mockLogger;
-      late Brick mockBrick;
-      late BrickSource mockBrickSource;
-      late Progress mockProgress;
-      late SourceWatcher mockSourceWatcher;
-      late Completer<int> exitCompleter;
-      late FileWatcher mockFileWatcher;
-      late TestFileWatcher testFileWatcher;
-      late KeyPressListener keyPressListener;
-      late TestDirectoryWatcher testDirectoryWatcher;
+    late Stdin mockStdin;
+    late Logger mockLogger;
+    late Brick mockBrick;
+    late BrickSource mockBrickSource;
+    late Progress mockProgress;
+    late SourceWatcher mockSourceWatcher;
+    late Completer<int> exitCompleter;
+    late FileWatcher mockFileWatcher;
+    late TestFileWatcher testFileWatcher;
+    late KeyPressListener keyPressListener;
+    late TestDirectoryWatcher testDirectoryWatcher;
 
-      setUp(() {
-        mockBrick = MockBrick();
-        mockStdin = MockStdin();
-        mockLogger = MockLogger();
-        mockBrickSource = MockBrickSource();
-        mockSourceWatcher = MockSourceWatcher();
-        mockProgress = MockProgress();
-        exitCompleter = Completer<int>();
-        testFileWatcher = TestFileWatcher();
-        mockFileWatcher = MockFileWatcher();
-        testDirectoryWatcher = TestDirectoryWatcher();
+    setUp(() {
+      mockBrick = MockBrick();
+      mockStdin = MockStdin();
+      mockLogger = MockLogger();
+      mockBrickSource = MockBrickSource();
+      mockSourceWatcher = MockSourceWatcher();
+      mockProgress = MockProgress();
+      exitCompleter = Completer<int>();
+      testFileWatcher = TestFileWatcher();
+      mockFileWatcher = MockFileWatcher();
+      testDirectoryWatcher = TestDirectoryWatcher();
 
-        keyPressListener = KeyPressListener(
-          stdin: mockStdin,
-          logger: mockLogger,
-          toExit: exitCompleter.complete,
-        );
+      keyPressListener = KeyPressListener(
+        stdin: mockStdin,
+        logger: mockLogger,
+        toExit: exitCompleter.complete,
+      );
 
-        when(() => mockLogger.progress(any())).thenReturn(mockProgress);
+      when(() => mockLogger.progress(any())).thenReturn(mockProgress);
 
-        when(() => mockStdin.hasTerminal).thenReturn(true);
+      when(() => mockStdin.hasTerminal).thenReturn(true);
 
-        when(() => mockBrick.source).thenReturn(mockBrickSource);
-        when(() => mockBrickSource.watcher).thenReturn(mockSourceWatcher);
+      when(() => mockBrick.source).thenReturn(mockBrickSource);
+      when(() => mockBrickSource.watcher).thenReturn(mockSourceWatcher);
 
-        when(() => mockSourceWatcher.hasRun).thenAnswer((_) => true);
-        when(mockSourceWatcher.start).thenAnswer((_) => Future.value());
-        when(mockSourceWatcher.stop).thenAnswer((_) => Future.value());
+      when(() => mockSourceWatcher.hasRun).thenAnswer((_) => true);
+      when(mockSourceWatcher.start).thenAnswer((_) => Future.value());
+      when(mockSourceWatcher.stop).thenAnswer((_) => Future.value());
 
-        when(() => mockFileWatcher.events)
-            .thenAnswer((_) => const Stream.empty());
+      when(() => mockFileWatcher.events)
+          .thenAnswer((_) => const Stream.empty());
 
-        when(mockStdin.asBroadcastStream).thenAnswer(
-          (_) => Stream.fromIterable([
-            'q'.codeUnits,
-            // [0x1b] // escape
-          ]),
-        );
-      });
+      when(mockStdin.asBroadcastStream).thenAnswer(
+        (_) => Stream.fromIterable([
+          'q'.codeUnits,
+          // [0x1b] // escape
+        ]),
+      );
+    });
 
-      tearDown(() {
-        testFileWatcher.close();
-        testDirectoryWatcher.close();
-      });
+    tearDown(() {
+      testFileWatcher.close();
+      testDirectoryWatcher.close();
+    });
 
-      test('runs gracefully', () async {
-        final oven = TestOvenMixin(
-          keyPressListener: keyPressListener,
-          logger: mockLogger,
-          outputDir: 'my_path',
-          isWatch: true,
-          fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
-        );
+    test('runs gracefully', () async {
+      final oven = TestOvenMixin(
+        keyPressListener: keyPressListener,
+        logger: mockLogger,
+        outputDir: 'my_path',
+        isWatch: true,
+        fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
+      );
 
-        unawaited(oven.putInOven({mockBrick}));
-        // expect(result.code, ExitCode.success.code);
+      unawaited(oven.putInOven({mockBrick}));
+      // expect(result.code, ExitCode.success.code);
 
-        await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
 
-        verify(mockLogger.preheat).called(1);
-        // this could possibly fail since this prints the time
-        verify(mockLogger.dingDing).called(1);
-        verify(mockLogger.watching).called(1);
+      verify(mockLogger.preheat).called(1);
+      // this could possibly fail since this prints the time
+      verify(mockLogger.dingDing).called(1);
+      verify(mockLogger.watching).called(1);
 
-        // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(mockLogger.quit).called(1);
-        verify(mockLogger.reload).called(1);
+      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
+      verify(mockLogger.quit).called(1);
+      verify(mockLogger.reload).called(1);
 
-        verify(() => mockFileWatcher.events).called(1);
+      verify(() => mockFileWatcher.events).called(1);
 
-        verify(
-          () => mockSourceWatcher.addEvent(any(), runBefore: true),
-        ).called(2);
-        verify(
-          () => mockSourceWatcher.addEvent(any(), runAfter: true),
-        ).called(2);
+      verify(
+        () => mockSourceWatcher.addEvent(any(), runBefore: true),
+      ).called(2);
+      verify(
+        () => mockSourceWatcher.addEvent(any(), runAfter: true),
+      ).called(3);
 
-        verify(() => mockBrick.cook(output: 'my_path', watch: true)).called(1);
-        verify(() => mockBrick.source).called(1);
-        verify(() => mockBrick.configPath).called(1);
-        verify(() => mockBrickSource.watcher).called(1);
+      verify(() => mockBrick.cook(output: 'my_path', watch: true)).called(1);
+      verify(() => mockBrick.source).called(1);
+      verify(() => mockBrick.configPath).called(1);
+      verify(() => mockBrickSource.watcher).called(1);
 
-        verify(mockLogger.exiting).called(1);
+      verify(mockLogger.exiting).called(1);
 
-        final exitCode = await exitCompleter.future;
-        // expects success because `q` was pressed
-        expect(exitCode, ExitCode.success.code);
+      final exitCode = await exitCompleter.future;
+      // expects success because `q` was pressed
+      expect(exitCode, ExitCode.success.code);
 
-        verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockProgress);
-        verifyNoMoreInteractions(mockBrick);
-        verifyNoMoreInteractions(mockBrickSource);
-        verifyNoMoreInteractions(mockSourceWatcher);
-        verifyNoMoreInteractions(mockFileWatcher);
-      });
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockBrick);
+      verifyNoMoreInteractions(mockBrickSource);
+      verifyNoMoreInteractions(mockSourceWatcher);
+      verifyNoMoreInteractions(mockFileWatcher);
+    });
 
-      test('calls config changed on config modify event', () async {
-        final keyController = StreamController<List<int>>();
+    test('calls config changed on config modify event', () async {
+      final keyController = StreamController<List<int>>();
 
-        when(mockStdin.asBroadcastStream).thenAnswer(
-          (_) => keyController.stream,
-        );
+      when(mockStdin.asBroadcastStream).thenAnswer(
+        (_) => keyController.stream,
+      );
 
-        final oven = TestOvenMixin(
-          keyPressListener: keyPressListener,
-          logger: mockLogger,
-          outputDir: 'my_path',
-          isWatch: true,
-          fileWatchers: {BrickOvenYaml.file: testFileWatcher},
-        );
+      final oven = TestOvenMixin(
+        keyPressListener: keyPressListener,
+        logger: mockLogger,
+        outputDir: 'my_path',
+        isWatch: true,
+        fileWatchers: {BrickOvenYaml.file: testFileWatcher},
+      );
 
-        final brick = Brick.memory(
-          name: 'BRICK',
-          source: mockBrickSource,
+      final brick = Brick.memory(
+        name: 'BRICK',
+        source: mockBrickSource,
+        fileSystem: MemoryFileSystem(),
+        logger: mockLogger,
+      );
+
+      unawaited(
+        oven.putInOven({brick}).then(
+          (exitCode) => exitCompleter.complete(exitCode.code),
+        ),
+      );
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(mockLogger.preheat).called(1);
+      verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
+
+      verify(mockSourceWatcher.start).called(1);
+      verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
+          .called(2);
+      verify(() => mockSourceWatcher.addEvent(any())).called(2);
+      verify(() => mockSourceWatcher.addEvent(any(), runAfter: true)).called(3);
+
+      // this could possibly fail since this prints the time
+      verify(mockLogger.dingDing).called(1);
+      verify(mockLogger.watching).called(1);
+
+      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
+      verify(mockLogger.quit).called(1);
+      verify(mockLogger.reload).called(1);
+
+      testFileWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(mockLogger.configChanged).called(1);
+
+      // keyController.add('q'.codeUnits);
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(mockSourceWatcher.stop).called(1);
+
+      final exitCode = await exitCompleter.future;
+      expect(exitCode, ExitCode.tempFail.code);
+
+      verify(() => mockSourceWatcher.hasRun).called(1);
+      verify(() => mockBrickSource.watcher).called(3);
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockBrick);
+      verifyNoMoreInteractions(mockBrickSource);
+      verifyNoMoreInteractions(mockSourceWatcher);
+      verifyNoMoreInteractions(mockFileWatcher);
+    });
+
+    test('calls config changed on config path modify event', () async {
+      final keyController = StreamController<List<int>>();
+
+      when(mockStdin.asBroadcastStream).thenAnswer(
+        (_) => keyController.stream,
+      );
+
+      final oven = TestOvenMixin(
+        keyPressListener: keyPressListener,
+        logger: mockLogger,
+        outputDir: 'my_path',
+        isWatch: true,
+        fileWatchers: {'config_path': testFileWatcher},
+      );
+
+      final brick = Brick.memory(
+        name: 'BRICK',
+        source: mockBrickSource,
+        fileSystem: MemoryFileSystem(),
+        logger: mockLogger,
+        configPath: 'config_path',
+      );
+
+      unawaited(
+        oven.putInOven({brick}).then(
+          (exitCode) => exitCompleter.complete(exitCode.code),
+        ),
+      );
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(mockLogger.preheat).called(1);
+      verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
+      // this could possibly fail since this prints the time
+      verify(mockLogger.dingDing).called(1);
+      verify(mockLogger.watching).called(1);
+
+      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
+      verify(mockLogger.quit).called(1);
+      verify(mockLogger.reload).called(1);
+
+      verify(mockSourceWatcher.start).called(1);
+      verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
+          .called(2);
+      verify(() => mockSourceWatcher.addEvent(any())).called(2);
+      verify(() => mockSourceWatcher.addEvent(any(), runAfter: true)).called(3);
+
+      testFileWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(mockLogger.configChanged).called(1);
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(mockSourceWatcher.stop).called(1);
+
+      final exitCode = await exitCompleter.future;
+      expect(exitCode, ExitCode.tempFail.code);
+
+      verify(() => mockSourceWatcher.hasRun).called(1);
+      verify(() => mockBrickSource.watcher).called(3);
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockBrick);
+      verifyNoMoreInteractions(mockBrickSource);
+      verifyNoMoreInteractions(mockSourceWatcher);
+      verifyNoMoreInteractions(mockFileWatcher);
+    });
+
+    test('calls file changed on source file modify event', () async {
+      final keyController = StreamController<List<int>>();
+
+      when(mockStdin.asBroadcastStream).thenAnswer(
+        (_) => keyController.stream,
+      );
+
+      final oven = TestOvenMixin(
+        keyPressListener: keyPressListener,
+        logger: mockLogger,
+        outputDir: 'my_path',
+        isWatch: true,
+        fileWatchers: {BrickOvenYaml.file: testFileWatcher},
+      );
+
+      final brick = Brick.memory(
+        name: 'BRICK',
+        source: BrickSource.memory(
+          localPath: '',
           fileSystem: MemoryFileSystem(),
-          logger: mockLogger,
-        );
-
-        unawaited(
-          oven.putInOven({brick}).then(
-            (exitCode) => exitCompleter.complete(exitCode.code),
+          watcher: SourceWatcher.config(
+            dirPath: '',
+            watcher: testDirectoryWatcher,
           ),
-        );
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.preheat).called(1);
-        verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
-
-        verify(mockSourceWatcher.start).called(1);
-        verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
-            .called(2);
-        verify(() => mockSourceWatcher.addEvent(any())).called(2);
-        verify(() => mockSourceWatcher.addEvent(any(), runAfter: true))
-            .called(2);
-
-        // this could possibly fail since this prints the time
-        verify(mockLogger.dingDing).called(1);
-        verify(mockLogger.watching).called(1);
-
-        // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(mockLogger.quit).called(1);
-        verify(mockLogger.reload).called(1);
-
-        testFileWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.configChanged).called(1);
-
-        // keyController.add('q'.codeUnits);
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockSourceWatcher.stop).called(1);
-
-        final exitCode = await exitCompleter.future;
-        expect(exitCode, ExitCode.tempFail.code);
-
-        verify(() => mockSourceWatcher.hasRun).called(1);
-        verify(() => mockBrickSource.watcher).called(3);
-
-        verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockProgress);
-        verifyNoMoreInteractions(mockBrick);
-        verifyNoMoreInteractions(mockBrickSource);
-        verifyNoMoreInteractions(mockSourceWatcher);
-        verifyNoMoreInteractions(mockFileWatcher);
-      });
-
-      test('calls config changed on config path modify event', () async {
-        final keyController = StreamController<List<int>>();
-
-        when(mockStdin.asBroadcastStream).thenAnswer(
-          (_) => keyController.stream,
-        );
-
-        final oven = TestOvenMixin(
-          keyPressListener: keyPressListener,
-          logger: mockLogger,
-          outputDir: 'my_path',
-          isWatch: true,
-          fileWatchers: {'config_path': testFileWatcher},
-        );
-
-        final brick = Brick.memory(
-          name: 'BRICK',
-          source: mockBrickSource,
-          fileSystem: MemoryFileSystem(),
-          logger: mockLogger,
-          configPath: 'config_path',
-        );
-
-        unawaited(
-          oven.putInOven({brick}).then(
-            (exitCode) => exitCompleter.complete(exitCode.code),
-          ),
-        );
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.preheat).called(1);
-        verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
-        // this could possibly fail since this prints the time
-        verify(mockLogger.dingDing).called(1);
-        verify(mockLogger.watching).called(1);
-
-        // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(mockLogger.quit).called(1);
-        verify(mockLogger.reload).called(1);
-
-        verify(mockSourceWatcher.start).called(1);
-        verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
-            .called(2);
-        verify(() => mockSourceWatcher.addEvent(any())).called(2);
-        verify(() => mockSourceWatcher.addEvent(any(), runAfter: true))
-            .called(2);
-
-        testFileWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.configChanged).called(1);
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockSourceWatcher.stop).called(1);
-
-        final exitCode = await exitCompleter.future;
-        expect(exitCode, ExitCode.tempFail.code);
-
-        verify(() => mockSourceWatcher.hasRun).called(1);
-        verify(() => mockBrickSource.watcher).called(3);
-
-        verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockProgress);
-        verifyNoMoreInteractions(mockBrick);
-        verifyNoMoreInteractions(mockBrickSource);
-        verifyNoMoreInteractions(mockSourceWatcher);
-        verifyNoMoreInteractions(mockFileWatcher);
-      });
-
-      test('calls file changed on source file modify event', () async {
-        final keyController = StreamController<List<int>>();
-
-        when(mockStdin.asBroadcastStream).thenAnswer(
-          (_) => keyController.stream,
-        );
-
-        final oven = TestOvenMixin(
-          keyPressListener: keyPressListener,
-          logger: mockLogger,
-          outputDir: 'my_path',
-          isWatch: true,
-          fileWatchers: {BrickOvenYaml.file: testFileWatcher},
-        );
-
-        final brick = Brick.memory(
-          name: 'BRICK',
-          source: BrickSource.memory(
-            localPath: '',
-            fileSystem: MemoryFileSystem(),
-            watcher: SourceWatcher.config(
-              dirPath: '',
-              watcher: testDirectoryWatcher,
-            ),
-          ),
-          fileSystem: MemoryFileSystem(),
-          logger: mockLogger,
-        );
-
-        unawaited(
-          oven.putInOven({brick}).then(
-            (exitCode) => exitCompleter.complete(exitCode.code),
-          ),
-        );
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.preheat).called(1);
-        verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
-        // this could possibly fail since this prints the time
-        verify(mockLogger.dingDing).called(1);
-        verify(mockLogger.watching).called(1);
-
-        // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(mockLogger.quit).called(1);
-        verify(mockLogger.reload).called(1);
-
-        testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(() => mockLogger.fileChanged('BRICK')).called(1);
-        verify(mockLogger.preheat).called(1);
-        verify(mockLogger.watching).called(1);
-
-        // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(mockLogger.quit).called(1);
-        verify(mockLogger.reload).called(1);
-
-        keyController.add('q'.codeUnits);
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.exiting).called(1);
-
-        final exitCode = await exitCompleter.future;
-        // expects success because `q` was pressed
-        expect(exitCode, ExitCode.success.code);
-
-        verify(() => mockProgress.complete('BRICK: cooked 0 files')).called(2);
-
-        verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockProgress);
-        verifyNoMoreInteractions(mockBrick);
-        verifyNoMoreInteractions(mockBrickSource);
-        verifyNoMoreInteractions(mockSourceWatcher);
-        verifyNoMoreInteractions(mockFileWatcher);
-      });
-
-      test('reloads when r is pressed', () async {
-        final keyController = StreamController<List<int>>();
-
-        when(mockStdin.asBroadcastStream).thenAnswer(
-          (_) => keyController.stream,
-        );
-
-        final oven = TestOvenMixin(
-          keyPressListener: keyPressListener,
-          logger: mockLogger,
-          outputDir: 'my_path',
-          isWatch: true,
-          fileWatchers: {BrickOvenYaml.file: testFileWatcher},
-        );
-
-        final brick = Brick.memory(
-          name: 'BRICK',
-          source: mockBrickSource,
-          fileSystem: MemoryFileSystem(),
-          logger: mockLogger,
-        );
-
-        unawaited(
-          oven.putInOven({brick}).then(
-            (exitCode) => exitCompleter.complete(exitCode.code),
-          ),
-        );
-
-        keyController.add('r'.codeUnits);
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(() => mockLogger.info('\nRestarting...')).called(1);
-        verify(mockLogger.preheat).called(1);
-        verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
-        // this could possibly fail since this prints the time
-        verify(mockLogger.dingDing).called(1);
-        verify(mockLogger.watching).called(1);
-
-        // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(mockLogger.quit).called(1);
-        verify(mockLogger.reload).called(1);
-
-        await Future<void>.delayed(Duration.zero);
-
-        final exitCode = await exitCompleter.future;
-        // expects success because `q` was pressed
-        expect(exitCode, ExitCode.tempFail.code);
-
-        verify(() => mockSourceWatcher.hasRun).called(1);
-        verify(() => mockBrickSource.watcher).called(2);
-
-        verify(() => mockSourceWatcher.addEvent(any())).called(2);
-        verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
-            .called(2);
-        verify(() => mockSourceWatcher.addEvent(any(), runAfter: true))
-            .called(2);
-        verify(mockSourceWatcher.start).called(1);
-
-        verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockProgress);
-        verifyNoMoreInteractions(mockBrick);
-        verifyNoMoreInteractions(mockBrickSource);
-        verifyNoMoreInteractions(mockSourceWatcher);
-        verifyNoMoreInteractions(mockFileWatcher);
-      });
-
-      test('quits when q is pressed', () async {
-        final keyController = StreamController<List<int>>();
-
-        when(mockStdin.asBroadcastStream).thenAnswer(
-          (_) => keyController.stream,
-        );
-
-        final oven = TestOvenMixin(
-          keyPressListener: keyPressListener,
-          logger: mockLogger,
-          outputDir: 'my_path',
-          isWatch: true,
-          fileWatchers: {BrickOvenYaml.file: testFileWatcher},
-        );
-
-        final brick = Brick.memory(
-          name: 'BRICK',
-          source: mockBrickSource,
-          fileSystem: MemoryFileSystem(),
-          logger: mockLogger,
-        );
-
-        unawaited(
-          oven.putInOven({brick}).then(
-            (exitCode) => exitCompleter.complete(exitCode.code),
-          ),
-        );
-
-        keyController.add('q'.codeUnits);
-
-        await Future<void>.delayed(Duration.zero);
-
-        verify(mockLogger.exiting).called(1);
-
-        final exitCode = await exitCompleter.future;
-        // expects success because `q` was pressed
-        expect(exitCode, ExitCode.success.code);
-
-        verify(mockLogger.preheat).called(1);
-        verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
-        // this could possibly fail since this prints the time
-        verify(mockLogger.dingDing).called(1);
-        verify(mockLogger.watching).called(1);
-
-        // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-        verify(mockLogger.quit).called(1);
-        verify(mockLogger.reload).called(1);
-
-        verify(() => mockBrickSource.watcher).called(2);
-
-        verify(() => mockSourceWatcher.addEvent(any())).called(2);
-        verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
-            .called(2);
-        verify(() => mockSourceWatcher.addEvent(any(), runAfter: true))
-            .called(2);
-        verify(mockSourceWatcher.start).called(1);
-        verify(() => mockSourceWatcher.hasRun).called(1);
-
-        verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockProgress);
-        verifyNoMoreInteractions(mockBrick);
-        verifyNoMoreInteractions(mockBrickSource);
-        verifyNoMoreInteractions(mockSourceWatcher);
-        verifyNoMoreInteractions(mockFileWatcher);
-      });
+        ),
+        fileSystem: MemoryFileSystem(),
+        logger: mockLogger,
+      );
+
+      unawaited(
+        oven.putInOven({brick}).then(
+          (exitCode) => exitCompleter.complete(exitCode.code),
+        ),
+      );
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(mockLogger.preheat).called(1);
+      verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
+      // this could possibly fail since this prints the time
+      verify(mockLogger.dingDing).called(1);
+      verify(mockLogger.watching).called(1);
+
+      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
+      verify(mockLogger.quit).called(1);
+      verify(mockLogger.reload).called(1);
+
+      testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(() => mockLogger.fileChanged('BRICK')).called(1);
+      verify(mockLogger.preheat).called(1);
+      verify(mockLogger.dingDing).called(1);
+      verify(mockLogger.watching).called(1);
+
+      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
+      verify(mockLogger.quit).called(1);
+      verify(mockLogger.reload).called(1);
+
+      keyController.add('q'.codeUnits);
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(mockLogger.exiting).called(1);
+
+      final exitCode = await exitCompleter.future;
+      // expects success because `q` was pressed
+      expect(exitCode, ExitCode.success.code);
+
+      verify(() => mockProgress.complete('BRICK: cooked 0 files')).called(2);
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockBrick);
+      verifyNoMoreInteractions(mockBrickSource);
+      verifyNoMoreInteractions(mockSourceWatcher);
+      verifyNoMoreInteractions(mockFileWatcher);
+    });
+
+    test('reloads when r is pressed', () async {
+      final keyController = StreamController<List<int>>();
+
+      when(mockStdin.asBroadcastStream).thenAnswer(
+        (_) => keyController.stream,
+      );
+
+      final oven = TestOvenMixin(
+        keyPressListener: keyPressListener,
+        logger: mockLogger,
+        outputDir: 'my_path',
+        isWatch: true,
+        fileWatchers: {BrickOvenYaml.file: testFileWatcher},
+      );
+
+      final brick = Brick.memory(
+        name: 'BRICK',
+        source: mockBrickSource,
+        fileSystem: MemoryFileSystem(),
+        logger: mockLogger,
+      );
+
+      unawaited(
+        oven.putInOven({brick}).then(
+          (exitCode) => exitCompleter.complete(exitCode.code),
+        ),
+      );
+
+      keyController.add('r'.codeUnits);
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(() => mockLogger.info('\nRestarting...')).called(1);
+      verify(mockLogger.preheat).called(1);
+      verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
+      // this could possibly fail since this prints the time
+      verify(mockLogger.dingDing).called(1);
+      verify(mockLogger.watching).called(1);
+
+      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
+      verify(mockLogger.quit).called(1);
+      verify(mockLogger.reload).called(1);
+
+      await Future<void>.delayed(Duration.zero);
+
+      final exitCode = await exitCompleter.future;
+      // expects success because `q` was pressed
+      expect(exitCode, ExitCode.tempFail.code);
+
+      verify(() => mockSourceWatcher.hasRun).called(1);
+      verify(() => mockBrickSource.watcher).called(2);
+
+      verify(() => mockSourceWatcher.addEvent(any())).called(2);
+      verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
+          .called(2);
+      verify(() => mockSourceWatcher.addEvent(any(), runAfter: true)).called(3);
+      verify(mockSourceWatcher.start).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockBrick);
+      verifyNoMoreInteractions(mockBrickSource);
+      verifyNoMoreInteractions(mockSourceWatcher);
+      verifyNoMoreInteractions(mockFileWatcher);
+    });
+
+    test('quits when q is pressed', () async {
+      final keyController = StreamController<List<int>>();
+
+      when(mockStdin.asBroadcastStream).thenAnswer(
+        (_) => keyController.stream,
+      );
+
+      final oven = TestOvenMixin(
+        keyPressListener: keyPressListener,
+        logger: mockLogger,
+        outputDir: 'my_path',
+        isWatch: true,
+        fileWatchers: {BrickOvenYaml.file: testFileWatcher},
+      );
+
+      final brick = Brick.memory(
+        name: 'BRICK',
+        source: mockBrickSource,
+        fileSystem: MemoryFileSystem(),
+        logger: mockLogger,
+      );
+
+      unawaited(
+        oven.putInOven({brick}).then(
+          (exitCode) => exitCompleter.complete(exitCode.code),
+        ),
+      );
+
+      keyController.add('q'.codeUnits);
+
+      await Future<void>.delayed(Duration.zero);
+
+      verify(mockLogger.exiting).called(1);
+
+      final exitCode = await exitCompleter.future;
+      // expects success because `q` was pressed
+      expect(exitCode, ExitCode.success.code);
+
+      verify(mockLogger.preheat).called(1);
+      verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
+      // this could possibly fail since this prints the time
+      verify(mockLogger.dingDing).called(1);
+      verify(mockLogger.watching).called(1);
+
+      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
+      verify(mockLogger.quit).called(1);
+      verify(mockLogger.reload).called(1);
+
+      verify(() => mockBrickSource.watcher).called(2);
+
+      verify(() => mockSourceWatcher.addEvent(any())).called(2);
+      verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
+          .called(2);
+      verify(() => mockSourceWatcher.addEvent(any(), runAfter: true)).called(3);
+      verify(mockSourceWatcher.start).called(1);
+      verify(() => mockSourceWatcher.hasRun).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockProgress);
+      verifyNoMoreInteractions(mockBrick);
+      verifyNoMoreInteractions(mockBrickSource);
+      verifyNoMoreInteractions(mockSourceWatcher);
+      verifyNoMoreInteractions(mockFileWatcher);
     });
   });
 }

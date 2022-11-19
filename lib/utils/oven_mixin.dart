@@ -57,6 +57,7 @@ mixin OvenMixin on BrickCooker, BrickCookerArgs, ConfigWatcherMixin {
             runBefore: true,
           )
           ..addEvent(logger.preheat, runBefore: true)
+          ..addEvent(logger.dingDing, runAfter: true)
           ..addEvent(logger.watching, runAfter: true)
           ..addEvent(logger.keyStrokes, runAfter: true);
       }
