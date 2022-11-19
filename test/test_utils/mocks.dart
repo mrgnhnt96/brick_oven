@@ -46,6 +46,8 @@ class MockFile extends Mock implements file.File {}
 
 class MockAnalytics extends Mock implements Analytics {}
 
+class MockDirectoryWatcher extends Mock implements DirectoryWatcher {}
+
 extension MockAnalyticsX on MockAnalytics {
   void stubMethods() {
     when(() => firstRun).thenReturn(false);
