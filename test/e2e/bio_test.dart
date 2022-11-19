@@ -41,7 +41,7 @@ void main() {
     localFileSystem = const LocalFileSystem();
   });
 
-  test('description', () async {
+  test('runs gracefully', () async {
     final source = localFileSystem.directory(bioSourcePath);
 
     final files =
@@ -94,34 +94,25 @@ void main() {
     }
 
     verifyInOrder([
+      () => mockAnalytics.firstRun,
       mockLogger.preheat,
       () => mockLogger.progress('Writing Brick: bio'),
+      () => mockProgress.complete('bio: cooked 1 file'),
       () => mockLogger.info('brick.yaml is in sync'),
       mockLogger.dingDing,
-    ]);
-
-    verify(() => mockProgress.complete('bio: cooked 1 file'));
-
-    verify(() => mockPubUpdater.getLatestVersion(packageName));
-
-    verify(() => mockAnalytics.firstRun);
-
-    verify(
       () => mockAnalytics.sendEvent(
-        'cook',
-        'one',
-        label: 'no-watch',
-        value: 0,
-        parameters: {
-          'bricks': '1',
-          'sync': 'true',
-        },
-      ),
-    ).called(1);
-
-    verify(
+            'cook',
+            'one',
+            label: 'no-watch',
+            value: 0,
+            parameters: {
+              'bricks': '1',
+              'sync': 'true',
+            },
+          ),
       () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
-    ).called(1);
+      () => mockPubUpdater.getLatestVersion(packageName),
+    ]);
 
     verifyNoMoreInteractions(mockLogger);
     verifyNoMoreInteractions(mockProgress);
