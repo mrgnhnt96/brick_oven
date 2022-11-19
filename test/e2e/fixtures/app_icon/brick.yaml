@@ -1,0 +1,8 @@
+name: app_icon
+description: Create an app icon file from a URL
+version: 0.1.0+1
+vars:
+  url:
+    type: string
+    description: The app icon URL.
+    prompt: Enter your app icon URL.

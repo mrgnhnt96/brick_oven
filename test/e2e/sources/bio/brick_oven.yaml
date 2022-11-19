@@ -1,0 +1,10 @@
+bricks:
+  bio:
+    source: ./oven
+    brick_config: brick.yaml
+    files:
+      ABOUT.md:
+        vars:
+          name: _NAME_
+          age: _AGE_
+          isDeveloper: _IS_DEVELOPER_
