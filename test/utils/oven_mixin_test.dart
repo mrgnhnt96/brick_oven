@@ -125,16 +125,15 @@ void main() {
       final result = await oven.putInOven({mockBrick});
       expect(result.code, ExitCode.success.code);
 
-      verify(mockLogger.preheat).called(1);
-      // this could possibly fail since this prints the time
-      verify(mockLogger.dingDing).called(1);
+      verifyInOrder([
+        mockLogger.preheat,
+        () => mockBrick.cook(output: 'my_path'),
+        mockLogger.dingDing,
+      ]);
 
       verifyNever(mockKeyPressListener.listenToKeystrokes);
       verifyNever(() => mockFileWatcher.events);
       verifyNever(mockSourceWatcher.start);
-      verify(
-        () => mockBrick.cook(output: 'my_path'),
-      ).called(1);
 
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockBrick);
@@ -160,17 +159,18 @@ void main() {
       final result = await oven.putInOven({mockBrick});
       expect(result.code, ExitCode.success.code);
 
-      verify(mockLogger.preheat).called(1);
-      // this could possibly fail since this prints the time
-      verify(mockLogger.dingDing).called(1);
+      verifyInOrder([
+        mockLogger.preheat,
+        () => mockBrick.cook(output: 'my_path'),
+        () => mockLogger.warn('my error'),
+        () => mockLogger.err('Could not cook brick: BRICK'),
+        mockLogger.dingDing,
+      ]);
 
       verifyNever(mockKeyPressListener.listenToKeystrokes);
       verifyNever(() => mockFileWatcher.events);
       verifyNever(mockSourceWatcher.start);
-      verify(() => mockBrick.cook(output: 'my_path')).called(1);
 
-      verify(() => mockLogger.warn('my error')).called(1);
-      verify(() => mockLogger.err('Could not cook brick: BRICK')).called(1);
       verify(() => mockBrick.name).called(1);
 
       verifyNoMoreInteractions(mockLogger);
@@ -197,18 +197,17 @@ void main() {
       final result = await oven.putInOven({mockBrick});
       expect(result.code, ExitCode.success.code);
 
-      verify(mockLogger.preheat).called(1);
-      // this could possibly fail since this prints the time
-      verify(mockLogger.dingDing).called(1);
+      verifyInOrder([
+        mockLogger.preheat,
+        () => mockBrick.cook(output: 'my_path'),
+        () => mockLogger.warn('Unknown error: Exception: my error'),
+        () => mockLogger.err('Could not cook brick: BRICK'),
+        mockLogger.dingDing,
+      ]);
 
       verifyNever(mockKeyPressListener.listenToKeystrokes);
       verifyNever(() => mockFileWatcher.events);
       verifyNever(mockSourceWatcher.start);
-      verify(() => mockBrick.cook(output: 'my_path')).called(1);
-
-      verify(() => mockLogger.warn('Unknown error: Exception: my error'))
-          .called(1);
-      verify(() => mockLogger.err('Could not cook brick: BRICK')).called(1);
 
       verify(() => mockBrick.name).called(1);
 
@@ -293,14 +292,14 @@ void main() {
 
       await Future<void>.delayed(Duration.zero);
 
-      verify(mockLogger.preheat).called(1);
-      // this could possibly fail since this prints the time
-      verify(mockLogger.dingDing).called(1);
-      verify(mockLogger.watching).called(1);
-
-      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-      verify(mockLogger.quit).called(1);
-      verify(mockLogger.reload).called(1);
+      verifyInOrder([
+        mockLogger.preheat,
+        () => mockBrick.cook(output: 'my_path', watch: true),
+        mockLogger.dingDing,
+        mockLogger.watching,
+        mockLogger.quit,
+        mockLogger.reload,
+      ]);
 
       verify(() => mockFileWatcher.events).called(1);
 
@@ -311,7 +310,6 @@ void main() {
         () => mockSourceWatcher.addEvent(any(), runAfter: true),
       ).called(3);
 
-      verify(() => mockBrick.cook(output: 'my_path', watch: true)).called(1);
       verify(() => mockBrick.source).called(1);
       verify(() => mockBrick.configPath).called(1);
       verify(() => mockBrickSource.watcher).called(1);
@@ -360,34 +358,26 @@ void main() {
 
       await Future<void>.delayed(Duration.zero);
 
-      verify(mockLogger.preheat).called(1);
-      verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
-
-      verify(mockSourceWatcher.start).called(1);
       verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
           .called(2);
       verify(() => mockSourceWatcher.addEvent(any())).called(2);
       verify(() => mockSourceWatcher.addEvent(any(), runAfter: true)).called(3);
 
-      // this could possibly fail since this prints the time
-      verify(mockLogger.dingDing).called(1);
-      verify(mockLogger.watching).called(1);
-
-      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-      verify(mockLogger.quit).called(1);
-      verify(mockLogger.reload).called(1);
-
       testFileWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
 
       await Future<void>.delayed(Duration.zero);
 
-      verify(mockLogger.configChanged).called(1);
-
-      // keyController.add('q'.codeUnits);
-
-      await Future<void>.delayed(Duration.zero);
-
-      verify(mockSourceWatcher.stop).called(1);
+      verifyInOrder([
+        mockLogger.preheat,
+        () => mockLogger.progress('Writing Brick: BRICK'),
+        mockSourceWatcher.start,
+        mockLogger.dingDing,
+        mockLogger.watching,
+        mockLogger.quit,
+        mockLogger.reload,
+        mockLogger.configChanged,
+        mockSourceWatcher.stop,
+      ]);
 
       final exitCode = await exitCompleter.future;
       expect(exitCode, ExitCode.tempFail.code);
@@ -434,17 +424,6 @@ void main() {
 
       await Future<void>.delayed(Duration.zero);
 
-      verify(mockLogger.preheat).called(1);
-      verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
-      // this could possibly fail since this prints the time
-      verify(mockLogger.dingDing).called(1);
-      verify(mockLogger.watching).called(1);
-
-      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-      verify(mockLogger.quit).called(1);
-      verify(mockLogger.reload).called(1);
-
-      verify(mockSourceWatcher.start).called(1);
       verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
           .called(2);
       verify(() => mockSourceWatcher.addEvent(any())).called(2);
@@ -454,11 +433,17 @@ void main() {
 
       await Future<void>.delayed(Duration.zero);
 
-      verify(mockLogger.configChanged).called(1);
-
-      await Future<void>.delayed(Duration.zero);
-
-      verify(mockSourceWatcher.stop).called(1);
+      verifyInOrder([
+        mockLogger.preheat,
+        () => mockLogger.progress('Writing Brick: BRICK'),
+        mockSourceWatcher.start,
+        mockLogger.dingDing,
+        mockLogger.watching,
+        mockLogger.quit,
+        mockLogger.reload,
+        mockLogger.configChanged,
+        mockSourceWatcher.stop,
+      ]);
 
       final exitCode = await exitCompleter.future;
       expect(exitCode, ExitCode.tempFail.code);
@@ -511,34 +496,29 @@ void main() {
 
       await Future<void>.delayed(Duration.zero);
 
-      verify(mockLogger.preheat).called(1);
-      verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
-      // this could possibly fail since this prints the time
-      verify(mockLogger.dingDing).called(1);
-      verify(mockLogger.watching).called(1);
-
-      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-      verify(mockLogger.quit).called(1);
-      verify(mockLogger.reload).called(1);
-
       testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
 
       await Future<void>.delayed(Duration.zero);
-
-      verify(() => mockLogger.fileChanged('BRICK')).called(1);
-      verify(mockLogger.preheat).called(1);
-      verify(mockLogger.dingDing).called(1);
-      verify(mockLogger.watching).called(1);
-
-      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-      verify(mockLogger.quit).called(1);
-      verify(mockLogger.reload).called(1);
 
       keyController.add('q'.codeUnits);
 
       await Future<void>.delayed(Duration.zero);
 
-      verify(mockLogger.exiting).called(1);
+      verifyInOrder([
+        mockLogger.preheat,
+        () => mockLogger.progress('Writing Brick: BRICK'),
+        mockLogger.dingDing,
+        mockLogger.watching,
+        mockLogger.quit,
+        mockLogger.reload,
+        () => mockLogger.fileChanged('BRICK'),
+        mockLogger.preheat,
+        mockLogger.dingDing,
+        mockLogger.watching,
+        mockLogger.quit,
+        mockLogger.reload,
+        mockLogger.exiting,
+      ]);
 
       final exitCode = await exitCompleter.future;
       // expects success because `q` was pressed
@@ -550,7 +530,6 @@ void main() {
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockBrick);
       verifyNoMoreInteractions(mockBrickSource);
-      verifyNoMoreInteractions(mockSourceWatcher);
       verifyNoMoreInteractions(mockFileWatcher);
     });
 
@@ -582,22 +561,22 @@ void main() {
         ),
       );
 
+      await Future<void>.delayed(Duration.zero);
+
       keyController.add('r'.codeUnits);
 
       await Future<void>.delayed(Duration.zero);
 
-      verify(() => mockLogger.info('\nRestarting...')).called(1);
-      verify(mockLogger.preheat).called(1);
-      verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
-      // this could possibly fail since this prints the time
-      verify(mockLogger.dingDing).called(1);
-      verify(mockLogger.watching).called(1);
-
-      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-      verify(mockLogger.quit).called(1);
-      verify(mockLogger.reload).called(1);
-
-      await Future<void>.delayed(Duration.zero);
+      verifyInOrder([
+        mockLogger.preheat,
+        () => mockLogger.progress('Writing Brick: BRICK'),
+        mockSourceWatcher.start,
+        mockLogger.dingDing,
+        mockLogger.watching,
+        mockLogger.quit,
+        mockLogger.reload,
+        () => mockLogger.info('\nRestarting...'),
+      ]);
 
       final exitCode = await exitCompleter.future;
       // expects success because `q` was pressed
@@ -610,7 +589,6 @@ void main() {
       verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
           .called(2);
       verify(() => mockSourceWatcher.addEvent(any(), runAfter: true)).called(3);
-      verify(mockSourceWatcher.start).called(1);
 
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockProgress);
@@ -658,15 +636,15 @@ void main() {
       // expects success because `q` was pressed
       expect(exitCode, ExitCode.success.code);
 
-      verify(mockLogger.preheat).called(1);
-      verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
-      // this could possibly fail since this prints the time
-      verify(mockLogger.dingDing).called(1);
-      verify(mockLogger.watching).called(1);
-
-      // this verifies -> verify(mockLogger.keyStrokes)).called(1);
-      verify(mockLogger.quit).called(1);
-      verify(mockLogger.reload).called(1);
+      verifyInOrder([
+        mockLogger.preheat,
+        () => mockLogger.progress('Writing Brick: BRICK'),
+        mockSourceWatcher.start,
+        mockLogger.dingDing,
+        mockLogger.watching,
+        mockLogger.quit,
+        mockLogger.reload,
+      ]);
 
       verify(() => mockBrickSource.watcher).called(2);
 
@@ -674,7 +652,6 @@ void main() {
       verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
           .called(2);
       verify(() => mockSourceWatcher.addEvent(any(), runAfter: true)).called(3);
-      verify(mockSourceWatcher.start).called(1);
       verify(() => mockSourceWatcher.hasRun).called(1);
 
       verifyNoMoreInteractions(mockLogger);

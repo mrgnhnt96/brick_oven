@@ -111,10 +111,11 @@ void main() {
 
           final result = await runner.run();
 
-          verify(mockBrick.cook).called(1);
-
-          verify(mockLogger.preheat).called(1);
-          verify(mockLogger.dingDing).called(1);
+          verifyInOrder([
+            mockLogger.preheat,
+            mockBrick.cook,
+            mockLogger.dingDing,
+          ]);
 
           verify(
             () => mockAnalytics.sendEvent(
@@ -153,16 +154,15 @@ void main() {
 
             final result = await runner.run();
 
-            verify(
+            verifyInOrder([
+              mockLogger.preheat,
               () => mockBrick.cook(
-                output: any(named: 'output'),
-                shouldSync: false,
-                watch: false,
-              ),
-            ).called(1);
-
-            verify(mockLogger.preheat).called(1);
-            verify(mockLogger.dingDing).called(1);
+                    output: any(named: 'output'),
+                    shouldSync: false,
+                    watch: false,
+                  ),
+              mockLogger.dingDing,
+            ]);
 
             verify(
               () => mockAnalytics.sendEvent(
@@ -201,16 +201,15 @@ void main() {
 
             final result = await runner.run();
 
-            verify(
+            verifyInOrder([
+              mockLogger.preheat,
               () => mockBrick.cook(
-                output: any(named: 'output'),
-                shouldSync: true,
-                watch: false,
-              ),
-            ).called(1);
-
-            verify(mockLogger.preheat).called(1);
-            verify(mockLogger.dingDing).called(1);
+                    output: any(named: 'output'),
+                    shouldSync: true,
+                    watch: false,
+                  ),
+              mockLogger.dingDing,
+            ]);
 
             verify(
               () => mockAnalytics.sendEvent(
@@ -289,16 +288,15 @@ void main() {
 
             final result = await runner.run();
 
-            verify(
+            verifyInOrder([
+              mockLogger.preheat,
               () => mockBrick.cook(
-                output: any(named: 'output'),
-                shouldSync: true,
-                watch: false,
-              ),
-            ).called(1);
-
-            verify(mockLogger.preheat).called(1);
-            verify(mockLogger.dingDing).called(1);
+                    output: any(named: 'output'),
+                    shouldSync: true,
+                    watch: false,
+                  ),
+              mockLogger.dingDing,
+            ]);
 
             verify(
               () => mockAnalytics.sendEvent(
@@ -338,22 +336,22 @@ void main() {
 
             final runResult = await runner.run();
 
-            verify(
-              () => mockBrick.cook(
-                output: any(named: 'output'),
-                shouldSync: true,
-                watch: true,
-              ),
-            ).called(1);
             verify(() => mockBrick.configPath).called(1);
             verify(() => mockBrick.source).called(1);
 
-            verify(mockLogger.preheat).called(1);
-            verify(mockLogger.dingDing).called(1);
-            verify(mockLogger.watching).called(1);
-            verify(mockLogger.quit).called(1);
-            verify(mockLogger.reload).called(1);
-            verify(mockLogger.exiting).called(1);
+            verifyInOrder([
+              mockLogger.preheat,
+              () => mockBrick.cook(
+                    output: any(named: 'output'),
+                    shouldSync: true,
+                    watch: true,
+                  ),
+              mockLogger.dingDing,
+              mockLogger.watching,
+              mockLogger.quit,
+              mockLogger.reload,
+              mockLogger.exiting,
+            ]);
 
             verify(
               () => mockAnalytics.sendEvent(
@@ -399,12 +397,13 @@ void main() {
 
         final result = await runner.run();
 
-        verify(mockLogger.preheat).called(1);
-        verify(mockBrick.cook).called(1);
-        verify(mockLogger.dingDing).called(1);
-
-        verify(() => mockLogger.err('Could not cook brick: BRICK')).called(1);
-        verify(() => mockLogger.warn('Unknown error: Exception: error'));
+        verifyInOrder([
+          mockLogger.preheat,
+          mockBrick.cook,
+          () => mockLogger.warn('Unknown error: Exception: error'),
+          () => mockLogger.err('Could not cook brick: BRICK'),
+          mockLogger.dingDing,
+        ]);
 
         verify(
           () => mockAnalytics.sendEvent(
@@ -440,14 +439,13 @@ void main() {
 
         final result = await runner.run();
 
-        verify(mockLogger.preheat).called(1);
-        verify(mockBrick.cook).called(1);
-        verify(mockLogger.dingDing).called(1);
-
-        verify(() => mockLogger.err('Could not cook brick: BRICK')).called(1);
-        verify(
+        verifyInOrder([
+          mockLogger.preheat,
+          mockBrick.cook,
           () => mockLogger.warn('Invalid brick config: "BRICK"\nReason: error'),
-        );
+          () => mockLogger.err('Could not cook brick: BRICK'),
+          mockLogger.dingDing,
+        ]);
 
         verify(
           () => mockAnalytics.sendEvent(
