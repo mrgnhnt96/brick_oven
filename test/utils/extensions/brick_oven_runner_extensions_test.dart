@@ -8,39 +8,41 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
+import 'package:usage/usage_io.dart';
 
 import '../../test_utils/mocks.dart';
 
 void main() {
   late Logger mockLogger;
   late BrickOvenRunner brickOvenRunner;
+  late PubUpdater mockPubUpdater;
+  late Analytics mockAnalytics;
 
-  setUp(() {
-    mockLogger = MockLogger();
-
-    brickOvenRunner = BrickOvenRunner(
-      logger: mockLogger,
-      pubUpdater: MockPubUpdater(),
-      analytics: MockAnalytics(),
-      fileSystem: MemoryFileSystem(),
-    );
-  });
-
-  group('BrickOvenRunnerX', () {
-    late PubUpdater mockPubUpdater;
-
-    setUp(() {
-      mockPubUpdater = MockPubUpdater();
-    });
-    test('#update is correct value', () {
-      const expected = '''
+  const versionMessage = '''
 
 Update available! CURRENT_VERSION → NEW_VERSION
 Changelog: https://github.com/mrgnhnt96/brick_oven/releases/tag/brick_oven-vNEW_VERSION
 Run `brick_oven update` to update
 ''';
 
-      expect(BrickOvenRunnerX.update, expected);
+  setUp(() {
+    mockLogger = MockLogger();
+    mockPubUpdater = MockPubUpdater();
+    mockAnalytics = MockAnalytics();
+
+    when(() => mockAnalytics.firstRun).thenReturn(false);
+
+    brickOvenRunner = BrickOvenRunner(
+      logger: mockLogger,
+      pubUpdater: mockPubUpdater,
+      analytics: mockAnalytics,
+      fileSystem: MemoryFileSystem(),
+    );
+  });
+
+  group('BrickOvenRunnerX', () {
+    test('#update is correct value', () {
+      expect(BrickOvenRunnerX.update, versionMessage);
     });
 
     test('#formatUpdate is same as update', () {
@@ -65,6 +67,12 @@ Run `brick_oven update` to update
           BrickOvenRunnerX.formatUpdate(packageVersion, '0.0.0'),
         ),
       ).called(1);
+
+      verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('does nothing when tool is up to date', () async {
@@ -77,7 +85,11 @@ Run `brick_oven update` to update
         updater: mockPubUpdater,
       );
 
-      verifyNever(() => mockLogger.info(any()));
+      verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('handles pub update errors gracefully', () async {
@@ -92,6 +104,12 @@ Run `brick_oven update` to update
         ),
         returnsNormally,
       );
+
+      verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(mockAnalytics);
     });
   });
 }

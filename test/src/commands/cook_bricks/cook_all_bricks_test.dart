@@ -219,15 +219,15 @@ void main() {
               toExit: exitCompleter.complete,
             );
 
-            final mockSource = MockSource();
-            final mockWatcher = MockWatcher();
+            final mockBrickSource = MockBrickSource();
+            final mockSourceWatcher = MockSourceWatcher();
 
-            when(() => mockBrick.source).thenReturn(mockSource);
-            when(() => mockSource.watcher).thenReturn(mockWatcher);
+            when(() => mockBrick.source).thenReturn(mockBrickSource);
+            when(() => mockBrickSource.watcher).thenReturn(mockSourceWatcher);
 
-            when(() => mockWatcher.hasRun).thenAnswer((_) => true);
-            when(mockWatcher.start).thenAnswer((_) => Future.value());
-            when(mockWatcher.stop).thenAnswer((_) => Future.value());
+            when(() => mockSourceWatcher.hasRun).thenAnswer((_) => true);
+            when(mockSourceWatcher.start).thenAnswer((_) => Future.value());
+            when(mockSourceWatcher.stop).thenAnswer((_) => Future.value());
           });
 
           tearDown(() {

@@ -16,17 +16,15 @@ import 'package:file/file.dart' as file;
 
 class MockBrick extends Mock implements Brick {}
 
-class MockSource extends Mock implements BrickSource {}
+class MockBrickSource extends Mock implements BrickSource {}
 
 class MockKeyPressListener extends Mock implements KeyPressListener {}
-
-class MockWatcher extends Mock implements SourceWatcher {}
 
 class MockLogger extends Mock implements Logger {}
 
 class MockPubUpdater extends Mock implements PubUpdater {}
 
-class MockBrickWatcher extends Mock implements SourceWatcher {}
+class MockSourceWatcher extends Mock implements SourceWatcher {}
 
 class MockProgress extends Mock implements Progress {}
 

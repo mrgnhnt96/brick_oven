@@ -4,23 +4,15 @@ import 'package:brick_oven/utils/extensions/analytics_extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
+import 'package:usage/usage_io.dart';
 
 import '../../test_utils/mocks.dart';
 
 void main() {
   late Logger mockLogger;
+  late Analytics mockAnalytics;
 
-  setUp(() {
-    mockLogger = MockLogger();
-  });
-
-  group('AnalyticsX', () {
-    test('#formatAsk is equal to ask', () {
-      expect(AnalyticsX.formatAsk(), AnalyticsX.ask);
-    });
-
-    test('#ask is formatted correctly', () {
-      const expected = '''
+  const consentMessage = '''
 +---------------------------------------------------+
 |           Welcome to the Brick Oven!              |
 +---------------------------------------------------+
@@ -29,13 +21,22 @@ void main() {
 | Opt-in to help us improve? 🥺 [y/n]               |
 +---------------------------------------------------+\n''';
 
-      expect(AnalyticsX.ask, expected);
+  setUp(() {
+    mockLogger = MockLogger();
+    mockAnalytics = MockAnalytics();
+  });
+
+  group('AnalyticsX', () {
+    test('#formatAsk is equal to ask', () {
+      expect(AnalyticsX.formatAsk(), AnalyticsX.ask);
+    });
+
+    test('#ask is formatted correctly', () {
+      expect(AnalyticsX.ask, consentMessage);
     });
 
     group('#askForConsent', () {
       test('handles accept response', () async {
-        final mockAnalytics = MockAnalytics();
-
         when(() => mockAnalytics.firstRun).thenReturn(true);
 
         when(
@@ -49,6 +50,19 @@ void main() {
         mockAnalytics.askForConsent(mockLogger);
 
         verify(() => mockAnalytics.enabled = true).called(1);
+
+        verify(
+          () => mockLogger.chooseOne(
+            consentMessage,
+            choices: [AnalyticsX.yes, AnalyticsX.no],
+            defaultValue: AnalyticsX.yes,
+          ),
+        ).called(1);
+
+        verify(() => mockAnalytics.firstRun).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockAnalytics);
       });
 
       test('handles reject response', () {
@@ -66,7 +80,20 @@ void main() {
 
         mockAnalytics.askForConsent(mockLogger);
 
+        verify(
+          () => mockLogger.chooseOne(
+            consentMessage,
+            choices: [AnalyticsX.yes, AnalyticsX.no],
+            defaultValue: AnalyticsX.yes,
+          ),
+        ).called(1);
+
+        verify(() => mockAnalytics.firstRun).called(1);
+
         verify(() => mockAnalytics.enabled = false).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockAnalytics);
       });
     });
   });

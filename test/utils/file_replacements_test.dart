@@ -413,6 +413,8 @@ before text {{name}} after text
       );
 
       expect(targetFile.readAsStringSync(), 'hello from this side');
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     test('prints warning if excess variables exist', () {
@@ -511,6 +513,8 @@ partial.page.md
       );
 
       expect(targetFile.readAsStringSync(), expectedContent);
+
+      verifyNoMoreInteractions(mockLogger);
     });
   });
 }

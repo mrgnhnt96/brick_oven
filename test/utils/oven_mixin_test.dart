@@ -23,6 +23,12 @@ import '../test_utils/test_directory_watcher.dart';
 import '../test_utils/test_file_watcher.dart';
 
 void main() {
+  late Logger mockLogger;
+
+  setUp(() {
+    mockLogger = MockLogger();
+  });
+
   tearDown(() {
     KeyPressListener.stream = null;
   });
@@ -31,35 +37,33 @@ void main() {
     test('returns super $KeyPressListener', () {
       final listener = KeyPressListener(
         stdin: MockStdin(),
-        logger: MockLogger(),
+        logger: mockLogger,
         toExit: (_) {},
       );
 
       final instance = TestOvenMixin(
         keyPressListener: listener,
-        logger: MockLogger(),
+        logger: mockLogger,
         fileWatchers: {},
       );
 
       expect(instance.keyListener, listener);
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     test('returns default $KeyPressListener', () {
       final instance = TestOvenMixin(
-        logger: MockLogger(),
+        logger: mockLogger,
         fileWatchers: {},
       );
 
       expect(instance.keyListener, isA<KeyPressListener>());
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     group('default $KeyPressListener', () {
-      late Logger mockLogger;
-
-      setUp(() {
-        mockLogger = MockLogger();
-      });
-
       test('calls toExit with ExitCode.tempFail when key is pressed', () async {
         final instance = TestOvenMixin(
           logger: mockLogger,
@@ -71,6 +75,8 @@ void main() {
         const exitCode = ExitCode.success;
 
         expect(() => toExit(exitCode.code), returnsNormally);
+
+        verifyNoMoreInteractions(mockLogger);
       });
 
       test('exits with code provided to toExit', () async {
@@ -84,29 +90,29 @@ void main() {
         const exitCode = ExitCode.ioError;
 
         expect(() async => toExit(exitCode.code), returnsNormally);
+
+        verifyNoMoreInteractions(mockLogger);
       });
     });
   });
 
   group('cook', () {
     group('mock', () {
-      late MockBrick mockBrick;
-      late MockLogger mockLogger;
-      late MockSource mockSource;
-      late MockWatcher mockWatcher;
-      late MockFileWatcher mockFileWatcher;
-      late MockKeyPressListener mockKeyPressListener;
+      late Brick mockBrick;
+      late BrickSource mockBrickSource;
+      late SourceWatcher mockSourceWatcher;
+      late FileWatcher mockFileWatcher;
+      late KeyPressListener mockKeyPressListener;
 
       setUp(() {
         mockBrick = MockBrick();
-        mockLogger = MockLogger();
-        mockSource = MockSource();
-        mockWatcher = MockWatcher();
+        mockBrickSource = MockBrickSource();
+        mockSourceWatcher = MockSourceWatcher();
         mockFileWatcher = MockFileWatcher();
         mockKeyPressListener = MockKeyPressListener();
 
-        when(() => mockBrick.source).thenReturn(mockSource);
-        when(() => mockSource.watcher).thenReturn(mockWatcher);
+        when(() => mockBrick.source).thenReturn(mockBrickSource);
+        when(() => mockBrickSource.watcher).thenReturn(mockSourceWatcher);
       });
 
       test('runs gracefully', () async {
@@ -126,10 +132,17 @@ void main() {
 
         verifyNever(mockKeyPressListener.listenToKeystrokes);
         verifyNever(() => mockFileWatcher.events);
-        verifyNever(mockWatcher.start);
+        verifyNever(mockSourceWatcher.start);
         verify(
           () => mockBrick.cook(output: 'my_path'),
         ).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockBrick);
+        verifyNoMoreInteractions(mockBrickSource);
+        verifyNoMoreInteractions(mockSourceWatcher);
+        verifyNoMoreInteractions(mockFileWatcher);
+        verifyNoMoreInteractions(mockKeyPressListener);
       });
 
       test('prints warning and error when $ConfigException is thrown',
@@ -155,11 +168,19 @@ void main() {
 
         verifyNever(mockKeyPressListener.listenToKeystrokes);
         verifyNever(() => mockFileWatcher.events);
-        verifyNever(mockWatcher.start);
+        verifyNever(mockSourceWatcher.start);
         verify(() => mockBrick.cook(output: 'my_path')).called(1);
 
         verify(() => mockLogger.warn('my error')).called(1);
         verify(() => mockLogger.err('Could not cook brick: BRICK')).called(1);
+        verify(() => mockBrick.name).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockBrick);
+        verifyNoMoreInteractions(mockBrickSource);
+        verifyNoMoreInteractions(mockSourceWatcher);
+        verifyNoMoreInteractions(mockFileWatcher);
+        verifyNoMoreInteractions(mockKeyPressListener);
       });
 
       test('prints warning and error when $Exception is thrown', () async {
@@ -184,12 +205,21 @@ void main() {
 
         verifyNever(mockKeyPressListener.listenToKeystrokes);
         verifyNever(() => mockFileWatcher.events);
-        verifyNever(mockWatcher.start);
+        verifyNever(mockSourceWatcher.start);
         verify(() => mockBrick.cook(output: 'my_path')).called(1);
 
         verify(() => mockLogger.warn('Unknown error: Exception: my error'))
             .called(1);
         verify(() => mockLogger.err('Could not cook brick: BRICK')).called(1);
+
+        verify(() => mockBrick.name).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockBrick);
+        verifyNoMoreInteractions(mockBrickSource);
+        verifyNoMoreInteractions(mockSourceWatcher);
+        verifyNoMoreInteractions(mockFileWatcher);
+        verifyNoMoreInteractions(mockKeyPressListener);
       });
     });
   });
@@ -198,12 +228,12 @@ void main() {
     group('mock', () {
       late Stdin mockStdin;
       late Logger mockLogger;
-      late MockBrick mockBrick;
-      late MockSource mockSource;
+      late Brick mockBrick;
+      late BrickSource mockBrickSource;
       late Progress mockProgress;
-      late MockWatcher mockWatcher;
+      late SourceWatcher mockSourceWatcher;
       late Completer<int> exitCompleter;
-      late MockFileWatcher mockFileWatcher;
+      late FileWatcher mockFileWatcher;
       late TestFileWatcher testFileWatcher;
       late KeyPressListener keyPressListener;
       late TestDirectoryWatcher testDirectoryWatcher;
@@ -212,8 +242,8 @@ void main() {
         mockBrick = MockBrick();
         mockStdin = MockStdin();
         mockLogger = MockLogger();
-        mockSource = MockSource();
-        mockWatcher = MockWatcher();
+        mockBrickSource = MockBrickSource();
+        mockSourceWatcher = MockSourceWatcher();
         mockProgress = MockProgress();
         exitCompleter = Completer<int>();
         testFileWatcher = TestFileWatcher();
@@ -230,12 +260,12 @@ void main() {
 
         when(() => mockStdin.hasTerminal).thenReturn(true);
 
-        when(() => mockBrick.source).thenReturn(mockSource);
-        when(() => mockSource.watcher).thenReturn(mockWatcher);
+        when(() => mockBrick.source).thenReturn(mockBrickSource);
+        when(() => mockBrickSource.watcher).thenReturn(mockSourceWatcher);
 
-        when(() => mockWatcher.hasRun).thenAnswer((_) => true);
-        when(mockWatcher.start).thenAnswer((_) => Future.value());
-        when(mockWatcher.stop).thenAnswer((_) => Future.value());
+        when(() => mockSourceWatcher.hasRun).thenAnswer((_) => true);
+        when(mockSourceWatcher.start).thenAnswer((_) => Future.value());
+        when(mockSourceWatcher.stop).thenAnswer((_) => Future.value());
 
         when(() => mockFileWatcher.events)
             .thenAnswer((_) => const Stream.empty());
@@ -279,19 +309,29 @@ void main() {
         verify(() => mockFileWatcher.events).called(1);
 
         verify(
-          () => mockWatcher.addEvent(any(), runBefore: true),
+          () => mockSourceWatcher.addEvent(any(), runBefore: true),
         ).called(2);
         verify(
-          () => mockWatcher.addEvent(any(), runAfter: true),
+          () => mockSourceWatcher.addEvent(any(), runAfter: true),
         ).called(2);
 
         verify(() => mockBrick.cook(output: 'my_path', watch: true)).called(1);
+        verify(() => mockBrick.source).called(1);
+        verify(() => mockBrick.configPath).called(1);
+        verify(() => mockBrickSource.watcher).called(1);
 
         verify(mockLogger.exiting).called(1);
 
         final exitCode = await exitCompleter.future;
         // expects success because `q` was pressed
         expect(exitCode, ExitCode.success.code);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockProgress);
+        verifyNoMoreInteractions(mockBrick);
+        verifyNoMoreInteractions(mockBrickSource);
+        verifyNoMoreInteractions(mockSourceWatcher);
+        verifyNoMoreInteractions(mockFileWatcher);
       });
 
       test('calls config changed on config modify event', () async {
@@ -311,7 +351,7 @@ void main() {
 
         final brick = Brick.memory(
           name: 'BRICK',
-          source: mockSource,
+          source: mockBrickSource,
           fileSystem: MemoryFileSystem(),
           logger: mockLogger,
         );
@@ -327,10 +367,12 @@ void main() {
         verify(mockLogger.preheat).called(1);
         verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
 
-        verify(mockWatcher.start).called(1);
-        verify(() => mockWatcher.addEvent(any(), runBefore: true)).called(2);
-        verify(() => mockWatcher.addEvent(any())).called(2);
-        verify(() => mockWatcher.addEvent(any(), runAfter: true)).called(2);
+        verify(mockSourceWatcher.start).called(1);
+        verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
+            .called(2);
+        verify(() => mockSourceWatcher.addEvent(any())).called(2);
+        verify(() => mockSourceWatcher.addEvent(any(), runAfter: true))
+            .called(2);
 
         // this could possibly fail since this prints the time
         verify(mockLogger.dingDing).called(1);
@@ -350,10 +392,20 @@ void main() {
 
         await Future<void>.delayed(Duration.zero);
 
-        verify(mockWatcher.stop).called(1);
+        verify(mockSourceWatcher.stop).called(1);
 
         final exitCode = await exitCompleter.future;
         expect(exitCode, ExitCode.tempFail.code);
+
+        verify(() => mockSourceWatcher.hasRun).called(1);
+        verify(() => mockBrickSource.watcher).called(3);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockProgress);
+        verifyNoMoreInteractions(mockBrick);
+        verifyNoMoreInteractions(mockBrickSource);
+        verifyNoMoreInteractions(mockSourceWatcher);
+        verifyNoMoreInteractions(mockFileWatcher);
       });
 
       test('calls config changed on config path modify event', () async {
@@ -373,7 +425,7 @@ void main() {
 
         final brick = Brick.memory(
           name: 'BRICK',
-          source: mockSource,
+          source: mockBrickSource,
           fileSystem: MemoryFileSystem(),
           logger: mockLogger,
           configPath: 'config_path',
@@ -397,10 +449,12 @@ void main() {
         verify(mockLogger.quit).called(1);
         verify(mockLogger.reload).called(1);
 
-        verify(mockWatcher.start).called(1);
-        verify(() => mockWatcher.addEvent(any(), runBefore: true)).called(2);
-        verify(() => mockWatcher.addEvent(any())).called(2);
-        verify(() => mockWatcher.addEvent(any(), runAfter: true)).called(2);
+        verify(mockSourceWatcher.start).called(1);
+        verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
+            .called(2);
+        verify(() => mockSourceWatcher.addEvent(any())).called(2);
+        verify(() => mockSourceWatcher.addEvent(any(), runAfter: true))
+            .called(2);
 
         testFileWatcher.triggerEvent(WatchEvent(ChangeType.MODIFY, ''));
 
@@ -410,10 +464,20 @@ void main() {
 
         await Future<void>.delayed(Duration.zero);
 
-        verify(mockWatcher.stop).called(1);
+        verify(mockSourceWatcher.stop).called(1);
 
         final exitCode = await exitCompleter.future;
         expect(exitCode, ExitCode.tempFail.code);
+
+        verify(() => mockSourceWatcher.hasRun).called(1);
+        verify(() => mockBrickSource.watcher).called(3);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockProgress);
+        verifyNoMoreInteractions(mockBrick);
+        verifyNoMoreInteractions(mockBrickSource);
+        verifyNoMoreInteractions(mockSourceWatcher);
+        verifyNoMoreInteractions(mockFileWatcher);
       });
 
       test('calls file changed on source file modify event', () async {
@@ -484,6 +548,15 @@ void main() {
         final exitCode = await exitCompleter.future;
         // expects success because `q` was pressed
         expect(exitCode, ExitCode.success.code);
+
+        verify(() => mockProgress.complete('BRICK: cooked 0 files')).called(2);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockProgress);
+        verifyNoMoreInteractions(mockBrick);
+        verifyNoMoreInteractions(mockBrickSource);
+        verifyNoMoreInteractions(mockSourceWatcher);
+        verifyNoMoreInteractions(mockFileWatcher);
       });
 
       test('reloads when r is pressed', () async {
@@ -503,7 +576,7 @@ void main() {
 
         final brick = Brick.memory(
           name: 'BRICK',
-          source: mockSource,
+          source: mockBrickSource,
           fileSystem: MemoryFileSystem(),
           logger: mockLogger,
         );
@@ -534,6 +607,23 @@ void main() {
         final exitCode = await exitCompleter.future;
         // expects success because `q` was pressed
         expect(exitCode, ExitCode.tempFail.code);
+
+        verify(() => mockSourceWatcher.hasRun).called(1);
+        verify(() => mockBrickSource.watcher).called(2);
+
+        verify(() => mockSourceWatcher.addEvent(any())).called(2);
+        verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
+            .called(2);
+        verify(() => mockSourceWatcher.addEvent(any(), runAfter: true))
+            .called(2);
+        verify(mockSourceWatcher.start).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockProgress);
+        verifyNoMoreInteractions(mockBrick);
+        verifyNoMoreInteractions(mockBrickSource);
+        verifyNoMoreInteractions(mockSourceWatcher);
+        verifyNoMoreInteractions(mockFileWatcher);
       });
 
       test('quits when q is pressed', () async {
@@ -553,7 +643,7 @@ void main() {
 
         final brick = Brick.memory(
           name: 'BRICK',
-          source: mockSource,
+          source: mockBrickSource,
           fileSystem: MemoryFileSystem(),
           logger: mockLogger,
         );
@@ -573,10 +663,35 @@ void main() {
         final exitCode = await exitCompleter.future;
         // expects success because `q` was pressed
         expect(exitCode, ExitCode.success.code);
+
+        verify(mockLogger.preheat).called(1);
+        verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
+        // this could possibly fail since this prints the time
+        verify(mockLogger.dingDing).called(1);
+        verify(mockLogger.watching).called(1);
+
+        // this verifies -> verify(mockLogger.keyStrokes)).called(1);
+        verify(mockLogger.quit).called(1);
+        verify(mockLogger.reload).called(1);
+
+        verify(() => mockBrickSource.watcher).called(2);
+
+        verify(() => mockSourceWatcher.addEvent(any())).called(2);
+        verify(() => mockSourceWatcher.addEvent(any(), runBefore: true))
+            .called(2);
+        verify(() => mockSourceWatcher.addEvent(any(), runAfter: true))
+            .called(2);
+        verify(mockSourceWatcher.start).called(1);
+        verify(() => mockSourceWatcher.hasRun).called(1);
+
+        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(mockProgress);
+        verifyNoMoreInteractions(mockBrick);
+        verifyNoMoreInteractions(mockBrickSource);
+        verifyNoMoreInteractions(mockSourceWatcher);
+        verifyNoMoreInteractions(mockFileWatcher);
       });
     });
-
-    group('write to file system', () {});
   });
 }
 

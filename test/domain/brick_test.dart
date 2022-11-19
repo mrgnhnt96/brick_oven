@@ -285,7 +285,7 @@ exclude:
 
       setUp(() {
         fs = MemoryFileSystem();
-        mockWatcher = MockBrickWatcher();
+        mockWatcher = MockSourceWatcher();
         testDirectoryWatcher = TestDirectoryWatcher();
 
         when(() => mockWatcher.addEvent(any())).thenReturn(voidCallback());
@@ -839,7 +839,7 @@ exclude:
 
     test('throws $BrickException when file #writefile throws', () {
       final mockFile = MockBrickFile();
-      final mockSource = MockSource();
+      final mockSource = MockBrickSource();
 
       when(
         () =>
@@ -913,7 +913,7 @@ exclude:
 
     test('throws $Exception when file #writefile throws', () {
       final mockFile = MockBrickFile();
-      final mockSource = MockSource();
+      final mockSource = MockBrickSource();
 
       when(
         () =>
