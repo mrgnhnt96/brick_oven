@@ -7,6 +7,7 @@ import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:brick_oven/domain/partial.dart';
@@ -173,6 +174,8 @@ vars:
         ),
         throwsA(isA<PartialException>()),
       );
+
+      verifyNoMoreInteractions(mockLogger);
     });
 
     test('writes file on target dir root', () {
@@ -188,6 +191,8 @@ vars:
       );
 
       expect(fs.file(join(targetDir, '{{~ $fileName }}')).existsSync(), isTrue);
+
+      verifyNoMoreInteractions(mockLogger);
     });
   });
 }
