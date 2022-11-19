@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 import 'util/cook_brick.dart';
 
 void main() {
-  test('runs gracefully', () {
-    cookBrick('bio');
+  group('cook single brick runs gracefully', () {
+    test('bio', () => cookBrick('bio'));
   });
 }
