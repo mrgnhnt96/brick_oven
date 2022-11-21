@@ -7,13 +7,19 @@ import 'util/cook_brick.dart';
 
 void main() {
   group('cook runs gracefully', () {
-    const bricks = [
-      'bio',
-    ];
+    const bricks = {
+      'bio': 1,
+    };
 
-    for (final brick in bricks) {
-      test('$brick cook (single)', () => cookBrick(brick));
-      test('$brick cook (all)', () => cookAll(brick));
+    for (final brick in bricks.entries) {
+      test(
+        '"${brick.key}" cook (single)',
+        () => cookBrick(brick.key, numberOfFiles: brick.value),
+      );
+      test(
+        '"${brick.key}" cook (all)',
+        () => cookAll(brick.key, numberOfFiles: brick.value),
+      );
     }
   });
 }
