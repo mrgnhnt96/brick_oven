@@ -27,7 +27,7 @@ Future<void> cookAll(String brickName, {required int numberOfFiles}) async {
 
   when(() => mockLogger.progress(any())).thenReturn(mockProgress);
 
-  final testPath = join('test', 'integration');
+  final testPath = join('test', 'e2e');
   final fixturePath = join(testPath, 'fixtures');
   final sourcePath = join(testPath, 'sources');
 
