@@ -9,6 +9,7 @@ void main() {
   group('cook runs gracefully', () {
     const bricks = {
       'bio': 1,
+      'documentation': 4,
     };
 
     for (final brick in bricks.entries) {
