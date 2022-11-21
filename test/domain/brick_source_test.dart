@@ -70,14 +70,20 @@ $path
         expect(instance.localPath, path);
       });
 
+      test('should return when empty', () {
+        final instance = BrickSource.fromYaml(
+          YamlValue.from(YamlMap.wrap({'path': ''})),
+          fileSystem: MemoryFileSystem(),
+        );
+
+        expect(instance.localPath, isNull);
+      });
+
       test(
           'should return when relative path when configPath is provided with source path',
           () {
-        final yaml = loadYaml('''
-.
-''') as String;
         final instance = BrickSource.fromYaml(
-          YamlValue.from(yaml),
+          YamlValue.from('.'),
           configPath: 'path/to/config.yaml',
           fileSystem: MemoryFileSystem(),
         );
