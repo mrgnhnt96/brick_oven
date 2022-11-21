@@ -198,46 +198,38 @@ fake_NAME_
       const variable = Variable(name: 'peanut', placeholder: placeholder);
 
       test('is correct value', () {
-        final expected = RegExp(r'(\{*\S*)' '$placeholder' r'(\w*\}*)');
+        final expected = RegExp(
+          r'(\{*\S*)' '$placeholder' r'(?:b(?:race)?(\d+))?(\w*\}*)',
+        );
 
         expect(testFileReplacements.variablePattern(variable), expected);
       });
 
       test('matches', () {
         const matches = {
-          placeholder: ['', ''],
-          '${placeholder}snake': ['', 'snake'],
-          '${placeholder}snakeCase': ['', 'snakeCase'],
-          '${placeholder}snake}': ['', 'snake}'],
-          '${placeholder}snakeCase}': ['', 'snakeCase}'],
-          '{${placeholder}snake': ['{', 'snake'],
-          '{${placeholder}snakeCase': ['{', 'snakeCase'],
-          '{$placeholder': ['{', ''],
-          '{{$placeholder': ['{{', ''],
-          '{$placeholder}': ['{', '}'],
-          '{{$placeholder}}': ['{{', '}}'],
-          '$placeholder}': ['', '}'],
-          '$placeholder}}': ['', '}}'],
-          '{{#$placeholder}}': ['{{#', '}}'],
-          '{{/$placeholder}}': ['{{/', '}}'],
-          '{{^$placeholder}}': ['{{^', '}}'],
-          'a$placeholder': [
-            'a',
-            '',
-          ],
-        };
-
-        const otherMatches = {
-          '${placeholder}snake}a': [
-            '${placeholder}snake}',
-            '',
-            'snake}',
-          ],
-          '${placeholder}snakeCase}a': [
-            '${placeholder}snakeCase}',
-            '',
-            'snakeCase}',
-          ],
+          placeholder: ['', null, ''],
+          '${placeholder}snake': ['', null, 'snake'],
+          '${placeholder}snakeCase': ['', null, 'snakeCase'],
+          '${placeholder}snake}': ['', null, 'snake}'],
+          '${placeholder}snakeCase}': ['', null, 'snakeCase}'],
+          '${placeholder}bsnake': ['', null, 'bsnake'],
+          '${placeholder}b2snake': ['', '2', 'snake'],
+          '${placeholder}b99snakeCase}': ['', '99', 'snakeCase}'],
+          '${placeholder}b999snakeCase}': ['', '999', 'snakeCase}'],
+          '${placeholder}b2': ['', '2', ''],
+          '${placeholder}b99': ['', '99', ''],
+          '${placeholder}b999': ['', '999', ''],
+          '${placeholder}brace2': ['', '2', ''],
+          '${placeholder}brace99': ['', '99', ''],
+          '${placeholder}brace999': ['', '999', ''],
+          '{$placeholder': ['{', null, ''],
+          '{{$placeholder': ['{{', null, ''],
+          '$placeholder}': ['', null, '}'],
+          '$placeholder}}': ['', null, '}}'],
+          '{{#$placeholder}}': ['{{#', null, '}}'],
+          '{{/$placeholder}}': ['{{/', null, '}}'],
+          '{{^$placeholder}}': ['{{^', null, '}}'],
+          'a$placeholder': ['a', null, ''],
         };
 
         for (final match in matches.entries) {
@@ -252,7 +244,23 @@ fake_NAME_
           expect(matchResult.group(0), match.key);
           expect(matchResult.group(1), match.value[0]);
           expect(matchResult.group(2), match.value[1]);
+          expect(matchResult.group(3), match.value[2]);
         }
+
+        const otherMatches = {
+          '${placeholder}snake}a': [
+            '${placeholder}snake}',
+            '',
+            null,
+            'snake}',
+          ],
+          '${placeholder}snakeCase}a': [
+            '${placeholder}snakeCase}',
+            '',
+            null,
+            'snakeCase}',
+          ],
+        };
 
         for (final match in otherMatches.entries) {
           final matches = testFileReplacements
@@ -266,19 +274,20 @@ fake_NAME_
           expect(matchResult.group(0), match.value[0]);
           expect(matchResult.group(1), match.value[1]);
           expect(matchResult.group(2), match.value[2]);
+          expect(matchResult.group(3), match.value[3]);
         }
 
         const placeholder2 = 'peanut-butter';
         const variable2 =
             Variable(name: 'variable2', placeholder: placeholder2);
 
-        const otherMatches2 = {
-          '{{#$placeholder2}}': ['{{#', '}}'],
-          '{{/$placeholder2}}': ['{{/', '}}'],
-          '{{^$placeholder2}}': ['{{^', '}}'],
+        const sectionMatches = {
+          '{{#$placeholder2}}': ['{{#', null, '}}'],
+          '{{/$placeholder2}}': ['{{/', null, '}}'],
+          '{{^$placeholder2}}': ['{{^', null, '}}'],
         };
 
-        for (final match in otherMatches2.entries) {
+        for (final match in sectionMatches.entries) {
           final matches = testFileReplacements
               .variablePattern(variable2)
               .allMatches(match.key);
@@ -290,6 +299,7 @@ fake_NAME_
           expect(matchResult.group(0), match.key);
           expect(matchResult.group(1), match.value[0]);
           expect(matchResult.group(2), match.value[1]);
+          expect(matchResult.group(3), match.value[2]);
         }
       });
     });
@@ -302,6 +312,27 @@ fake_NAME_
           '{_NAME_}',
           '{_NAME_',
           '_NAME_}',
+        ];
+
+        for (final content in contents) {
+          const variable = Variable(name: 'name', placeholder: '_NAME_');
+
+          expect(
+            () => testFileReplacements.checkForVariables(
+              content,
+              variable,
+            ),
+            throwsA(isA<VariableException>()),
+          );
+        }
+      });
+
+      test('when variables brace quantity is not supported', () {
+        const contents = [
+          '_NAME_b4',
+          '_NAME_b99',
+          '_NAME_b1',
+          '_NAME_b0',
         ];
 
         for (final content in contents) {
@@ -345,9 +376,9 @@ fake_NAME_
 _NAME_
 prefix_NAME_
 _NAME_suffix
-_NAME_escaped
-_NAME_escapedsuffix
-_NAME_escaped _NAME_unescaped/_NAME_suffix
+_NAME_b3
+_NAME_b3suffix
+_NAME_b3 _NAME_b2/_NAME_suffix
 before text _NAME_ after text
 ''';
 
@@ -475,7 +506,7 @@ before text {{name}} after text
 
     test('writes sections, variables, and partials', () {
       const content = '''
-_VAR_ _VAR_snake _VAR_escaped
+_VAR_ _VAR_snake _VAR_b3
 
 if_SECTION_
 ifNot_SECTION_

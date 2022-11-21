@@ -182,8 +182,11 @@ mixin FileReplacements {
 
   /// the pattern to find variables within the content
   @visibleForTesting
-  RegExp variablePattern(Variable variable) =>
-      RegExp(r'(\{*\S*)' '${variable.placeholder}' r'(\w*\}*)');
+  RegExp variablePattern(Variable variable) => RegExp(
+        r'(\{*\S*)'
+        '${variable.placeholder}'
+        r'(?:b(?:race)?(\d+))?(\w*\}*)',
+      );
 
   /// replaces the [variable] in the [content]
   @visibleForTesting
@@ -196,12 +199,23 @@ mixin FileReplacements {
     final newContent = content.replaceAllMapped(
       variablePattern(variable),
       (match) {
-        final completeMatch = match.group(0)!;
+        final completeMatch = match.group(0) ?? '';
+
+        final braceCount = int.tryParse(match.group(2) ?? '');
+        final wrapWithBraces = braceCount != null;
+
+        if (wrapWithBraces && (braceCount < 2 || braceCount > 3)) {
+          throw VariableException(
+            variable: completeMatch,
+            reason: 'Wrap with braces must be 2 or 3, '
+                'but was $braceCount',
+          );
+        }
 
         final startsWithBracket =
-            RegExp(r'^\{+(?![/^#])$').hasMatch(match.group(1)!);
-        final isTag = RegExp(r'^\{+[/^#]').hasMatch(match.group(1)!);
-        final endsWithBracket = RegExp(r'\}+$').hasMatch(match.group(2)!);
+            RegExp(r'^\{+(?![/^#])$').hasMatch(match.group(1) ?? '');
+        final isTag = RegExp(r'^\{+[/^#]').hasMatch(match.group(1) ?? '');
+        final endsWithBracket = RegExp(r'\}+$').hasMatch(match.group(3) ?? '');
 
         if (isTag && endsWithBracket) {
           return completeMatch;
@@ -225,7 +239,7 @@ mixin FileReplacements {
           isVariableUsed = true;
         }
 
-        final possibleTag = match.group(2);
+        final possibleTag = match.group(3);
 
         final tag = MustacheTag.values.findFrom(possibleTag);
 
@@ -234,11 +248,14 @@ mixin FileReplacements {
             suffix = possibleTag;
           }
 
-          result = '{{${variable.name}}}';
+          final startBraces = '{' * (braceCount ?? 2);
+          final endBraces = '}' * (braceCount ?? 2);
+
+          result = '$startBraces${variable.name}$endBraces';
         } else {
           // format the variable
           suffix = MustacheTag.values.suffixFrom(possibleTag) ?? '';
-          result = tag.wrap(variable.name);
+          result = tag.wrap(variable.name, braceCount: braceCount ?? 3);
         }
 
         isVariableUsed = true;

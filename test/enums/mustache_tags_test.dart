@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:test/test.dart';
 
 import 'package:brick_oven/enums/mustache_tag.dart';
@@ -20,8 +22,6 @@ void main() {
   ];
 
   const nonFormatTags = [
-    MustacheTag.escaped,
-    MustacheTag.unescaped,
     MustacheTag.if_,
     MustacheTag.ifNot,
     MustacheTag.endIf,
@@ -94,12 +94,6 @@ void main() {
       'upperCase',
       'uppercase',
       'upper',
-    ],
-    MustacheTag.escaped: [
-      'escaped',
-    ],
-    MustacheTag.unescaped: [
-      'unescaped',
     ],
     MustacheTag.if_: [
       'if',
@@ -179,12 +173,6 @@ void main() {
       'upperCase$suffix',
       'uppercase$suffix',
       'upper$suffix',
-    ],
-    MustacheTag.escaped: [
-      'escaped$suffix',
-    ],
-    MustacheTag.unescaped: [
-      'unescaped$suffix',
     ],
     MustacheTag.if_: [
       'if$suffix',
@@ -275,8 +263,6 @@ void main() {
         }
 
         const nonFormatTagExpected = {
-          MustacheTag.escaped: '{{{DUDE}}}',
-          MustacheTag.unescaped: '{{DUDE}}',
           MustacheTag.if_: '{{#DUDE}}',
           MustacheTag.ifNot: '{{^DUDE}}',
           MustacheTag.endIf: '{{/DUDE}}',
@@ -286,6 +272,45 @@ void main() {
           expect(
             tag.wrap('DUDE'),
             nonFormatTagExpected[tag],
+          );
+        }
+      });
+
+      test('wraps with provided brace count', () {
+        for (final tag in formatTags) {
+          expect(
+            tag.wrap('sup_dude', braceCount: 3),
+            '{{#${tag.name}}}{{{sup_dude}}}{{/${tag.name}}}',
+          );
+
+          expect(
+            tag.wrap('sup_dude', braceCount: 2),
+            '{{#${tag.name}}}{{sup_dude}}{{/${tag.name}}}',
+          );
+
+          expect(
+            tag.wrap('sup_dude', braceCount: null),
+            '{{#${tag.name}}}{{{sup_dude}}}{{/${tag.name}}}',
+          );
+        }
+      });
+
+      test('throws assertion error when braceCount is less than min amount',
+          () {
+        for (final tag in formatTags) {
+          expect(
+            () => tag.wrap('sup_dude', braceCount: 1),
+            throwsA(isA<AssertionError>()),
+          );
+        }
+      });
+
+      test('throws assertion error when braceCount is greater than max amount',
+          () {
+        for (final tag in formatTags) {
+          expect(
+            () => tag.wrap('sup_dude', braceCount: 4),
+            throwsA(isA<AssertionError>()),
           );
         }
       });
@@ -316,8 +341,6 @@ void main() {
         MustacheTag.snakeCase: () => MustacheTag.snakeCase.isSnakeCase,
         MustacheTag.titleCase: () => MustacheTag.titleCase.isTitleCase,
         MustacheTag.upperCase: () => MustacheTag.upperCase.isUpperCase,
-        MustacheTag.escaped: () => MustacheTag.escaped.isEscaped,
-        MustacheTag.unescaped: () => MustacheTag.unescaped.isUnescaped,
         MustacheTag.if_: () => MustacheTag.if_.isIf,
         MustacheTag.ifNot: () => MustacheTag.ifNot.isIfNot,
         MustacheTag.endIf: () => MustacheTag.endIf.isEndIf,

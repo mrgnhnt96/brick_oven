@@ -43,12 +43,6 @@ enum MustacheTag {
   /// UPPERCASE
   upperCase,
 
-  /// no format, but wrapped with `{{{}}}`
-  escaped,
-
-  /// no format, but wrapped with `{{{}}}`
-  unescaped,
-
   /// no format, start of an inverted inline section
   ifNot,
 
@@ -68,14 +62,23 @@ extension MustacheTagX on MustacheTag {
   /// Wraps the [content] with mustache
   ///
   /// eg: {{#snakeCase}}This is the content{{/snakeCase}}
-  String wrap(String content) {
+  String wrap(String content, {int? braceCount}) {
+    assert(
+      braceCount == null || braceCount >= 2 && braceCount <= 3,
+      'braceCount must be 2 or 3',
+    );
+
+    braceCount ??= 3;
+
     if (isFormat) {
       final isWrapped = wrappedPattern.hasMatch(content);
 
       var wrappedContent = content;
 
       if (!isWrapped) {
-        wrappedContent = '{{{$content}}}';
+        final startBraces = '{' * braceCount;
+        final endBraces = '}' * braceCount;
+        wrappedContent = '$startBraces$content$endBraces';
       }
 
       return '{{#$name}}$wrappedContent{{/$name}}';
@@ -85,14 +88,6 @@ extension MustacheTagX on MustacheTag {
       !wrappedPattern.hasMatch(content),
       'Content must not be wrapped with {{{}}} when not formatting content',
     );
-
-    if (isEscaped) {
-      return '{{{$content}}}';
-    }
-
-    if (isUnescaped) {
-      return '{{$content}}';
-    }
 
     if (isIf) {
       return '{{#$content}}';
@@ -127,12 +122,6 @@ extension MustacheTagX on MustacheTag {
 
     return false;
   }
-
-  /// whether the format is [MustacheTag.escaped]
-  bool get isEscaped => this == MustacheTag.escaped;
-
-  /// whether the format is [MustacheTag.unescaped]
-  bool get isUnescaped => this == MustacheTag.unescaped;
 
   /// whether the format is [MustacheTag.if_]
   bool get isIf => this == MustacheTag.if_;
