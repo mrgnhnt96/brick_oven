@@ -17,7 +17,10 @@ import '../../test_utils/mocks.dart';
 ///   - test/integration/sources/[brickName]
 /// - Accessing running command
 ///   - brick_oven cook [brickName]
-Future<void> cookBrick(String brickName) async {
+Future<void> cookBrick(
+  String brickName, {
+  required int numberOfFiles,
+}) async {
   final mockLogger = MockLogger();
   final mockProgress = MockProgress();
   final mockPubUpdater = MockPubUpdater()..stubMethods();
@@ -88,7 +91,9 @@ Future<void> cookBrick(String brickName) async {
     () => mockAnalytics.firstRun,
     mockLogger.preheat,
     () => mockLogger.progress('Writing Brick: $brickName'),
-    () => mockProgress.complete('$brickName: cooked 1 file'),
+    () => mockProgress.complete(
+          '$brickName: cooked $numberOfFiles file${numberOfFiles > 1 ? 's' : ''}',
+        ),
     () => mockLogger.info('brick.yaml is in sync'),
     mockLogger.dingDing,
     () => mockAnalytics.sendEvent(

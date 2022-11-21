@@ -19,7 +19,7 @@ import '../../test_utils/mocks.dart';
 ///   - brick_oven cook [brickName]
 ///
 /// WARNING: it is expected to only have 1 brick configured within the brick_oven.yaml
-Future<void> cookAll(String brickName) async {
+Future<void> cookAll(String brickName, {required int numberOfFiles}) async {
   final mockLogger = MockLogger();
   final mockProgress = MockProgress();
   final mockPubUpdater = MockPubUpdater()..stubMethods();
@@ -90,7 +90,9 @@ Future<void> cookAll(String brickName) async {
     () => mockAnalytics.firstRun,
     mockLogger.preheat,
     () => mockLogger.progress('Writing Brick: $brickName'),
-    () => mockProgress.complete('$brickName: cooked 1 file'),
+    () => mockProgress.complete(
+          '$brickName: cooked $numberOfFiles file${numberOfFiles > 1 ? 's' : ''}',
+        ),
     () => mockLogger.info('brick.yaml is in sync'),
     mockLogger.dingDing,
     () => mockAnalytics.sendEvent(
