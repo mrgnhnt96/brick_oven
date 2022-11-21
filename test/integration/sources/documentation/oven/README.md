@@ -5,7 +5,7 @@ _DESCRIPTION_
 ## Usage 🚀
 
 ```sh
-# _NAME_title
+# _NAME_b2title
 ```
 
 ```
