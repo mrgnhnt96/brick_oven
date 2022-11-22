@@ -11,6 +11,7 @@ void main() {
       'bio': 1,
       'documentation': 4,
       'favorite_color': 1,
+      'flavors': 2,
     };
 
     for (final brick in bricks.entries) {
