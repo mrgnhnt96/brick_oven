@@ -9,6 +9,7 @@ import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/constants.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -296,7 +297,7 @@ class Brick extends Equatable {
 
   /// variables used not provided by the user
   static List<Variable> get defaultVariables => [
-        const Variable(name: '.', placeholder: '_INDEX_VALUE_'),
+        const Variable(name: '.', placeholder: kIndexValue),
       ];
 
   @override
@@ -325,6 +326,10 @@ class Brick extends Equatable {
       if (file.includeIfNot != null) {
         variables.add(file.includeIfNot!);
       }
+
+      if (file.name != null) {
+        variables.add(file.name!.value);
+      }
     }
 
     for (final partial in partials) {
@@ -333,9 +338,8 @@ class Brick extends Equatable {
     }
 
     for (final dir in dirs) {
-      final dirName = dir.name?.value;
-      if (dirName != null) {
-        variables.add(dirName);
+      if (dir.name != null) {
+        variables.add(dir.name!.value);
       }
 
       if (dir.includeIf != null) {
@@ -380,9 +384,9 @@ class Brick extends Equatable {
       );
     }
 
-    final variables = allBrickVariables();
+    final variables = allBrickVariables()..remove(kIndexValue);
 
-    final variablesInBrickYaml = brickYaml.vars.toSet();
+    final variablesInBrickYaml = brickYaml.vars.toSet()..remove(kIndexValue);
 
     if (variablesInBrickYaml.difference(variables).isNotEmpty) {
       isInSync = false;
