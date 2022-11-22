@@ -19,17 +19,17 @@ void main() {
   group('#checkForPartials', () {
     test('replaces partial placeholder with partial value', () {
       const content = '''
-partial.do_not_replace
+partials.do_not_replace
 {{> partial }}
 
-// partial.replace_me
-// partial.replace_me.dart
-partial.replace_me_too //
-partial.replace_me_too.md //
+// partials.replace_me
+// partials.replace_me.dart
+partials.replace_me_too //
+partials.replace_me_too.md //
 ''';
 
       const expectedContent = '''
-partial.do_not_replace
+partials.do_not_replace
 {{> partial }}
 
 {{> replace_me.dart }}
@@ -523,8 +523,8 @@ if_SECTION_
 ifNot_SECTION_
 endIf_SECTION_
 
-partial.page
-partial.page.md
+partials.page
+partials.page.md
 ''';
 
       const expectedContent = '''

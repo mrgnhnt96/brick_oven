@@ -97,7 +97,8 @@ mixin FileReplacements {
     final partialsUsed = <String>{};
 
     for (final partial in partials) {
-      final partialPattern = RegExp(r'.*\bpartial\.' '${partial.name}' r'\b.*');
+      final partialPattern =
+          RegExp(r'.*\bpartials\.' '${partial.name}' r'\b.*');
       final compareContent = newContent;
       newContent =
           newContent.replaceAll(partialPattern, partial.toPartialInput());
