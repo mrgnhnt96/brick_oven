@@ -51,9 +51,13 @@ Future<void> cook({
   for (final file in files) {
     final relativePath = relative(file.path, from: brickSourcePath);
 
-    memoryFileSystem.file(relativePath)
-      ..createSync(recursive: true)
-      ..writeAsStringSync(file.readAsStringSync());
+    final memoryFile = memoryFileSystem.file(relativePath)
+      ..createSync(recursive: true);
+    try {
+      memoryFile.writeAsStringSync(file.readAsStringSync());
+    } catch (_) {
+      memoryFile.writeAsBytesSync(file.readAsBytesSync());
+    }
   }
 
   final brickYamlContent = localFileSystem
@@ -112,7 +116,12 @@ Future<void> cook({
         memoryFileSystem.file(join(brickResultPath, relativePath));
 
     expect(actualFile.existsSync(), isTrue);
-    expect(actualFile.readAsStringSync(), file.readAsStringSync());
+
+    try {
+      expect(actualFile.readAsStringSync(), file.readAsStringSync());
+    } catch (_) {
+      expect(actualFile.readAsBytesSync(), file.readAsBytesSync());
+    }
   }
 
   verifyNoMoreInteractions(mockLogger);
