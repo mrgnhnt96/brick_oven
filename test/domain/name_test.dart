@@ -2,20 +2,74 @@ import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/constants.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
 void main() {
   group('$Name', () {
     test('can be instanciated', () {
-      expect(() => const Name('name'), returnsNormally);
+      expect(() => Name('name'), returnsNormally);
+    });
+
+    group('throws assertion error', () {
+      test('when braces is not 2 or 3', () {
+        expect(
+          () => Name('name', braces: 1),
+          throwsA(isA<AssertionError>()),
+        );
+
+        expect(
+          () => Name('name', braces: 4),
+          throwsA(isA<AssertionError>()),
+        );
+      });
+
+      test('when tag is not a format tag', () {
+        expect(
+          () => Name('name', tag: MustacheTag.if_),
+          throwsA(isA<AssertionError>()),
+        );
+      });
+
+      test('when section and invertedSection are both set', () {
+        expect(
+          () => Name('name', section: 'section', invertedSection: 'section'),
+          throwsA(isA<AssertionError>()),
+        );
+      });
+
+      test('when tag is set when section or invertedSection is set', () {
+        expect(
+          () => Name('name', tag: MustacheTag.camelCase, section: 'section'),
+          throwsA(isA<AssertionError>()),
+        );
+
+        expect(
+          () => Name(
+            'name',
+            tag: MustacheTag.camelCase,
+            invertedSection: 'section',
+          ),
+          throwsA(isA<AssertionError>()),
+        );
+      });
+
+      test(
+          'when value is $kIndexValue and section and invertedSection are not set',
+          () {
+        expect(
+          () => Name(kIndexValue),
+          throwsA(isA<AssertionError>()),
+        );
+      });
     });
 
     group('#fromYaml', () {
       test('can parse null and returns backup name', () {
         expect(
           Name.fromYaml(const YamlValue.none(), 'name'),
-          const Name('name'),
+          Name('name'),
         );
       });
 
@@ -25,7 +79,7 @@ void main() {
             const YamlValue.string('name'),
             'backup',
           ),
-          equals(const Name('name')),
+          Name('name'),
         );
       });
 
@@ -38,25 +92,117 @@ suffix: suffix
 
         expect(
           Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
-          equals(const Name('name', prefix: 'prefix', suffix: 'suffix')),
+          Name('name', prefix: 'prefix', suffix: 'suffix'),
         );
       });
 
-      test('can parse format when provided', () {
-        final yaml = loadYaml('''
+      group('sections', () {
+        test('can parse section', () {
+          final yaml = loadYaml('''
 value: name
-format: snake
+section: section
 ''') as YamlMap;
 
-        expect(
-          Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
-          equals(
-            const Name(
-              'name',
-              tag: MustacheTag.snakeCase,
-            ),
-          ),
-        );
+          expect(
+            Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
+            Name('name', section: 'section'),
+          );
+        });
+
+        test('can parse inverted section', () {
+          final yaml = loadYaml('''
+value: name
+inverted_section: inverted_section
+''') as YamlMap;
+
+          expect(
+            Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
+            Name('name', invertedSection: 'inverted_section'),
+          );
+        });
+
+        test(
+            'should throw $VariableException when section and inverted section are provided',
+            () {
+          final yaml = loadYaml('''
+value: name
+section: section
+inverted_section: inverted_section
+''') as YamlMap;
+
+          expect(
+            () => Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
+            throwsA(isA<VariableException>()),
+          );
+        });
+
+        test(
+            'should throw $VariableException when format and section are provided',
+            () {
+          final yaml = loadYaml('''
+value: name
+format: camel
+section: section
+''') as YamlMap;
+
+          expect(
+            () => Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
+            throwsA(isA<VariableException>()),
+          );
+        });
+
+        test(
+            'should throw $VariableException when format and inverted section are provided',
+            () {
+          final yaml = loadYaml('''
+value: name
+format: camel
+inverted_section: section
+''') as YamlMap;
+
+          expect(
+            () => Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
+            throwsA(isA<VariableException>()),
+          );
+        });
+      });
+
+      group('braces', () {
+        test('can parse when provided', () {
+          final yaml = loadYaml('''
+value: name
+braces: 3
+''') as YamlMap;
+
+          expect(
+            Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
+            equals(Name('name', braces: 3)),
+          );
+        });
+
+        test('can parse when omitted', () {
+          final yaml = loadYaml('''
+value: name
+braces:
+''') as YamlMap;
+
+          expect(
+            Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
+            equals(Name('name', braces: 3)),
+          );
+        });
+
+        test('throws $VariableException when braces is not 2 or 3', () {
+          final yaml = loadYaml('''
+value: name
+braces: 1
+''') as YamlMap;
+
+          expect(
+            () => Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
+            throwsA(isA<VariableException>()),
+          );
+        });
       });
 
       test('should throw $ConfigException when extra keys are provided', () {
@@ -96,11 +242,69 @@ $key:
       });
     });
 
-    group('#simple', () {
-      test('formats and prepends the prefix and appends the suffix', () {
+    group('#format', () {
+      test('wraps with provided braces', () {
         expect(
-          const Name('name', prefix: 'prefix', suffix: 'suffix').simple,
-          equals('prefix{name}suffix'),
+          Name('name', braces: 2).format(),
+          '{{name}}',
+        );
+
+        expect(
+          Name('name', braces: 3).format(),
+          '{{{name}}}',
+        );
+      });
+
+      test('includes prefix', () {
+        expect(
+          Name('name', prefix: 'prefix').format(),
+          'prefix{{{name}}}',
+        );
+      });
+
+      test('includes suffix', () {
+        expect(
+          Name('name', suffix: 'suffix').format(),
+          '{{{name}}}suffix',
+        );
+      });
+
+      test('wraps with section when provided', () {
+        expect(
+          Name('name', section: 'section').format(),
+          '{{#section}}{{{name}}}{{/section}}',
+        );
+      });
+
+      test('wraps with inverted section when provided', () {
+        expect(
+          Name('name', invertedSection: 'section').format(),
+          '{{^section}}{{{name}}}{{/section}}',
+        );
+      });
+
+      test('converted $kIndexValue to correct format', () {
+        expect(
+          Name(kIndexValue, invertedSection: 'section').format(),
+          '{{^section}}{{{.}}}{{/section}}',
+        );
+        expect(
+          Name(kIndexValue, section: 'section').format(),
+          '{{#section}}{{{.}}}{{/section}}',
+        );
+      });
+
+      test('wraps with braces by default', () {
+        expect(
+          Name('name').format(),
+          '{{{name}}}',
+        );
+      });
+
+      test('wraps with format when provided', () {
+        expect(
+          Name('name', tag: MustacheTag.camelCase).format(),
+          '{{#camelCase}}{{{name}}}{{/camelCase}}',
         );
       });
     });

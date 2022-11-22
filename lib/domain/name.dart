@@ -2,6 +2,7 @@ import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/constants.dart';
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 import 'package:equatable/equatable.dart';
 
@@ -14,13 +15,37 @@ part 'name.g.dart';
 @autoequal
 class Name extends Equatable {
   /// {@macro name}
-  const Name(
+  Name(
     this.value, {
     String? prefix,
     String? suffix,
+    this.section,
+    this.invertedSection,
     this.tag,
+    int? braces,
   })  : prefix = prefix ?? '',
-        suffix = suffix ?? '';
+        suffix = suffix ?? '',
+        braces = braces ?? kDefaultBraces,
+        assert(
+          braces == null || braces > 1 && braces < 4,
+          'braces must be 2 or 3',
+        ),
+        assert(tag == null || tag.isFormat, 'tag must be a format tag'),
+        assert(
+          section == null || invertedSection == null,
+          'section and invertedSection cannot both be set',
+        ),
+        assert(
+          tag == null || section == null && invertedSection == null,
+          'tag cannot be set when section or invertedSection is set',
+        ),
+        assert(
+          value != kIndexValue ||
+              value == kIndexValue &&
+                  (section != null || invertedSection != null),
+          'to access the index value, section or '
+          'inverted section must be provided',
+        );
 
   /// {@macro name}
   ///
@@ -29,7 +54,7 @@ class Name extends Equatable {
     String? name;
     String? prefix;
     String? suffix;
-    MustacheTag? tag;
+    MustacheTag? format;
 
     if (value.isError()) {
       throw VariableException(
@@ -61,7 +86,34 @@ class Name extends Equatable {
       name = getValue('value') ?? backup;
       prefix = getValue('prefix');
       suffix = getValue('suffix');
-      tag = MustacheTag.values.findFrom(getValue('format'));
+      format =
+          MustacheTag.values.findFrom(getValue('format'), onlyFormat: true);
+
+      final section = getValue('section');
+      final invertedSection = getValue('inverted_section');
+
+      if (section != null && invertedSection != null) {
+        throw VariableException(
+          variable: backup,
+          reason: 'Cannot have both `section` and `inverted_section`',
+        );
+      }
+
+      if (format != null && (section != null || invertedSection != null)) {
+        throw VariableException(
+          variable: backup,
+          reason: 'Cannot have `format` and `section`/`inverted_section`',
+        );
+      }
+
+      final braces = int.tryParse('${nameConfig.remove('braces')}');
+
+      if (braces != null && (braces < 2 || braces > 3)) {
+        throw VariableException(
+          variable: backup,
+          reason: '`braces` must be 2 or 3',
+        );
+      }
 
       if (nameConfig.isNotEmpty) {
         throw VariableException(
@@ -70,7 +122,15 @@ class Name extends Equatable {
         );
       }
 
-      return Name(name, prefix: prefix, suffix: suffix, tag: tag);
+      return Name(
+        name,
+        prefix: prefix,
+        suffix: suffix,
+        tag: format,
+        section: section,
+        invertedSection: invertedSection,
+        braces: braces,
+      );
     }
 
     if (value.isString()) {
@@ -94,26 +154,49 @@ class Name extends Equatable {
   /// the value of the name
   final String value;
 
+  /// if the name is to be wrapped with a section tag
+  final String? section;
+
+  /// if the name is to be wrapped with an inverted section tag
+  final String? invertedSection;
+
+  /// the number of braces to wrap the name with
+  final int braces;
+
   @override
   List<Object?> get props => _$props;
 
-  String get _toVariable {
-    return '$prefix{{{$value}}}$suffix';
-  }
-
   /// gets the name of the file with formatting to mustache
-  String get formatted {
-    if (tag != null) {
-      return tag!.wrap(_toVariable);
+  String format() {
+    var result = value;
+
+    if (result == kIndexValue) {
+      result = '.';
     }
 
-    return _toVariable;
-  }
+    if (tag != null) {
+      result = tag!.wrap(value, braceCount: braces);
+    } else {
+      final startBraces = '{' * braces;
+      final endBraces = '}' * braces;
+      result = '$startBraces$result$endBraces';
+    }
 
-  /// gets the name of the file without formatting to mustache
-  ///
-  /// eg: `prefix{name}suffix`
-  String get simple {
-    return '$prefix{$value}$suffix';
+    if (section != null || invertedSection != null) {
+      String start;
+      String end;
+
+      if (section != null) {
+        start = MustacheTag.if_.wrap(section!);
+        end = MustacheTag.endIf.wrap(section!);
+      } else {
+        start = MustacheTag.ifNot.wrap(invertedSection!);
+        end = MustacheTag.endIf.wrap(invertedSection!);
+      }
+
+      result = '$start$result$end';
+    }
+
+    return '$prefix$result$suffix';
   }
 }
