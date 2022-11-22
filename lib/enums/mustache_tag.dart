@@ -1,5 +1,6 @@
 // ignore_for_file: parameter_assignments
 
+import 'package:brick_oven/utils/constants.dart';
 import 'package:meta/meta.dart';
 
 /// the formats that Mustache supports
@@ -68,7 +69,7 @@ extension MustacheTagX on MustacheTag {
       'braceCount must be 2 or 3',
     );
 
-    braceCount ??= 3;
+    braceCount ??= kDefaultBraces;
 
     if (isFormat) {
       final isWrapped = wrappedPattern.hasMatch(content);
@@ -175,7 +176,7 @@ extension MustacheTagX on MustacheTag {
 /// extension on [List<MustacheFormat>]
 extension ListMustacheX on List<MustacheTag> {
   /// loops through looking for a matched [value], return null if not found
-  MustacheTag? findFrom(String? value) {
+  MustacheTag? findFrom(String? value, {bool onlyFormat = false}) {
     if (value == null) {
       return null;
     }
@@ -184,9 +185,10 @@ extension ListMustacheX on List<MustacheTag> {
 
     for (final e in this) {
       final name = e.name.toLowerCase().replaceAll('_', '');
-
-      if (valueLower.startsWith(name)) {
-        return e;
+      if (!onlyFormat) {
+        if (valueLower.startsWith(name)) {
+          return e;
+        }
       }
 
       if (!e.isFormat) {

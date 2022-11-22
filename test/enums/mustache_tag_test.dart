@@ -386,6 +386,22 @@ void main() {
         expect(MustacheTag.values.findFrom('nothing'), isNull);
         expect(MustacheTag.values.findFrom(null), isNull);
       });
+
+      test('ignores non format tags when #onlyFormat is true', () {
+        for (final tag in nonFormatTags) {
+          expect(
+            MustacheTag.values.findFrom(tag.name, onlyFormat: true),
+            isNull,
+          );
+        }
+
+        for (final tag in formatTags) {
+          expect(
+            MustacheTag.values.findFrom(tag.name, onlyFormat: true),
+            tag,
+          );
+        }
+      });
     });
 
     group('#suffixFrom', () {
