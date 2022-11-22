@@ -10,6 +10,7 @@ void main() {
     const bricks = {
       'bio': 1,
       'documentation': 4,
+      'favorite_color': 1,
     };
 
     for (final brick in bricks.entries) {

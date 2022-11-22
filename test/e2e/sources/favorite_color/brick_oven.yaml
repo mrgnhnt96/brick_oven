@@ -1,0 +1,8 @@
+bricks:
+  favorite_color:
+    source: oven
+    brick_config: brick.yaml
+    files:
+      color.md:
+        vars:
+          color: _COLOR_
