@@ -9,3 +9,4 @@ build/
 .codecov_secret
 codecov
 publish_package.sh
+test/.test_runner.dart
