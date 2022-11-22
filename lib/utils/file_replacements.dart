@@ -5,6 +5,7 @@ import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
 import 'package:brick_oven/enums/mustache_section.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/constants.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
@@ -63,7 +64,9 @@ mixin FileReplacements {
     content = partialsResult.content;
     usedPartials.addAll(partialsResult.used);
 
-    usedVariables.addAll(ignoreVariablesIfNotPresent.map((v) => v.name));
+    usedVariables
+      ..addAll(ignoreVariablesIfNotPresent.map((v) => v.name))
+      ..add(kIndexValue);
 
     final variableNames = variables.map((v) => v.name).toSet();
     final unusedVariables = variableNames.difference(usedVariables);
@@ -248,6 +251,7 @@ mixin FileReplacements {
             suffix = possibleTag;
           }
 
+          // the `kDefaultBraces` is not used here to allow unescaping
           final startBraces = '{' * (braceCount ?? 2);
           final endBraces = '}' * (braceCount ?? 2);
 
@@ -255,7 +259,7 @@ mixin FileReplacements {
         } else {
           // format the variable
           suffix = MustacheTag.values.suffixFrom(possibleTag) ?? '';
-          result = tag.wrap(variable.name, braceCount: braceCount ?? 3);
+          result = tag.wrap(variable.name, braceCount: braceCount);
         }
 
         isVariableUsed = true;

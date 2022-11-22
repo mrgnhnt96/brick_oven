@@ -4,6 +4,7 @@ import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/constants.dart';
 import 'package:brick_oven/utils/file_replacements.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -452,6 +453,11 @@ before text {{name}} after text
       verifyNever(() => mockLogger.warn(any()));
 
       const variable = Variable(placeholder: '_HELLO_', name: 'hello');
+
+      // should be ignored by default
+      const indexValueVariable =
+          Variable(placeholder: kIndexValue, name: 'hello');
+
       const extraVariable = Variable(placeholder: '_GOODBYE_', name: 'goodbye');
       const ignoredVariable =
           Variable(placeholder: '_NO_ONE_CARES_', name: 'lol');
@@ -463,7 +469,12 @@ before text {{name}} after text
         partials: [],
         sourceFile: sourceFile,
         targetFile: targetFile,
-        variables: [variable, extraVariable, ignoredVariable],
+        variables: [
+          variable,
+          extraVariable,
+          ignoredVariable,
+          indexValueVariable
+        ],
         fileSystem: fileSystem,
         logger: mockLogger,
       );
