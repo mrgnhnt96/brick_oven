@@ -187,7 +187,7 @@ class BrickFile extends Equatable with FileReplacements {
   String get fileName {
     String name;
     if (hasConfiguredName) {
-      name = '${this.name!.formatted}$extension';
+      name = '${this.name!.format()}$extension';
     } else {
       name = basename(path);
     }
@@ -205,15 +205,6 @@ class BrickFile extends Equatable with FileReplacements {
 
   /// if the name of the file has been configured
   bool get hasConfiguredName => name != null;
-
-  /// gets the name of the file without formatting to mustache
-  String get simpleName {
-    if (!hasConfiguredName) {
-      return basename(path);
-    }
-
-    return '${name!.simple}$extension';
-  }
 
   /// writes the file in the [targetDir], with the
   /// contents of the [sourceFile].

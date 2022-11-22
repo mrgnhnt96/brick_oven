@@ -15,27 +15,27 @@ void main() {
   group('$BrickDir unnamed ctor', () {
     test('can be instanciated', () {
       expect(
-        () => BrickDir(name: const Name(highestLevel), path: dirPath),
+        () => BrickDir(name: Name(highestLevel), path: dirPath),
         returnsNormally,
       );
     });
 
     test('removes leading and trailing slashes from path', () {
-      final brickPath = BrickDir(name: const Name('name'), path: '/$dirPath');
+      final brickPath = BrickDir(name: Name('name'), path: '/$dirPath');
 
       expect(brickPath.path, dirPath);
 
-      final brickPath2 = BrickDir(name: const Name('name'), path: './$dirPath');
+      final brickPath2 = BrickDir(name: Name('name'), path: './$dirPath');
 
       expect(brickPath2.path, dirPath);
 
-      final brickPath3 = BrickDir(name: const Name('name'), path: '$dirPath/');
+      final brickPath3 = BrickDir(name: Name('name'), path: '$dirPath/');
 
       expect(brickPath3.path, dirPath);
     });
 
     test('placeholder is the highest level from path', () {
-      final brickPath = BrickDir(name: const Name('name'), path: '/$dirPath');
+      final brickPath = BrickDir(name: Name('name'), path: '/$dirPath');
 
       expect(brickPath.placeholder, highestLevel);
     });
@@ -223,7 +223,7 @@ name: name
   test('#configuredParts returns segmented path', () {
     for (final path in paths.keys) {
       final segments = paths[path];
-      final brickPath = BrickDir(name: const Name('name'), path: path);
+      final brickPath = BrickDir(name: Name('name'), path: path);
 
       expect(brickPath.configuredParts.length, segments);
     }
@@ -236,7 +236,7 @@ name: name
       const original = '/path/to/other/file.png';
       final brick = BrickDir(
         path: 'path',
-        name: const Name(replacement, tag: MustacheTag.snakeCase),
+        name: Name(replacement, tag: MustacheTag.snakeCase),
       );
 
       expect(
@@ -274,7 +274,7 @@ name: name
 
             final path = BrickDir(
               path: dir,
-              name: const Name(replacement),
+              name: Name(replacement),
             );
 
             const original = '$dir$filePath';
@@ -300,7 +300,7 @@ name: name
 
             final path = BrickDir(
               path: dir,
-              name: const Name(replacement),
+              name: Name(replacement),
             );
             const original = '$dir$filePath';
 
@@ -312,7 +312,7 @@ name: name
           test('as non starting position', () {
             final path = BrickDir(
               path: '/to',
-              name: const Name(replacement),
+              name: Name(replacement),
             );
             const original = 'path/to/some/file.png';
             final result = path.apply(original, originalPath: original);
@@ -328,7 +328,7 @@ name: name
 
             final path = BrickDir(
               path: dir,
-              name: const Name(replacement),
+              name: Name(replacement),
             );
             const original = '$dir$filePath';
 
@@ -355,7 +355,7 @@ name: name
 
         final brick = BrickDir(
           path: 'foo',
-          name: const Name(replacement),
+          name: Name(replacement),
         );
         path = brick.apply(path, originalPath: originalPath);
 
@@ -371,7 +371,7 @@ name: name
 
         final brick = BrickDir(
           path: 'foo/bar',
-          name: const Name(replacement),
+          name: Name(replacement),
         );
         path = brick.apply(path, originalPath: originalPath);
 
@@ -387,7 +387,7 @@ name: name
 
         final brick = BrickDir(
           path: 'foo/bar/baz',
-          name: const Name(replacement),
+          name: Name(replacement),
         );
         path = brick.apply(path, originalPath: originalPath);
 
@@ -405,7 +405,7 @@ name: name
 
         final brick = BrickDir(
           path: 'foo/bar/baz/foo',
-          name: const Name(replacement),
+          name: Name(replacement),
         );
         path = brick.apply(path, originalPath: originalPath);
 
@@ -421,7 +421,7 @@ name: name
 
         final brick = BrickDir(
           path: 'foo/bar/baz/foo/bar',
-          name: const Name(replacement),
+          name: Name(replacement),
         );
         path = brick.apply(path, originalPath: originalPath);
 
@@ -437,7 +437,7 @@ name: name
 
         final brick = BrickDir(
           path: 'foo/bar/baz/foo/bar/baz',
-          name: const Name(replacement),
+          name: Name(replacement),
         );
         path = brick.apply(path, originalPath: originalPath);
 
@@ -456,12 +456,12 @@ name: name
 
         final brick = BrickDir(
           path: 'foo',
-          name: const Name(replacement),
+          name: Name(replacement),
         );
         path = brick.apply(path, originalPath: originalPath);
 
         final brick2 =
-            BrickDir(path: 'foo/bar/baz/foo', name: const Name(replacement2));
+            BrickDir(path: 'foo/bar/baz/foo', name: Name(replacement2));
         path = brick2.apply(path, originalPath: originalPath);
 
         expect(
@@ -476,12 +476,11 @@ name: name
 
         final brick = BrickDir(
           path: 'foo',
-          name: const Name(replacement),
+          name: Name(replacement),
         );
         path = brick.apply(path, originalPath: originalPath);
 
-        final brick2 =
-            BrickDir(path: 'foo/bar', name: const Name(replacement2));
+        final brick2 = BrickDir(path: 'foo/bar', name: Name(replacement2));
         path = brick2.apply(path, originalPath: originalPath);
 
         expect(
@@ -514,7 +513,7 @@ name: name
 
         final brick = BrickDir(
           path: 'foo',
-          name: const Name(replacement),
+          name: Name(replacement),
           includeIf: 'check',
         );
         path = brick.apply(path, originalPath: originalPath);
@@ -532,7 +531,7 @@ name: name
 
         final brick = BrickDir(
           path: 'foo',
-          name: const Name(replacement, tag: MustacheTag.snakeCase),
+          name: Name(replacement, tag: MustacheTag.snakeCase),
           includeIf: 'check',
         );
         path = brick.apply(path, originalPath: originalPath);
@@ -567,7 +566,7 @@ name: name
 
         final brick = BrickDir(
           path: 'foo',
-          name: const Name(replacement),
+          name: Name(replacement),
           includeIfNot: 'check',
         );
         path = brick.apply(path, originalPath: originalPath);
@@ -586,7 +585,7 @@ name: name
 
         final brick = BrickDir(
           path: 'foo',
-          name: const Name(replacement, tag: MustacheTag.snakeCase),
+          name: Name(replacement, tag: MustacheTag.snakeCase),
           includeIfNot: 'check',
         );
         path = brick.apply(path, originalPath: originalPath);

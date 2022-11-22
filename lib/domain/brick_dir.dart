@@ -197,7 +197,7 @@ class BrickDir extends Equatable {
     // ignore: parameter_assignments
     path = BrickDir.cleanPath(path);
 
-    final replacement = name?.formatted;
+    final replacement = name?.format();
 
     final pathParts = BrickDir.separatePath(path);
 

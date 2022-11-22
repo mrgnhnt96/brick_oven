@@ -367,13 +367,13 @@ yooooo:
     });
 
     test('return the provided name', () {
-      const instance = BrickFile.config(defaultPath, name: Name(name));
+      final instance = BrickFile.config(defaultPath, name: Name(name));
 
       expect(instance.fileName, '{{{$name}}}.dart');
     });
 
     test('prepends the prefix', () {
-      const instance = BrickFile.config(
+      final instance = BrickFile.config(
         defaultPath,
         name: Name(name, prefix: prefix),
       );
@@ -382,7 +382,7 @@ yooooo:
     });
 
     test('appends the suffix', () {
-      const instance = BrickFile.config(
+      final instance = BrickFile.config(
         defaultPath,
         name: Name(name, suffix: suffix),
       );
@@ -391,7 +391,7 @@ yooooo:
     });
 
     test('formats the name to mustache format when provided', () {
-      const instance = BrickFile.config(
+      final instance = BrickFile.config(
         defaultPath,
         name: Name(name, tag: MustacheTag.snakeCase),
       );
@@ -403,7 +403,7 @@ yooooo:
     });
 
     test('does not format the name to mustache format when not provided', () {
-      const instance = BrickFile.config(defaultPath, name: Name(name));
+      final instance = BrickFile.config(defaultPath, name: Name(name));
 
       expect(
         instance.fileName,
@@ -432,7 +432,7 @@ yooooo:
       });
 
       test('returns name wrapped in if with configured name', () {
-        const instance = BrickFile.config(
+        final instance = BrickFile.config(
           defaultPath,
           name: Name(name),
           includeIf: 'check',
@@ -446,7 +446,7 @@ yooooo:
 
       test('returns name wrapped in if with configured name and formatting',
           () {
-        const instance = BrickFile.config(
+        final instance = BrickFile.config(
           defaultPath,
           name: Name(name, tag: MustacheTag.snakeCase),
           includeIf: 'check',
@@ -471,7 +471,7 @@ yooooo:
       });
 
       test('returns name wrapped in if with configured name', () {
-        const instance = BrickFile.config(
+        final instance = BrickFile.config(
           defaultPath,
           name: Name(name),
           includeIfNot: 'check',
@@ -485,7 +485,7 @@ yooooo:
 
       test('returns name wrapped in if with configured name and formatting',
           () {
-        const instance = BrickFile.config(
+        final instance = BrickFile.config(
           defaultPath,
           name: Name(name, tag: MustacheTag.snakeCase),
           includeIfNot: 'check',
@@ -524,7 +524,7 @@ yooooo:
 
   group('#hasConfiguredName', () {
     test('returns true when a name is provided', () {
-      const file = BrickFile.config('path/to/file.dart', name: Name('name'));
+      final file = BrickFile.config('path/to/file.dart', name: Name('name'));
 
       expect(file.hasConfiguredName, isTrue);
     });
@@ -533,44 +533,6 @@ yooooo:
       const file = BrickFile.config('path/to/file.dart');
 
       expect(file.hasConfiguredName, isFalse);
-    });
-  });
-
-  group('#nonformattedName', () {
-    test('returns the basename when no name is provided', () {
-      const file = BrickFile.config('path/to/file.dart');
-
-      expect(file.simpleName, 'file.dart');
-    });
-
-    test('returns the provided name', () {
-      const file = BrickFile.config('path/to/file.dart', name: Name('name'));
-
-      expect(file.simpleName, '{name}.dart');
-    });
-
-    test('returns the provided name with prefix', () {
-      const file = BrickFile.config(
-        'path/to/file.dart',
-        name: Name(
-          'name',
-          prefix: 'prefix_',
-        ),
-      );
-
-      expect(file.simpleName, 'prefix_{name}.dart');
-    });
-
-    test('returns the provided name with suffix', () {
-      const file = BrickFile.config(
-        'path/to/file.dart',
-        name: Name(
-          'name',
-          suffix: '_suffix',
-        ),
-      );
-
-      expect(file.simpleName, '{name}_suffix.dart');
     });
   });
 
@@ -691,8 +653,7 @@ yooooo:
 
     test('updates file name when provided', () {
       const replacement = 'something';
-      final instance =
-          BrickFile.config(defaultPath, name: const Name(replacement));
+      final instance = BrickFile.config(defaultPath, name: Name(replacement));
 
       instance.writeTargetFile(
         additionalVariables: [],
