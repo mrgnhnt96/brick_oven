@@ -564,7 +564,7 @@ yooooo:
 
       expect(
         () => instance.writeTargetFile(
-          additionalVariables: [],
+          outOfFileVariables: [],
           partials: [],
           sourceFile: sourceFile,
           dirs: [],
@@ -582,7 +582,7 @@ yooooo:
       const instance = BrickFile.config(defaultFile);
 
       instance.writeTargetFile(
-        additionalVariables: [],
+        outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,
         dirs: [],
@@ -602,7 +602,7 @@ yooooo:
       const instance = BrickFile.config(defaultFile);
 
       instance.writeTargetFile(
-        additionalVariables: [],
+        outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,
         dirs: [],
@@ -629,7 +629,7 @@ yooooo:
       final dir = brickPath(name: replacement, path: join('path', 'to'));
 
       instance.writeTargetFile(
-        additionalVariables: [],
+        outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,
         dirs: [dir],
@@ -656,7 +656,7 @@ yooooo:
       final instance = BrickFile.config(defaultPath, name: Name(replacement));
 
       instance.writeTargetFile(
-        additionalVariables: [],
+        outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,
         dirs: [],
@@ -688,7 +688,7 @@ class TestBrickFile extends BrickFile {
 
   @override
   FileWriteResult writeFile({
-    required List<Variable> ignoreVariablesIfNotPresent,
+    required List<Variable> outOfFileVariables,
     required File targetFile,
     required File sourceFile,
     required List<Variable> variables,

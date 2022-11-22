@@ -860,7 +860,7 @@ exclude:
           fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
-          additionalVariables: any(named: 'additionalVariables'),
+          outOfFileVariables: any(named: 'outOfFileVariables'),
         ),
       ).thenThrow(
         const PartialException(partial: 'this one', reason: 'for no reason'),
@@ -898,7 +898,7 @@ exclude:
           fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
-          additionalVariables: any(named: 'additionalVariables'),
+          outOfFileVariables: any(named: 'outOfFileVariables'),
         ),
       ).called(1);
 
@@ -920,7 +920,7 @@ exclude:
           fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
-          additionalVariables: any(named: 'additionalVariables'),
+          outOfFileVariables: any(named: 'outOfFileVariables'),
         ),
       ).thenThrow(
         Exception('error'),
@@ -957,7 +957,7 @@ exclude:
           fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
-          additionalVariables: any(named: 'additionalVariables'),
+          outOfFileVariables: any(named: 'outOfFileVariables'),
         ),
       ).called(1);
 
@@ -985,7 +985,7 @@ exclude:
 
       when(
         () => mockFile.writeTargetFile(
-          additionalVariables: any(named: 'additionalVariables'),
+          outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
           logger: any(named: 'logger'),
           fileSystem: any(named: 'fileSystem'),
@@ -1016,7 +1016,7 @@ exclude:
       verify(() => mockFile.path).called(3);
       verify(
         () => mockFile.writeTargetFile(
-          additionalVariables: any(named: 'additionalVariables'),
+          outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
           logger: any(named: 'logger'),
           fileSystem: any(named: 'fileSystem'),
@@ -1059,7 +1059,7 @@ exclude:
 
       when(
         () => mockFile.writeTargetFile(
-          additionalVariables: any(named: 'additionalVariables'),
+          outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
           logger: any(named: 'logger'),
           fileSystem: any(named: 'fileSystem'),
@@ -1090,7 +1090,7 @@ exclude:
       verify(() => mockFile.path).called(3);
       verify(
         () => mockFile.writeTargetFile(
-          additionalVariables: any(named: 'additionalVariables'),
+          outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
           logger: any(named: 'logger'),
           fileSystem: any(named: 'fileSystem'),

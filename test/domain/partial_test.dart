@@ -165,7 +165,7 @@ vars:
 
       expect(
         () => instance.writeTargetFile(
-          additionalVariables: [],
+          outOfFileVariables: [],
           partials: [],
           sourceFile: sourceFile,
           targetDir: '',
@@ -182,7 +182,7 @@ vars:
       const instance = Partial(path: 'path/to/file.dart');
 
       instance.writeTargetFile(
-        additionalVariables: [],
+        outOfFileVariables: [],
         targetDir: targetDir,
         sourceFile: sourceFile,
         partials: [],
@@ -202,7 +202,7 @@ class TestBrickPartial extends Partial {
 
   @override
   FileWriteResult writeFile({
-    required List<Variable> ignoreVariablesIfNotPresent,
+    required List<Variable> outOfFileVariables,
     required File targetFile,
     required File sourceFile,
     required List<Variable> variables,

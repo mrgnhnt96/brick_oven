@@ -486,7 +486,7 @@ class Brick extends Equatable {
             partials: partials,
             fileSystem: _fileSystem,
             logger: _logger,
-            additionalVariables: defaultVariables,
+            outOfFileVariables: defaultVariables,
           );
         } on ConfigException catch (e) {
           fail('file', file.path);
@@ -513,7 +513,7 @@ class Brick extends Equatable {
             partials: partials,
             fileSystem: _fileSystem,
             logger: _logger,
-            additionalVariables: defaultVariables,
+            outOfFileVariables: defaultVariables,
           );
         } on ConfigException catch (e) {
           fail('partial', partial.path);

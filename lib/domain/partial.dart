@@ -118,7 +118,7 @@ class Partial extends Equatable with FileReplacements {
     required String targetDir,
     required File sourceFile,
     required List<Partial> partials,
-    required List<Variable> additionalVariables,
+    required List<Variable> outOfFileVariables,
     required FileSystem fileSystem,
     required Logger logger,
   }) {
@@ -129,8 +129,8 @@ class Partial extends Equatable with FileReplacements {
       return writeFile(
         targetFile: file,
         sourceFile: sourceFile,
-        variables: [...variables, ...additionalVariables],
-        ignoreVariablesIfNotPresent: additionalVariables,
+        variables: variables,
+        outOfFileVariables: outOfFileVariables,
         partials: partials,
         fileSystem: fileSystem,
         logger: logger,

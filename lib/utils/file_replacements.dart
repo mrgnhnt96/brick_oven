@@ -20,11 +20,16 @@ mixin FileReplacements {
 
   /// writes the [targetFile] content using the [sourceFile]'s content and
   /// replacing the [variables] and [partials] with their configured values
+  ///
+  /// [outOfFileVariables] are variables that are not configured in the
+  /// brick_oven.yaml file, they are variables from the brick_oven project\
+  /// [outOfFileVariables] are not included in the sync
+  /// (brick.yaml or brick_oven.yaml) list
   FileWriteResult writeFile({
     required File targetFile,
     required File sourceFile,
     required List<Variable> variables,
-    required List<Variable> ignoreVariablesIfNotPresent,
+    required List<Variable> outOfFileVariables,
     required List<Partial> partials,
     required FileSystem? fileSystem,
     required Logger logger,
@@ -34,6 +39,8 @@ mixin FileReplacements {
 
       return const FileWriteResult.empty();
     }
+
+    variables.addAll(outOfFileVariables);
 
     /// used to check if variable/partials is goes unused
     final usedVariables = <String>{};
@@ -64,12 +71,14 @@ mixin FileReplacements {
     content = partialsResult.content;
     usedPartials.addAll(partialsResult.used);
 
-    usedVariables
-      ..addAll(ignoreVariablesIfNotPresent.map((v) => v.name))
-      ..add(kIndexValue);
+    final ignoreVariables = {
+      ...outOfFileVariables.map((v) => v.name),
+      kIndexValue,
+    };
 
     final variableNames = variables.map((v) => v.name).toSet();
-    final unusedVariables = variableNames.difference(usedVariables);
+    final unusedVariables =
+        variableNames.difference({...usedVariables, ...ignoreVariables});
 
     if (unusedVariables.isNotEmpty) {
       final vars = '"${unusedVariables.map((e) => e).join('", "')}"';
