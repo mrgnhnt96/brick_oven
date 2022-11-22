@@ -1,0 +1,8 @@
+bricks:
+  legacy:
+    source: oven
+    brick_config: brick.yaml
+    files:
+      GREETINGS.md:
+        vars:
+          name: _NAME_

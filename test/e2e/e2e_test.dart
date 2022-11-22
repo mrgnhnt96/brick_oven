@@ -12,6 +12,12 @@ void main() {
       'documentation': 4,
       'favorite_color': 1,
       'flavors': 2,
+      'greeting': 1,
+      'hello': 1,
+      'hello_world': 3,
+      'hooks': 1,
+      'legacy': 1,
+      'photos': 1,
     };
 
     for (final brick in bricks.entries) {

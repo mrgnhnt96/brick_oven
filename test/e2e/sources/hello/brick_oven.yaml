@@ -1,0 +1,8 @@
+bricks:
+  hello:
+    source: oven
+    brick_config: brick.yaml
+    files:
+      HELLO.md:
+        vars:
+          name: _NAME_

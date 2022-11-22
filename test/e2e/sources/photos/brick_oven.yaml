@@ -1,0 +1,4 @@
+bricks:
+  photos:
+    source: oven
+    brick_config: brick.yaml

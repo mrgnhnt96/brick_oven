@@ -1,0 +1,13 @@
+bricks:
+  hello_world:
+    source: oven
+    brick_config: brick.yaml
+    files:
+      HELLO.md:
+        vars:
+          name: _NAME_
+    partials:
+      common_footer.md:
+      common_header.md:
+        vars:
+          name: _NAME_
