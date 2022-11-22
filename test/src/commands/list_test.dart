@@ -143,7 +143,7 @@ void main() {
                 dirs: [
                   BrickDir(
                     path: 'lib/nested',
-                    name: const Name('nested'),
+                    name: Name('nested'),
                   ),
                 ],
                 files: const [
@@ -170,7 +170,7 @@ void main() {
                 dirs: [
                   BrickDir(
                     path: 'lib/nested',
-                    name: const Name('nested'),
+                    name: Name('nested'),
                   ),
                 ],
                 files: const [

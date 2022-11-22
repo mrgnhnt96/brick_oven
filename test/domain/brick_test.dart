@@ -14,6 +14,7 @@ import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/constants.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -73,8 +74,8 @@ exclude:
       );
 
       final brick = Brick(
-        dirs: [BrickDir(name: const Name(dirName), path: dirPath)],
-        files: [BrickFile(filePath, name: const Name(fileName))],
+        dirs: [BrickDir(name: Name(dirName), path: dirPath)],
+        files: [BrickFile(filePath, name: Name(fileName))],
         exclude: const [excludeDir],
         name: brickName,
         source: BrickSource(
@@ -281,7 +282,7 @@ brick_config: brick.yaml
 
     test('#defaultVariables has correct values', () {
       const expected = [
-        Variable(name: '.', placeholder: '_INDEX_VALUE_'),
+        Variable(name: '.', placeholder: kIndexValue),
       ];
 
       expect(Brick.defaultVariables, expected);
@@ -1331,7 +1332,7 @@ exclude:
 
         fs.file(join(localPath, filePath))
           ..createSync(recursive: true)
-          ..writeAsStringSync('_INDEX_VALUE_');
+          ..writeAsStringSync(kIndexValue);
 
         final targetFile = fs.file(join(brickPath, file.path));
 
@@ -1366,7 +1367,7 @@ exclude:
 
         fs.file(join(localPath, file))
           ..createSync(recursive: true)
-          ..writeAsStringSync('_INDEX_VALUE_');
+          ..writeAsStringSync(kIndexValue);
 
         final targetFile = fs.file(join(brickPath, partial.toPartialFile()));
 
@@ -1550,6 +1551,37 @@ exclude:
 
         verifyNoMoreInteractions(mockLogger);
       });
+
+      test('gets #name', () {
+        final brick = Brick(
+          name: '',
+          source: BrickSource.none(
+            fileSystem: MemoryFileSystem(),
+          ),
+          logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
+          files: [
+            BrickFile.config(
+              '',
+              name: Name('var1'),
+            ),
+            BrickFile.config(
+              '',
+              name: Name('var2'),
+            ),
+          ],
+        );
+
+        expect(
+          brick.allBrickVariables(),
+          {
+            'var1',
+            'var2',
+          },
+        );
+
+        verifyNoMoreInteractions(mockLogger);
+      });
     });
 
     group('dirs', () {
@@ -1562,8 +1594,8 @@ exclude:
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
           dirs: [
-            BrickDir(name: const Name('name1'), path: ''),
-            BrickDir(name: const Name('name2'), path: ''),
+            BrickDir(name: Name('name1'), path: ''),
+            BrickDir(name: Name('name2'), path: ''),
           ],
         );
 
@@ -1797,7 +1829,7 @@ exclude:
           fileSystem: MemoryFileSystem(),
           dirs: [
             BrickDir(
-              name: const Name('var1'),
+              name: Name('var1'),
               includeIf: 'var2',
               path: '',
             ),
