@@ -1,5 +1,6 @@
 // ignore_for_file: cascade_invocations
 
+import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/variable.dart';
@@ -434,8 +435,8 @@ before text {{name}} after text
     test('copies file when no variables or partials are provided', () {
       sourceFile.writeAsStringSync('hello from this side');
 
-      testFileReplacements.writeFile(
-        ignoreVariablesIfNotPresent: [],
+      final result = testFileReplacements.writeFile(
+        outOfFileVariables: [],
         partials: [],
         variables: [],
         sourceFile: sourceFile,
@@ -443,6 +444,8 @@ before text {{name}} after text
         fileSystem: fileSystem,
         logger: mockLogger,
       );
+
+      expect(result, const FileWriteResult.empty());
 
       expect(targetFile.readAsStringSync(), 'hello from this side');
 
@@ -454,29 +457,29 @@ before text {{name}} after text
 
       const variable = Variable(placeholder: '_HELLO_', name: 'hello');
 
-      // should be ignored by default
-      const indexValueVariable =
-          Variable(placeholder: kIndexValue, name: 'hello');
-
       const extraVariable = Variable(placeholder: '_GOODBYE_', name: 'goodbye');
-      const ignoredVariable =
-          Variable(placeholder: '_NO_ONE_CARES_', name: 'lol');
 
       sourceFile.writeAsStringSync('replace: _HELLO_');
 
-      testFileReplacements.writeFile(
-        ignoreVariablesIfNotPresent: [ignoredVariable],
+      final result = testFileReplacements.writeFile(
+        outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,
         targetFile: targetFile,
         variables: [
           variable,
           extraVariable,
-          ignoredVariable,
-          indexValueVariable
         ],
         fileSystem: fileSystem,
         logger: mockLogger,
+      );
+
+      expect(
+        result,
+        const FileWriteResult(
+          usedVariables: {'hello'},
+          usedPartials: {},
+        ),
       );
 
       verify(
@@ -484,6 +487,82 @@ before text {{name}} after text
           'Unused variables ("${extraVariable.name}") in `${sourceFile.path}`',
         ),
       ).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+    });
+
+    test('ignores out of file variables when checking excess variables', () {
+      verifyNever(() => mockLogger.warn(any()));
+
+      const variable = Variable(placeholder: '_HELLO_', name: 'hello');
+
+      // should be ignored by default
+      const indexValueVariable = Variable(
+        placeholder: kIndexValue,
+        name: 'hello',
+      );
+
+      const ignoredVariable =
+          Variable(placeholder: '_NO_ONE_CARES_', name: 'lol');
+
+      sourceFile.writeAsStringSync('replace: _HELLO_');
+
+      final result = testFileReplacements.writeFile(
+        outOfFileVariables: [ignoredVariable, indexValueVariable],
+        partials: [],
+        sourceFile: sourceFile,
+        targetFile: targetFile,
+        variables: [variable],
+        fileSystem: fileSystem,
+        logger: mockLogger,
+      );
+
+      expect(
+        result,
+        const FileWriteResult(
+          usedVariables: {'hello'},
+          usedPartials: {},
+        ),
+      );
+
+      verifyNoMoreInteractions(mockLogger);
+    });
+
+    test('includes out of file variables in content replacement', () {
+      verifyNever(() => mockLogger.warn(any()));
+
+      // should be ignored by default
+      const indexValueVariable = Variable(
+        placeholder: kIndexValue,
+        name: 'sup',
+      );
+
+      const variable = Variable(placeholder: '_HELLO_', name: 'hello');
+
+      const ignoredVariable =
+          Variable(placeholder: '_NO_ONE_CARES_', name: 'lol');
+
+      sourceFile.writeAsStringSync('replace: _HELLO_ _NO_ONE_CARES_');
+
+      final result = testFileReplacements.writeFile(
+        outOfFileVariables: [ignoredVariable, indexValueVariable],
+        partials: [],
+        sourceFile: sourceFile,
+        targetFile: targetFile,
+        variables: [variable],
+        fileSystem: fileSystem,
+        logger: mockLogger,
+      );
+
+      expect(
+        result,
+        const FileWriteResult(
+          usedPartials: {},
+          usedVariables: {'hello', 'lol'},
+        ),
+      );
+
+      expect(targetFile.readAsStringSync(), 'replace: {{hello}} {{lol}}');
 
       verifyNoMoreInteractions(mockLogger);
     });
@@ -496,8 +575,8 @@ before text {{name}} after text
 
       sourceFile.deleteSync();
 
-      testFileReplacements.writeFile(
-        ignoreVariablesIfNotPresent: [],
+      final result = testFileReplacements.writeFile(
+        outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,
         targetFile: targetFile,
@@ -505,6 +584,8 @@ before text {{name}} after text
         fileSystem: fileSystem,
         logger: mockLogger,
       );
+
+      expect(result, const FileWriteResult.empty());
 
       verify(
         () => mockLogger.warn(
@@ -544,14 +625,22 @@ partials.page.md
 
       sourceFile.writeAsStringSync(content);
 
-      testFileReplacements.writeFile(
-        ignoreVariablesIfNotPresent: [],
+      final result = testFileReplacements.writeFile(
+        outOfFileVariables: [],
         partials: [partial],
         sourceFile: sourceFile,
         targetFile: targetFile,
         variables: [variable, section],
         fileSystem: fileSystem,
         logger: mockLogger,
+      );
+
+      expect(
+        result,
+        const FileWriteResult(
+          usedVariables: {'var', 'section'},
+          usedPartials: {'path/page.md'},
+        ),
       );
 
       expect(targetFile.readAsStringSync(), expectedContent);
