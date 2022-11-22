@@ -115,6 +115,28 @@ vars: sup yo
       verifyNoMoreInteractions(mockLogger);
     });
 
+    test('returns when vars is not provided', () {
+      final config = BrickYamlConfig(
+        path: 'brick.yaml',
+        fileSystem: memoryFS,
+      );
+
+      const content = '''
+name: My Brick
+''';
+
+      memoryFS.file('brick.yaml').writeAsStringSync(content);
+
+      const data = BrickYamlData(
+        name: 'My Brick',
+        vars: [],
+      );
+
+      expect(config.data(logger: mockLogger), data);
+
+      verifyNoMoreInteractions(mockLogger);
+    });
+
     test('returns data of config file', () {
       final config = BrickYamlConfig(
         path: 'brick.yaml',

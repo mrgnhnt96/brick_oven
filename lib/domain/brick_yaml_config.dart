@@ -61,6 +61,13 @@ class BrickYamlConfig extends Equatable {
       );
     }
 
+    if (varsRaw.isNone()) {
+      return BrickYamlData(
+        name: name,
+        vars: vars,
+      );
+    }
+
     if (!varsRaw.isYaml()) {
       logger.warn('`vars` is an unsupported type in `brick.yaml`');
 
