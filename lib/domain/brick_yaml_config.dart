@@ -48,10 +48,29 @@ class BrickYamlConfig extends Equatable {
     final config = Map<String, dynamic>.from(yaml.asYaml().value);
 
     final name = config['name'] as String? ?? 'Unknown';
-    final varsRaw = config['vars'] as Map? ?? const {};
+    final varsRaw = YamlValue.from(config['vars']);
     final vars = <String>[];
 
-    for (final variable in varsRaw.keys) {
+    // legacy support for `vars` as a list
+    if (varsRaw.isList()) {
+      vars.addAll(List<String>.from(varsRaw.asList().value));
+
+      return BrickYamlData(
+        name: name,
+        vars: vars,
+      );
+    }
+
+    if (!varsRaw.isYaml()) {
+      logger.warn('`vars` is an unsupported type in `brick.yaml`');
+
+      return BrickYamlData(
+        name: name,
+        vars: vars,
+      );
+    }
+
+    for (final variable in varsRaw.asYaml().value.keys) {
       vars.add(variable as String);
     }
 

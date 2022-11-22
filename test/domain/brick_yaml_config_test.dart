@@ -61,6 +61,60 @@ void main() {
       verifyNoMoreInteractions(mockLogger);
     });
 
+    test('supports legacy config file', () {
+      final config = BrickYamlConfig(
+        path: 'brick.yaml',
+        fileSystem: memoryFS,
+      );
+
+      const content = '''
+name: My Brick
+
+vars:
+  - var1
+  - var2
+''';
+
+      memoryFS.file('brick.yaml').writeAsStringSync(content);
+
+      const data = BrickYamlData(
+        name: 'My Brick',
+        vars: ['var1', 'var2'],
+      );
+
+      expect(config.data(logger: mockLogger), data);
+
+      verifyNoMoreInteractions(mockLogger);
+    });
+
+    test('warns when vars is incorrect type', () {
+      final config = BrickYamlConfig(
+        path: 'brick.yaml',
+        fileSystem: memoryFS,
+      );
+
+      const content = '''
+name: My Brick
+
+vars: sup yo
+''';
+
+      memoryFS.file('brick.yaml').writeAsStringSync(content);
+
+      const data = BrickYamlData(
+        name: 'My Brick',
+        vars: [],
+      );
+
+      expect(config.data(logger: mockLogger), data);
+
+      verify(
+        () => mockLogger.warn('`vars` is an unsupported type in `brick.yaml`'),
+      ).called(1);
+
+      verifyNoMoreInteractions(mockLogger);
+    });
+
     test('returns data of config file', () {
       final config = BrickYamlConfig(
         path: 'brick.yaml',
