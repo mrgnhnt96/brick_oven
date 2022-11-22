@@ -384,9 +384,12 @@ class Brick extends Equatable {
       );
     }
 
-    final variables = allBrickVariables()..remove(kIndexValue);
+    const alwaysRemove = [kIndexValue, '.'];
 
-    final variablesInBrickYaml = brickYaml.vars.toSet()..remove(kIndexValue);
+    final variables = allBrickVariables()..removeAll(alwaysRemove);
+
+    final variablesInBrickYaml = brickYaml.vars.toSet()
+      ..removeAll(alwaysRemove);
 
     if (variablesInBrickYaml.difference(variables).isNotEmpty) {
       isInSync = false;

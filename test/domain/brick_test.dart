@@ -1771,6 +1771,38 @@ exclude:
           .called(1);
     });
 
+    test('ignores extra default variables', () {
+      when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+          .thenReturn(const BrickYamlData(name: 'Count Dooku', vars: []));
+
+      verifyNever(() => mockLogger.info(any()));
+
+      Brick(
+        name: 'Count Dooku',
+        source: BrickSource.none(
+          fileSystem: MemoryFileSystem(),
+        ),
+        files: [
+          BrickFile.config(
+            '',
+            variables: [
+              ...Brick.defaultVariables,
+              const Variable(name: '_INDEX_VALUE_'),
+              const Variable(name: '.'),
+            ],
+          ),
+        ],
+        brickYamlConfig: mockBricYamlConfig,
+        logger: mockLogger,
+        fileSystem: MemoryFileSystem(),
+      ).checkBrickYamlConfig(shouldSync: true);
+
+      verifyNever(() => mockLogger.warn(any()));
+      verifyNever(() => mockLogger.err(any()));
+      verify(() => mockLogger.info(darkGray.wrap('brick.yaml is in sync')))
+          .called(1);
+    });
+
     group('alerts when brick.yaml is in out of sync', () {
       test('when brick.yaml contains extra variables', () {
         when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
