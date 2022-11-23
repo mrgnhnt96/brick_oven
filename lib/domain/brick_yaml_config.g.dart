@@ -9,5 +9,5 @@ part of 'brick_yaml_config.dart';
 extension _$BrickYamlConfigAutoequal on BrickYamlConfig {
   @Deprecated(r'Use _$props instead')
   List<Object?> get _autoequalProps => _$props;
-  List<Object?> get _$props => [path];
+  List<Object?> get _$props => [ignoreVars, path];
 }

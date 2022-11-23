@@ -1,6 +1,9 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/brick_yaml_data.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -17,7 +20,76 @@ class BrickYamlConfig extends Equatable {
   const BrickYamlConfig({
     required this.path,
     required FileSystem fileSystem,
+    required this.ignoreVars,
   }) : _fileSystem = fileSystem;
+
+  /// {@macro brick_yaml_config}
+  factory BrickYamlConfig.fromYaml(
+    YamlValue yaml, {
+    required FileSystem fileSystem,
+  }) {
+    if (yaml.isError()) {
+      throw BrickConfigException(reason: yaml.asError().value);
+    }
+
+    if (yaml.isString()) {
+      final path = yaml.asString().value;
+
+      return BrickYamlConfig(
+        path: path,
+        fileSystem: fileSystem,
+        ignoreVars: const [],
+      );
+    }
+
+    if (!yaml.isYaml()) {
+      throw const BrickConfigException(
+        reason: '`brick_config` must be a of type `String` or `Map`',
+      );
+    }
+
+    final data = yaml.asYaml().value.data;
+
+    final path = YamlValue.from(data.remove('path'));
+    if (!path.isString()) {
+      throw const BrickConfigException(
+        reason: '`brick_config.path` must be a of type `String`',
+      );
+    }
+
+    final ignoreVars = <String>[];
+
+    final ignoreVarsData = YamlValue.from(data.remove('ignore_vars'));
+    if (ignoreVarsData.isList()) {
+      final vars = List<String>.from(ignoreVarsData.asList().value);
+      ignoreVars.addAll(vars);
+    } else if (!ignoreVarsData.isNone()) {
+      throw const BrickConfigException(
+        reason: '`brick_config.ignore_vars` must be a of type `List`',
+      );
+    }
+
+    if (data.isNotEmpty) {
+      throw BrickConfigException(
+        reason: 'Unknown keys: "${data.keys.join('", "')}"',
+      );
+    }
+
+    final dir = BrickDir.cleanPath(path.asString().value);
+
+    return BrickYamlConfig(
+      path: dir,
+      ignoreVars: ignoreVars,
+      fileSystem: fileSystem,
+    );
+  }
+
+  /// a list of variables that will not be checked for sync
+  ///
+  /// This includes
+  /// - if the variable exists in the brick.yaml file but not brick_oven.yaml
+  /// - if the variable exists in brick_oven.yaml but not brick.yaml
+  final List<String> ignoreVars;
 
   /// the path to the brick.yaml file
   final String path;
