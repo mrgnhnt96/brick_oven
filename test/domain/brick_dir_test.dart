@@ -172,6 +172,16 @@ name: name
 
       expect(brickPath.name?.value, 'name');
     });
+
+    test('returns name from string', () {
+      final yaml = loadYaml('''
+name
+''');
+
+      final brickPath = BrickDir.fromYaml(YamlValue.from(yaml), dirPath);
+
+      expect(brickPath.name?.value, 'name');
+    });
   });
 
   const paths = {

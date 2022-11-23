@@ -320,6 +320,24 @@ partials:
         verifyNoMoreInteractions(mockLogger);
       });
 
+      test('when urls is not map', () {
+        final yaml = loadYaml('''
+urls: url/path
+''');
+
+        expect(
+          () => Brick.fromYaml(
+            YamlValue.from(yaml),
+            brickName,
+            fileSystem: MemoryFileSystem(),
+            logger: mockLogger,
+          ),
+          throwsA(isA<BrickException>()),
+        );
+
+        verifyNoMoreInteractions(mockLogger);
+      });
+
       group('brick config', () {
         test('runs gracefully when brick config is null', () {
           final yaml = loadYaml('''

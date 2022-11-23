@@ -583,7 +583,7 @@ yooooo:
       final pathContent = file.newPathForFile(urls: [url], dirs: []);
 
       final expected = ContentReplacement(
-        content: 'path/to/{{% url %}}',
+        content: 'path/to/{{{% url %}}}',
         used: const {'url'},
         data: {'url': url},
       );
@@ -666,7 +666,7 @@ yooooo:
       );
 
       final expected = ContentReplacement(
-        content: '{{{path}}}/{{{to}}}/{{{dir}}}/{{% url %}}',
+        content: '{{{path}}}/{{{to}}}/{{{dir}}}/{{{% url %}}}',
         used: const {'path', 'to', 'dir', 'url'},
         data: {'url': url},
       );
