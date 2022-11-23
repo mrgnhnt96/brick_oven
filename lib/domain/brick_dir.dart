@@ -52,13 +52,6 @@ class BrickDir extends Equatable {
       );
     }
 
-    if (extension(path).isNotEmpty) {
-      throw DirectoryException(
-        directory: path,
-        reason: 'the path must point to a directory',
-      );
-    }
-
     if (yaml.isNone()) {
       throw DirectoryException(
         directory: path,
