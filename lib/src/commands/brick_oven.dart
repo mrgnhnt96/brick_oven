@@ -60,9 +60,9 @@ abstract class BrickOvenCommand extends Command<int> {
     }
 
     try {
-      for (final brick in bricksYaml.asYaml().value.entries) {
-        final name = brick.key as String;
-        final value = YamlValue.from(brick.value);
+      for (final brickData in bricksYaml.asYaml().value.entries) {
+        final name = brickData.key as String;
+        final value = YamlValue.from(brickData.value);
 
         YamlValue yaml;
         String? configPath;
@@ -100,15 +100,15 @@ abstract class BrickOvenCommand extends Command<int> {
           return BricksOrError(null, err.message);
         }
 
-        bricks.add(
-          Brick.fromYaml(
-            yaml,
-            name,
-            configPath: configPath,
-            fileSystem: fileSystem,
-            logger: logger,
-          ),
+        final brick = Brick.fromYaml(
+          yaml,
+          name,
+          configPath: configPath,
+          fileSystem: fileSystem,
+          logger: logger,
         );
+
+        bricks.add(brick);
       }
     } on ConfigException catch (e) {
       return BricksOrError(null, e.message);
