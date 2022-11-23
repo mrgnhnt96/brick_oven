@@ -1,11 +1,11 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
+import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -13,7 +13,6 @@ import 'package:brick_oven/utils/constants.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 
 part 'brick.g.dart';
@@ -245,22 +244,6 @@ class Brick extends Equatable {
     );
   }
 
-  /// provide
-  @visibleForTesting
-  const Brick.memory({
-    required this.name,
-    required this.source,
-    required FileSystem fileSystem,
-    required Logger logger,
-    this.dirs = const [],
-    this.files = const [],
-    this.exclude = const [],
-    this.partials = const [],
-    this.configPath,
-    this.brickYamlConfig,
-  })  : _fileSystem = fileSystem,
-        _logger = logger;
-
   /// the config file to the brick.yaml file
   ///
   /// When provided, extra checks are performed to ensure the brick.yaml file is
@@ -421,10 +404,14 @@ class Brick extends Equatable {
   ///
   /// targets: [output] (bricks) -> [name] -> __brick__
   void cook({
-    String output = 'bricks',
+    String? output,
     bool watch = false,
     bool shouldSync = true,
   }) {
+    output ??= 'bricks';
+
+    final targetDir = join(output, name, '__brick__');
+
     final names = <String>{};
 
     for (final partial in partials) {
@@ -447,12 +434,6 @@ class Brick extends Equatable {
     }
 
     void putInTheOven() {
-      final targetDir = join(
-        output,
-        name,
-        '__brick__',
-      );
-
       final directory = _fileSystem.directory(targetDir);
       if (directory.existsSync()) {
         directory.deleteSync(recursive: true);

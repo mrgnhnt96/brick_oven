@@ -430,7 +430,7 @@ exclude:
         test(
             'uses default directory bricks/{name}/__brick__ when path not provided',
             () {
-          final testBrick = Brick.memory(
+          final testBrick = Brick(
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
@@ -461,7 +461,7 @@ exclude:
         });
 
         test('uses provided path for output when provided', () {
-          final testBrick = Brick.memory(
+          final testBrick = Brick(
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
@@ -501,7 +501,7 @@ exclude:
         });
 
         test('file gets updated on modify event', () async {
-          final testBrick = Brick.memory(
+          final testBrick = Brick(
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
@@ -548,7 +548,7 @@ exclude:
         });
 
         test('file gets added on create event', () async {
-          final testBrick = Brick.memory(
+          final testBrick = Brick(
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
@@ -591,7 +591,7 @@ exclude:
         });
 
         test('file gets delete on delete event', () async {
-          final testBrick = Brick.memory(
+          final testBrick = Brick(
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
@@ -638,7 +638,7 @@ exclude:
         });
 
         test('writes bricks when no watcher is available', () {
-          final testBrick = Brick.memory(
+          final testBrick = Brick(
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
@@ -682,7 +682,7 @@ exclude:
 
           const variable = Variable(placeholder: '_HELLO_', name: 'hello');
 
-          final brick = Brick.memory(
+          final brick = Brick(
             name: 'BRICK',
             source: BrickSource.none(
               fileSystem: MemoryFileSystem(),
@@ -720,7 +720,7 @@ exclude:
             ..createSync(recursive: true)
             ..writeAsStringSync('');
 
-          final brick = Brick.memory(
+          final brick = Brick(
             name: 'BRICK',
             source: BrickSource.none(
               fileSystem: MemoryFileSystem(),
@@ -747,7 +747,7 @@ exclude:
       });
 
       test('stops watching files for updates', () async {
-        final testBrick = Brick.memory(
+        final testBrick = Brick(
           name: brickName,
           source: BrickSource.memory(
             localPath: localPath,
@@ -815,7 +815,7 @@ exclude:
     });
 
     test('throws $BrickException when duplicate partials exist', () {
-      final brick = Brick.memory(
+      final brick = Brick(
         name: 'Brick',
         source: BrickSource.none(
           fileSystem: MemoryFileSystem(),
@@ -866,7 +866,7 @@ exclude:
         const PartialException(partial: 'this one', reason: 'for no reason'),
       );
 
-      final brick = Brick.memory(
+      final brick = Brick(
         name: 'Brick',
         source: BrickSource.none(
           fileSystem: MemoryFileSystem(),
@@ -926,7 +926,7 @@ exclude:
         Exception('error'),
       );
 
-      final brick = Brick.memory(
+      final brick = Brick(
         name: 'Brick',
         source: BrickSource.none(
           fileSystem: MemoryFileSystem(),
@@ -979,7 +979,7 @@ exclude:
         () => mockSource.fromSourcePath(any()),
       ).thenReturn('');
 
-      when(() => mockFile.fileName).thenReturn(fileName);
+      when(mockFile.formatName).thenReturn(fileName);
       when(() => mockFile.path).thenReturn(filePath);
       when(() => mockFile.variables).thenReturn([]);
 
@@ -997,7 +997,7 @@ exclude:
         const FileException(file: 'this one', reason: 'for no reason'),
       );
 
-      final brick = Brick.memory(
+      final brick = Brick(
         name: 'Brick',
         source: mockSource,
         logger: mockLogger,
@@ -1053,7 +1053,7 @@ exclude:
         () => mockSource.fromSourcePath(any()),
       ).thenReturn('');
 
-      when(() => mockFile.fileName).thenReturn(fileName);
+      when(mockFile.formatName).thenReturn(fileName);
       when(() => mockFile.path).thenReturn(filePath);
       when(() => mockFile.variables).thenReturn([]);
 
@@ -1071,7 +1071,7 @@ exclude:
         Exception('error'),
       );
 
-      final brick = Brick.memory(
+      final brick = Brick(
         name: 'Brick',
         source: mockSource,
         logger: mockLogger,
@@ -1117,7 +1117,7 @@ exclude:
     test(
         'uses default directory bricks/{name}/__brick__ when path not provided',
         () {
-      final testBrick = Brick.memory(
+      final testBrick = Brick(
         name: brickName,
         logger: mockLogger,
         source: BrickSource.memory(
@@ -1152,7 +1152,7 @@ exclude:
     });
 
     test('uses provided path for output when provided', () {
-      final testBrick = Brick.memory(
+      final testBrick = Brick(
         name: brickName,
         logger: mockLogger,
         source: BrickSource.memory(
@@ -1191,7 +1191,7 @@ exclude:
     });
 
     test('deletes directory if exists', () {
-      final testBrick = Brick.memory(
+      final testBrick = Brick(
         name: brickName,
         logger: mockLogger,
         source: BrickSource.memory(
@@ -1238,7 +1238,7 @@ exclude:
         fs.file(fakeSourcePath).createSync(recursive: true);
       }
 
-      final testBrick = Brick.memory(
+      final testBrick = Brick(
         name: brickName,
         logger: mockLogger,
         source: BrickSource.memory(
@@ -1278,7 +1278,7 @@ exclude:
         fs.file(fakeSourcePath).createSync(recursive: true);
       }
 
-      final testBrick = Brick.memory(
+      final testBrick = Brick(
         name: brickName,
         logger: mockLogger,
         source: BrickSource.memory(
@@ -1328,15 +1328,18 @@ exclude:
     group('#defaultVariables write', () {
       test('files', () {
         const filePath = 'file1.dart';
-        const file = BrickFile(filePath);
+        const file = BrickFile.config(
+          filePath,
+          variables: [Variable(name: 'name', placeholder: '_VAL_')],
+        );
 
         fs.file(join(localPath, filePath))
           ..createSync(recursive: true)
-          ..writeAsStringSync(kIndexValue);
+          ..writeAsStringSync('_VAL_ $kIndexValue');
 
         final targetFile = fs.file(join(brickPath, file.path));
 
-        Brick.memory(
+        Brick(
           name: brickName,
           logger: mockLogger,
           source: BrickSource.memory(
@@ -1347,7 +1350,7 @@ exclude:
           fileSystem: fs,
         ).cook();
 
-        const expected = '{{.}}';
+        const expected = '{{name}} {{.}}';
 
         expect(targetFile.readAsStringSync(), expected);
 
@@ -1371,7 +1374,7 @@ exclude:
 
         final targetFile = fs.file(join(brickPath, partial.toPartialFile()));
 
-        Brick.memory(
+        Brick(
           name: brickName,
           logger: mockLogger,
           source: BrickSource.memory(
