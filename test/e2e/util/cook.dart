@@ -112,18 +112,18 @@ Future<void> cook({
       file.path,
       from: join(brickFixturePath, '__brick__'),
     );
-    final actualFile =
+    final expectedFile =
         memoryFileSystem.file(join(brickResultPath, relativePath));
 
-    expect(actualFile.existsSync(), isTrue);
+    expect(expectedFile.existsSync(), isTrue);
 
     dynamic content;
     dynamic expected;
     try {
-      content = actualFile.readAsStringSync();
+      content = expectedFile.readAsStringSync();
       expected = file.readAsStringSync();
     } catch (_) {
-      content = actualFile.readAsBytesSync();
+      content = expectedFile.readAsBytesSync();
       expected = file.readAsBytesSync();
     }
 
