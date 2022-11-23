@@ -48,7 +48,7 @@ class BrickDir extends Equatable {
     if (yaml.isError()) {
       throw DirectoryException(
         directory: path,
-        reason: 'Invalid directory: ${yaml.asError().value}',
+        reason: yaml.asError().value,
       );
     }
 
