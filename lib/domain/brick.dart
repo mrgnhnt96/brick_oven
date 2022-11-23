@@ -201,24 +201,11 @@ class Brick extends Equatable {
     }
 
     final brickConfig = YamlValue.from(data.remove('brick_config'));
-    String? brickYamlPath;
     BrickYamlConfig? brickYamlConfig;
 
-    if (brickConfig.isString()) {
-      brickYamlPath = brickConfig.asString().value;
-    } else if (brickConfig.isNone()) {
-      brickYamlPath = null;
-    } else {
-      throw BrickException(
-        brick: name,
-        reason: '`brick_config` must be a of type `String`',
-      );
-    }
-
-    if (brickYamlPath != null) {
-      final dir = BrickDir.cleanPath(dirname(configPath ?? ''));
-      brickYamlConfig = BrickYamlConfig(
-        path: join(dir, brickYamlPath),
+    if (!brickConfig.isNone()) {
+      brickYamlConfig = BrickYamlConfig.fromYaml(
+        brickConfig,
         fileSystem: fileSystem,
       );
     }
@@ -367,7 +354,7 @@ class Brick extends Equatable {
       );
     }
 
-    const alwaysRemove = [kIndexValue, '.'];
+    final alwaysRemove = [kIndexValue, '.', ...config.ignoreVars];
 
     final variables = allBrickVariables()..removeAll(alwaysRemove);
 
