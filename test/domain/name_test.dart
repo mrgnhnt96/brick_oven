@@ -85,16 +85,60 @@ void main() {
         );
       });
 
-      test('can parse yaml map', () {
+      test('can parse yaml map with section', () {
         final yaml = loadYaml('''
 value: name
 prefix: prefix
 suffix: suffix
+section: section
 ''') as YamlMap;
 
         expect(
           Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
-          Name('name', prefix: 'prefix', suffix: 'suffix'),
+          Name(
+            'name',
+            prefix: 'prefix',
+            suffix: 'suffix',
+            section: 'section',
+          ),
+        );
+      });
+
+      test('can parse yaml map with inverted_section', () {
+        final yaml = loadYaml('''
+value: name
+prefix: prefix
+suffix: suffix
+inverted_section: invertedSection
+''') as YamlMap;
+
+        expect(
+          Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
+          Name(
+            'name',
+            prefix: 'prefix',
+            suffix: 'suffix',
+            invertedSection: 'invertedSection',
+          ),
+        );
+      });
+
+      test('can parse yaml map with invert_section', () {
+        final yaml = loadYaml('''
+value: name
+prefix: prefix
+suffix: suffix
+invert_section: invertedSection
+''') as YamlMap;
+
+        expect(
+          Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
+          Name(
+            'name',
+            prefix: 'prefix',
+            suffix: 'suffix',
+            invertedSection: 'invertedSection',
+          ),
         );
       });
 

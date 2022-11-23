@@ -86,7 +86,8 @@ class Name extends Equatable {
           MustacheTag.values.findFrom(getValue('format'), onlyFormat: true);
 
       final section = getValue('section');
-      final invertedSection = getValue('inverted_section');
+      final invertedSection =
+          getValue('inverted_section') ?? getValue('invert_section');
 
       if (section != null && invertedSection != null) {
         throw VariableException(
