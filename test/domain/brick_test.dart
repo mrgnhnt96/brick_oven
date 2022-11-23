@@ -658,23 +658,50 @@ exclude:
         test('prints warning if excess variables exist', () {
           verifyNever(() => mockLogger.warn(any()));
 
-          fs.file(join(localPath, filePath))
-            ..createSync(recursive: true)
-            ..writeAsStringSync('');
+          fs.file(join('path', 'file1.dart')).createSync(recursive: true);
 
-          const variable = Variable(placeholder: '_HELLO_', name: 'hello');
+          fs.file(join('path', 'file2.dart')).createSync(recursive: true);
+
+          fs.file('partial').createSync(recursive: true);
 
           final brick = Brick(
             name: 'BRICK',
-            source: BrickSource.none(
-              fileSystem: MemoryFileSystem(),
+            source: BrickSource(
+              localPath: '.',
+              fileSystem: fs,
             ),
             logger: mockLogger,
             fileSystem: fs,
+            partials: const [
+              Partial(
+                path: 'partial',
+                variables: [Variable(name: 'partialVar')],
+              ),
+            ],
+            dirs: [
+              BrickDir(
+                path: 'path',
+                includeIf: 'dirIncludeIf',
+                name: Name('dirName', section: 'dirSection'),
+              ),
+              BrickDir(
+                path: 'path',
+                includeIfNot: 'dirIncludeIfNot',
+                name: Name('dirName', invertedSection: 'dirInvertedSection'),
+              ),
+            ],
             files: [
               BrickFile.config(
-                filePath,
-                variables: const [variable],
+                join('path', 'file1.dart'),
+                includeIf: 'fileIncludeIf',
+                name: Name('fileName1', section: 'fileSection'),
+                variables: const [Variable(name: 'fileVar1')],
+              ),
+              BrickFile.config(
+                join('path', 'file2.dart'),
+                name: Name('fileName2', invertedSection: 'fileInvertedSection'),
+                includeIfNot: 'fileIncludeIfNot',
+                variables: const [Variable(name: 'fileVar2')],
               ),
             ],
           );
@@ -682,47 +709,96 @@ exclude:
           // ignore: cascade_invocations
           brick.cook();
 
-          verify(() => mockLogger.warn('Unused variables ("hello") in BRICK'))
+          const vars = '"fileVar1", '
+              '"fileVar2", '
+              '"partialVar", '
+              '"dirSection", '
+              '"dirIncludeIf", '
+              '"dirInvertedSection", '
+              '"dirIncludeIfNot"';
+
+          verify(
+            () => mockLogger
+                .warn('Unused variables ("fileVar1") in `./path/file1.dart`'),
+          ).called(1);
+          verify(
+            () => mockLogger
+                .warn('Unused variables ("fileVar2") in `./path/file2.dart`'),
+          ).called(1);
+          verify(() => mockLogger.warn('Unused variables ($vars) in BRICK'))
               .called(1);
           verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
-          verify(() => mockLogger.info('')).called(1);
+
+          verify(() => mockLogger.warn('Unused partials ("partial") in BRICK'))
+              .called(1);
+
           verify(
-            () => mockLogger.warn(
-              'The configured file "$filePath" does not exist within ',
-            ),
+            () => mockLogger
+                .warn('Unused variables ("partialVar") in `./partial`'),
           ).called(1);
 
           verifyNoMoreInteractions(mockLogger);
         });
 
-        test('prints warning if excess partials exist', () {
+        test('does not print warning if excess variables do not exist', () {
           verifyNever(() => mockLogger.warn(any()));
 
-          fs.file(join(localPath, filePath))
+          fs.file(join('path', 'file1.dart'))
             ..createSync(recursive: true)
-            ..writeAsStringSync('');
+            ..writeAsStringSync('fileVar1');
+
+          fs.file(join('path', 'to', 'file2.dart'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('fileVar2');
+
+          fs.file('partial')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('partialVar');
 
           final brick = Brick(
             name: 'BRICK',
-            source: BrickSource.none(
-              fileSystem: MemoryFileSystem(),
+            source: BrickSource(
+              localPath: '.',
+              fileSystem: fs,
             ),
             logger: mockLogger,
             fileSystem: fs,
-            partials: [
+            partials: const [
               Partial(
-                path: join(localPath, filePath),
+                path: 'partial',
+                variables: [Variable(name: 'partialVar')],
+              ),
+            ],
+            dirs: [
+              BrickDir(
+                path: 'path',
+                includeIf: 'dirIncludeIf',
+                name: Name('dirName', section: 'dirSection'),
+              ),
+              BrickDir(
+                path: join('path', 'to'),
+                includeIfNot: 'dirIncludeIfNot',
+                name: Name('dirName', invertedSection: 'dirInvertedSection'),
+              ),
+            ],
+            files: [
+              BrickFile.config(
+                join('path', 'file1.dart'),
+                includeIf: 'fileIncludeIf',
+                name: Name('fileName1', section: 'fileSection'),
+                variables: const [Variable(name: 'fileVar1')],
+              ),
+              BrickFile.config(
+                join('path', 'to', 'file2.dart'),
+                name: Name('fileName2', invertedSection: 'fileInvertedSection'),
+                includeIfNot: 'fileIncludeIfNot',
+                variables: const [Variable(name: 'fileVar2')],
               ),
             ],
           );
 
           // ignore: cascade_invocations
           brick.cook();
-
-          verify(
-            () => mockLogger.warn('Unused partials ("$fileName") in BRICK'),
-          ).called(1);
-          verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
 
           verifyNoMoreInteractions(mockLogger);
         });
@@ -1388,6 +1464,31 @@ exclude:
   });
 
   group('#allBrickVariables', () {
+    test('ignores dot annotation', () {
+      final brick = Brick(
+        name: '',
+        source: BrickSource.none(
+          fileSystem: MemoryFileSystem(),
+        ),
+        logger: mockLogger,
+        fileSystem: MemoryFileSystem(),
+        files: const [
+          BrickFile.config(
+            '',
+            variables: [
+              Variable(name: 'var1.sup'),
+              Variable(name: 'var1.yo'),
+              Variable(name: 'var1.hi'),
+            ],
+          ),
+        ],
+      );
+
+      expect(brick.allBrickVariables(), {'var1'});
+
+      verifyNoMoreInteractions(mockLogger);
+    });
+
     group('files', () {
       test('gets #variables from files', () {
         final brick = Brick(
@@ -1548,11 +1649,11 @@ exclude:
           files: [
             BrickFile.config(
               '',
-              name: Name('var1'),
+              name: Name('var1', section: 'section'),
             ),
             BrickFile.config(
               '',
-              name: Name('var2'),
+              name: Name('var2', invertedSection: 'invertedSection'),
             ),
           ],
         );
@@ -1562,6 +1663,8 @@ exclude:
           {
             'var1',
             'var2',
+            'section',
+            'invertedSection',
           },
         );
 
@@ -1579,8 +1682,11 @@ exclude:
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
           dirs: [
-            BrickDir(name: Name('name1'), path: ''),
-            BrickDir(name: Name('name2'), path: ''),
+            BrickDir(name: Name('name1', section: 'section'), path: ''),
+            BrickDir(
+              name: Name('name2', invertedSection: 'invertedSection'),
+              path: '',
+            ),
           ],
         );
 
@@ -1589,6 +1695,8 @@ exclude:
           {
             'name1',
             'name2',
+            'section',
+            'invertedSection',
           },
         );
 
@@ -1658,12 +1766,12 @@ exclude:
   });
 
   group('#checkBrickYamlConfig', () {
-    late BrickYamlConfig mockBricYamlConfig;
+    late BrickYamlConfig mockBrickYamlConfig;
 
     setUp(() {
       printLogs = [];
 
-      mockBricYamlConfig = MockBrickYamlConfig();
+      mockBrickYamlConfig = MockBrickYamlConfig();
     });
 
     test('returns when shouldSync is false', () {
@@ -1693,7 +1801,7 @@ exclude:
     });
 
     test('warns when data returns null in reading brick.yaml file', () {
-      when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+      when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
           .thenReturn(null);
       verifyNever(() => mockLogger.warn(any()));
 
@@ -1702,15 +1810,17 @@ exclude:
         source: BrickSource.none(
           fileSystem: MemoryFileSystem(),
         ),
-        brickYamlConfig: mockBricYamlConfig,
+        brickYamlConfig: mockBrickYamlConfig,
         logger: mockLogger,
         fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
     });
 
     test('warns when names are not in sync', () {
-      when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+      when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
           .thenReturn(const BrickYamlData(name: 'Master Skywalker', vars: []));
+
+      when(() => mockBrickYamlConfig.ignoreVars).thenReturn([]);
 
       verifyNever(() => mockLogger.warn(any()));
 
@@ -1719,7 +1829,7 @@ exclude:
         source: BrickSource.none(
           fileSystem: MemoryFileSystem(),
         ),
-        brickYamlConfig: mockBricYamlConfig,
+        brickYamlConfig: mockBrickYamlConfig,
         logger: mockLogger,
         fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
@@ -1735,8 +1845,10 @@ exclude:
     });
 
     test('alerts when brick.yaml is in sync', () {
-      when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+      when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
           .thenReturn(const BrickYamlData(name: 'Count Dooku', vars: []));
+
+      when(() => mockBrickYamlConfig.ignoreVars).thenReturn([]);
 
       verifyNever(() => mockLogger.info(any()));
 
@@ -1745,7 +1857,7 @@ exclude:
         source: BrickSource.none(
           fileSystem: MemoryFileSystem(),
         ),
-        brickYamlConfig: mockBricYamlConfig,
+        brickYamlConfig: mockBrickYamlConfig,
         logger: mockLogger,
         fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
@@ -1757,8 +1869,10 @@ exclude:
     });
 
     test('ignores extra default variables', () {
-      when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+      when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
           .thenReturn(const BrickYamlData(name: 'Count Dooku', vars: []));
+
+      when(() => mockBrickYamlConfig.ignoreVars).thenReturn([]);
 
       verifyNever(() => mockLogger.info(any()));
 
@@ -1777,7 +1891,7 @@ exclude:
             ],
           ),
         ],
-        brickYamlConfig: mockBricYamlConfig,
+        brickYamlConfig: mockBrickYamlConfig,
         logger: mockLogger,
         fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
@@ -1789,9 +1903,9 @@ exclude:
     });
 
     test('ignores $BrickYamlConfig.ignoreVars from sync', () {
-      when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+      when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
           .thenReturn(const BrickYamlData(name: 'Count Dooku', vars: []));
-      when(() => mockBricYamlConfig.ignoreVars).thenReturn(['favorite_color']);
+      when(() => mockBrickYamlConfig.ignoreVars).thenReturn(['favorite_color']);
 
       verifyNever(() => mockLogger.info(any()));
 
@@ -1808,7 +1922,7 @@ exclude:
             ],
           ),
         ],
-        brickYamlConfig: mockBricYamlConfig,
+        brickYamlConfig: mockBrickYamlConfig,
         logger: mockLogger,
         fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
@@ -1821,13 +1935,15 @@ exclude:
 
     group('alerts when brick.yaml is in out of sync', () {
       test('when brick.yaml contains extra variables', () {
-        when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+        when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
             .thenReturn(
           const BrickYamlData(
             name: 'Count Dooku',
             vars: ['var1', 'var2'],
           ),
         );
+
+        when(() => mockBrickYamlConfig.ignoreVars).thenReturn([]);
 
         verifyNever(() => mockLogger.warn(any()));
         verifyNever(() => mockLogger.err(any()));
@@ -1837,7 +1953,7 @@ exclude:
           source: BrickSource.none(
             fileSystem: MemoryFileSystem(),
           ),
-          brickYamlConfig: mockBricYamlConfig,
+          brickYamlConfig: mockBrickYamlConfig,
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
         ).checkBrickYamlConfig(shouldSync: true);
@@ -1856,13 +1972,15 @@ exclude:
       });
 
       test('when brick_oven.yaml contains extra variables', () {
-        when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+        when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
             .thenReturn(
           const BrickYamlData(
             name: 'Count Dooku',
             vars: [],
           ),
         );
+
+        when(() => mockBrickYamlConfig.ignoreVars).thenReturn([]);
 
         verifyNever(() => mockLogger.warn(any()));
         verifyNever(() => mockLogger.err(any()));
@@ -1872,7 +1990,7 @@ exclude:
           source: BrickSource.none(
             fileSystem: MemoryFileSystem(),
           ),
-          brickYamlConfig: mockBricYamlConfig,
+          brickYamlConfig: mockBrickYamlConfig,
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
           dirs: [
