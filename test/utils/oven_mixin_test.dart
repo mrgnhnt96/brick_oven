@@ -343,7 +343,7 @@ void main() {
         fileWatchers: {BrickOvenYaml.file: testFileWatcher},
       );
 
-      final brick = Brick.memory(
+      final brick = Brick(
         name: 'BRICK',
         source: mockBrickSource,
         fileSystem: MemoryFileSystem(),
@@ -408,7 +408,7 @@ void main() {
         fileWatchers: {'config_path': testFileWatcher},
       );
 
-      final brick = Brick.memory(
+      final brick = Brick(
         name: 'BRICK',
         source: mockBrickSource,
         fileSystem: MemoryFileSystem(),
@@ -474,7 +474,7 @@ void main() {
         fileWatchers: {BrickOvenYaml.file: testFileWatcher},
       );
 
-      final brick = Brick.memory(
+      final brick = Brick(
         name: 'BRICK',
         source: BrickSource.memory(
           localPath: '',
@@ -548,7 +548,7 @@ void main() {
         fileWatchers: {BrickOvenYaml.file: testFileWatcher},
       );
 
-      final brick = Brick.memory(
+      final brick = Brick(
         name: 'BRICK',
         source: mockBrickSource,
         fileSystem: MemoryFileSystem(),
@@ -613,7 +613,7 @@ void main() {
         fileWatchers: {BrickOvenYaml.file: testFileWatcher},
       );
 
-      final brick = Brick.memory(
+      final brick = Brick(
         name: 'BRICK',
         source: mockBrickSource,
         fileSystem: MemoryFileSystem(),

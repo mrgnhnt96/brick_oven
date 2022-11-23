@@ -132,7 +132,7 @@ void main() {
           verbose: verbose,
         )..brickOrErrorResponse = BricksOrError(
             {
-              Brick.memory(
+              Brick(
                 name: 'package_1',
                 source: BrickSource.fromString(
                   'example/lib',
@@ -159,7 +159,7 @@ void main() {
                 ],
                 partials: const [Partial(path: 'header.md')],
               ),
-              Brick.memory(
+              Brick(
                 name: 'package_2',
                 source: BrickSource.fromString(
                   'example/lib',
