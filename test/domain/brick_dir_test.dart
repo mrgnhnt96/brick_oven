@@ -27,6 +27,18 @@ void main() {
       );
     });
 
+    test('throws assertion error when includeIf and includeIfNot are both set',
+        () {
+      expect(
+        () => BrickDir(
+          path: dirPath,
+          includeIf: 'check',
+          includeIfNot: 'checkNot',
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
     test('removes leading and trailing slashes from path', () {
       final brickPath = BrickDir(name: Name('name'), path: '/$dirPath');
 

@@ -9,6 +9,7 @@ import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/file_replacements.dart';
+import 'package:brick_oven/utils/include_mixin.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -22,12 +23,13 @@ part 'brick_file.g.dart';
 /// Represents a file configured in a brick
 /// {@endtemplate}
 @autoequal
-class BrickFile extends Equatable with FileReplacements {
+class BrickFile extends Equatable with FileReplacements, IncludeMixin {
   /// {macro brick_file}
-  const BrickFile(this.path, {this.name})
-      : variables = const [],
-        includeIf = null,
-        includeIfNot = null;
+  const BrickFile(String path, {Name? name})
+      : this.config(
+          path,
+          name: name,
+        );
 
   /// configures the brick file will all available properties,
   /// should only be used in testing
@@ -38,7 +40,10 @@ class BrickFile extends Equatable with FileReplacements {
     this.name,
     this.includeIf,
     this.includeIfNot,
-  });
+  }) : assert(
+          includeIf == null || includeIfNot == null,
+          'includeIf and includeIfNot cannot both be set',
+        );
 
   /// parses the [yaml]
   factory BrickFile.fromYaml(
@@ -107,25 +112,13 @@ class BrickFile extends Equatable with FileReplacements {
       }
     }
 
-    String? getValue(String key) {
+    String? getInclude(String key) {
       final yaml = YamlValue.from(data.remove(key));
-
-      if (yaml.isNone()) {
-        return null;
-      }
-
-      if (!yaml.isString()) {
-        throw FileException(
-          file: path,
-          reason: 'Expected type `String` or `null` for `$key`',
-        );
-      }
-
-      return yaml.asString().value;
+      return IncludeMixin.getInclude(yaml, key);
     }
 
-    final includeIf = getValue('include_if');
-    final includeIfNot = getValue('include_if_not');
+    final includeIf = getInclude('include_if');
+    final includeIfNot = getInclude('include_if_not');
 
     if (includeIf != null && includeIfNot != null) {
       throw FileException(
@@ -150,16 +143,10 @@ class BrickFile extends Equatable with FileReplacements {
     );
   }
 
-  /// whether to include the file in the _mason_ build output
-  /// based on the variable provided
-  ///
-  /// wraps the file in a `{{#if}}` block
+  @override
   final String? includeIf;
 
-  /// whether to include the file in the _mason_ build output
-  /// based on the variable provided
-  ///
-  /// wraps the file in a `{{^if}}` block
+  @override
   final String? includeIfNot;
 
   /// the name of the file

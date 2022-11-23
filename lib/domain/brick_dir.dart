@@ -1,6 +1,7 @@
 import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
+import 'package:brick_oven/utils/include_mixin.dart';
 import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
 
@@ -13,7 +14,7 @@ part 'brick_dir.g.dart';
 /// The configuration of the path that will be updated to mustache
 /// {@endtemplate}
 @autoequal
-class BrickDir extends Equatable {
+class BrickDir extends Equatable with IncludeMixin {
   /// {@macro brick_dir}
   BrickDir({
     required String path,
@@ -34,7 +35,11 @@ class BrickDir extends Equatable {
     required this.originalPath,
     required this.includeIf,
     required this.includeIfNot,
-  }) : assert(extension(path).isEmpty, 'path must not have an extension');
+  })  : assert(extension(path).isEmpty, 'path must not have an extension'),
+        assert(
+          includeIf == null || includeIfNot == null,
+          'includeIf and includeIfNot cannot both be set',
+        );
 
   /// parses the [yaml]
   factory BrickDir.fromYaml(YamlValue yaml, String path) {
@@ -93,25 +98,13 @@ class BrickDir extends Equatable {
       }
     }
 
-    String? getValue(String key) {
+    String? getInclude(String key) {
       final yaml = YamlValue.from(data.remove(key));
-
-      if (yaml.isNone()) {
-        return null;
-      }
-
-      if (!yaml.isString()) {
-        throw FileException(
-          file: path,
-          reason: 'Expected type `String` or `null` for `$key`',
-        );
-      }
-
-      return yaml.asString().value;
+      return IncludeMixin.getInclude(yaml, key);
     }
 
-    final includeIf = getValue('include_if');
-    final includeIfNot = getValue('include_if_not');
+    final includeIf = getInclude('include_if');
+    final includeIfNot = getInclude('include_if_not');
 
     if (includeIf != null && includeIfNot != null) {
       throw FileException(
@@ -141,16 +134,10 @@ class BrickDir extends Equatable {
   /// the pattern to separate segments of a path
   static RegExp separatorPattern = RegExp(r'(?<!{+)[\/\\]');
 
-  /// whether to include the file in the _mason_ build output
-  /// based on the variable provided
-  ///
-  /// wraps the file in a `{{#if}}` block
+  @override
   final String? includeIf;
 
-  /// whether to include the file in the _mason_ build output
-  /// based on the variable provided
-  ///
-  /// wraps the file in a `{{^if}}` block
+  @override
   final String? includeIfNot;
 
   /// the name that will replace the placeholder within the [path]

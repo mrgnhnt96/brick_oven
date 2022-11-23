@@ -36,36 +36,20 @@ void main() {
     mockLogger = MockLogger();
   });
 
-  group('$BrickFile unnamed ctor', () {
-    final instance = BrickFile(join('path', 'to', 'file.dart'));
+  test('can be instanciated', () {
+    expect(BrickFile(join('path', 'to', 'file.dart')), isA<BrickFile>());
+  });
 
-    test('can be instanciated', () {
-      expect(instance, isA<BrickFile>());
-    });
-
-    test('variables is an empty list', () {
-      expect(instance.variables, isEmpty);
-    });
-
-    test('prefix is null', () {
-      expect(instance.name?.prefix, isNull);
-    });
-
-    test('suffix is null', () {
-      expect(instance.name?.suffix, isNull);
-    });
-
-    test('providedName is null', () {
-      expect(instance.name?.value, isNull);
-    });
-
-    test('include if is null', () {
-      expect(instance.includeIf, isNull);
-    });
-
-    test('include if not is null', () {
-      expect(instance.includeIfNot, isNull);
-    });
+  test('throws assertion error when includeIf and includeIfNot are both set',
+      () {
+    expect(
+      () => BrickFile.config(
+        'path',
+        includeIf: 'check',
+        includeIfNot: 'checkNot',
+      ),
+      throwsA(isA<AssertionError>()),
+    );
   });
 
   group('#fromYaml', () {
