@@ -157,14 +157,6 @@ class BrickSource extends Equatable {
     return localPath!;
   }
 
-  /// retrieves the files from the `source` value
-  Iterable<BrickFile> files() sync* {
-    if (localPath != null) {
-      yield* _fromDir();
-      return;
-    }
-  }
-
   /// returns the path of [path] as if it were from the [sourceDir]
   String fromSourcePath(String path) {
     return join(sourceDir, path);
@@ -237,21 +229,33 @@ class BrickSource extends Equatable {
     return brickFiles;
   }
 
-  Iterable<BrickFile> _fromDir() sync* {
+  /// retrieves the files from the [localPath] directory
+  List<BrickFile> files() {
     final localPath = this.localPath;
+
+    if (localPath == null) {
+      return [];
+    }
 
     final dir = _fileSystem.directory(localPath);
 
     if (!dir.existsSync()) {
-      return;
+      return [];
     }
 
-    final files = dir.listSync(recursive: true)
-      ..removeWhere((element) => element is Directory);
+    final files = dir.listSync(recursive: true).whereType<File>();
+
+    final brickFiles = <BrickFile>[];
 
     for (final file in files) {
-      yield BrickFile(file.path.replaceFirst(RegExp('$localPath.'), ''));
+      final brickFile = BrickFile(
+        file.path.replaceFirst(RegExp('$localPath.'), ''),
+      );
+
+      brickFiles.add(brickFile);
     }
+
+    return brickFiles;
   }
 }
 
