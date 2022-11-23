@@ -20,6 +20,7 @@ void main() {
       'photos': 1,
       'plugin': 9,
       'random_color': 1,
+      'simple': 1,
     };
 
     for (final brick in bricks.entries) {
