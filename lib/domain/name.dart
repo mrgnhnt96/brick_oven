@@ -36,10 +36,6 @@ class Name extends Equatable {
           'section and invertedSection cannot both be set',
         ),
         assert(
-          tag == null || section == null && invertedSection == null,
-          'tag cannot be set when section or invertedSection is set',
-        ),
-        assert(
           value != kIndexValue ||
               value == kIndexValue &&
                   (section != null || invertedSection != null),
@@ -96,13 +92,6 @@ class Name extends Equatable {
         throw VariableException(
           variable: backup,
           reason: 'Cannot have both `section` and `inverted_section`',
-        );
-      }
-
-      if (format != null && (section != null || invertedSection != null)) {
-        throw VariableException(
-          variable: backup,
-          reason: 'Cannot have `format` and `section`/`inverted_section`',
         );
       }
 

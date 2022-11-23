@@ -39,10 +39,21 @@ void main() {
         );
       });
 
-      test('when tag is set when section or invertedSection is set', () {
+      test(
+          'when value is $kIndexValue and section and invertedSection are not set',
+          () {
+        expect(
+          () => Name(kIndexValue),
+          throwsA(isA<AssertionError>()),
+        );
+      });
+    });
+
+    group('returns normally', () {
+      test('when tag is set and section or invertedSection is set', () {
         expect(
           () => Name('name', tag: MustacheTag.camelCase, section: 'section'),
-          throwsA(isA<AssertionError>()),
+          returnsNormally,
         );
 
         expect(
@@ -51,16 +62,7 @@ void main() {
             tag: MustacheTag.camelCase,
             invertedSection: 'section',
           ),
-          throwsA(isA<AssertionError>()),
-        );
-      });
-
-      test(
-          'when value is $kIndexValue and section and invertedSection are not set',
-          () {
-        expect(
-          () => Name(kIndexValue),
-          throwsA(isA<AssertionError>()),
+          returnsNormally,
         );
       });
     });
@@ -136,9 +138,7 @@ inverted_section: inverted_section
           );
         });
 
-        test(
-            'should throw $VariableException when format and section are provided',
-            () {
+        test('should return normally when format and section are provided', () {
           final yaml = loadYaml('''
 value: name
 format: camel
@@ -147,12 +147,12 @@ section: section
 
           expect(
             () => Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
-            throwsA(isA<VariableException>()),
+            returnsNormally,
           );
         });
 
         test(
-            'should throw $VariableException when format and inverted section are provided',
+            'should return normally when format and inverted section are provided',
             () {
           final yaml = loadYaml('''
 value: name
@@ -162,7 +162,7 @@ inverted_section: section
 
           expect(
             () => Name.fromYaml(YamlValue.yaml(yaml), 'backup'),
-            throwsA(isA<VariableException>()),
+            returnsNormally,
           );
         });
       });
