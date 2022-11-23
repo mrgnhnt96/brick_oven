@@ -1,0 +1,10 @@
+bricks:
+  app_icon:
+    source: oven
+    brick_config: brick.yaml
+
+    urls:
+      icon:
+        name:
+          value: url
+          braces: 2
