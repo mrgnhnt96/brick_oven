@@ -228,13 +228,6 @@ class Brick extends Equatable {
         return urls;
       }
 
-      if (urlData.isError()) {
-        throw BrickException(
-          brick: name,
-          reason: urlData.asError().value,
-        );
-      }
-
       if (!urlData.isYaml()) {
         throw BrickException(
           brick: name,
