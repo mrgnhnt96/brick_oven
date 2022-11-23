@@ -1,8 +1,10 @@
 import 'package:autoequal/autoequal.dart';
 import 'package:brick_oven/domain/brick_dir.dart';
+import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/partial.dart';
+import 'package:brick_oven/domain/url.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -222,6 +224,54 @@ class BrickFile extends Equatable with FileReplacements {
     return name;
   }
 
+  /// updates the file path with the provided [urls] and [dirs]
+  /// replacing the appropriate segments and file name
+  @visibleForTesting
+  ContentReplacement newPathForFile({
+    required List<Url> urls,
+    required List<BrickDir> dirs,
+  }) {
+    final variablesUsed = <String>{};
+
+    var newPath = path;
+    newPath = newPath.replaceAll(basename(newPath), '');
+
+    Url? url;
+    final urlPaths = urls.asMap().map((_, e) => MapEntry(e.path, e));
+
+    if (urlPaths.containsKey(path)) {
+      url = urlPaths[path];
+      variablesUsed.addAll(url!.variables);
+
+      newPath = join(newPath, url.formatName());
+    } else {
+      newPath = join(newPath, formatName());
+    }
+
+    variablesUsed.addAll(nameVariables);
+
+    if (BrickDir.separatorPattern.hasMatch(newPath)) {
+      final originalPath = newPath;
+
+      for (final configDir in dirs) {
+        final comparePath = newPath;
+        newPath = configDir.apply(newPath, originalPath: originalPath);
+
+        if (newPath != comparePath) {
+          variablesUsed.addAll(configDir.variables);
+        }
+      }
+    }
+
+    return ContentReplacement(
+      content: newPath,
+      used: variablesUsed,
+      data: {
+        'url': url,
+      },
+    );
+  }
+
   /// writes the file in the [targetDir], with the
   /// contents of the [sourceFile].
   ///
@@ -233,36 +283,24 @@ class BrickFile extends Equatable with FileReplacements {
     required List<BrickDir> dirs,
     required List<Variable> outOfFileVariables,
     required List<Partial> partials,
+    required List<Url> urls,
     required FileSystem fileSystem,
     required Logger logger,
   }) {
-    final dirNamesUsed = <String>{};
-    final fileNamesUsed = <String>{};
+    final pathContent = newPathForFile(
+      urls: urls,
+      dirs: dirs,
+    );
 
-    var newPath = path;
-    newPath = newPath.replaceAll(basename(newPath), '');
-    newPath = join(newPath, formatName());
-
-    fileNamesUsed.addAll(nameVariables);
-
-    // check for any slashes not preceeded by {
-    final slashPattern = RegExp(r'(?<!{+)\' '$separator');
-
-    if (slashPattern.hasMatch(newPath)) {
-      final originalPath = newPath;
-
-      for (final configDir in dirs) {
-        final comparePath = newPath;
-        newPath = configDir.apply(newPath, originalPath: originalPath);
-
-        if (newPath != comparePath) {
-          dirNamesUsed.addAll(configDir.variables);
-        }
-      }
-    }
-
-    final file = fileSystem.file(join(targetDir, newPath))
+    final file = fileSystem.file(join(targetDir, pathContent.content))
       ..createSync(recursive: true);
+
+    if (pathContent.data['url'] != null) {
+      return FileWriteResult(
+        usedVariables: pathContent.used,
+        usedPartials: const {},
+      );
+    }
 
     try {
       final writeResult = writeFile(
@@ -279,8 +317,7 @@ class BrickFile extends Equatable with FileReplacements {
         usedPartials: writeResult.usedPartials,
         usedVariables: {
           ...writeResult.usedVariables,
-          ...fileNamesUsed,
-          ...dirNamesUsed,
+          ...pathContent.used,
         },
       );
     } on ConfigException catch (e) {

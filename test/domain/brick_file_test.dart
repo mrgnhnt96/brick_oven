@@ -1,10 +1,12 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/brick_dir.dart';
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/name.dart';
+import 'package:brick_oven/domain/partial.dart';
+import 'package:brick_oven/domain/url.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
@@ -20,10 +22,6 @@ import 'package:yaml/yaml.dart';
 import '../test_utils/mocks.dart';
 
 void main() {
-  const defaultFileName = 'file';
-  const defaultFile = '$defaultFileName.dart';
-  final defaultPath = join('path', 'to', defaultFile);
-
   const fileExtensions = {
     'file.dart': '.dart',
     'file.dart.mustache': '.dart.mustache',
@@ -39,7 +37,7 @@ void main() {
   });
 
   group('$BrickFile unnamed ctor', () {
-    final instance = BrickFile(defaultPath);
+    final instance = BrickFile(join('path', 'to', 'file.dart'));
 
     test('can be instanciated', () {
       expect(instance, isA<BrickFile>());
@@ -127,11 +125,13 @@ vars:
   name: value
 ''') as YamlMap;
 
-      final instance =
-          BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+      final instance = BrickFile.fromYaml(
+        YamlValue.from(yaml),
+        path: join('path', 'to', 'file.dart'),
+      );
 
       expect(instance.variables, hasLength(1));
-      expect(instance.path, defaultPath);
+      expect(instance.path, join('path', 'to', 'file.dart'));
       expect(instance.name?.prefix, 'Mr.');
       expect(instance.name?.suffix, 'Sr.');
       expect(instance.name?.value, 'George');
@@ -142,8 +142,10 @@ vars:
 include_if: check
 ''') as YamlMap;
 
-      final instance =
-          BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+      final instance = BrickFile.fromYaml(
+        YamlValue.from(yaml),
+        path: join('path', 'to', 'file.dart'),
+      );
 
       expect(instance.includeIf, 'check');
     });
@@ -153,8 +155,10 @@ include_if: check
 include_if_not: check
 ''') as YamlMap;
 
-      final instance =
-          BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+      final instance = BrickFile.fromYaml(
+        YamlValue.from(yaml),
+        path: join('path', 'to', 'file.dart'),
+      );
 
       expect(instance.includeIfNot, 'check');
     });
@@ -164,8 +168,10 @@ include_if_not: check
 name:
 ''') as YamlMap;
 
-      final instance =
-          BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+      final instance = BrickFile.fromYaml(
+        YamlValue.from(yaml),
+        path: join('path', 'to', 'file.dart'),
+      );
 
       expect(instance.variables, isEmpty);
 
@@ -173,8 +179,10 @@ name:
 vars:
 ''') as YamlMap;
 
-      final instance2 =
-          BrickFile.fromYaml(YamlValue.from(yaml2), path: defaultPath);
+      final instance2 = BrickFile.fromYaml(
+        YamlValue.from(yaml2),
+        path: join('path', 'to', 'file.dart'),
+      );
 
       expect(instance2.variables, isEmpty);
     });
@@ -187,7 +195,10 @@ include_if:
 ''') as YamlMap;
 
       expect(
-        () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+        () => BrickFile.fromYaml(
+          YamlValue.from(yaml),
+          path: join('path', 'to', 'file.dart'),
+        ),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -201,7 +212,10 @@ include_if_not:
 ''') as YamlMap;
 
       expect(
-        () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+        () => BrickFile.fromYaml(
+          YamlValue.from(yaml),
+          path: join('path', 'to', 'file.dart'),
+        ),
         throwsA(isA<ConfigException>()),
       );
     });
@@ -210,7 +224,7 @@ include_if_not:
       expect(
         () => BrickFile.fromYaml(
           const YamlValue.error('error'),
-          path: defaultPath,
+          path: join('path', 'to', 'file.dart'),
         ),
         throwsA(isA<ConfigException>()),
       );
@@ -220,7 +234,7 @@ include_if_not:
       expect(
         () => BrickFile.fromYaml(
           const YamlValue.string('Hi, hows it going?'),
-          path: defaultPath,
+          path: join('path', 'to', 'file.dart'),
         ),
         throwsA(isA<ConfigException>()),
       );
@@ -237,7 +251,7 @@ include_if_not: check
       expect(
         () => BrickFile.fromYaml(
           YamlValue.from(yaml),
-          path: defaultPath,
+          path: join('path', 'to', 'file.dart'),
         ),
         throwsA(isA<ConfigException>()),
       );
@@ -249,8 +263,10 @@ include_if_not: check
 vars:
 ''') as YamlMap;
 
-        final instance =
-            BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+        final instance = BrickFile.fromYaml(
+          YamlValue.from(yaml),
+          path: join('path', 'to', 'file.dart'),
+        );
 
         expect(instance.name, isNull);
       });
@@ -260,8 +276,10 @@ vars:
 name: Alfalfa
 ''') as YamlMap;
 
-        final instance =
-            BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+        final instance = BrickFile.fromYaml(
+          YamlValue.from(yaml),
+          path: join('path', 'to', 'file.dart'),
+        );
 
         expect(instance.name?.value, 'Alfalfa');
       });
@@ -272,8 +290,10 @@ name:
   value: Mickie Ds
 ''') as YamlMap;
 
-        final instance =
-            BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+        final instance = BrickFile.fromYaml(
+          YamlValue.from(yaml),
+          path: join('path', 'to', 'file.dart'),
+        );
 
         expect(instance.name?.value, 'Mickie Ds');
       });
@@ -283,10 +303,12 @@ name:
 name:
 ''') as YamlMap;
 
-        final instance =
-            BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+        final instance = BrickFile.fromYaml(
+          YamlValue.from(yaml),
+          path: join('path', 'to', 'file.dart'),
+        );
 
-        expect(instance.name?.value, defaultFileName);
+        expect(instance.name?.value, 'file');
       });
 
       test('throws $ConfigException when not configured correctly', () {
@@ -297,7 +319,10 @@ name:
 ''') as YamlMap;
 
         expect(
-          () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+          () => BrickFile.fromYaml(
+            YamlValue.from(yaml),
+            path: join('path', 'to', 'file.dart'),
+          ),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -308,8 +333,10 @@ name:
         final yaml = loadYaml('''
 name:
 ''') as YamlMap;
-        final instance =
-            BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath);
+        final instance = BrickFile.fromYaml(
+          YamlValue.from(yaml),
+          path: join('path', 'to', 'file.dart'),
+        );
 
         expect(instance.variables, isEmpty);
       });
@@ -321,7 +348,10 @@ vars:
 ''') as YamlMap;
 
         expect(
-          () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+          () => BrickFile.fromYaml(
+            YamlValue.from(yaml),
+            path: join('path', 'to', 'file.dart'),
+          ),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -335,7 +365,10 @@ vars:
 ''') as YamlMap;
 
         expect(
-          () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+          () => BrickFile.fromYaml(
+            YamlValue.from(yaml),
+            path: join('path', 'to', 'file.dart'),
+          ),
           throwsA(isA<ConfigException>()),
         );
       });
@@ -348,66 +381,65 @@ yooooo:
 ''') as YamlMap;
 
     expect(
-      () => BrickFile.fromYaml(YamlValue.from(yaml), path: defaultPath),
+      () => BrickFile.fromYaml(
+        YamlValue.from(yaml),
+        path: join('path', 'to', 'file.dart'),
+      ),
       throwsA(isA<ConfigException>()),
     );
   });
 
   group('#formatName', () {
-    const defaultFile = 'file.dart';
-    const defaultPath = defaultFile;
-    const name = 'name';
-    const prefix = 'prefix';
-    const suffix = 'suffix';
-
     test('return the file name formatted when no provided name', () {
-      const instance = BrickFile(defaultFile);
+      const instance = BrickFile('file.dart');
 
-      expect(instance.formatName(), defaultFile);
+      expect(instance.formatName(), 'file.dart');
     });
 
     test('return the provided name', () {
-      final instance = BrickFile.config(defaultPath, name: Name(name));
+      final instance =
+          BrickFile.config(join('path', 'to', 'file.dart'), name: Name('name'));
 
-      expect(instance.formatName(), '{{{$name}}}.dart');
+      expect(instance.formatName(), '{{{name}}}.dart');
     });
 
     test('prepends the prefix', () {
       final instance = BrickFile.config(
-        defaultPath,
-        name: Name(name, prefix: prefix),
+        join('path', 'to', 'file.dart'),
+        name: Name('name', prefix: 'prefix'),
       );
 
-      expect(instance.formatName(), '$prefix{{{$name}}}.dart');
+      expect(instance.formatName(), 'prefix{{{name}}}.dart');
     });
 
     test('appends the suffix', () {
       final instance = BrickFile.config(
-        defaultPath,
-        name: Name(name, suffix: suffix),
+        join('path', 'to', 'file.dart'),
+        name: Name('name', suffix: 'suffix'),
       );
 
-      expect(instance.formatName(), '{{{$name}}}$suffix.dart');
+      expect(instance.formatName(), '{{{name}}}suffix.dart');
     });
 
     test('formats the name to mustache format when provided', () {
       final instance = BrickFile.config(
-        defaultPath,
-        name: Name(name, tag: MustacheTag.snakeCase),
+        join('path', 'to', 'file.dart'),
+        name: Name('name', tag: MustacheTag.snakeCase),
       );
 
       expect(
         instance.formatName(),
-        '{{#snakeCase}}{{{$name}}}{{/snakeCase}}.dart',
+        '{{#snakeCase}}{{{name}}}{{/snakeCase}}.dart',
       );
     });
 
     test('does not format the name to mustache format when not provided', () {
-      final instance = BrickFile.config(defaultPath, name: Name(name));
+      final instance =
+          BrickFile.config(join('path', 'to', 'file.dart'), name: Name('name'));
 
       expect(
         instance.formatName(),
-        contains('{{{$name}}}'),
+        contains('{{{name}}}'),
       );
     });
 
@@ -423,38 +455,41 @@ yooooo:
     group('#include_if', () {
       test('returns name wrapped in if without formatting or configured name',
           () {
-        const instance = BrickFile.config(
-          defaultPath,
-          includeIf: 'check',
-        );
-
-        expect(instance.formatName(), '{{#check}}$defaultPath{{/check}}');
-      });
-
-      test('returns name wrapped in if with configured name', () {
         final instance = BrickFile.config(
-          defaultPath,
-          name: Name(name),
+          join('path', 'to', 'file.dart'),
           includeIf: 'check',
         );
 
         expect(
           instance.formatName(),
-          '{{#check}}{{{$name}}}.dart{{/check}}',
+          '{{#check}}file.dart{{/check}}',
+        );
+      });
+
+      test('returns name wrapped in if with configured name', () {
+        final instance = BrickFile.config(
+          join('path', 'to', 'file.dart'),
+          name: Name('name'),
+          includeIf: 'check',
+        );
+
+        expect(
+          instance.formatName(),
+          '{{#check}}{{{name}}}.dart{{/check}}',
         );
       });
 
       test('returns name wrapped in if with configured name and formatting',
           () {
         final instance = BrickFile.config(
-          defaultPath,
-          name: Name(name, tag: MustacheTag.snakeCase),
+          join('path', 'to', 'file.dart'),
+          name: Name('name', tag: MustacheTag.snakeCase),
           includeIf: 'check',
         );
 
         expect(
           instance.formatName(),
-          '{{#check}}{{#snakeCase}}{{{$name}}}{{/snakeCase}}.dart{{/check}}',
+          '{{#check}}{{#snakeCase}}{{{name}}}{{/snakeCase}}.dart{{/check}}',
         );
       });
     });
@@ -462,38 +497,41 @@ yooooo:
     group('#include_if_not', () {
       test('returns name wrapped in if without formatting or configured name',
           () {
-        const instance = BrickFile.config(
-          defaultPath,
-          includeIfNot: 'check',
-        );
-
-        expect(instance.formatName(), '{{^check}}$defaultPath{{/check}}');
-      });
-
-      test('returns name wrapped in if with configured name', () {
         final instance = BrickFile.config(
-          defaultPath,
-          name: Name(name),
+          join('path', 'to', 'file.dart'),
           includeIfNot: 'check',
         );
 
         expect(
           instance.formatName(),
-          '{{^check}}{{{$name}}}.dart{{/check}}',
+          '{{^check}}file.dart{{/check}}',
+        );
+      });
+
+      test('returns name wrapped in if with configured name', () {
+        final instance = BrickFile.config(
+          join('path', 'to', 'file.dart'),
+          name: Name('name'),
+          includeIfNot: 'check',
+        );
+
+        expect(
+          instance.formatName(),
+          '{{^check}}{{{name}}}.dart{{/check}}',
         );
       });
 
       test('returns name wrapped in if with configured name and formatting',
           () {
         final instance = BrickFile.config(
-          defaultPath,
-          name: Name(name, tag: MustacheTag.snakeCase),
+          join('path', 'to', 'file.dart'),
+          name: Name('name', tag: MustacheTag.snakeCase),
           includeIfNot: 'check',
         );
 
         expect(
           instance.formatName(),
-          '{{^check}}{{#snakeCase}}{{{$name}}}{{/snakeCase}}.dart{{/check}}',
+          '{{^check}}{{#snakeCase}}{{{name}}}{{/snakeCase}}.dart{{/check}}',
         );
       });
     });
@@ -522,40 +560,140 @@ yooooo:
     });
   });
 
-  group('#writeTargetFiles', () {
-    late FileSystem fileSystem;
-    late File sourceFile;
-    const sourceFilePath = 'source.dart';
-    const content = 'content';
+  group('#newPathForFile', () {
+    test('returns when path', () {
+      const file = BrickFile('path/to/file.dart');
 
-    BrickDir brickPath({
-      String? name,
-      String? path,
-    }) {
-      return BrickDir(
-        name: Name(name ?? 'name'),
-        path: path ?? defaultPath,
+      final pathContent = file.newPathForFile(urls: [], dirs: []);
+
+      const expected = ContentReplacement(
+        content: 'path/to/file.dart',
+        used: {},
+        data: {'url': null},
       );
-    }
+
+      expect(pathContent, expected);
+    });
+
+    test('returns when path is url', () {
+      final url = Url('path/to/url');
+
+      const file = BrickFile('path/to/url');
+
+      final pathContent = file.newPathForFile(urls: [url], dirs: []);
+
+      final expected = ContentReplacement(
+        content: 'path/to/{{% url %}}',
+        used: const {'url'},
+        data: {'url': url},
+      );
+
+      expect(pathContent, expected);
+    });
+
+    test('returns when path is dir', () {
+      const file = BrickFile('path/to/dir');
+
+      final pathContent = file.newPathForFile(
+        urls: [],
+        dirs: [
+          BrickDir(
+            path: 'path/to/dir',
+            name: Name('my_dir'),
+          ),
+        ],
+      );
+
+      const expected = ContentReplacement(
+        content: 'path/to/{{{my_dir}}}',
+        used: {'my_dir'},
+        data: {'url': null},
+      );
+
+      expect(pathContent, expected);
+    });
+
+    test('applies dirs to path', () {
+      final file = BrickFile('path/to/dir/file.dart', name: Name('file'));
+
+      final pathContent = file.newPathForFile(
+        urls: [],
+        dirs: [
+          BrickDir(
+            path: 'path/to',
+            name: Name('to'),
+          ),
+          BrickDir(
+            path: 'path/to/dir',
+            name: Name('dir'),
+          ),
+          BrickDir(
+            path: 'path',
+            name: Name('path'),
+          ),
+        ],
+      );
+
+      const expected = ContentReplacement(
+        content: '{{{path}}}/{{{to}}}/{{{dir}}}/{{{file}}}.dart',
+        used: {'path', 'to', 'dir', 'file'},
+        data: {'url': null},
+      );
+
+      expect(pathContent, expected);
+    });
+
+    test('applies dirs to url', () {
+      final url = Url('path/to/dir/url');
+      const file = BrickFile('path/to/dir/url');
+
+      final pathContent = file.newPathForFile(
+        urls: [url],
+        dirs: [
+          BrickDir(
+            path: 'path/to',
+            name: Name('to'),
+          ),
+          BrickDir(
+            path: 'path/to/dir',
+            name: Name('dir'),
+          ),
+          BrickDir(
+            path: 'path',
+            name: Name('path'),
+          ),
+        ],
+      );
+
+      final expected = ContentReplacement(
+        content: '{{{path}}}/{{{to}}}/{{{dir}}}/{{% url %}}',
+        used: const {'path', 'to', 'dir', 'url'},
+        data: {'url': url},
+      );
+
+      expect(pathContent, expected);
+    });
+  });
+
+  group('#writeTargetFiles', () {
+    late FileSystem memoryFileSystem;
 
     setUp(() {
-      fileSystem = MemoryFileSystem();
-      sourceFile = fileSystem.file(sourceFilePath)
-        ..createSync(recursive: true)
-        ..writeAsStringSync(content);
+      memoryFileSystem = MemoryFileSystem();
     });
 
     test('Throws $FileException when #writeFile throws', () {
-      const instance = TestBrickFile(defaultFile);
+      const instance = TestBrickFile.throws('file.dart');
 
       expect(
         () => instance.writeTargetFile(
+          urls: [],
           outOfFileVariables: [],
           partials: [],
-          sourceFile: sourceFile,
+          sourceFile: memoryFileSystem.file('file.dart'),
           dirs: [],
           targetDir: '',
-          fileSystem: fileSystem,
+          fileSystem: memoryFileSystem,
           logger: mockLogger,
         ),
         throwsA(isA<FileException>()),
@@ -564,124 +702,79 @@ yooooo:
       verifyNoMoreInteractions(mockLogger);
     });
 
-    test('writes a file on the root level', () {
-      const instance = BrickFile.config(defaultFile);
+    test('returns used variables from write file', () {
+      final instance = BrickFile.config(
+        'path/to/file.dart',
+        variables: const [Variable(name: 'var')],
+        includeIf: 'check',
+        name: Name('name'),
+      );
+
+      final sourceFile = memoryFileSystem.file('file.dart');
+
+      sourceFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync('var\npartials.file');
 
       final result = instance.writeTargetFile(
+        urls: [],
         outOfFileVariables: [],
-        partials: [],
+        partials: const [
+          Partial(path: 'path/to/file.dart'),
+        ],
         sourceFile: sourceFile,
-        dirs: [],
+        dirs: [
+          BrickDir(
+            path: 'path/to',
+            name: Name('to'),
+          ),
+        ],
         targetDir: '',
-        fileSystem: fileSystem,
+        fileSystem: memoryFileSystem,
         logger: mockLogger,
       );
 
-      expect(result, const FileWriteResult.empty());
+      const expected = FileWriteResult(
+        usedPartials: {'path/to/file.dart'},
+        usedVariables: {'var', 'name', 'check', 'to'},
+      );
 
-      final newFile = fileSystem.file(defaultFile);
-
-      expect(newFile.existsSync(), isTrue);
+      expect(result, expected);
 
       verifyNoMoreInteractions(mockLogger);
     });
 
-    test('writes a file on a nested level', () {
-      const instance = BrickFile.config(defaultFile);
+    test('returns used variables from write url', () {
+      const instance = BrickFile.config('path/to/url');
+
+      final sourceFile = memoryFileSystem.file('file');
+
+      sourceFile.createSync(recursive: true);
 
       final result = instance.writeTargetFile(
+        urls: [Url('path/to/url')],
         outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,
-        dirs: [],
-        targetDir: 'nested',
-        fileSystem: fileSystem,
-        logger: mockLogger,
-      );
-
-      expect(result, const FileWriteResult.empty());
-
-      final newFile = fileSystem.file(
-        join(
-          'nested',
-          defaultFile,
-        ),
-      );
-
-      verifyNoMoreInteractions(mockLogger);
-
-      expect(newFile.existsSync(), isTrue);
-    });
-
-    test('updates path with configured directory', () {
-      final instance = BrickFile.config(defaultPath);
-      const replacement = 'something';
-      final dir = brickPath(name: replacement, path: join('path', 'to'));
-
-      final result = instance.writeTargetFile(
-        outOfFileVariables: [],
-        partials: [],
-        sourceFile: sourceFile,
-        dirs: [dir],
+        dirs: [
+          BrickDir(
+            path: 'path/to',
+            name: Name('to'),
+          ),
+        ],
         targetDir: '',
-        fileSystem: fileSystem,
+        fileSystem: memoryFileSystem,
         logger: mockLogger,
       );
 
-      expect(
-        result,
-        const FileWriteResult(
-          usedVariables: {'something'},
-          usedPartials: {},
-        ),
+      const expected = FileWriteResult(
+        usedPartials: {},
+        usedVariables: {'url', 'to'},
       );
 
-      final newFile = fileSystem.file(
-        join(
-          'path',
-          '{{{$replacement}}}',
-          defaultFile,
-        ),
-      );
+      expect(result, expected);
 
       verifyNoMoreInteractions(mockLogger);
-
-      expect(newFile.existsSync(), isTrue);
-    });
-
-    test('updates file name when provided', () {
-      const replacement = 'something';
-      final instance = BrickFile.config(defaultPath, name: Name(replacement));
-
-      final result = instance.writeTargetFile(
-        outOfFileVariables: [],
-        partials: [],
-        sourceFile: sourceFile,
-        dirs: [],
-        targetDir: '',
-        fileSystem: fileSystem,
-        logger: mockLogger,
-      );
-
-      expect(
-        result,
-        const FileWriteResult(
-          usedVariables: {replacement},
-          usedPartials: {},
-        ),
-      );
-
-      final newFile = fileSystem.file(
-        join(
-          'path',
-          'to',
-          '{{{$replacement}}}.dart',
-        ),
-      );
-
-      verifyNoMoreInteractions(mockLogger);
-
-      expect(newFile.existsSync(), isTrue);
     });
   });
 
@@ -713,10 +806,7 @@ yooooo:
 }
 
 class TestBrickFile extends BrickFile {
-  const TestBrickFile(String path)
-      : super.config(
-          path,
-        );
+  const TestBrickFile.throws(String path) : super.config(path);
 
   @override
   FileWriteResult writeFile({
