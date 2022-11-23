@@ -18,6 +18,7 @@ void main() {
       'hooks': 1,
       'legacy': 1,
       'photos': 1,
+      'plugin': 9,
     };
 
     for (final brick in bricks.entries) {

@@ -1,0 +1,22 @@
+bricks:
+  plugin:
+    source: oven
+    brick_config: brick.yaml
+    dirs:
+      android:
+        include_if: android
+      ios:
+        include_if: ios
+    files:
+      build.gradle:
+        include_if: android
+      Podfile:
+        include_if: ios
+      example/android.dart:
+        include_if: android
+      example/ios.dart:
+        include_if: ios
+      tests/android_tests.dart:
+        include_if: android
+      tests/ios_tests.dart:
+        include_if: ios
