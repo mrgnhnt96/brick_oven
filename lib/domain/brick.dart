@@ -10,6 +10,7 @@ import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/constants.dart';
+import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -73,7 +74,7 @@ class Brick extends Equatable {
       );
     }
 
-    final data = {...yaml.asYaml().value};
+    final data = yaml.asYaml().value.data;
 
     late final BrickSource source;
     try {
@@ -88,9 +89,11 @@ class Brick extends Equatable {
 
     final filesData = YamlValue.from(data.remove('files'));
 
-    Iterable<BrickFile> files() sync* {
+    List<BrickFile> files() {
+      final files = <BrickFile>[];
+
       if (filesData.isNone()) {
-        return;
+        return files;
       }
 
       if (!filesData.isYaml()) {
@@ -104,15 +107,20 @@ class Brick extends Equatable {
         final path = entry.key as String;
         final yaml = YamlValue.from(entry.value);
 
-        yield BrickFile.fromYaml(yaml, path: path);
+        final file = BrickFile.fromYaml(yaml, path: path);
+        files.add(file);
       }
+
+      return files;
     }
 
     final pathsData = YamlValue.from(data.remove('dirs'));
 
-    Iterable<BrickDir> paths() sync* {
+    List<BrickDir> paths() {
+      final paths = <BrickDir>[];
+
       if (pathsData.isNone()) {
-        return;
+        return paths;
       }
 
       if (!pathsData.isYaml()) {
@@ -125,8 +133,11 @@ class Brick extends Equatable {
       for (final entry in pathsData.asYaml().value.entries) {
         final path = entry.key as String;
 
-        yield BrickDir.fromYaml(YamlValue.from(entry.value), path);
+        final dir = BrickDir.fromYaml(YamlValue.from(entry.value), path);
+        paths.add(dir);
       }
+
+      return paths;
     }
 
     final partialsData = YamlValue.from(data.remove('partials'));
@@ -161,9 +172,11 @@ class Brick extends Equatable {
 
     final excludedPaths = YamlValue.from(data.remove('exclude'));
 
-    Iterable<String> exclude() sync* {
+    List<String> exclude() {
+      final excludes = <String>[];
+
       if (excludedPaths.isNone()) {
-        return;
+        return excludes;
       }
 
       if (!excludedPaths.isList() && !excludedPaths.isString()) {
@@ -183,21 +196,24 @@ class Brick extends Equatable {
 
       for (final path in paths) {
         if (path.isString()) {
-          yield path.asString().value;
-        } else {
-          final variableError = VariableException(
-            variable: 'exclude',
-            reason: 'Expected a `String`, got `${path.value}` '
-                // ignore: avoid_dynamic_calls
-                '(${path.value.runtimeType})',
-          );
-
-          throw BrickException(
-            brick: name,
-            reason: variableError.message,
-          );
+          excludes.add(path.asString().value);
+          continue;
         }
+
+        final variableError = VariableException(
+          variable: 'exclude',
+          reason: 'Expected a `String`, got `${path.value}` '
+              // ignore: avoid_dynamic_calls
+              '(${path.value.runtimeType})',
+        );
+
+        throw BrickException(
+          brick: name,
+          reason: variableError.message,
+        );
       }
+
+      return excludes;
     }
 
     final brickConfig = YamlValue.from(data.remove('brick_config'));
@@ -218,12 +234,12 @@ class Brick extends Equatable {
     }
 
     return Brick._fromYaml(
-      files: files().toList(),
-      partials: partials().toList(),
+      files: files(),
+      partials: partials(),
       source: source,
       name: name,
-      dirs: paths().toList(),
-      exclude: exclude().toList(),
+      dirs: paths(),
+      exclude: exclude(),
       configPath: configPath,
       brickYamlConfig: brickYamlConfig,
       fileSystem: fileSystem,
@@ -283,41 +299,51 @@ class Brick extends Equatable {
   ///   - [BrickDir.includeIf]
   ///   - [BrickDir.includeIfNot]
   Set<String> allBrickVariables() {
-    final variables = <String>{};
+    final rawVariables = <String>{};
 
     for (final file in files) {
       final names = file.variables.map((e) => e.name);
-      variables.addAll(names);
+      rawVariables.addAll(names);
 
       if (file.includeIf != null) {
-        variables.add(file.includeIf!);
+        rawVariables.add(file.includeIf!);
       }
 
       if (file.includeIfNot != null) {
-        variables.add(file.includeIfNot!);
+        rawVariables.add(file.includeIfNot!);
       }
 
       if (file.name != null) {
-        variables.add(file.name!.value);
+        rawVariables.addAll(file.name!.variables);
       }
     }
 
     for (final partial in partials) {
       final names = partial.variables.map((e) => e.name);
-      variables.addAll(names);
+      rawVariables.addAll(names);
     }
 
     for (final dir in dirs) {
       if (dir.name != null) {
-        variables.add(dir.name!.value);
+        rawVariables.addAll(dir.name!.variables);
       }
 
       if (dir.includeIf != null) {
-        variables.add(dir.includeIf!);
+        rawVariables.add(dir.includeIf!);
       }
 
       if (dir.includeIfNot != null) {
-        variables.add(dir.includeIfNot!);
+        rawVariables.add(dir.includeIfNot!);
+      }
+    }
+
+    final variables = <String>{};
+
+    for (final variable in rawVariables) {
+      if (variable.contains('.') && variable != '.') {
+        variables.add(variable.split('.').first);
+      } else {
+        variables.add(variable);
       }
     }
 
