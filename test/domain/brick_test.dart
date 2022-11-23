@@ -709,13 +709,7 @@ exclude:
           // ignore: cascade_invocations
           brick.cook();
 
-          const vars = '"fileVar1", '
-              '"fileVar2", '
-              '"partialVar", '
-              '"dirSection", '
-              '"dirIncludeIf", '
-              '"dirInvertedSection", '
-              '"dirIncludeIfNot"';
+          const vars = '"fileVar1", "fileVar2", "partialVar"';
 
           verify(
             () => mockLogger
@@ -725,17 +719,16 @@ exclude:
             () => mockLogger
                 .warn('Unused variables ("fileVar2") in `./path/file2.dart`'),
           ).called(1);
+          verify(
+            () => mockLogger
+                .warn('Unused variables ("partialVar") in `./partial`'),
+          ).called(1);
           verify(() => mockLogger.warn('Unused variables ($vars) in BRICK'))
               .called(1);
           verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
 
           verify(() => mockLogger.warn('Unused partials ("partial") in BRICK'))
               .called(1);
-
-          verify(
-            () => mockLogger
-                .warn('Unused variables ("partialVar") in `./partial`'),
-          ).called(1);
 
           verifyNoMoreInteractions(mockLogger);
         });
@@ -749,7 +742,7 @@ exclude:
 
           fs.file(join('path', 'to', 'file2.dart'))
             ..createSync(recursive: true)
-            ..writeAsStringSync('fileVar2');
+            ..writeAsStringSync('fileVar2\npartials.partial');
 
           fs.file('partial')
             ..createSync(recursive: true)
@@ -799,6 +792,8 @@ exclude:
 
           // ignore: cascade_invocations
           brick.cook();
+
+          verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
 
           verifyNoMoreInteractions(mockLogger);
         });
