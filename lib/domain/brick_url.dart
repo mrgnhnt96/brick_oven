@@ -7,15 +7,15 @@ import 'package:brick_oven/utils/include_mixin.dart';
 import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
 
-part 'url.g.dart';
+part 'brick_url.g.dart';
 
 /// {@template url}
 /// Represents a URL configured in a brick
 /// {@endtemplate}
 @autoequal
-class Url extends Equatable with IncludeMixin {
+class BrickUrl extends Equatable with IncludeMixin {
   /// {macro url}
-  Url(
+  BrickUrl(
     this.path, {
     this.name,
     this.includeIf,
@@ -27,7 +27,7 @@ class Url extends Equatable with IncludeMixin {
         );
 
   /// {macro url}
-  factory Url.fromYaml(YamlValue yaml, String path) {
+  factory BrickUrl.fromYaml(YamlValue yaml, String path) {
     if (extension(path).isNotEmpty) {
       throw UrlException(
         url: path,
@@ -43,7 +43,7 @@ class Url extends Equatable with IncludeMixin {
     }
 
     if (yaml.isNone()) {
-      return Url(path);
+      return BrickUrl(path);
     }
 
     if (!yaml.isYaml() && !yaml.isString()) {
@@ -58,7 +58,7 @@ class Url extends Equatable with IncludeMixin {
     if (yaml.isString()) {
       final name = yaml.asString().value;
 
-      return Url(
+      return BrickUrl(
         path,
         name: Name(name),
       );
@@ -90,7 +90,7 @@ class Url extends Equatable with IncludeMixin {
       );
     }
 
-    return Url(
+    return BrickUrl(
       path,
       name: name,
       includeIf: includeIf,

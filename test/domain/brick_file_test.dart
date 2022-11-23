@@ -6,7 +6,7 @@ import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/url.dart';
+import 'package:brick_oven/domain/brick_url.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
@@ -560,7 +560,7 @@ yooooo:
     });
 
     test('returns when path is url', () {
-      final url = Url('path/to/url');
+      final url = BrickUrl('path/to/url');
 
       const file = BrickFile('path/to/url');
 
@@ -628,7 +628,7 @@ yooooo:
     });
 
     test('applies dirs to url', () {
-      final url = Url('path/to/dir/url');
+      final url = BrickUrl('path/to/dir/url');
       const file = BrickFile('path/to/dir/url');
 
       final pathContent = file.newPathForFile(
@@ -736,7 +736,7 @@ yooooo:
       sourceFile.createSync(recursive: true);
 
       final result = instance.writeTargetFile(
-        urls: [Url('path/to/url')],
+        urls: [BrickUrl('path/to/url')],
         outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,

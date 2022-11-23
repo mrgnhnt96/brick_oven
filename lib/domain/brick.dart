@@ -6,7 +6,7 @@ import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/url.dart';
+import 'package:brick_oven/domain/brick_url.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -221,8 +221,8 @@ class Brick extends Equatable {
 
     final urlData = YamlValue.from(data.remove('urls'));
 
-    List<Url> urls() {
-      final urls = <Url>[];
+    List<BrickUrl> urls() {
+      final urls = <BrickUrl>[];
 
       if (urlData.isNone()) {
         return urls;
@@ -238,7 +238,7 @@ class Brick extends Equatable {
       for (final entry in urlData.asYaml().value.entries) {
         final path = entry.key as String;
 
-        final url = Url.fromYaml(YamlValue.from(entry.value), path);
+        final url = BrickUrl.fromYaml(YamlValue.from(entry.value), path);
 
         urls.add(url);
       }
@@ -298,7 +298,7 @@ class Brick extends Equatable {
   final List<Partial> partials;
 
   /// the configured urls that will be imported to the [source] files
-  final List<Url> urls;
+  final List<BrickUrl> urls;
 
   /// paths to be excluded from the [source]
   final List<String> exclude;

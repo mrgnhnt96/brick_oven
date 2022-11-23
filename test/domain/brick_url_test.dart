@@ -3,25 +3,25 @@ import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:test/test.dart';
-import 'package:brick_oven/domain/url.dart';
+import 'package:brick_oven/domain/brick_url.dart';
 import 'package:yaml/yaml.dart';
 
 void main() {
-  group('$Url', () {
+  group('$BrickUrl', () {
     test('can be instanciated', () {
-      final url = Url('path');
+      final url = BrickUrl('path');
 
-      expect(url, isA<Url>());
+      expect(url, isA<BrickUrl>());
     });
 
     test('throws assertion error when path contains extension', () {
-      expect(() => Url('path.ext'), throwsA(isA<AssertionError>()));
+      expect(() => BrickUrl('path.ext'), throwsA(isA<AssertionError>()));
     });
 
     test('throws assertion error when includeIf and includeIfNot are both set',
         () {
       expect(
-        () => Url(
+        () => BrickUrl(
           'path',
           includeIf: 'check',
           includeIfNot: 'checkNot',
@@ -34,28 +34,28 @@ void main() {
       group('throws $UrlException when', () {
         test('path contains extension', () {
           expect(
-            () => Url.fromYaml(YamlValue.from('path'), 'path.ext'),
+            () => BrickUrl.fromYaml(YamlValue.from('path'), 'path.ext'),
             throwsA(isA<UrlException>()),
           );
         });
 
         test('yaml is error', () {
           expect(
-            () => Url.fromYaml(const YamlValue.error('error'), 'path'),
+            () => BrickUrl.fromYaml(const YamlValue.error('error'), 'path'),
             throwsA(isA<UrlException>()),
           );
         });
 
         test('yaml is not correct type', () {
           expect(
-            () => Url.fromYaml(YamlValue.list(YamlList.wrap([])), 'path'),
+            () => BrickUrl.fromYaml(YamlValue.list(YamlList.wrap([])), 'path'),
             throwsA(isA<UrlException>()),
           );
         });
 
         test('yaml has extra keys', () {
           expect(
-            () => Url.fromYaml(
+            () => BrickUrl.fromYaml(
               YamlValue.from(
                 YamlMap.wrap({
                   'name': 'name',
@@ -70,13 +70,13 @@ void main() {
       });
 
       test('returns when yaml is null ', () {
-        final url = Url.fromYaml(const YamlValue.none(), 'path');
+        final url = BrickUrl.fromYaml(const YamlValue.none(), 'path');
 
-        expect(url, Url('path'));
+        expect(url, BrickUrl('path'));
       });
 
       test('returns when yaml is map ', () {
-        final url = Url.fromYaml(
+        final url = BrickUrl.fromYaml(
           YamlValue.from(
             YamlMap.wrap({
               'name': {
@@ -90,7 +90,7 @@ void main() {
 
         expect(
           url,
-          Url(
+          BrickUrl(
             'path',
             name: Name('name', tag: MustacheTag.camelCase),
           ),
@@ -102,7 +102,7 @@ void main() {
 include_if: check
 ''') as YamlMap;
 
-        final instance = Url.fromYaml(
+        final instance = BrickUrl.fromYaml(
           YamlValue.from(yaml),
           'path/to/url',
         );
@@ -115,7 +115,7 @@ include_if: check
 include_if_not: check
 ''') as YamlMap;
 
-        final instance = Url.fromYaml(
+        final instance = BrickUrl.fromYaml(
           YamlValue.from(yaml),
           'path/to/url',
         );
@@ -127,19 +127,19 @@ include_if_not: check
     group('#formatName', () {
       group('returns correct format when', () {
         test('name is not provided', () {
-          final url = Url('path/to/file');
+          final url = BrickUrl('path/to/file');
 
           expect(url.formatName(), '{{{% file %}}}');
         });
 
         test('name is provided', () {
-          final url = Url('path', name: Name('name'));
+          final url = BrickUrl('path', name: Name('name'));
 
           expect(url.formatName(), '{{{% name %}}}');
         });
 
         test('name is provided with additional args', () {
-          final url1 = Url(
+          final url1 = BrickUrl(
             'path',
             name: Name(
               'name',
@@ -155,7 +155,7 @@ include_if_not: check
             '{{#section}}prefix{{#camelCase}}{{{% name %}}}{{/camelCase}}suffix{{/section}}',
           );
 
-          final url2 = Url(
+          final url2 = BrickUrl(
             'path',
             name: Name(
               'name',
@@ -176,7 +176,7 @@ include_if_not: check
 
     group('variables', () {
       test('returns when name is provided', () {
-        final url = Url(
+        final url = BrickUrl(
           'path/to/somewhere',
           name: Name('name'),
         );
@@ -185,7 +185,7 @@ include_if_not: check
       });
 
       test('returns when name is not provided', () {
-        final url = Url('path/to/somewhere');
+        final url = BrickUrl('path/to/somewhere');
 
         expect(url.variables, ['somewhere']);
       });

@@ -4,7 +4,7 @@ import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/url.dart';
+import 'package:brick_oven/domain/brick_url.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -215,7 +215,7 @@ class BrickFile extends Equatable with FileReplacements, IncludeMixin {
   /// replacing the appropriate segments and file name
   @visibleForTesting
   ContentReplacement newPathForFile({
-    required List<Url> urls,
+    required List<BrickUrl> urls,
     required List<BrickDir> dirs,
   }) {
     final variablesUsed = <String>{};
@@ -223,7 +223,7 @@ class BrickFile extends Equatable with FileReplacements, IncludeMixin {
     var newPath = path;
     newPath = newPath.replaceAll(basename(newPath), '');
 
-    Url? url;
+    BrickUrl? url;
     final urlPaths = urls.asMap().map((_, e) => MapEntry(e.path, e));
 
     if (urlPaths.containsKey(path)) {
@@ -270,7 +270,7 @@ class BrickFile extends Equatable with FileReplacements, IncludeMixin {
     required List<BrickDir> dirs,
     required List<Variable> outOfFileVariables,
     required List<Partial> partials,
-    required List<Url> urls,
+    required List<BrickUrl> urls,
     required FileSystem fileSystem,
     required Logger logger,
   }) {

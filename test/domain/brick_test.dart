@@ -11,7 +11,7 @@ import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/domain/brick_yaml_data.dart';
 import 'package:brick_oven/domain/name.dart';
-import 'package:brick_oven/domain/url.dart';
+import 'package:brick_oven/domain/brick_url.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -173,18 +173,18 @@ urls:
         ],
         exclude: const ['exclude/all/of/me'],
         urls: [
-          Url(
+          BrickUrl(
             'add/this/url',
           ),
-          Url(
+          BrickUrl(
             'add/this/url/too',
             name: Name('other_url'),
           ),
-          Url(
+          BrickUrl(
             'and/also/this/url',
             name: Name('my_url', section: 'device'),
           ),
-          Url(
+          BrickUrl(
             'and/also/this/url/too',
             name: Name('me_too', invertedSection: 'device'),
           ),
@@ -1892,8 +1892,8 @@ exclude:
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
           urls: [
-            Url('path', name: Name('name1', section: 'section')),
-            Url(
+            BrickUrl('path', name: Name('name1', section: 'section')),
+            BrickUrl(
               'path/to',
               name: Name('name2', invertedSection: 'invertedSection'),
             ),
