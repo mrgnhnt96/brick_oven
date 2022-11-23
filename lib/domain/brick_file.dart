@@ -162,7 +162,7 @@ class BrickFile extends Equatable with FileReplacements {
 
   /// the name of the file
   ///
-  /// if provided, [fileName] will format the name
+  /// if provided, [formatName] will format the name
   /// using mustache
   final Name? name;
 
@@ -182,11 +182,11 @@ class BrickFile extends Equatable with FileReplacements {
 
   /// the name of file with extension
   ///
-  /// If [hasConfiguredName], then the name will be formatted with mustache,
+  /// If [name], then the name will be formatted with mustache,
   /// prepended with prefix, and appended with suffix
-  String get fileName {
+  String formatName() {
     String name;
-    if (hasConfiguredName) {
+    if (this.name != null) {
       name = '${this.name!.format()}$extension';
     } else {
       name = basename(path);
@@ -203,9 +203,6 @@ class BrickFile extends Equatable with FileReplacements {
     return name;
   }
 
-  /// if the name of the file has been configured
-  bool get hasConfiguredName => name != null;
-
   /// writes the file in the [targetDir], with the
   /// contents of the [sourceFile].
   ///
@@ -220,13 +217,29 @@ class BrickFile extends Equatable with FileReplacements {
     required FileSystem fileSystem,
     required Logger logger,
   }) {
+    final dirNamesUsed = <String>{};
+    final fileNamesUsed = <String>{};
+
     var newPath = path;
     newPath = newPath.replaceAll(basename(newPath), '');
-    newPath = join(newPath, fileName);
+    newPath = join(newPath, formatName());
 
-    final dirsUsed = <String>{};
+    if (name != null) {
+      fileNamesUsed.add(name!.value);
+    }
 
-    if (newPath.contains(separator)) {
+    if (includeIf != null) {
+      fileNamesUsed.add(includeIf!);
+    }
+
+    if (includeIfNot != null) {
+      fileNamesUsed.add(includeIfNot!);
+    }
+
+    // check for any slashes not preceeded by {
+    final slashPattern = RegExp(r'(?<!{+)\' '$separator');
+
+    if (slashPattern.hasMatch(newPath)) {
       final originalPath = newPath;
 
       for (final configDir in dirs) {
@@ -236,7 +249,7 @@ class BrickFile extends Equatable with FileReplacements {
         if (newPath != comparePath) {
           final name = configDir.name?.value;
           if (name != null) {
-            dirsUsed.add(name);
+            dirNamesUsed.add(name);
           }
         }
       }
@@ -260,7 +273,8 @@ class BrickFile extends Equatable with FileReplacements {
         usedPartials: writeResult.usedPartials,
         usedVariables: {
           ...writeResult.usedVariables,
-          ...dirsUsed,
+          ...fileNamesUsed,
+          ...dirNamesUsed,
         },
       );
     } on ConfigException catch (e) {

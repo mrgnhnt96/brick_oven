@@ -110,7 +110,7 @@ name:
         final file = BrickFile.fromYaml(YamlValue.from(yaml), path: path);
 
         expect(
-          file.fileName,
+          file.formatName(),
           '{{{$fileName}}}$ext',
         );
       }
@@ -353,7 +353,7 @@ yooooo:
     );
   });
 
-  group('#fileName', () {
+  group('#formatName', () {
     const defaultFile = 'file.dart';
     const defaultPath = defaultFile;
     const name = 'name';
@@ -363,13 +363,13 @@ yooooo:
     test('return the file name formatted when no provided name', () {
       const instance = BrickFile(defaultFile);
 
-      expect(instance.fileName, defaultFile);
+      expect(instance.formatName(), defaultFile);
     });
 
     test('return the provided name', () {
       final instance = BrickFile.config(defaultPath, name: Name(name));
 
-      expect(instance.fileName, '{{{$name}}}.dart');
+      expect(instance.formatName(), '{{{$name}}}.dart');
     });
 
     test('prepends the prefix', () {
@@ -378,7 +378,7 @@ yooooo:
         name: Name(name, prefix: prefix),
       );
 
-      expect(instance.fileName, '$prefix{{{$name}}}.dart');
+      expect(instance.formatName(), '$prefix{{{$name}}}.dart');
     });
 
     test('appends the suffix', () {
@@ -387,7 +387,7 @@ yooooo:
         name: Name(name, suffix: suffix),
       );
 
-      expect(instance.fileName, '{{{$name}}}$suffix.dart');
+      expect(instance.formatName(), '{{{$name}}}$suffix.dart');
     });
 
     test('formats the name to mustache format when provided', () {
@@ -397,7 +397,7 @@ yooooo:
       );
 
       expect(
-        instance.fileName,
+        instance.formatName(),
         '{{#snakeCase}}{{{$name}}}{{/snakeCase}}.dart',
       );
     });
@@ -406,7 +406,7 @@ yooooo:
       final instance = BrickFile.config(defaultPath, name: Name(name));
 
       expect(
-        instance.fileName,
+        instance.formatName(),
         contains('{{{$name}}}'),
       );
     });
@@ -416,7 +416,7 @@ yooooo:
         final expected = fileExtensions[file]!;
         final instance = BrickFile.config(file);
 
-        expect(instance.fileName, endsWith(expected));
+        expect(instance.formatName(), endsWith(expected));
       }
     });
 
@@ -428,7 +428,7 @@ yooooo:
           includeIf: 'check',
         );
 
-        expect(instance.fileName, '{{#check}}$defaultPath{{/check}}');
+        expect(instance.formatName(), '{{#check}}$defaultPath{{/check}}');
       });
 
       test('returns name wrapped in if with configured name', () {
@@ -439,7 +439,7 @@ yooooo:
         );
 
         expect(
-          instance.fileName,
+          instance.formatName(),
           '{{#check}}{{{$name}}}.dart{{/check}}',
         );
       });
@@ -453,7 +453,7 @@ yooooo:
         );
 
         expect(
-          instance.fileName,
+          instance.formatName(),
           '{{#check}}{{#snakeCase}}{{{$name}}}{{/snakeCase}}.dart{{/check}}',
         );
       });
@@ -467,7 +467,7 @@ yooooo:
           includeIfNot: 'check',
         );
 
-        expect(instance.fileName, '{{^check}}$defaultPath{{/check}}');
+        expect(instance.formatName(), '{{^check}}$defaultPath{{/check}}');
       });
 
       test('returns name wrapped in if with configured name', () {
@@ -478,7 +478,7 @@ yooooo:
         );
 
         expect(
-          instance.fileName,
+          instance.formatName(),
           '{{^check}}{{{$name}}}.dart{{/check}}',
         );
       });
@@ -492,7 +492,7 @@ yooooo:
         );
 
         expect(
-          instance.fileName,
+          instance.formatName(),
           '{{^check}}{{#snakeCase}}{{{$name}}}{{/snakeCase}}.dart{{/check}}',
         );
       });
@@ -519,20 +519,6 @@ yooooo:
 
         expect(instance.extension, extension);
       }
-    });
-  });
-
-  group('#hasConfiguredName', () {
-    test('returns true when a name is provided', () {
-      final file = BrickFile.config('path/to/file.dart', name: Name('name'));
-
-      expect(file.hasConfiguredName, isTrue);
-    });
-
-    test('returns false when no name is provided', () {
-      const file = BrickFile.config('path/to/file.dart');
-
-      expect(file.hasConfiguredName, isFalse);
     });
   });
 
@@ -581,7 +567,7 @@ yooooo:
     test('writes a file on the root level', () {
       const instance = BrickFile.config(defaultFile);
 
-      instance.writeTargetFile(
+      final result = instance.writeTargetFile(
         outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,
@@ -590,6 +576,8 @@ yooooo:
         fileSystem: fileSystem,
         logger: mockLogger,
       );
+
+      expect(result, const FileWriteResult.empty());
 
       final newFile = fileSystem.file(defaultFile);
 
@@ -601,7 +589,7 @@ yooooo:
     test('writes a file on a nested level', () {
       const instance = BrickFile.config(defaultFile);
 
-      instance.writeTargetFile(
+      final result = instance.writeTargetFile(
         outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,
@@ -610,6 +598,8 @@ yooooo:
         fileSystem: fileSystem,
         logger: mockLogger,
       );
+
+      expect(result, const FileWriteResult.empty());
 
       final newFile = fileSystem.file(
         join(
@@ -628,7 +618,7 @@ yooooo:
       const replacement = 'something';
       final dir = brickPath(name: replacement, path: join('path', 'to'));
 
-      instance.writeTargetFile(
+      final result = instance.writeTargetFile(
         outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,
@@ -636,6 +626,14 @@ yooooo:
         targetDir: '',
         fileSystem: fileSystem,
         logger: mockLogger,
+      );
+
+      expect(
+        result,
+        const FileWriteResult(
+          usedVariables: {'something'},
+          usedPartials: {},
+        ),
       );
 
       final newFile = fileSystem.file(
@@ -655,7 +653,7 @@ yooooo:
       const replacement = 'something';
       final instance = BrickFile.config(defaultPath, name: Name(replacement));
 
-      instance.writeTargetFile(
+      final result = instance.writeTargetFile(
         outOfFileVariables: [],
         partials: [],
         sourceFile: sourceFile,
@@ -663,6 +661,14 @@ yooooo:
         targetDir: '',
         fileSystem: fileSystem,
         logger: mockLogger,
+      );
+
+      expect(
+        result,
+        const FileWriteResult(
+          usedVariables: {replacement},
+          usedPartials: {},
+        ),
       );
 
       final newFile = fileSystem.file(
