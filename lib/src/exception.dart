@@ -115,11 +115,11 @@ class BrickException implements ConfigException {
   String get message => 'Invalid brick config: "$brick"\nReason: $reason';
 }
 
-/// {@template config_exception}
-/// An exception thrown when a configuration is setup incorrectly.
+/// {@template file_exception}
+/// An exception thrown when a file is setup incorrectly.
 /// {@endtemplate}
 class FileException implements ConfigException {
-  /// {@macro config_exception}
+  /// {@macro config_file}
   const FileException({
     required this.file,
     required this.reason,
@@ -133,4 +133,20 @@ class FileException implements ConfigException {
 
   @override
   String get message => 'Invalid file config: "$file"\nReason: $reason';
+}
+
+/// {@template brick_config_exception}
+/// An exception thrown when a configuration is done incorrectly.
+/// {@endtemplate}
+class BrickConfigException implements ConfigException {
+  /// {@macro brick_config_exception}
+  const BrickConfigException({
+    required this.reason,
+  });
+
+  /// the reason the brick is not configured correctly
+  final String reason;
+
+  @override
+  String get message => reason;
 }
