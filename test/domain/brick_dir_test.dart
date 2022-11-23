@@ -20,6 +20,13 @@ void main() {
       );
     });
 
+    test('throws assertion error when file path is provided', () {
+      expect(
+        () => BrickDir(path: '/path/to/some/file.png'),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
     test('removes leading and trailing slashes from path', () {
       final brickPath = BrickDir(name: Name('name'), path: '/$dirPath');
 
@@ -42,6 +49,13 @@ void main() {
   });
 
   group('#fromYaml', () {
+    test('throws $ConfigException when file path is provided', () {
+      expect(
+        () => BrickDir.fromYaml(const YamlValue.none(), 'path/to/file.png'),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
     test('throws $ConfigException when yaml is error', () {
       expect(
         () => BrickDir.fromYaml(const YamlValue.error('error'), dirPath),
@@ -220,15 +234,6 @@ name: name
     });
   });
 
-  test('#configuredParts returns segmented path', () {
-    for (final path in paths.keys) {
-      final segments = paths[path];
-      final brickPath = BrickDir(name: Name('name'), path: path);
-
-      expect(brickPath.configuredParts.length, segments);
-    }
-  });
-
   group('#apply', () {
     const replacement = 'batman';
 
@@ -254,12 +259,14 @@ name: name
         expect(result, original);
       });
 
-      test('brick path is not a directory', () {
-        final path = BrickDir(path: '/path/to/some/file.png');
-        const original = '/path/to/some/file.png';
-        final result = path.apply(original, originalPath: original);
+      test('paths dont match', () {
+        const originalPath = 'test/android_tests.dart';
+        var path = originalPath;
 
-        expect(result, original);
+        final brick = BrickDir(path: 'android');
+        path = brick.apply(path, originalPath: originalPath);
+
+        expect(path, 'test/android_tests.dart');
       });
 
       group('brick path is not more than 1 level', () {
@@ -503,7 +510,23 @@ name: name
 
         expect(
           path,
-          '{{#check}}foo/bar/baz/foo{{/check}}',
+          '{{#check}}foo{{/check}}/bar/baz/foo',
+        );
+      });
+
+      test('wraps nested path with include if without name configuration', () {
+        const originalPath = 'foo/bar/baz/foo';
+        var path = originalPath;
+
+        final brick = BrickDir(
+          path: 'foo/bar/baz/foo',
+          includeIf: 'check',
+        );
+        path = brick.apply(path, originalPath: originalPath);
+
+        expect(
+          path,
+          'foo/bar/baz/{{#check}}foo{{/check}}',
         );
       });
 
@@ -520,7 +543,7 @@ name: name
 
         expect(
           path,
-          '{{#check}}{{{$replacement}}}/bar/baz/foo{{/check}}',
+          '{{#check}}{{{$replacement}}}{{/check}}/bar/baz/foo',
         );
       });
 
@@ -538,7 +561,7 @@ name: name
 
         expect(
           path,
-          '{{#check}}{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}/bar/baz/foo{{/check}}',
+          '{{#check}}{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}{{/check}}/bar/baz/foo',
         );
       });
     });
@@ -556,7 +579,7 @@ name: name
 
         expect(
           path,
-          '{{^check}}foo/bar/baz/foo{{/check}}',
+          '{{^check}}foo{{/check}}/bar/baz/foo',
         );
       });
 
@@ -573,7 +596,7 @@ name: name
 
         expect(
           path,
-          '{{^check}}{{{$replacement}}}/bar/baz/foo{{/check}}',
+          '{{^check}}{{{$replacement}}}{{/check}}/bar/baz/foo',
         );
       });
 
@@ -592,7 +615,7 @@ name: name
 
         expect(
           path,
-          '{{^check}}{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}/bar/baz/foo{{/check}}',
+          '{{^check}}{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}{{/check}}/bar/baz/foo',
         );
       });
     });

@@ -15,35 +15,38 @@ part 'brick_dir.g.dart';
 @autoequal
 class BrickDir extends Equatable {
   /// {@macro brick_dir}
-  factory BrickDir({
+  BrickDir({
     required String path,
     Name? name,
     String? includeIf,
     String? includeIfNot,
-  }) {
-    final cleanPath = BrickDir.cleanPath(path);
+  }) : this._(
+          name: name,
+          originalPath: path,
+          path: BrickDir.cleanPath(path),
+          placeholder: basename(BrickDir.cleanPath(path)),
+          includeIf: includeIf,
+          includeIfNot: includeIfNot,
+        );
 
-    return BrickDir._(
-      name: name,
-      originalPath: path,
-      path: cleanPath,
-      placeholder: basename(cleanPath),
-      includeIf: includeIf,
-      includeIfNot: includeIfNot,
-    );
-  }
-
-  const BrickDir._({
+  BrickDir._({
     required this.name,
     required this.path,
     required this.placeholder,
     required this.originalPath,
     required this.includeIf,
     required this.includeIfNot,
-  });
+  }) : assert(extension(path).isEmpty, 'path must not have an extension');
 
   /// parses the [yaml]
   factory BrickDir.fromYaml(YamlValue yaml, String path) {
+    if (extension(path).isNotEmpty) {
+      throw DirectoryException(
+        directory: path,
+        reason: 'path must not have an extension',
+      );
+    }
+
     if (yaml.isError()) {
       throw DirectoryException(
         directory: path,
@@ -178,48 +181,57 @@ class BrickDir extends Equatable {
   @override
   List<Object?> get props => _$props;
 
-  /// the segments of [path]
-  List<String> get configuredParts => separatePath(path);
-
-  /// applies the [path] with any [configuredParts] and
+  /// applies the [path] with any configured parts from [path] and
   /// formats them with mustache
   String apply(
     String path, {
     required String originalPath,
   }) {
-    final isNotFile = extension(placeholder).isNotEmpty;
-    final pathsDontMatch = !originalPath.contains(this.path);
+    final orignalParts = separatePath(originalPath);
+    final configuredParts = separatePath(this.path);
 
-    if (isNotFile || pathsDontMatch) {
-      return path;
-    }
+    for (var i = 0;; i++) {
+      if (i >= orignalParts.length) {
+        if (i >= configuredParts.length) {
+          break;
+        }
 
-    // ignore: parameter_assignments
-    path = BrickDir.cleanPath(path);
+        return path;
+      }
 
-    final replacement = name?.format();
+      if (i >= configuredParts.length) {
+        break;
+      }
 
-    final pathParts = BrickDir.separatePath(path);
+      final pathPart = orignalParts[i];
+      final configuredPart = configuredParts[i];
 
-    if (pathParts.length < configuredParts.length) {
-      return path;
-    }
-
-    if (replacement != null) {
-      if (pathParts[configuredParts.length - 1] == placeholder) {
-        pathParts[configuredParts.length - 1] = replacement;
+      if (pathPart != configuredPart) {
+        return path;
       }
     }
 
-    final configuredPath = pathParts.join(separator);
+    final index = configuredParts.length - 1;
+    final pathParts = separatePath(BrickDir.cleanPath(path));
+
+    if (pathParts[index] != placeholder) {
+      return path;
+    }
+
+    if (name != null) {
+      pathParts[index] = name!.format();
+    }
 
     if (includeIf != null) {
-      return '{{#$includeIf}}$configuredPath{{/$includeIf}}';
+      pathParts[index] = '{{#$includeIf}}${pathParts[index]}{{/$includeIf}}';
     }
 
     if (includeIfNot != null) {
-      return '{{^$includeIfNot}}$configuredPath{{/$includeIfNot}}';
+      pathParts[index] =
+          '{{^$includeIfNot}}${pathParts[index]}{{/$includeIfNot}}';
     }
+
+    final configuredPath = joinAll(pathParts);
 
     return configuredPath;
   }
