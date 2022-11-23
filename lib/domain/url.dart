@@ -82,7 +82,7 @@ class Url extends Equatable {
   /// the name of the file for the URL
   final Name? name;
 
-  Name get _replacementName => name ?? Name(basename(path), braces: 2);
+  Name get _replacementName => name ?? Name(basename(path));
 
   /// gets the variables used within the URL
   List<String> get variables {
