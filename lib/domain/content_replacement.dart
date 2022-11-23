@@ -12,6 +12,7 @@ class ContentReplacement extends Equatable {
   const ContentReplacement({
     required this.content,
     required this.used,
+    this.data = const {},
   });
 
   /// the new content
@@ -19,6 +20,9 @@ class ContentReplacement extends Equatable {
 
   /// the variables used in the content
   final Set<String> used;
+
+  /// any additional data that needs to be returned
+  final Map<String, dynamic> data;
 
   @override
   List<Object?> get props => _$props;

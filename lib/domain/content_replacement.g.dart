@@ -9,5 +9,5 @@ part of 'content_replacement.dart';
 extension _$ContentReplacementAutoequal on ContentReplacement {
   @Deprecated(r'Use _$props instead')
   List<Object?> get _autoequalProps => _$props;
-  List<Object?> get _$props => [content, used];
+  List<Object?> get _$props => [content, used, data];
 }
