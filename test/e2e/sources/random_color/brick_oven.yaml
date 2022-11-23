@@ -1,0 +1,12 @@
+bricks:
+  random_color:
+    source: oven
+    brick_config:
+      path: brick.yaml
+      ignore_vars:
+        - favorite_color
+    files:
+      color.md:
+        vars:
+          name: _NAME_
+          favorite_color: _FAVORITE_COLOR_
