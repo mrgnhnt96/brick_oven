@@ -18,6 +18,18 @@ void main() {
       expect(() => Url('path.ext'), throwsA(isA<AssertionError>()));
     });
 
+    test('throws assertion error when includeIf and includeIfNot are both set',
+        () {
+      expect(
+        () => Url(
+          'path',
+          includeIf: 'check',
+          includeIfNot: 'checkNot',
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
     group('#fromYaml', () {
       group('throws $UrlException when', () {
         test('path contains extension', () {
@@ -83,6 +95,32 @@ void main() {
             name: Name('name', tag: MustacheTag.camelCase),
           ),
         );
+      });
+
+      test('can parse include if', () {
+        final yaml = loadYaml('''
+include_if: check
+''') as YamlMap;
+
+        final instance = Url.fromYaml(
+          YamlValue.from(yaml),
+          'path/to/url',
+        );
+
+        expect(instance.includeIf, 'check');
+      });
+
+      test('can parse include if not', () {
+        final yaml = loadYaml('''
+include_if_not: check
+''') as YamlMap;
+
+        final instance = Url.fromYaml(
+          YamlValue.from(yaml),
+          'path/to/url',
+        );
+
+        expect(instance.includeIfNot, 'check');
       });
     });
 

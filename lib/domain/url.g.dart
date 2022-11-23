@@ -9,5 +9,5 @@ part of 'url.dart';
 extension _$UrlAutoequal on Url {
   @Deprecated(r'Use _$props instead')
   List<Object?> get _autoequalProps => _$props;
-  List<Object?> get _$props => [path, name];
+  List<Object?> get _$props => [path, name, includeIf, includeIfNot];
 }
