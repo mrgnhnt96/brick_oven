@@ -220,25 +220,6 @@ partials:
       });
 
       group('brick config', () {
-        test('throws $BrickException when brick config is wrong type', () {
-          final yaml = loadYaml('''
-brick_config:
-  - Hi
-''');
-
-          expect(
-            () => Brick.fromYaml(
-              YamlValue.from(yaml),
-              brickName,
-              fileSystem: MemoryFileSystem(),
-              logger: mockLogger,
-            ),
-            throwsA(isA<BrickException>()),
-          );
-
-          verifyNoMoreInteractions(mockLogger);
-        });
-
         test('runs gracefully when brick config is null', () {
           final yaml = loadYaml('''
 brick_config:
@@ -271,6 +252,7 @@ brick_config: brick.yaml
             ).brickYamlConfig,
             BrickYamlConfig(
               path: 'brick.yaml',
+              ignoreVars: const [],
               fileSystem: MemoryFileSystem(),
             ),
           );
@@ -1792,6 +1774,37 @@ exclude:
               ...Brick.defaultVariables,
               const Variable(name: '_INDEX_VALUE_'),
               const Variable(name: '.'),
+            ],
+          ),
+        ],
+        brickYamlConfig: mockBricYamlConfig,
+        logger: mockLogger,
+        fileSystem: MemoryFileSystem(),
+      ).checkBrickYamlConfig(shouldSync: true);
+
+      verifyNever(() => mockLogger.warn(any()));
+      verifyNever(() => mockLogger.err(any()));
+      verify(() => mockLogger.info(darkGray.wrap('brick.yaml is in sync')))
+          .called(1);
+    });
+
+    test('ignores $BrickYamlConfig.ignoreVars from sync', () {
+      when(() => mockBricYamlConfig.data(logger: any(named: 'logger')))
+          .thenReturn(const BrickYamlData(name: 'Count Dooku', vars: []));
+      when(() => mockBricYamlConfig.ignoreVars).thenReturn(['favorite_color']);
+
+      verifyNever(() => mockLogger.info(any()));
+
+      Brick(
+        name: 'Count Dooku',
+        source: BrickSource.none(
+          fileSystem: MemoryFileSystem(),
+        ),
+        files: const [
+          BrickFile.config(
+            '',
+            variables: [
+              Variable(name: 'favorite_color', placeholder: '_FAVORITE_COLOR_'),
             ],
           ),
         ],
