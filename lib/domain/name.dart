@@ -152,11 +152,30 @@ class Name extends Equatable {
   /// the number of braces to wrap the name with
   final int braces;
 
+  /// returns the variables associated with this name
+  List<String> get variables {
+    final variables = <String>[value];
+
+    if (section != null) {
+      variables.add(section!);
+    }
+
+    if (invertedSection != null) {
+      variables.add(invertedSection!);
+    }
+
+    return variables;
+  }
+
   @override
   List<Object?> get props => _$props;
 
   /// gets the name of the file with formatting to mustache
-  String format() {
+  ///
+  /// [trailing] gets appended to the end of the name _AFTER_
+  /// wrapping the name with braces & formatting but _BEFORE_
+  /// wrapping with the section tag
+  String format({String trailing = ''}) {
     var result = value;
 
     if (result == kIndexValue) {
@@ -170,6 +189,8 @@ class Name extends Equatable {
       final endBraces = '}' * braces;
       result = '$startBraces$result$endBraces';
     }
+
+    result = '$prefix$result$suffix$trailing';
 
     if (section != null || invertedSection != null) {
       String start;
@@ -186,6 +207,6 @@ class Name extends Equatable {
       result = '$start$result$end';
     }
 
-    return '$prefix$result$suffix';
+    return result;
   }
 }

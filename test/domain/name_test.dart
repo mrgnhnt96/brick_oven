@@ -75,7 +75,7 @@ void main() {
         );
       });
 
-      test('can parse string when provided', () {
+      test('can parse string', () {
         expect(
           Name.fromYaml(
             const YamlValue.string('name'),
@@ -85,7 +85,7 @@ void main() {
         );
       });
 
-      test('can parse yaml map when provided', () {
+      test('can parse yaml map', () {
         final yaml = loadYaml('''
 value: name
 prefix: prefix
@@ -168,7 +168,7 @@ inverted_section: section
       });
 
       group('braces', () {
-        test('can parse when provided', () {
+        test('can parse', () {
           final yaml = loadYaml('''
 value: name
 braces: 3
@@ -269,14 +269,14 @@ $key:
         );
       });
 
-      test('wraps with section when provided', () {
+      test('wraps with section', () {
         expect(
           Name('name', section: 'section').format(),
           '{{#section}}{{{name}}}{{/section}}',
         );
       });
 
-      test('wraps with inverted section when provided', () {
+      test('wraps with inverted section', () {
         expect(
           Name('name', invertedSection: 'section').format(),
           '{{^section}}{{{name}}}{{/section}}',
@@ -301,10 +301,68 @@ $key:
         );
       });
 
-      test('wraps with format when provided', () {
+      test('wraps with format', () {
         expect(
           Name('name', tag: MustacheTag.camelCase).format(),
           '{{#camelCase}}{{{name}}}{{/camelCase}}',
+        );
+      });
+
+      test('wraps with format and section', () {
+        expect(
+          Name('name', tag: MustacheTag.camelCase, section: 'section').format(),
+          '{{#section}}{{#camelCase}}{{{name}}}{{/camelCase}}{{/section}}',
+        );
+      });
+
+      test('wraps with format and inverted section', () {
+        expect(
+          Name('name', tag: MustacheTag.camelCase, invertedSection: 'section')
+              .format(),
+          '{{^section}}{{#camelCase}}{{{name}}}{{/camelCase}}{{/section}}',
+        );
+      });
+
+      test('wraps prefix/suffix with format and section', () {
+        expect(
+          Name(
+            'name',
+            tag: MustacheTag.camelCase,
+            section: 'section',
+            prefix: 'prefix',
+            suffix: 'suffix',
+          ).format(),
+          '{{#section}}prefix{{#camelCase}}{{{name}}}{{/camelCase}}suffix{{/section}}',
+        );
+      });
+
+      test('wraps prefix/suffix with format and inverted section', () {
+        final name = Name(
+          'name',
+          tag: MustacheTag.camelCase,
+          invertedSection: 'section',
+          prefix: 'prefix',
+          suffix: 'suffix',
+        );
+
+        expect(
+          name.format(),
+          '{{^section}}prefix{{#camelCase}}{{{name}}}{{/camelCase}}suffix{{/section}}',
+        );
+      });
+
+      test('wraps appends trailing before wrapping with section', () {
+        final name = Name(
+          'name',
+          tag: MustacheTag.camelCase,
+          invertedSection: 'section',
+          prefix: 'prefix',
+          suffix: 'suffix',
+        );
+
+        expect(
+          name.format(trailing: '.dart'),
+          '{{^section}}prefix{{#camelCase}}{{{name}}}{{/camelCase}}suffix.dart{{/section}}',
         );
       });
     });
