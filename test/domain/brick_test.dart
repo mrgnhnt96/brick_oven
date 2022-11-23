@@ -11,6 +11,7 @@ import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/domain/brick_yaml_data.dart';
 import 'package:brick_oven/domain/name.dart';
+import 'package:brick_oven/domain/url.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -52,41 +53,141 @@ void main() {
   group('#fromYaml', () {
     test('parses when provided', () {
       final yaml = loadYaml('''
-source: $localPath
+source: oven
+brick_config: brick.yaml
 dirs:
-  $dirPath: $dirName
+  path:
+    name:
+  path/to:
+    name:
+      value: to
+      section: device
+    include_if: ios
+  path/to/dir:
+    include_if_not: ios
+    name:
+      value: dir
+      invert_section: device
 files:
-  $filePath:
-    name: $fileName
-partials:
-  $partialPath:
+  file.md:
+    name:
+  my/file.md:
+    include_if: ios
+    name:
+      value: file
+      section: device
+  my/other/file.md:
+    include_if_not: ios
+    name:
+      value: other
+      invert_section: device
     vars:
-      one:
+      var1: _VAR1_
+partials:
+  some/partial.dart:
+  some/other/partial.dart:
+    vars:
+      one: _ONE_
 exclude:
-  - $excludeDir
+  - exclude/all/of/me
+urls:
+  add/this/url:
+  add/this/url/too: other_url
+  and/also/this/url:
+    name:
+      value: my_url
+      section: device
+  and/also/this/url/too:
+    name:
+      value: me_too
+      invert_section: device
 ''');
 
       final result = Brick.fromYaml(
         YamlValue.from(yaml),
-        brickName,
+        'YOLO',
         fileSystem: MemoryFileSystem(),
         logger: mockLogger,
       );
 
       final brick = Brick(
-        dirs: [BrickDir(name: Name(dirName), path: dirPath)],
-        files: [BrickFile(filePath, name: Name(fileName))],
-        exclude: const [excludeDir],
-        name: brickName,
+        name: 'YOLO',
+        brickYamlConfig: BrickYamlConfig(
+          fileSystem: MemoryFileSystem(),
+          ignoreVars: const [],
+          path: 'brick.yaml',
+        ),
         source: BrickSource(
-          localPath: localPath,
+          localPath: 'oven',
           fileSystem: MemoryFileSystem(),
         ),
-        partials: [
+        dirs: [
+          BrickDir(
+            path: 'path',
+            name: Name('path'),
+          ),
+          BrickDir(
+            path: 'path/to',
+            name: Name('to', section: 'device'),
+            includeIf: 'ios',
+          ),
+          BrickDir(
+            path: 'path/to/dir',
+            name: Name('dir', invertedSection: 'device'),
+            includeIfNot: 'ios',
+          ),
+        ],
+        files: [
+          BrickFile(
+            'file.md',
+            name: Name('file'),
+          ),
+          BrickFile.config(
+            'my/file.md',
+            name: Name('file', section: 'device'),
+            includeIf: 'ios',
+          ),
+          BrickFile.config(
+            'my/other/file.md',
+            name: Name('other', invertedSection: 'device'),
+            includeIfNot: 'ios',
+            variables: const [
+              Variable(
+                name: 'var1',
+                placeholder: '_VAR1_',
+              ),
+            ],
+          ),
+        ],
+        partials: const [
+          Partial(path: 'some/partial.dart'),
           Partial(
-            path: partialPath,
-            variables: const [Variable(name: 'one')],
-          )
+            path: 'some/other/partial.dart',
+            variables: [
+              Variable(
+                name: 'one',
+                placeholder: '_ONE_',
+              ),
+            ],
+          ),
+        ],
+        exclude: const ['exclude/all/of/me'],
+        urls: [
+          Url(
+            'add/this/url',
+          ),
+          Url(
+            'add/this/url/too',
+            name: Name('other_url'),
+          ),
+          Url(
+            'and/also/this/url',
+            name: Name('my_url', section: 'device'),
+          ),
+          Url(
+            'and/also/this/url/too',
+            name: Name('me_too', invertedSection: 'device'),
+          ),
         ],
         fileSystem: MemoryFileSystem(),
         logger: mockLogger,
@@ -1038,6 +1139,7 @@ exclude:
 
       when(
         () => mockFile.writeTargetFile(
+          urls: any(named: 'urls'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
           logger: any(named: 'logger'),
@@ -1069,6 +1171,7 @@ exclude:
       verify(() => mockFile.path).called(3);
       verify(
         () => mockFile.writeTargetFile(
+          urls: any(named: 'urls'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
           logger: any(named: 'logger'),
@@ -1112,6 +1215,7 @@ exclude:
 
       when(
         () => mockFile.writeTargetFile(
+          urls: any(named: 'urls'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
           logger: any(named: 'logger'),
@@ -1143,6 +1247,7 @@ exclude:
       verify(() => mockFile.path).called(3);
       verify(
         () => mockFile.writeTargetFile(
+          urls: any(named: 'urls'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
           logger: any(named: 'logger'),
@@ -1756,6 +1861,38 @@ exclude:
             'var2',
           },
         );
+      });
+    });
+
+    group('urls', () {
+      test('gets #names', () {
+        final brick = Brick(
+          name: '',
+          source: BrickSource.none(
+            fileSystem: MemoryFileSystem(),
+          ),
+          logger: mockLogger,
+          fileSystem: MemoryFileSystem(),
+          urls: [
+            Url('path', name: Name('name1', section: 'section')),
+            Url(
+              'path/to',
+              name: Name('name2', invertedSection: 'invertedSection'),
+            ),
+          ],
+        );
+
+        expect(
+          brick.allBrickVariables(),
+          {
+            'name1',
+            'name2',
+            'section',
+            'invertedSection',
+          },
+        );
+
+        verifyNoMoreInteractions(mockLogger);
       });
     });
   });

@@ -6,6 +6,7 @@ import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/brick_yaml_config.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/partial.dart';
+import 'package:brick_oven/domain/url.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
@@ -33,6 +34,7 @@ class Brick extends Equatable {
     this.configPath,
     this.brickYamlConfig,
     this.exclude = const [],
+    this.urls = const [],
     required Logger logger,
     required FileSystem fileSystem,
   })  : _fileSystem = fileSystem,
@@ -47,6 +49,7 @@ class Brick extends Equatable {
     required this.configPath,
     required this.brickYamlConfig,
     required this.partials,
+    required this.urls,
     required FileSystem fileSystem,
     required Logger logger,
   })  : _fileSystem = fileSystem,
@@ -216,6 +219,40 @@ class Brick extends Equatable {
       return excludes;
     }
 
+    final urlData = YamlValue.from(data.remove('urls'));
+
+    List<Url> urls() {
+      final urls = <Url>[];
+
+      if (urlData.isNone()) {
+        return urls;
+      }
+
+      if (urlData.isError()) {
+        throw BrickException(
+          brick: name,
+          reason: urlData.asError().value,
+        );
+      }
+
+      if (!urlData.isYaml()) {
+        throw BrickException(
+          brick: name,
+          reason: '`urls` must be a of type `Map`',
+        );
+      }
+
+      for (final entry in urlData.asYaml().value.entries) {
+        final path = entry.key as String;
+
+        final url = Url.fromYaml(YamlValue.from(entry.value), path);
+
+        urls.add(url);
+      }
+
+      return urls;
+    }
+
     final brickConfig = YamlValue.from(data.remove('brick_config'));
     BrickYamlConfig? brickYamlConfig;
 
@@ -236,10 +273,11 @@ class Brick extends Equatable {
     return Brick._fromYaml(
       files: files(),
       partials: partials(),
-      source: source,
-      name: name,
       dirs: paths(),
       exclude: exclude(),
+      urls: urls(),
+      source: source,
+      name: name,
       configPath: configPath,
       brickYamlConfig: brickYamlConfig,
       fileSystem: fileSystem,
@@ -265,6 +303,9 @@ class Brick extends Equatable {
 
   /// the configured partials that will be imported to the [source] files
   final List<Partial> partials;
+
+  /// the configured urls that will be imported to the [source] files
+  final List<Url> urls;
 
   /// paths to be excluded from the [source]
   final List<String> exclude;
@@ -335,6 +376,10 @@ class Brick extends Equatable {
       if (dir.includeIfNot != null) {
         rawVariables.add(dir.includeIfNot!);
       }
+    }
+
+    for (final url in urls) {
+      rawVariables.addAll(url.variables);
     }
 
     final variables = <String>{};
@@ -479,6 +524,7 @@ class Brick extends Equatable {
             dirs: dirs,
             partials: partials,
             fileSystem: _fileSystem,
+            urls: urls,
             logger: _logger,
             outOfFileVariables: defaultVariables,
           );
