@@ -151,6 +151,30 @@ void main() {
     });
   });
 
+  group('$UrlException', () {
+    test('can be instanciated', () {
+      expect(
+        const UrlException(url: 'test', reason: 'test'),
+        isA<BrickOvenException>(),
+      );
+
+      expect(
+        () => const UrlException(url: 'test', reason: 'test'),
+        returnsNormally,
+      );
+    });
+
+    test('has the correct message', () {
+      const url = '💩';
+      const reason = '🚽';
+
+      expect(
+        const UrlException(url: url, reason: reason).message,
+        'Invalid URL config: "$url"\nReason: $reason',
+      );
+    });
+  });
+
   group('$BrickConfigException', () {
     test('can be instanciated', () {
       expect(

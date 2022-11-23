@@ -75,6 +75,26 @@ class DirectoryException implements ConfigException {
       'Invalid directory config: "$directory"\nReason: $reason';
 }
 
+/// {@template url_exception}
+/// An exception thrown when a URL is not configured correctly.
+/// {@endtemplate}
+class UrlException implements ConfigException {
+  /// {@macro url_exception}
+  const UrlException({
+    required this.url,
+    required this.reason,
+  });
+
+  /// the URL that is not configured correctly
+  final String url;
+
+  /// the reason the URL is not configured correctly
+  final String reason;
+
+  @override
+  String get message => 'Invalid URL config: "$url"\nReason: $reason';
+}
+
 /// {@template source_exception}
 /// An exception thrown when a source is not configured correctly.
 /// {@endtemplate}
