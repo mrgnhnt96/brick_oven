@@ -117,11 +117,17 @@ Future<void> cook({
 
     expect(actualFile.existsSync(), isTrue);
 
+    dynamic content;
+    dynamic expected;
     try {
-      expect(actualFile.readAsStringSync(), file.readAsStringSync());
+      content = actualFile.readAsStringSync();
+      expected = file.readAsStringSync();
     } catch (_) {
-      expect(actualFile.readAsBytesSync(), file.readAsBytesSync());
+      content = actualFile.readAsBytesSync();
+      expected = file.readAsBytesSync();
     }
+
+    expect(content, expected);
   }
 
   verifyNoMoreInteractions(mockLogger);
