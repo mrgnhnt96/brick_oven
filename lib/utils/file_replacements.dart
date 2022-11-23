@@ -40,7 +40,8 @@ mixin FileReplacements {
       return const FileWriteResult.empty();
     }
 
-    variables.addAll(outOfFileVariables);
+    // ignore: parameter_assignments
+    variables = [...variables, ...outOfFileVariables];
 
     /// used to check if variable/partials is goes unused
     final usedVariables = <String>{};
