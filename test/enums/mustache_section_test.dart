@@ -5,34 +5,34 @@ import 'package:brick_oven/enums/mustache_section.dart';
 void main() {
   group('$MustacheSection', () {
     test('#isStart', () {
-      expect(MustacheSection.if_.isStart, isTrue);
-      expect(MustacheSection.endIf.isStart, isFalse);
-      expect(MustacheSection.ifNot.isStart, isFalse);
+      expect(MustacheSection.section.isStart, isTrue);
+      expect(MustacheSection.endSection.isStart, isFalse);
+      expect(MustacheSection.invertedSection.isStart, isFalse);
     });
 
     test('#isEnd', () {
-      expect(MustacheSection.if_.isEnd, isFalse);
-      expect(MustacheSection.endIf.isEnd, isTrue);
-      expect(MustacheSection.ifNot.isEnd, isFalse);
+      expect(MustacheSection.section.isEnd, isFalse);
+      expect(MustacheSection.endSection.isEnd, isTrue);
+      expect(MustacheSection.invertedSection.isEnd, isFalse);
     });
 
     test('#isInvert', () {
-      expect(MustacheSection.if_.isInvert, isFalse);
-      expect(MustacheSection.endIf.isInvert, isFalse);
-      expect(MustacheSection.ifNot.isInvert, isTrue);
+      expect(MustacheSection.section.isInvert, isFalse);
+      expect(MustacheSection.endSection.isInvert, isFalse);
+      expect(MustacheSection.invertedSection.isInvert, isTrue);
     });
 
     group('#symbol', () {
       test('returns the symbol of the start section', () {
-        expect(MustacheSection.if_.symbol, '#');
+        expect(MustacheSection.section.symbol, '#');
       });
 
       test('returns the symbol of the end section', () {
-        expect(MustacheSection.endIf.symbol, '/');
+        expect(MustacheSection.endSection.symbol, '/');
       });
 
       test('returns the symbol of the invert section', () {
-        expect(MustacheSection.ifNot.symbol, '^');
+        expect(MustacheSection.invertedSection.symbol, '^');
       });
     });
 
@@ -41,21 +41,21 @@ void main() {
 
       test('returns the format of the start section', () {
         expect(
-          MustacheSection.if_.format(defaultValue),
+          MustacheSection.section.format(defaultValue),
           '{{#$defaultValue}}',
         );
       });
 
       test('returns the format of the end section', () {
         expect(
-          MustacheSection.endIf.format(defaultValue),
+          MustacheSection.endSection.format(defaultValue),
           '{{/$defaultValue}}',
         );
       });
 
       test('returns the format of the invert section', () {
         expect(
-          MustacheSection.ifNot.format(defaultValue),
+          MustacheSection.invertedSection.format(defaultValue),
           '{{^$defaultValue}}',
         );
       });
@@ -66,30 +66,34 @@ void main() {
     const suffix = 'ASDF';
 
     const sectionsWithoutSuffixes = {
-      MustacheSection.if_: [
-        'if',
+      MustacheSection.section: [
+        'section',
       ],
-      MustacheSection.ifNot: [
-        'ifNot',
-        'ifnot',
+      MustacheSection.invertedSection: [
+        'invertedSection',
+        'invertedsection',
+        'invertSection',
+        'invertsection',
       ],
-      MustacheSection.endIf: [
-        'endIf',
-        'endif',
+      MustacheSection.endSection: [
+        'endSection',
+        'endsection',
       ],
     };
 
     const sectionsWithSuffixes = {
-      MustacheSection.if_: [
-        'if$suffix',
+      MustacheSection.section: [
+        'section$suffix',
       ],
-      MustacheSection.ifNot: [
-        'ifNot$suffix',
-        'ifnot$suffix',
+      MustacheSection.invertedSection: [
+        'invertedSection$suffix',
+        'invertedsection$suffix',
+        'invertSection$suffix',
+        'invertsection$suffix',
       ],
-      MustacheSection.endIf: [
-        'endIf$suffix',
-        'endif$suffix',
+      MustacheSection.endSection: [
+        'endSection$suffix',
+        'endsection$suffix',
       ],
     };
 

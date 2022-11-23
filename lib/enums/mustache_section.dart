@@ -1,13 +1,13 @@
 /// The sections from Mustache
 enum MustacheSection {
   /// the inverted start of a section
-  ifNot,
+  invertedSection,
 
   /// the start of a section
-  if_,
+  section,
 
   /// the end of a section
-  endIf,
+  endSection,
 }
 
 /// extensions on lists of [MustacheSection]
@@ -21,10 +21,16 @@ extension ListMustacheSectionX on List<MustacheSection> {
     final valueLower = value.toLowerCase();
 
     for (final e in this) {
-      final name = e.name.toLowerCase().replaceAll('_', '');
+      final name = e.name.toLowerCase();
 
       if (valueLower.startsWith(name)) {
         return e;
+      }
+
+      if (e.isInvert) {
+        if (valueLower.startsWith('invertsection')) {
+          return e;
+        }
       }
     }
 
@@ -35,22 +41,22 @@ extension ListMustacheSectionX on List<MustacheSection> {
 /// extension on mustache sections
 extension MustacheSectionX on MustacheSection {
   /// whether this section is the start
-  bool get isStart => this == MustacheSection.if_;
+  bool get isStart => this == MustacheSection.section;
 
   /// whether this section is the end
-  bool get isEnd => this == MustacheSection.endIf;
+  bool get isEnd => this == MustacheSection.endSection;
 
   /// whether this section is inverted
-  bool get isInvert => this == MustacheSection.ifNot;
+  bool get isInvert => this == MustacheSection.invertedSection;
 
   /// the symbol of the section
   String get symbol {
     switch (this) {
-      case MustacheSection.if_:
+      case MustacheSection.section:
         return '#';
-      case MustacheSection.endIf:
+      case MustacheSection.endSection:
         return '/';
-      case MustacheSection.ifNot:
+      case MustacheSection.invertedSection:
         return '^';
     }
   }

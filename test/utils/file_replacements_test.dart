@@ -135,25 +135,25 @@ partials.do_not_replace
 
     test('returns new content when section is found', () {
       const content = '''
-if_NAME_
+section_NAME_
 some content
-endIf_NAME_
+endSection_NAME_
 
-// if_NAME_
+// section_NAME_
 // some more content
-// endif_NAME_
+// endsection_NAME_
 
-if_NAME_ //
+section_NAME_ //
 other content //
-EndIf_NAME_ //
+EndSection_NAME_ //
 
-ifNot_NAME_
+invertSection_NAME_
 last content
-endiF_NAME_
+endSectioN_NAME_
 
 fake_NAME_
 
-if_NAME_ ENDIF_NAME_
+section_NAME_ ENDSECTION_NAME_
 ''';
 
       const variable = Variable(name: 'name', placeholder: '_NAME_');
@@ -600,9 +600,9 @@ before text {{name}} after text
       const content = '''
 _VAR_ _VAR_snake _VAR_b3
 
-if_SECTION_
-ifNot_SECTION_
-endIf_SECTION_
+section_SECTION_
+invertSection_SECTION_
+endSection_SECTION_
 
 partials.page
 partials.page.md
