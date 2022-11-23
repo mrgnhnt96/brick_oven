@@ -21,6 +21,7 @@ void main() {
       'plugin': 9,
       'random_color': 1,
       'simple': 1,
+      'todos': 3,
     };
 
     for (final brick in bricks.entries) {

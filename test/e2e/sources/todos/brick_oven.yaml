@@ -1,0 +1,37 @@
+bricks:
+  todos:
+    source: oven
+    brick_config:
+      path: brick.yaml
+      ignore_vars:
+        - name
+        - done
+        - todo
+    dirs:
+      todos/todo:
+        name:
+          section: todos
+      todos/todo/developers/name:
+        name:
+          section: developers
+
+    files:
+      todos/todo.md:
+        name:
+          prefix: todo_
+          suffix: _todo
+          format: upperCase
+          section: todos
+        vars:
+          todos.todo: _TODO_
+          todos.done: _DONE_
+      todos/todo/developers/name/info.md:
+        vars:
+          developers.name: _DEVELOPER_NAME_
+          todos.todo: _TODO_
+          todos.done: _DONE_
+      todos.md:
+        vars:
+          todos: _TODOS_
+          done: _DONE_
+          todo: _TODO_
