@@ -684,6 +684,32 @@ yooooo:
       expect(newFile.existsSync(), isTrue);
     });
   });
+
+  group('#nameVariables', () {
+    test('returns all variables associated with the name', () {
+      final instance = BrickFile.config(
+        'path',
+        includeIf: 'check',
+        name: Name('name', section: 'section'),
+        variables: const [
+          Variable(name: 'var'),
+        ],
+      );
+
+      expect(instance.nameVariables, {'check', 'name', 'section'});
+
+      final instance2 = BrickFile.config(
+        'path',
+        includeIfNot: 'check',
+        name: Name('name', invertedSection: 'section'),
+        variables: const [
+          Variable(name: 'var'),
+        ],
+      );
+
+      expect(instance2.nameVariables, {'check', 'name', 'section'});
+    });
+  });
 }
 
 class TestBrickFile extends BrickFile {
