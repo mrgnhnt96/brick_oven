@@ -10,5 +10,5 @@ extension _$BrickDirAutoequal on BrickDir {
   @Deprecated(r'Use _$props instead')
   List<Object?> get _autoequalProps => _$props;
   List<Object?> get _$props =>
-      [includeIf, includeIfNot, name, originalPath, path, placeholder];
+      [includeIf, includeIfNot, name, originalPath, path];
 }

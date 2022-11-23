@@ -40,12 +40,6 @@ void main() {
 
       expect(brickPath3.path, dirPath);
     });
-
-    test('placeholder is the highest level from path', () {
-      final brickPath = BrickDir(name: Name('name'), path: '/$dirPath');
-
-      expect(brickPath.placeholder, highestLevel);
-    });
   });
 
   group('#fromYaml', () {
@@ -207,7 +201,21 @@ name: name
       expect(BrickDir.separatorPattern, isA<RegExp>());
     });
 
-    test('#separatePath separates path into segments', () {
+    test('separates path into segments', () {
+      for (final path in paths.keys) {
+        final segments = paths[path];
+
+        expect(BrickDir.separatePath(path).length, segments);
+      }
+    });
+
+    test('ignores mustache tag separators', () {
+      const paths = {
+        'path/to/{{#check}}{{{value}}}{{/check}/dir': 4,
+        'path/{{to}}/{{#check}}{{{value}}}{{/check}/dir': 4,
+        '{{^if}}path{{/if}}/{{to}}/{{#check}}{{{value}}}{{/check}/dir': 4,
+      };
+
       for (final path in paths.keys) {
         final segments = paths[path];
 
@@ -618,6 +626,26 @@ name: name
           '{{^check}}{{#snakeCase}}{{{$replacement}}}{{/snakeCase}}{{/check}}/bar/baz/foo',
         );
       });
+    });
+  });
+
+  group('#variables', () {
+    test('returns all variables associated with the name', () {
+      final instance = BrickDir(
+        path: 'path',
+        includeIf: 'check',
+        name: Name('name', section: 'section'),
+      );
+
+      expect(instance.variables, {'check', 'name', 'section'});
+
+      final instance2 = BrickDir(
+        path: 'path',
+        includeIfNot: 'check',
+        name: Name('name', invertedSection: 'section'),
+      );
+
+      expect(instance2.variables, {'check', 'name', 'section'});
     });
   });
 }

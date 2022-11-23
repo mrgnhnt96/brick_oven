@@ -24,7 +24,6 @@ class BrickDir extends Equatable {
           name: name,
           originalPath: path,
           path: BrickDir.cleanPath(path),
-          placeholder: basename(BrickDir.cleanPath(path)),
           includeIf: includeIf,
           includeIfNot: includeIfNot,
         );
@@ -32,7 +31,6 @@ class BrickDir extends Equatable {
   BrickDir._({
     required this.name,
     required this.path,
-    required this.placeholder,
     required this.originalPath,
     required this.includeIf,
     required this.includeIfNot,
@@ -148,7 +146,7 @@ class BrickDir extends Equatable {
   static RegExp leadingAndTrailingSlashPattern = RegExp(r'^[\/\\]+|[\/\\]+$');
 
   /// the pattern to separate segments of a path
-  static RegExp separatorPattern = RegExp(r'[\/\\]');
+  static RegExp separatorPattern = RegExp(r'(?<!{+)[\/\\]');
 
   /// whether to include the file in the _mason_ build output
   /// based on the variable provided
@@ -162,7 +160,7 @@ class BrickDir extends Equatable {
   /// wraps the file in a `{{^if}}` block
   final String? includeIfNot;
 
-  /// the name that will replace the [placeholder] within the [path]
+  /// the name that will replace the placeholder within the [path]
   final Name? name;
 
   /// the non-altered (cleaned) path, which was originally provided
@@ -173,10 +171,24 @@ class BrickDir extends Equatable {
   /// The path MUST point to a directory, a file's path will not be altered
   final String path;
 
-  /// the placeholder of the [path] that will be replaced with [name]
-  ///
-  /// The placeholder MUST be a directory
-  final String placeholder;
+  /// the list of variables used to create the [path]
+  List<String> get variables {
+    final variables = <String>[];
+
+    if (name != null) {
+      variables.addAll(name!.variables);
+    }
+
+    if (includeIf != null) {
+      variables.add(includeIf!);
+    }
+
+    if (includeIfNot != null) {
+      variables.add(includeIfNot!);
+    }
+
+    return variables;
+  }
 
   @override
   List<Object?> get props => _$props;
@@ -213,10 +225,6 @@ class BrickDir extends Equatable {
 
     final index = configuredParts.length - 1;
     final pathParts = separatePath(BrickDir.cleanPath(path));
-
-    if (pathParts[index] != placeholder) {
-      return path;
-    }
 
     if (name != null) {
       pathParts[index] = name!.format();
