@@ -150,4 +150,27 @@ void main() {
       );
     });
   });
+
+  group('$BrickConfigException', () {
+    test('can be instanciated', () {
+      expect(
+        const BrickConfigException(reason: 'test'),
+        isA<BrickOvenException>(),
+      );
+
+      expect(
+        () => const BrickConfigException(reason: 'test'),
+        returnsNormally,
+      );
+    });
+
+    test('has the correct message', () {
+      const reason = '🚽';
+
+      expect(
+        const BrickConfigException(reason: reason).message,
+        reason,
+      );
+    });
+  });
 }
