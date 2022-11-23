@@ -171,20 +171,29 @@ class Name extends Equatable {
   @override
   List<Object?> get props => _$props;
 
-  /// gets the name of the file with formatting to mustache
+  /// returns the name of the file with formatting to mustache
   ///
   /// [trailing] gets appended to the end of the name _AFTER_
   /// wrapping the name with braces & formatting but _BEFORE_
   /// wrapping with the section tag
-  String format({String trailing = ''}) {
+  ///
+  /// [postStartBraces] & [preEndBraces] gets prepended to the name _BEFORE_
+  /// wrapping the name with braces & formatting
+  String format({
+    String trailing = '',
+    String postStartBraces = '',
+    String preEndBraces = '',
+  }) {
     var result = value;
 
     if (result == kIndexValue) {
       result = '.';
     }
 
+    result = '$postStartBraces$result$preEndBraces';
+
     if (tag != null) {
-      result = tag!.wrap(value, braceCount: braces);
+      result = tag!.wrap(result, braceCount: braces);
     } else {
       final startBraces = '{' * braces;
       final endBraces = '}' * braces;

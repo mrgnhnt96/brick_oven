@@ -409,6 +409,23 @@ $key:
           '{{^section}}prefix{{#camelCase}}{{{name}}}{{/camelCase}}suffix.dart{{/section}}',
         );
       });
+
+      test(
+          'wraps adds postStartBraces & preEndBraces before wrapping with format',
+          () {
+        final name = Name(
+          'name',
+          tag: MustacheTag.camelCase,
+          invertedSection: 'section',
+          prefix: 'prefix',
+          suffix: 'suffix',
+        );
+
+        expect(
+          name.format(postStartBraces: '% ', preEndBraces: ' %'),
+          '{{^section}}prefix{{#camelCase}}{{{% name %}}}{{/camelCase}}suffix{{/section}}',
+        );
+      });
     });
   });
 }
