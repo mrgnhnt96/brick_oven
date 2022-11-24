@@ -67,6 +67,18 @@ void main() {
             throwsA(isA<UrlException>()),
           );
         });
+
+        test('include_if and include_if_not are both used', () {
+          final yaml = loadYaml('''
+include_if: check
+include_if_not: check
+''') as YamlMap;
+
+          expect(
+            () => BrickUrl.fromYaml(YamlValue.from(yaml), 'path'),
+            throwsA(isA<ConfigException>()),
+          );
+        });
       });
 
       test('returns when yaml is null ', () {
