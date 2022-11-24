@@ -7,6 +7,7 @@ import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
 part 'brick_yaml_config.g.dart';
@@ -27,6 +28,7 @@ class BrickYamlConfig extends Equatable {
   factory BrickYamlConfig.fromYaml(
     YamlValue yaml, {
     required FileSystem fileSystem,
+    required String configPath,
   }) {
     if (yaml.isError()) {
       throw BrickConfigException(reason: yaml.asError().value);
@@ -36,7 +38,7 @@ class BrickYamlConfig extends Equatable {
       final path = yaml.asString().value;
 
       return BrickYamlConfig(
-        path: path,
+        path: join(configPath, path),
         fileSystem: fileSystem,
         ignoreVars: const [],
       );
@@ -78,7 +80,7 @@ class BrickYamlConfig extends Equatable {
     final dir = BrickDir.cleanPath(path.asString().value);
 
     return BrickYamlConfig(
-      path: dir,
+      path: join(configPath, dir),
       ignoreVars: ignoreVars,
       fileSystem: fileSystem,
     );

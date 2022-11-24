@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
@@ -43,6 +44,7 @@ brick_config:
         () => BrickYamlConfig.fromYaml(
           YamlValue.from(yaml),
           fileSystem: MemoryFileSystem(),
+          configPath: '',
         ),
         throwsA(isA<BrickConfigException>()),
       );
@@ -53,6 +55,7 @@ brick_config:
         () => BrickYamlConfig.fromYaml(
           const YamlValue.error('error'),
           fileSystem: MemoryFileSystem(),
+          configPath: '',
         ),
         throwsA(isA<BrickConfigException>()),
       );
@@ -62,6 +65,7 @@ brick_config:
       final config = BrickYamlConfig.fromYaml(
         YamlValue.from('brick.yaml'),
         fileSystem: MemoryFileSystem(),
+        configPath: '',
       );
 
       expect(config.path, 'brick.yaml');
@@ -75,24 +79,10 @@ path: brick.yaml
       final config = BrickYamlConfig.fromYaml(
         YamlValue.from(yaml),
         fileSystem: MemoryFileSystem(),
+        configPath: '',
       );
 
       expect(config.path, 'brick.yaml');
-    });
-
-    test('returns ignore vars when provided', () {
-      final yaml = loadYaml('''
-path: brick.yaml
-ignore_vars:
-  - ignore
-''');
-
-      final config = BrickYamlConfig.fromYaml(
-        YamlValue.from(yaml),
-        fileSystem: MemoryFileSystem(),
-      );
-
-      expect(config.ignoreVars, ['ignore']);
     });
 
     test('throws $BrickConfigException when extra keys are provided', () {
@@ -105,9 +95,52 @@ extra: key
         () => BrickYamlConfig.fromYaml(
           YamlValue.from(yaml),
           fileSystem: MemoryFileSystem(),
+          configPath: '',
         ),
         throwsA(isA<BrickConfigException>()),
       );
+    });
+
+    test('can parse successfully', () {
+      final yaml = loadYaml('''
+path: brick.yaml
+ignore_vars:
+  - ignore
+''');
+
+      final config = BrickYamlConfig.fromYaml(
+        YamlValue.from(yaml),
+        fileSystem: MemoryFileSystem(),
+        configPath: '',
+      );
+
+      final expected = BrickYamlConfig(
+        path: 'brick.yaml',
+        fileSystem: MemoryFileSystem(),
+        ignoreVars: const ['ignore'],
+      );
+
+      expect(config, expected);
+    });
+
+    test('returns path with provided configPath', () {
+      final yaml = loadYaml('''
+path: brick.yaml
+''');
+
+      final config = BrickYamlConfig.fromYaml(
+        YamlValue.from(yaml),
+        fileSystem: MemoryFileSystem(),
+        configPath: join('path', 'to', 'config'),
+      );
+
+      final expected = BrickYamlConfig(
+        path: join('path', 'to', 'config', 'brick.yaml'),
+        fileSystem: MemoryFileSystem(),
+        ignoreVars: const [],
+      );
+
+      expect(config, expected);
     });
   });
 

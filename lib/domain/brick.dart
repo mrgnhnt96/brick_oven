@@ -253,6 +253,7 @@ class Brick extends Equatable {
       brickYamlConfig = BrickYamlConfig.fromYaml(
         brickConfig,
         fileSystem: fileSystem,
+        configPath: dirname(configPath ?? ''),
       );
     }
 
