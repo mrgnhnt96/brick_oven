@@ -115,7 +115,7 @@ urls:
         brickYamlConfig: BrickYamlConfig(
           fileSystem: MemoryFileSystem(),
           ignoreVars: const [],
-          path: 'brick.yaml',
+          path: './brick.yaml',
         ),
         source: BrickSource(
           localPath: 'oven',
@@ -370,7 +370,7 @@ brick_config: brick.yaml
               logger: mockLogger,
             ).brickYamlConfig,
             BrickYamlConfig(
-              path: 'brick.yaml',
+              path: './brick.yaml',
               ignoreVars: const [],
               fileSystem: MemoryFileSystem(),
             ),
