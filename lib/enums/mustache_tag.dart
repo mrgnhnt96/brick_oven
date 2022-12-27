@@ -63,13 +63,41 @@ extension MustacheTagX on MustacheTag {
   /// Wraps the [content] with mustache
   ///
   /// eg: {{#snakeCase}}This is the content{{/snakeCase}}
-  String wrap(String content, {int? braceCount}) {
+  String wrap(
+    String content, {
+    int? braceCount,
+    String? startDeliminator,
+    String? endDeliminator,
+  }) {
     assert(
       braceCount == null || braceCount >= 2 && braceCount <= 3,
       'braceCount must be 2 or 3',
     );
 
-    braceCount ??= kDefaultBraces;
+    assert(
+      startDeliminator == null || startDeliminator.length == 1,
+      'startDeliminator must be 1 character',
+    );
+
+    assert(
+      endDeliminator == null || endDeliminator.length == 1,
+      'endDeliminator must be 1 character',
+    );
+
+    assert(
+      (startDeliminator == null) == (endDeliminator == null),
+      'startDeliminator and endDeliminator must be null or not null',
+    );
+
+    if (startDeliminator != null && endDeliminator != null) {
+      assert(
+        startDeliminator != endDeliminator,
+        'startDeliminator and endDeliminator must be different',
+      );
+    }
+
+    final startBraces = (startDeliminator ?? '{') * 2;
+    final endBraces = (endDeliminator ?? '}') * 2;
 
     if (isFormat) {
       final isWrapped = wrappedPattern.hasMatch(content);
@@ -77,12 +105,14 @@ extension MustacheTagX on MustacheTag {
       var wrappedContent = content;
 
       if (!isWrapped) {
-        final startBraces = '{' * braceCount;
-        final endBraces = '}' * braceCount;
+        braceCount ??= kDefaultBraces;
+
+        final startBraces = (startDeliminator ?? '{') * braceCount;
+        final endBraces = (endDeliminator ?? '}') * braceCount;
         wrappedContent = '$startBraces$content$endBraces';
       }
 
-      return '{{#$name}}$wrappedContent{{/$name}}';
+      return '$startBraces#$name$endBraces$wrappedContent$startBraces/$name$endBraces';
     }
 
     assert(
@@ -91,15 +121,15 @@ extension MustacheTagX on MustacheTag {
     );
 
     if (isIf) {
-      return '{{#$content}}';
+      return '$startBraces#$content$endBraces';
     }
 
     if (isIfNot) {
-      return '{{^$content}}';
+      return '$startBraces^$content$endBraces';
     }
 
     if (isEndIf) {
-      return '{{/$content}}';
+      return '$startBraces/$content$endBraces';
     }
 
     return content;

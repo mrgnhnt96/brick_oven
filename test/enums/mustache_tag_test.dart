@@ -295,24 +295,67 @@ void main() {
         }
       });
 
-      test('throws assertion error when braceCount is less than min amount',
-          () {
-        for (final tag in formatTags) {
-          expect(
-            () => tag.wrap('sup_dude', braceCount: 1),
-            throwsA(isA<AssertionError>()),
-          );
-        }
-      });
+      group('throws assertion error when', () {
+        test('braceCount is less than min amount', () {
+          for (final tag in formatTags) {
+            expect(
+              () => tag.wrap('sup_dude', braceCount: 1),
+              throwsA(isA<AssertionError>()),
+            );
+          }
+        });
 
-      test('throws assertion error when braceCount is greater than max amount',
-          () {
-        for (final tag in formatTags) {
-          expect(
-            () => tag.wrap('sup_dude', braceCount: 4),
-            throwsA(isA<AssertionError>()),
-          );
-        }
+        test('braceCount is greater than max amount', () {
+          for (final tag in formatTags) {
+            expect(
+              () => tag.wrap('sup_dude', braceCount: 4),
+              throwsA(isA<AssertionError>()),
+            );
+          }
+        });
+
+        test('startDeliminator is not a single character', () {
+          for (final tag in formatTags) {
+            expect(
+              () => tag.wrap('sup_dude', startDeliminator: 'foo'),
+              throwsA(isA<AssertionError>()),
+            );
+          }
+        });
+
+        test('endDeliminator is not a single character', () {
+          for (final tag in formatTags) {
+            expect(
+              () => tag.wrap('sup_dude', endDeliminator: 'foo'),
+              throwsA(isA<AssertionError>()),
+            );
+          }
+        });
+
+        test('startDeliminator is the same as endDeliminator', () {
+          for (final tag in formatTags) {
+            expect(
+              () => tag.wrap(
+                'sup_dude',
+                startDeliminator: '}',
+                endDeliminator: '}',
+              ),
+              throwsA(isA<AssertionError>()),
+            );
+          }
+        });
+
+        test('startDeliminator is set and endDeliminator is not', () {
+          for (final tag in formatTags) {
+            expect(
+              () => tag.wrap(
+                'sup_dude',
+                startDeliminator: '}',
+              ),
+              throwsA(isA<AssertionError>()),
+            );
+          }
+        });
       });
     });
 
