@@ -235,14 +235,20 @@ mixin FileReplacements {
           return completeMatch;
         }
 
+        var startDeliminator = '{';
+        var endDeliminator = '}';
+        var totalBraceCount = braceCount ?? 2;
+
+        var startDeliminatorSection = '';
+        var endDeliminatorSection = '';
+
         if (startsWithBracket || endsWithBracket) {
-          throw VariableException(
-            variable: completeMatch,
-            reason: 'Please remove curly braces from variable '
-                '`$completeMatch` '
-                'This will cause unexpected behavior '
-                'when creating the brick',
-          );
+          startDeliminatorSection = '{{=<< >>=}}';
+          endDeliminatorSection = '<<={{ }}=>>';
+
+          startDeliminator = '<';
+          endDeliminator = '>';
+          totalBraceCount = 2;
         }
 
         String result;
@@ -263,19 +269,28 @@ mixin FileReplacements {
           }
 
           // the `kDefaultBraces` is not used here to allow unescaping
-          final startBraces = '{' * (braceCount ?? 2);
-          final endBraces = '}' * (braceCount ?? 2);
+          final startBraces = startDeliminator * totalBraceCount;
+          final endBraces = endDeliminator * totalBraceCount;
 
           result = '$startBraces${variable.name}$endBraces';
         } else {
           // format the variable
           suffix = MustacheTag.values.suffixFrom(possibleTag) ?? '';
-          result = tag.wrap(variable.name, braceCount: braceCount);
+          result = tag.wrap(
+            variable.name,
+            braceCount: braceCount,
+            startDeliminator: startDeliminator,
+            endDeliminator: endDeliminator,
+          );
         }
 
         isVariableUsed = true;
 
-        return '$prefix$result$suffix';
+        return '$startDeliminatorSection'
+            '$prefix'
+            '$result'
+            '$suffix'
+            '$endDeliminatorSection';
       },
     );
 

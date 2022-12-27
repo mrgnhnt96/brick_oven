@@ -306,29 +306,22 @@ fake_NAME_
       });
     });
 
+    test('sets a deliminator when the variable is wrapped with braces', () {
+      const content = '{_NAME_}';
+      const expected = ContentReplacement(
+        content: '{{=<< >>=}}{<<name>>}<<={{ }}=>>',
+        used: {'name'},
+      );
+
+      final result = testFileReplacements.checkForVariables(
+        content,
+        const Variable(name: 'name', placeholder: '_NAME_'),
+      );
+
+      expect(result, expected);
+    });
+
     group('throws $VariableException', () {
-      test('when variables starts or ends with a bracket', () {
-        const contents = [
-          '{{{_NAME_}}}',
-          '{{_NAME_}}',
-          '{_NAME_}',
-          '{_NAME_',
-          '_NAME_}',
-        ];
-
-        for (final content in contents) {
-          const variable = Variable(name: 'name', placeholder: '_NAME_');
-
-          expect(
-            () => testFileReplacements.checkForVariables(
-              content,
-              variable,
-            ),
-            throwsA(isA<VariableException>()),
-          );
-        }
-      });
-
       test('when variables brace quantity is not supported', () {
         const contents = [
           '_NAME_b4',
