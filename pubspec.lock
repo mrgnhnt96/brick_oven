@@ -15,6 +15,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.2.0"
+  archive:
+    dependency: transitive
+    description:
+      name: archive
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.3.5"
   args:
     dependency: "direct main"
     description:
@@ -267,6 +274,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.7.0"
+  lcov_parser:
+    dependency: transitive
+    description:
+      name: lcov_parser
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   logging:
     dependency: transitive
     description:
@@ -274,6 +288,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
+  mason:
+    dependency: transitive
+    description:
+      name: mason
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0-dev.38"
   mason_logger:
     dependency: "direct main"
     description:
@@ -309,6 +330,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.0"
+  mustache_template:
+    dependency: transitive
+    description:
+      name: mustache_template
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   node_preamble:
     dependency: transitive
     description:
@@ -337,6 +365,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.0"
+  pointycastle:
+    dependency: transitive
+    description:
+      name: pointycastle
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.6.2"
   pool:
     dependency: transitive
     description:
@@ -372,6 +407,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.1"
+  recase:
+    dependency: transitive
+    description:
+      name: recase
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.1.0"
   shelf:
     dependency: transitive
     description:
@@ -533,6 +575,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.0"
+  very_good_cli:
+    dependency: "direct dev"
+    description:
+      name: very_good_cli
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.8.5"
+  very_good_test_runner:
+    dependency: transitive
+    description:
+      name: very_good_test_runner
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   vm_service:
     dependency: transitive
     description:
