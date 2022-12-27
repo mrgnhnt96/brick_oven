@@ -93,7 +93,15 @@ class BrickFile extends Equatable with FileReplacements, IncludeMixin {
           final name = entry.key as String;
           yield Variable.fromYaml(YamlValue.from(entry.value), name);
         } on ConfigException catch (e) {
-          throw FileException(file: path, reason: e.message);
+          throw FileException(
+            file: path,
+            reason: e.message,
+          );
+        } catch (e) {
+          throw FileException(
+            file: path,
+            reason: e.toString(),
+          );
         }
       }
     }
@@ -107,8 +115,18 @@ class BrickFile extends Equatable with FileReplacements, IncludeMixin {
     if (!nameYaml.isNone() || hasNameKey) {
       try {
         name = Name.fromYaml(nameYaml, basenameWithoutExtension(path));
-      } on ConfigException catch (e) {
-        throw FileException(file: path, reason: e.message);
+      } catch (e) {
+        if (e is ConfigException) {
+          throw FileException(
+            file: path,
+            reason: e.message,
+          );
+        }
+
+        throw FileException(
+          file: path,
+          reason: e.toString(),
+        );
       }
     }
 
@@ -307,10 +325,16 @@ class BrickFile extends Equatable with FileReplacements, IncludeMixin {
           ...pathContent.used,
         },
       );
-    } on ConfigException catch (e) {
+    } catch (e) {
+      if (e is ConfigException) {
+        throw FileException(
+          file: sourceFile.path,
+          reason: e.message,
+        );
+      }
       throw FileException(
         file: sourceFile.path,
-        reason: e.message,
+        reason: e.toString(),
       );
     }
   }

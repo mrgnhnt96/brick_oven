@@ -81,6 +81,11 @@ class Partial extends Equatable with FileReplacements {
           partial: path,
           reason: e.message,
         );
+      } catch (e) {
+        throw PartialException(
+          partial: path,
+          reason: e.toString(),
+        );
       }
     }
 
@@ -135,10 +140,17 @@ class Partial extends Equatable with FileReplacements {
         fileSystem: fileSystem,
         logger: logger,
       );
-    } on ConfigException catch (e) {
+    } catch (e) {
+      if (e is ConfigException) {
+        throw PartialException(
+          partial: sourceFile.path,
+          reason: e.message,
+        );
+      }
+
       throw PartialException(
         partial: sourceFile.path,
-        reason: e.message,
+        reason: e.toString(),
       );
     }
   }

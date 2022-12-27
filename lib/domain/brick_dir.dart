@@ -95,6 +95,11 @@ class BrickDir extends Equatable with IncludeMixin {
           directory: path,
           reason: e.message,
         );
+      } catch (e) {
+        throw DirectoryException(
+          directory: path,
+          reason: e.toString(),
+        );
       }
     }
 
