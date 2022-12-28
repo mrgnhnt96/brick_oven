@@ -17,12 +17,12 @@ upload_coverage:
 
 test:
   only:
-  - very_good test --test-randomize-ordering-seed random
+    - very_good test --test-randomize-ordering-seed random
 
   coverage:
-  - rm -rf coverage
-  - $test:only --coverage --exclude-coverage **/*.g.dart
-  - $coverage
+    - rm -rf coverage
+    - $test:only --coverage --exclude-coverage **/*.g.dart
+    - $coverage
 
 clean:
   proj:
@@ -39,3 +39,6 @@ install:
 
 format:
   - flutter-stylizer -w ./...
+
+# required before running: `yarn global add cspell`
+spell_check: cspell "**" --config ".github/cspell/cspell.json"
