@@ -133,7 +133,7 @@ class BrickDir extends Equatable with IncludeMixin {
     );
   }
 
-  /// the pattern to remove all preceeding and trailing slashes
+  /// the pattern to remove all preceding and trailing slashes
   static RegExp leadingAndTrailingSlashPattern = RegExp(r'^[\/\\]+|[\/\\]+$');
 
   /// the pattern to separate segments of a path
@@ -184,11 +184,11 @@ class BrickDir extends Equatable with IncludeMixin {
     String path, {
     required String originalPath,
   }) {
-    final orignalParts = separatePath(originalPath);
+    final originalParts = separatePath(originalPath);
     final configuredParts = separatePath(this.path);
 
     for (var i = 0;; i++) {
-      if (i >= orignalParts.length) {
+      if (i >= originalParts.length) {
         if (i >= configuredParts.length) {
           break;
         }
@@ -200,7 +200,7 @@ class BrickDir extends Equatable with IncludeMixin {
         break;
       }
 
-      final pathPart = orignalParts[i];
+      final pathPart = originalParts[i];
       final configuredPart = configuredParts[i];
 
       if (pathPart != configuredPart) {
@@ -229,8 +229,8 @@ class BrickDir extends Equatable with IncludeMixin {
     return configuredPath;
   }
 
-  /// cleans the path of any strange ocurrences
-  /// and preceeding & trailing slashes
+  /// cleans the path of any strange occurrences
+  /// and preceding & trailing slashes
   static String cleanPath(String path) {
     return path.cleanUpPath();
   }

@@ -8,7 +8,7 @@ import 'package:yaml/yaml.dart';
 
 void main() {
   group('$BrickUrl', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       final url = BrickUrl('path');
 
       expect(url, isA<BrickUrl>());

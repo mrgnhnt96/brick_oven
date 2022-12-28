@@ -15,7 +15,7 @@ import 'package:yaml/yaml.dart';
 part 'brick_source.g.dart';
 
 /// {@template brick_source}
-/// The brick's source, where the files are retrived, copied &/or altered
+/// The brick's source, where the files are retrieved, copied &/or altered
 /// {@endtemplate}
 @autoequal
 class BrickSource extends Equatable {

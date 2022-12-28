@@ -21,7 +21,7 @@ class BricksOrError extends Equatable {
   /// the error that occurred while parsing the configuration file
   String get error => _error!;
 
-  /// if the parsing the configuration file was successfull
+  /// if the parsing the configuration file was successful
   bool get isBricks => _bricks != null;
 
   /// if there was an error parsing the configuration file

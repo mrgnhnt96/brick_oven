@@ -15,7 +15,7 @@ void main() {
     mockLogger = MockLogger();
   });
 
-  test('can be instanciated', () {
+  test('can be instantiated', () {
     expect(() => const BricksOrError(null, null), returnsNormally);
   });
 

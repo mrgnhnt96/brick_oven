@@ -22,7 +22,7 @@ void main() {
     memoryFS = MemoryFileSystem();
   });
 
-  test('can be instanciated', () {
+  test('can be instantiated', () {
     expect(
       () => BrickYamlConfig(
         path: 'brick.yaml',
