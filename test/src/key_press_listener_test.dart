@@ -41,7 +41,7 @@ void main() {
       ).thenAnswer((_) => const Stream.empty());
     });
 
-    test('returns null when stdin has no termainal', () {
+    test('returns null when stdin has no terminal', () {
       when(() => mockStdin.hasTerminal).thenReturn(false);
 
       expect(() => keyPressListener.listenToKeystrokes(), returnsNormally);

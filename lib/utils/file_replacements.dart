@@ -164,7 +164,7 @@ mixin FileReplacements {
       },
     );
 
-    // remove all extra linebreaks before & after the section
+    // remove all extra line breaks before & after the section
     final _ = sectioned.replaceAllMapped(
       RegExp(r'(\n*)({{[#^/][\w-]+}})$(\n*)', multiLine: true),
       (match) {

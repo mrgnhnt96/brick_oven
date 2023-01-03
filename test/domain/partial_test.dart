@@ -16,7 +16,7 @@ import 'package:yaml/yaml.dart';
 import '../test_utils/mocks.dart';
 
 void main() {
-  test('can be instanciated', () {
+  test('can be instantiated', () {
     expect(() => const Partial(path: 'path'), returnsNormally);
   });
 

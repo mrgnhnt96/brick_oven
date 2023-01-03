@@ -39,7 +39,7 @@ void main() {
     return fakePaths;
   }
 
-  test('can be instanciated', () {
+  test('can be instantiated', () {
     final instance =
         BrickSource(localPath: 'test', fileSystem: MemoryFileSystem());
 

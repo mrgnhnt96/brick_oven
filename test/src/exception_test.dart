@@ -3,12 +3,12 @@ import 'package:test/test.dart';
 import 'package:brick_oven/src/exception.dart';
 
 void main() {
-  test('$BrickOvenException can be instanciated', () {
+  test('$BrickOvenException can be instantiated', () {
     expect(() => const BrickOvenException('test'), returnsNormally);
   });
 
   group('$VariableException', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       expect(
         const VariableException(variable: 'test', reason: 'test'),
         isA<BrickOvenException>(),
@@ -32,7 +32,7 @@ void main() {
   });
 
   group('$PartialException', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       expect(
         const PartialException(partial: 'test', reason: 'test'),
         isA<BrickOvenException>(),
@@ -56,7 +56,7 @@ void main() {
   });
 
   group('$DirectoryException', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       expect(
         const DirectoryException(directory: 'test', reason: 'test'),
         isA<BrickOvenException>(),
@@ -80,7 +80,7 @@ void main() {
   });
 
   group('$SourceException', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       expect(
         const SourceException(source: 'test', reason: 'test'),
         isA<BrickOvenException>(),
@@ -104,7 +104,7 @@ void main() {
   });
 
   group('$BrickException', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       expect(
         const BrickException(brick: 'test', reason: 'test'),
         isA<BrickOvenException>(),
@@ -128,7 +128,7 @@ void main() {
   });
 
   group('$FileException', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       expect(
         const FileException(file: 'test', reason: 'test'),
         isA<BrickOvenException>(),
@@ -152,7 +152,7 @@ void main() {
   });
 
   group('$UrlException', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       expect(
         const UrlException(url: 'test', reason: 'test'),
         isA<BrickOvenException>(),
@@ -176,7 +176,7 @@ void main() {
   });
 
   group('$BrickConfigException', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       expect(
         const BrickConfigException(reason: 'test'),
         isA<BrickOvenException>(),

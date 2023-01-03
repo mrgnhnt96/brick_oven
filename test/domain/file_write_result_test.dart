@@ -3,7 +3,7 @@ import 'package:brick_oven/domain/file_write_result.dart';
 
 void main() {
   group(FileWriteResult, () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       final usedPartials = <String>{'hi'};
       final usedVariables = <String>{'dude'};
 
@@ -16,7 +16,7 @@ void main() {
       expect(result.usedVariables, usedVariables);
     });
 
-    test('#empty can be instanciated', () {
+    test('#empty can be instantiated', () {
       const result = FileWriteResult.empty();
 
       expect(result.usedPartials, isEmpty);

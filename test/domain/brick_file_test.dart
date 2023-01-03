@@ -36,7 +36,7 @@ void main() {
     mockLogger = MockLogger();
   });
 
-  test('can be instanciated', () {
+  test('can be instantiated', () {
     expect(BrickFile(join('path', 'to', 'file.dart')), isA<BrickFile>());
   });
 

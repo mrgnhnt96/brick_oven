@@ -13,7 +13,7 @@ void main() {
   const dirPath = 'path/to/some/$highestLevel';
 
   group('$BrickDir unnamed ctor', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       expect(
         () => BrickDir(name: Name(highestLevel), path: dirPath),
         returnsNormally,
@@ -289,7 +289,7 @@ name
         expect(result, original);
       });
 
-      test('paths dont match', () {
+      test('paths do not match', () {
         const originalPath = 'test/android_tests.dart';
         var path = originalPath;
 

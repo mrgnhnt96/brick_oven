@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
 void main() {
-  test('can be instanciated', () {
+  test('can be instantiated', () {
     const instance = Variable(name: 'scooby_doo', placeholder: 'placeholder');
 
     expect(instance, isNotNull);

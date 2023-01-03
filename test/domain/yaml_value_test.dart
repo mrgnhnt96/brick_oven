@@ -6,35 +6,35 @@ import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:yaml/yaml.dart';
 
 void main() {
-  test('#string can be instanciated', () {
+  test('#string can be instantiated', () {
     const string = YamlValue.string('test');
 
     expect(string, isA<YamlValue>());
     expect(string, isA<YamlString>());
   });
 
-  test('#error can be instanciated', () {
+  test('#error can be instantiated', () {
     const error = YamlValue.error('test');
 
     expect(error, isA<YamlValue>());
     expect(error, isA<YamlError>());
   });
 
-  test('#list can be instanciated', () {
+  test('#list can be instantiated', () {
     final list = YamlValue.list(YamlList());
 
     expect(list, isA<YamlValue>());
     expect(list, isA<YamlListValue>());
   });
 
-  test('#yaml can be instanciated', () {
+  test('#yaml can be instantiated', () {
     final yaml = YamlValue.yaml(YamlMap());
 
     expect(yaml, isA<YamlValue>());
     expect(yaml, isA<YamlMapValue>());
   });
 
-  test('#none can be instanciated', () {
+  test('#none can be instantiated', () {
     const none = YamlValue.none();
 
     expect(none, isA<YamlValue>());
@@ -217,7 +217,7 @@ void main() {
   });
 
   group('$YamlString', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       const string = YamlString('test');
 
       expect(string, isA<YamlString>());
@@ -237,7 +237,7 @@ void main() {
   });
 
   group('$YamlMapValue', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       final yaml = YamlMap();
 
       final value = YamlMapValue(yaml);
@@ -263,7 +263,7 @@ void main() {
   });
 
   group('$YamlNone', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       const none = YamlNone();
 
       expect(none, isA<YamlNone>());

@@ -8,7 +8,7 @@ import 'package:yaml/yaml.dart';
 
 void main() {
   group('$Name', () {
-    test('can be instanciated', () {
+    test('can be instantiated', () {
       expect(() => Name('name'), returnsNormally);
     });
 
