@@ -7,7 +7,5 @@ part of 'file_write_result.dart';
 // **************************************************************************
 
 extension _$FileWriteResultAutoequal on FileWriteResult {
-  @Deprecated(r'Use _$props instead')
-  List<Object?> get _autoequalProps => _$props;
   List<Object?> get _$props => [usedVariables, usedPartials];
 }

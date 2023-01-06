@@ -7,7 +7,5 @@ part of 'brick_url.dart';
 // **************************************************************************
 
 extension _$BrickUrlAutoequal on BrickUrl {
-  @Deprecated(r'Use _$props instead')
-  List<Object?> get _autoequalProps => _$props;
   List<Object?> get _$props => [path, name, includeIf, includeIfNot];
 }

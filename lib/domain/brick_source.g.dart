@@ -7,7 +7,5 @@ part of 'brick_source.dart';
 // **************************************************************************
 
 extension _$BrickSourceAutoequal on BrickSource {
-  @Deprecated(r'Use _$props instead')
-  List<Object?> get _autoequalProps => _$props;
   List<Object?> get _$props => [localPath, watcher];
 }
