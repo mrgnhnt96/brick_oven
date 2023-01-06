@@ -1,17 +1,17 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:brick_oven/domain/file_write_result.dart';
-import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/content_replacement.dart';
-import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/constants.dart';
-import 'package:brick_oven/utils/file_replacements.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/domain/content_replacement.dart';
+import 'package:brick_oven/domain/file_write_result.dart';
+import 'package:brick_oven/domain/partial.dart';
+import 'package:brick_oven/domain/variable.dart';
+import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/constants.dart';
+import 'package:brick_oven/utils/file_replacements.dart';
 import '../test_utils/mocks.dart';
 
 void main() {

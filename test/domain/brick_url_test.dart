@@ -1,10 +1,11 @@
+import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
+
+import 'package:brick_oven/domain/brick_url.dart';
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
 import 'package:brick_oven/src/exception.dart';
-import 'package:test/test.dart';
-import 'package:brick_oven/domain/brick_url.dart';
-import 'package:yaml/yaml.dart';
 
 void main() {
   group('$BrickUrl', () {

@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/utils/config_watcher_mixin.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:watcher/watcher.dart';
 
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/utils/config_watcher_mixin.dart';
 import '../test_utils/print_override.dart';
 import '../test_utils/test_file_watcher.dart';
 

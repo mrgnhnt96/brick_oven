@@ -1,8 +1,9 @@
+import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
+
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
-import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
 
 void main() {
   test('can be instantiated', () {

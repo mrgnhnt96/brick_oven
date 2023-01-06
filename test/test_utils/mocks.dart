@@ -1,19 +1,20 @@
 import 'dart:io';
 
-import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/source_watcher.dart';
-import 'package:brick_oven/domain/brick_yaml_config.dart';
-import 'package:brick_oven/src/key_press_listener.dart';
-import 'package:brick_oven/src/version.dart';
+import 'package:file/file.dart' as file;
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:usage/usage_io.dart';
 import 'package:watcher/watcher.dart';
-import 'package:file/file.dart' as file;
+
+import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_source.dart';
+import 'package:brick_oven/domain/brick_yaml_config.dart';
+import 'package:brick_oven/domain/partial.dart';
+import 'package:brick_oven/domain/source_watcher.dart';
+import 'package:brick_oven/src/key_press_listener.dart';
+import 'package:brick_oven/src/version.dart';
 
 class MockBrick extends Mock implements Brick {}
 

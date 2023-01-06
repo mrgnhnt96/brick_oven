@@ -1,14 +1,15 @@
-import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/file_write_result.dart';
-import 'package:brick_oven/domain/content_replacement.dart';
-import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/enums/mustache_tag.dart';
-import 'package:brick_oven/enums/mustache_section.dart';
-import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/constants.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
+
+import 'package:brick_oven/domain/content_replacement.dart';
+import 'package:brick_oven/domain/file_write_result.dart';
+import 'package:brick_oven/domain/partial.dart';
+import 'package:brick_oven/domain/variable.dart';
+import 'package:brick_oven/enums/mustache_section.dart';
+import 'package:brick_oven/enums/mustache_tag.dart';
+import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/constants.dart';
 
 /// {@template file_replacements}
 /// the methods to replace variables and partials in a file

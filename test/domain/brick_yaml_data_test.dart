@@ -1,5 +1,6 @@
-import 'package:brick_oven/domain/brick_yaml_data.dart';
 import 'package:test/test.dart';
+
+import 'package:brick_oven/domain/brick_yaml_data.dart';
 
 void main() {
   test('can be instantiated', () {

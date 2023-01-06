@@ -1,11 +1,12 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:equatable/equatable.dart';
+import 'package:path/path.dart';
+
 import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 import 'package:brick_oven/utils/include_mixin.dart';
-import 'package:equatable/equatable.dart';
-import 'package:path/path.dart';
 
 part 'brick_url.g.dart';
 

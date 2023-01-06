@@ -1,7 +1,7 @@
-import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:test/test.dart';
 import 'package:watcher/watcher.dart';
 
+import 'package:brick_oven/domain/source_watcher.dart';
 import '../test_utils/mocks.dart';
 import '../test_utils/test_directory_watcher.dart';
 

@@ -1,7 +1,3 @@
-import 'package:brick_oven/domain/brick_yaml_config.dart';
-import 'package:brick_oven/domain/brick_yaml_data.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -10,6 +6,10 @@ import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
+import 'package:brick_oven/domain/brick_yaml_config.dart';
+import 'package:brick_oven/domain/brick_yaml_data.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/src/exception.dart';
 import '../test_utils/mocks.dart';
 
 void main() {

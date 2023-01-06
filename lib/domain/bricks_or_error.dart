@@ -1,6 +1,7 @@
 import 'package:autoequal/autoequal.dart';
-import 'package:brick_oven/domain/brick.dart';
 import 'package:equatable/equatable.dart';
+
+import 'package:brick_oven/domain/brick.dart';
 
 part 'bricks_or_error.g.dart';
 

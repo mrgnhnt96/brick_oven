@@ -1,8 +1,9 @@
 // ignore_for_file: cascade_invocations
 
 import 'package:args/args.dart';
-import 'package:brick_oven/utils/extensions/arg_parser_extensions.dart';
 import 'package:test/test.dart';
+
+import 'package:brick_oven/utils/extensions/arg_parser_extensions.dart';
 
 void main() {
   group('ArgParserX', () {

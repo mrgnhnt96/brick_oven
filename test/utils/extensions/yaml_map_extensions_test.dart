@@ -1,8 +1,9 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
+
+import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 
 void main() {
   group('YamlMapX', () {

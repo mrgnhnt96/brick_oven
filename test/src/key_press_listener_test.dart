@@ -2,11 +2,11 @@
 
 import 'dart:async';
 
-import 'package:brick_oven/src/key_press_listener.dart';
-import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/src/key_press_listener.dart';
+import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import '../test_utils/fakes.dart';
 import '../test_utils/mocks.dart';
 

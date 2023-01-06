@@ -5,12 +5,11 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
+import 'package:usage/usage_io.dart';
 
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_bricks.dart';
 import 'package:brick_oven/src/runner.dart';
-import 'package:usage/usage_io.dart';
-
 import '../../../test_utils/mocks.dart';
 
 void main() {

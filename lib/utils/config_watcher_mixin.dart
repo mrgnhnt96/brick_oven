@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
+
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
 
 /// Watches the path provided for changes
 mixin ConfigWatcherMixin {

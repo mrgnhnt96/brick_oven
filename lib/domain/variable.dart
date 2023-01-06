@@ -1,8 +1,9 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:equatable/equatable.dart';
+
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions/string_extensions.dart';
-import 'package:equatable/equatable.dart';
 
 part 'variable.g.dart';
 

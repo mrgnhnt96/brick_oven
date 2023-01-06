@@ -1,9 +1,9 @@
 // ignore_for_file: prefer_void_to_null
 
 import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
 
 import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:yaml/yaml.dart';
 
 void main() {
   test('#string can be instantiated', () {

@@ -1,4 +1,5 @@
 import 'package:test/test.dart';
+
 import 'package:brick_oven/utils/extensions/string_extensions.dart';
 
 void main() {

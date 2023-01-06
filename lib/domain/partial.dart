@@ -1,14 +1,15 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:equatable/equatable.dart';
+import 'package:file/file.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:path/path.dart';
+
+import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 import 'package:brick_oven/utils/file_replacements.dart';
-import 'package:brick_oven/domain/file_write_result.dart';
-import 'package:equatable/equatable.dart';
-import 'package:file/file.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:path/path.dart';
 
 part 'partial.g.dart';
 

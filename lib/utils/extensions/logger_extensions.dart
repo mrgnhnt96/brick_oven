@@ -1,6 +1,7 @@
-import 'package:brick_oven/utils/extensions/datetime_extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
+
+import 'package:brick_oven/utils/extensions/datetime_extensions.dart';
 
 /// the extension for [Logger]
 extension LoggerX on Logger {

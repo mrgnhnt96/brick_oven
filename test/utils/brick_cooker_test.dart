@@ -1,8 +1,8 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:test/test.dart';
-import 'package:brick_oven/utils/brick_cooker.dart';
 
+import 'package:brick_oven/utils/brick_cooker.dart';
 import '../test_utils/fakes.dart';
 
 void main() {

@@ -1,8 +1,3 @@
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/src/exception.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mocktail/mocktail.dart';
@@ -10,6 +5,11 @@ import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_source.dart';
+import 'package:brick_oven/domain/variable.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/src/exception.dart';
 import '../test_utils/mocks.dart';
 
 void main() {

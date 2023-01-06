@@ -2,20 +2,6 @@
 
 import 'dart:async';
 
-import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_file.dart';
-import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/brick_dir.dart';
-import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/source_watcher.dart';
-import 'package:brick_oven/domain/brick_yaml_config.dart';
-import 'package:brick_oven/domain/brick_yaml_data.dart';
-import 'package:brick_oven/domain/name.dart';
-import 'package:brick_oven/domain/brick_url.dart';
-import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/constants.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -25,6 +11,20 @@ import 'package:test/test.dart';
 import 'package:watcher/watcher.dart';
 import 'package:yaml/yaml.dart';
 
+import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/brick_dir.dart';
+import 'package:brick_oven/domain/brick_file.dart';
+import 'package:brick_oven/domain/brick_source.dart';
+import 'package:brick_oven/domain/brick_url.dart';
+import 'package:brick_oven/domain/brick_yaml_config.dart';
+import 'package:brick_oven/domain/brick_yaml_data.dart';
+import 'package:brick_oven/domain/name.dart';
+import 'package:brick_oven/domain/partial.dart';
+import 'package:brick_oven/domain/source_watcher.dart';
+import 'package:brick_oven/domain/variable.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/constants.dart';
 import '../test_utils/fakes.dart';
 import '../test_utils/mocks.dart';
 import '../test_utils/print_override.dart';

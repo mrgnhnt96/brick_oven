@@ -1,11 +1,11 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:brick_oven/utils/extensions/analytics_extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 import 'package:usage/usage_io.dart';
 
+import 'package:brick_oven/utils/extensions/analytics_extensions.dart';
 import '../../test_utils/mocks.dart';
 
 void main() {

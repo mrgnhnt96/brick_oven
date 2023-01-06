@@ -1,7 +1,8 @@
 // ignore_for_file: parameter_assignments
 
-import 'package:brick_oven/utils/constants.dart';
 import 'package:meta/meta.dart';
+
+import 'package:brick_oven/utils/constants.dart';
 
 /// the formats that Mustache supports
 enum MustacheTag {

@@ -1,5 +1,3 @@
-import 'package:brick_oven/src/runner.dart';
-import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
@@ -8,6 +6,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/src/runner.dart';
+import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import '../../test_utils/mocks.dart';
 
 /// [brickName] will be used for
