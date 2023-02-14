@@ -273,14 +273,12 @@ void main() {
 
 class TestListCommand extends ListCommand {
   TestListCommand({
+    required super.logger,
+    required super.analytics,
     this.verbose,
     FileSystem? fileSystem,
-    required Logger logger,
-    required Analytics analytics,
   }) : super(
-          logger: logger,
           fileSystem: fileSystem ?? MemoryFileSystem(),
-          analytics: analytics,
         );
 
   final bool? verbose;

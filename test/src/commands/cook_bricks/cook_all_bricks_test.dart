@@ -462,23 +462,17 @@ void main() {
 
 class TestCookAllBricks extends CookAllBricks {
   TestCookAllBricks({
-    required Logger logger,
-    required FileSystem fileSystem,
+    required super.logger,
+    required super.fileSystem,
+    required super.analytics,
     this.bricksOrError,
     bool? isWatch,
     bool? shouldSync,
     Map<String, dynamic>? argResults,
-    required Analytics analytics,
-    KeyPressListener? keyPressListener,
+    super.keyPressListener,
   })  : _argResults = argResults ?? <String, dynamic>{},
         _isWatch = isWatch,
-        _shouldSync = shouldSync,
-        super(
-          logger: logger,
-          fileSystem: fileSystem,
-          analytics: analytics,
-          keyPressListener: keyPressListener,
-        );
+        _shouldSync = shouldSync;
 
   final Map<String, dynamic> _argResults;
 

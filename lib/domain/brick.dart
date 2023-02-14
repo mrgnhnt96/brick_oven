@@ -29,6 +29,8 @@ class Brick extends Equatable {
   const Brick({
     required this.name,
     required this.source,
+    required Logger logger,
+    required FileSystem fileSystem,
     this.dirs = const [],
     this.files = const [],
     this.partials = const [],
@@ -36,8 +38,6 @@ class Brick extends Equatable {
     this.brickYamlConfig,
     this.exclude = const [],
     this.urls = const [],
-    required Logger logger,
-    required FileSystem fileSystem,
   })  : _fileSystem = fileSystem,
         _logger = logger;
 
@@ -60,9 +60,9 @@ class Brick extends Equatable {
   factory Brick.fromYaml(
     YamlValue yaml,
     String name, {
-    String? configPath,
     required FileSystem fileSystem,
     required Logger logger,
+    String? configPath,
   }) {
     if (yaml.isError()) {
       throw BrickException(

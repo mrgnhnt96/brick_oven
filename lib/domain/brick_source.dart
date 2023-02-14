@@ -41,8 +41,8 @@ class BrickSource extends Equatable {
   /// parse [yaml] into the source
   factory BrickSource.fromYaml(
     YamlValue yaml, {
-    String? configPath,
     required FileSystem fileSystem,
+    String? configPath,
   }) {
     if (yaml.isError()) {
       throw const SourceException(
@@ -167,8 +167,8 @@ class BrickSource extends Equatable {
   /// variables & configurations
   Iterable<BrickFile> mergeFilesAndConfig(
     Iterable<BrickFile> configFiles, {
-    Iterable<String> excludedPaths = const [],
     required Logger logger,
+    Iterable<String> excludedPaths = const [],
   }) {
     final configs = configFiles.toMap();
 

@@ -472,22 +472,15 @@ void main() {
 
 class TestCookSingleBrick extends CookSingleBrick {
   TestCookSingleBrick(
-    Brick brick, {
-    required FileSystem fileSystem,
-    required Analytics analytics,
-    required Logger logger,
+    super.brick, {
+    required super.fileSystem,
+    required super.analytics,
+    required super.logger,
     bool? isWatch,
     bool? shouldSync,
-    KeyPressListener? keyPressListener,
+    super.keyPressListener,
   })  : _isWatch = isWatch,
-        _shouldSync = shouldSync,
-        super(
-          brick,
-          fileSystem: fileSystem,
-          analytics: analytics,
-          logger: logger,
-          keyPressListener: keyPressListener,
-        );
+        _shouldSync = shouldSync;
 
   final bool? _isWatch;
   final bool? _shouldSync;

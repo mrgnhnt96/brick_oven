@@ -2,8 +2,6 @@
 
 import 'dart:async';
 
-import 'package:file/file.dart';
-import 'package:mason_logger/mason_logger.dart';
 import 'package:usage/usage_io.dart';
 
 import 'package:brick_oven/domain/brick.dart';
@@ -23,12 +21,11 @@ class CookSingleBrick extends BrickOvenCommand
   /// {@macro cook_single_brick_command}
   CookSingleBrick(
     this.brick, {
-    required FileSystem fileSystem,
+    required super.fileSystem,
     required Analytics analytics,
-    required Logger logger,
+    required super.logger,
     this.keyPressListener,
-  })  : _analytics = analytics,
-        super(fileSystem: fileSystem, logger: logger) {
+  }) : _analytics = analytics {
     argParser
       ..addCookOptionsAndFlags()
       ..addSeparator('${'-' * 79}\n');

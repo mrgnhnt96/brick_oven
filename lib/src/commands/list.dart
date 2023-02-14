@@ -2,7 +2,6 @@
 
 import 'dart:async';
 
-import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:usage/usage_io.dart';
 
@@ -16,14 +15,10 @@ import 'package:brick_oven/src/runner.dart';
 class ListCommand extends BrickOvenCommand {
   /// {@macro lists_command}
   ListCommand({
-    required Logger logger,
+    required super.logger,
     required Analytics analytics,
-    required FileSystem fileSystem,
-  })  : _analytics = analytics,
-        super(
-          logger: logger,
-          fileSystem: fileSystem,
-        ) {
+    required super.fileSystem,
+  }) : _analytics = analytics {
     argParser.addFlag(
       'verbose',
       abbr: 'v',

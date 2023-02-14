@@ -667,14 +667,13 @@ void main() {
 class TestOvenMixin extends BrickOvenCommand
     with BrickCooker, BrickCookerArgs, ConfigWatcherMixin, OvenMixin {
   TestOvenMixin({
-    this.keyPressListener,
-    required Logger logger,
-    this.outputDir = '',
+    required super.logger,
     required this.fileWatchers,
+    this.keyPressListener,
+    this.outputDir = '',
     this.isWatch = false,
     this.shouldSync = true,
   }) : super(
-          logger: logger,
           fileSystem: MemoryFileSystem(),
         );
 

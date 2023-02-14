@@ -228,10 +228,9 @@ bricks:
 class TestBrickOvenCommand extends BrickOvenCommand {
   TestBrickOvenCommand(
     FileSystem fs, {
-    required Logger logger,
+    required super.logger,
   }) : super(
           fileSystem: fs,
-          logger: logger,
         );
 
   @override

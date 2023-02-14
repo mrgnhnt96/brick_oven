@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:usage/usage_io.dart';
 
@@ -19,12 +18,11 @@ class CookAllBricks extends BrickOvenCommand
     with BrickCooker, BrickCookerArgs, ConfigWatcherMixin, OvenMixin {
   /// {@macro cook_all_bricks_command}
   CookAllBricks({
-    required FileSystem fileSystem,
-    required Logger logger,
+    required super.fileSystem,
+    required super.logger,
     required Analytics analytics,
     this.keyPressListener,
-  })  : _analytics = analytics,
-        super(fileSystem: fileSystem, logger: logger) {
+  }) : _analytics = analytics {
     argParser
       ..addCookOptionsAndFlags()
       ..addSeparator('${'-' * 79}\n');

@@ -338,17 +338,12 @@ void main() {
 
 class TestBrickOvenRunner extends BrickOvenRunner {
   TestBrickOvenRunner({
-    required Logger logger,
-    required FileSystem fileSystem,
+    required super.logger,
+    required super.fileSystem,
     required this.onRun,
-    required PubUpdater pubUpdater,
-    required Analytics analytics,
-  }) : super(
-          logger: logger,
-          pubUpdater: pubUpdater,
-          fileSystem: fileSystem,
-          analytics: analytics,
-        );
+    required super.pubUpdater,
+    required super.analytics,
+  });
 
   final void Function() onRun;
 

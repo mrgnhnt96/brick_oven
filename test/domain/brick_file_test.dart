@@ -790,7 +790,7 @@ yooooo:
 }
 
 class TestBrickFile extends BrickFile {
-  const TestBrickFile.throws(String path) : super.config(path);
+  const TestBrickFile.throws(super.path) : super.config();
 
   @override
   FileWriteResult writeFile({
