@@ -5,4 +5,4 @@ bricks:
     files:
       GREETINGS.md:
         vars:
-          name: _NAME_
+          _NAME_: name

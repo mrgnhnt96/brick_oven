@@ -82,12 +82,12 @@ files:
       value: other
       invert_section: device
     vars:
-      var1: _VAR1_
+      _VAR1_: var1
 partials:
   some/partial.dart:
   some/other/partial.dart:
     vars:
-      one: _ONE_
+      _ONE_: one
 exclude:
   - exclude/all/of/me
 urls:
@@ -508,7 +508,7 @@ exclude:
         testDirectoryWatcher = TestDirectoryWatcher();
 
         when(() => mockWatcher.addEvent(any())).thenReturn(voidCallback());
-        when(() => mockWatcher.start([])).thenAnswer((_) => Future.value());
+        when(() => mockWatcher.start(any())).thenAnswer((_) => Future.value());
         when(() => mockWatcher.hasRun).thenReturn(false);
 
         mockProgress = MockProgress();
@@ -591,7 +591,7 @@ exclude:
 
           verify(() => mockWatcher.addEvent(any())).called(2);
 
-          verify(() => mockWatcher.start([])).called(1);
+          verify(() => mockWatcher.start(any())).called(1);
           verify(() => mockWatcher.hasRun).called(1);
 
           verify(() => mockLogger.progress('Writing Brick: super_awesome'))
@@ -1143,8 +1143,11 @@ exclude:
       final mockSource = MockBrickSource();
 
       when(
-        () =>
-            mockSource.mergeFilesAndConfig(any(), logger: any(named: 'logger')),
+        () => mockSource.mergeFilesAndConfig(
+          any(),
+          logger: any(named: 'logger'),
+          excludedPaths: any(named: 'excludedPaths'),
+        ),
       ).thenReturn([mockFile]);
 
       when(
@@ -1202,7 +1205,11 @@ exclude:
 
       verify(() => mockSource.watcher).called(1);
       verify(
-        () => mockSource.mergeFilesAndConfig([mockFile], logger: mockLogger),
+        () => mockSource.mergeFilesAndConfig(
+          [mockFile],
+          logger: mockLogger,
+          excludedPaths: any(named: 'excludedPaths'),
+        ),
       ).called(1);
       verify(
         () => mockSource.fromSourcePath(filePath),
@@ -1219,8 +1226,11 @@ exclude:
       final mockSource = MockBrickSource();
 
       when(
-        () =>
-            mockSource.mergeFilesAndConfig(any(), logger: any(named: 'logger')),
+        () => mockSource.mergeFilesAndConfig(
+          any(),
+          logger: any(named: 'logger'),
+          excludedPaths: any(named: 'excludedPaths'),
+        ),
       ).thenReturn([mockFile]);
 
       when(
@@ -1278,7 +1288,11 @@ exclude:
 
       verify(() => mockSource.watcher).called(1);
       verify(
-        () => mockSource.mergeFilesAndConfig([mockFile], logger: mockLogger),
+        () => mockSource.mergeFilesAndConfig(
+          [mockFile],
+          logger: mockLogger,
+          excludedPaths: any(named: 'excludedPaths'),
+        ),
       ).called(1);
       verify(
         () => mockSource.fromSourcePath(filePath),

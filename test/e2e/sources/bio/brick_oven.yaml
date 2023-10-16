@@ -5,6 +5,6 @@ bricks:
     files:
       ABOUT.md:
         vars:
-          name: _NAME_
-          age: _AGE_
-          isDeveloper: _IS_DEVELOPER_
+          _NAME_: name
+          _AGE_: age
+          _IS_DEVELOPER_: isDeveloper

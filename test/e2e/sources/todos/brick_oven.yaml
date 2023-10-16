@@ -23,15 +23,15 @@ bricks:
           format: upperCase
           section: todos
         vars:
-          todos.todo: _TODO_
-          todos.done: _DONE_
+          _TODO_: todos.todo
+          _DONE_: todos.done
       todos/todo/developers/name/info.md:
         vars:
-          developers.name: _DEVELOPER_NAME_
-          todos.todo: _TODO_
-          todos.done: _DONE_
+          _DEVELOPER_NAME_: developers.name
+          _TODO_: todos.todo
+          _DONE_: todos.done
       todos.md:
         vars:
-          todos: _TODOS_
-          done: _DONE_
-          todo: _TODO_
+          _TODOS_: todos
+          _DONE_: done
+          _TODO_: todo

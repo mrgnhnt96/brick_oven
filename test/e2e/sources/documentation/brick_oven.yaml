@@ -5,8 +5,8 @@ bricks:
     files:
       README.md:
         vars:
-          name: _NAME_
-          description: _DESCRIPTION_
+          _NAME_: name
+          _DESCRIPTION_: description
       LICENSE:
         vars:
-          author: _AUTHOR_
+          _AUTHOR_: author

@@ -5,4 +5,4 @@ bricks:
     files:
       color.md:
         vars:
-          color: _COLOR_
+          _COLOR_: color

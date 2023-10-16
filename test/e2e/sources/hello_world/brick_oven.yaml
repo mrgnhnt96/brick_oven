@@ -5,9 +5,9 @@ bricks:
     files:
       HELLO.md:
         vars:
-          name: _NAME_
+          _NAME_: name
     partials:
       common_footer.md:
       common_header.md:
         vars:
-          name: _NAME_
+          _NAME_: name

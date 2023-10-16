@@ -9,7 +9,7 @@ bricks:
           section: flavors
           prefix: main_
         vars:
-          flavors: _FLAVORS_
+          _FLAVORS_: flavors
       README.md:
         vars:
-          flavors: _FLAVORS_
+          _FLAVORS_: flavors

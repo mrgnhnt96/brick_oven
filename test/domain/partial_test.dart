@@ -92,7 +92,7 @@ vars:
         const content = '''
 vars:
   some:
-  one: _ONE_
+  _ONE_: one
 
 ''';
         final yaml = YamlValue.from(loadYaml(content));

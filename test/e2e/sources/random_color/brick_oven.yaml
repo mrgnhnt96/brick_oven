@@ -8,5 +8,5 @@ bricks:
     files:
       color.md:
         vars:
-          name: _NAME_
-          favorite_color: _FAVORITE_COLOR_
+          _NAME_: name
+          _FAVORITE_COLOR_: favorite_color
