@@ -268,7 +268,7 @@ void main() {
             when(() => mockBrickSource.watcher).thenReturn(mockSourceWatcher);
 
             when(() => mockSourceWatcher.hasRun).thenAnswer((_) => true);
-            when(() => mockSourceWatcher.start([]))
+            when(() => mockSourceWatcher.start(any()))
                 .thenAnswer((_) => Future.value());
             when(mockSourceWatcher.stop).thenAnswer((_) => Future.value());
           });
