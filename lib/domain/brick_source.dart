@@ -12,6 +12,8 @@ import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
+import 'package:brick_oven/utils/separate_dirs_and_paths.dart';
+import 'package:brick_oven/utils/should_exclude_path.dart';
 
 part 'brick_source.g.dart';
 
@@ -198,38 +200,14 @@ class BrickSource extends Equatable {
       ..addAll(sourceFiles)
       ..addAll(configs);
 
-    final excludedDirs = <String>[];
-    final excludedFiles = <String>[];
-
-    for (final e in excludedPaths) {
-      final path = normalize(e);
-
-      if (extension(path).isNotEmpty) {
-        excludedFiles.add(path);
-      } else {
-        excludedDirs.add(path);
-      }
-    }
+    final (excludedDirs, excludedFiles) = separateDirsAndPaths(excludedPaths);
 
     final brickFiles = <BrickFile>[];
 
     for (final key in result.keys) {
       final path = normalize(key);
 
-      if (excludedFiles.contains(path)) {
-        continue;
-      }
-
-      var isExcluded = false;
-      for (final dir in excludedDirs) {
-        final segments = split(path);
-        if (segments.contains(dir)) {
-          isExcluded = true;
-          break;
-        }
-      }
-
-      if (isExcluded) {
+      if (shouldExcludePath(path, excludedDirs, excludedFiles)) {
         continue;
       }
 
