@@ -508,7 +508,7 @@ exclude:
         testDirectoryWatcher = TestDirectoryWatcher();
 
         when(() => mockWatcher.addEvent(any())).thenReturn(voidCallback());
-        when(mockWatcher.start).thenAnswer((_) => Future.value());
+        when(() =>mockWatcher.start([])).thenAnswer((_) => Future.value());
         when(() => mockWatcher.hasRun).thenReturn(false);
 
         mockProgress = MockProgress();
@@ -591,7 +591,7 @@ exclude:
 
           verify(() => mockWatcher.addEvent(any())).called(2);
 
-          verify(mockWatcher.start).called(1);
+          verify(() => mockWatcher.start([])).called(1);
           verify(() => mockWatcher.hasRun).called(1);
 
           verify(() => mockLogger.progress('Writing Brick: super_awesome'))

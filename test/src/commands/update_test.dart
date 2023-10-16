@@ -10,8 +10,6 @@ import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/src/version.dart';
 import '../../test_utils/mocks.dart';
 
-class FakeProcessResult extends Fake implements ProcessResult {}
-
 void main() {
   const latestVersion = '0.0.0';
   late Logger mockLogger;
@@ -133,7 +131,7 @@ void main() {
 
       when(
         () => mockPubUpdater.update(packageName: any(named: 'packageName')),
-      ).thenAnswer((_) => Future.value(FakeProcessResult()));
+      ).thenAnswer((_) => Future.value(ProcessResult(0, 0, '', '')));
 
       final result = await updateCommand.run();
 

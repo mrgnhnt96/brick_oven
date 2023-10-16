@@ -91,12 +91,14 @@ include_if_not: check
       test('returns when yaml is map ', () {
         final url = BrickUrl.fromYaml(
           YamlValue.from(
-            YamlMap.wrap({
-              'name': {
-                'value': 'name',
-                'format': 'camel',
-              }
-            }),
+            YamlMap.wrap(
+              {
+                'name': {
+                  'value': 'name',
+                  'format': 'camel',
+                },
+              },
+            ),
           ),
           'path',
         );

@@ -93,10 +93,12 @@ void main() {
         when(
           mockStdin.asBroadcastStream,
         ).thenAnswer(
-          (_) => Stream.fromIterable([
-            'q'.codeUnits,
-            [0x1b]
-          ]),
+          (_) => Stream.fromIterable(
+            [
+              'q'.codeUnits,
+              [0x1b],
+            ],
+          ),
         );
 
         var qPressed = false;

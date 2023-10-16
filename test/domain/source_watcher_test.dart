@@ -43,7 +43,7 @@ void main() {
       test('is false when listener is null', () {
         expect(watcher.isRunning, isFalse);
 
-        watcher.addEvent(() {});
+        watcher.addEvent((_) {});
 
         expect(watcher.isRunning, false);
       });
@@ -53,7 +53,7 @@ void main() {
         () async {
           expect(watcher.isRunning, isFalse);
 
-          await watcher.start();
+          await watcher.start([]);
 
           expect(watcher.isRunning, isFalse);
         },
@@ -64,9 +64,9 @@ void main() {
         () async {
           expect(watcher.isRunning, isFalse);
 
-          watcher.addEvent(() {});
+          watcher.addEvent((_) {});
 
-          await watcher.start();
+          await watcher.start([]);
 
           expect(watcher.isRunning, isTrue);
         },
@@ -75,9 +75,9 @@ void main() {
       test('is true when there are before events and a listener', () async {
         expect(watcher.isRunning, isFalse);
 
-        watcher.addEvent(() {}, runBefore: true);
+        watcher.addEvent((_) {}, runBefore: true);
 
-        await watcher.start();
+        await watcher.start([]);
 
         expect(watcher.isRunning, isTrue);
       });
@@ -85,9 +85,9 @@ void main() {
       test('is true when there are after events and a listener', () async {
         expect(watcher.isRunning, isFalse);
 
-        watcher.addEvent(() {}, runAfter: true);
+        watcher.addEvent((_) {}, runAfter: true);
 
-        await watcher.start();
+        await watcher.start([]);
 
         expect(watcher.isRunning, isTrue);
       });
@@ -95,19 +95,25 @@ void main() {
 
     group('#addEvent', () {
       test('adds an event', () {
-        expect(() => watcher.addEvent(() {}), returnsNormally);
+        expect(() => watcher.addEvent((_) {}), returnsNormally);
 
         expect(watcher.events.length, 1);
       });
 
       test('adds a pre event', () {
-        expect(() => watcher.addEvent(() {}, runBefore: true), returnsNormally);
+        expect(
+          () => watcher.addEvent((_) {}, runBefore: true),
+          returnsNormally,
+        );
 
         expect(watcher.beforeEvents.length, 1);
       });
 
       test('adds a post event', () {
-        expect(() => watcher.addEvent(() {}, runAfter: true), returnsNormally);
+        expect(
+          () => watcher.addEvent((_) {}, runAfter: true),
+          returnsNormally,
+        );
 
         expect(watcher.afterEvents.length, 1);
       });
@@ -119,19 +125,19 @@ void main() {
         test('creates a listener', () async {
           expect(watcher.listener, isNull);
 
-          await watcher.start();
+          await watcher.start([]);
 
           expect(watcher.listener, isNotNull);
         });
 
         test('calls reset when listener is not null', () async {
-          await watcher.start();
+          await watcher.start([]);
 
           final listener1 = watcher.listener;
 
           expect(watcher.listener, isNotNull);
 
-          await watcher.start();
+          await watcher.start([]);
 
           final listener2 = watcher.listener;
 
@@ -145,7 +151,7 @@ void main() {
 
           testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
 
-          await watcher.start();
+          await watcher.start([]);
 
           await expectLater(watcher.hasRun, isTrue);
         });
@@ -153,13 +159,13 @@ void main() {
         test('calls all the events', () async {
           var hasRunEvent = false;
 
-          watcher.addEvent(() {
+          watcher.addEvent((_) {
             hasRunEvent = true;
           });
 
           testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
 
-          await watcher.start();
+          await watcher.start([]);
 
           expect(hasRunEvent, isTrue);
         });
@@ -168,7 +174,7 @@ void main() {
           var hasRunEvent = false;
 
           watcher.addEvent(
-            () {
+            (_) {
               hasRunEvent = true;
             },
             runBefore: true,
@@ -176,7 +182,7 @@ void main() {
 
           testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
 
-          await watcher.start();
+          await watcher.start([]);
 
           expect(hasRunEvent, isTrue);
         });
@@ -185,7 +191,7 @@ void main() {
           var hasRunEvent = false;
 
           watcher.addEvent(
-            () {
+            (_) {
               hasRunEvent = true;
             },
             runAfter: true,
@@ -193,7 +199,7 @@ void main() {
 
           testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
 
-          await watcher.start();
+          await watcher.start([]);
 
           expect(hasRunEvent, isTrue);
         });
@@ -209,9 +215,9 @@ void main() {
 
       test('maintains events', () async {
         watcher
-          ..addEvent(() {})
-          ..addEvent(() {}, runBefore: true)
-          ..addEvent(() {}, runAfter: true);
+          ..addEvent((_) {})
+          ..addEvent((_) {}, runBefore: true)
+          ..addEvent((_) {}, runAfter: true);
 
         expect(watcher.events.length, 1);
         expect(watcher.beforeEvents.length, 1);
@@ -227,7 +233,7 @@ void main() {
 
     group('#stop', () {
       test('sets listener to null', () async {
-        await watcher.start();
+        await watcher.start([]);
 
         expect(watcher.listener, isNotNull);
 
@@ -238,9 +244,9 @@ void main() {
 
       test('removes all events', () async {
         watcher
-          ..addEvent(() {})
-          ..addEvent(() {}, runAfter: true)
-          ..addEvent(() {}, runBefore: true);
+          ..addEvent((_) {})
+          ..addEvent((_) {}, runAfter: true)
+          ..addEvent((_) {}, runBefore: true);
 
         expect(watcher.events.length, 1);
         expect(watcher.beforeEvents.length, 1);

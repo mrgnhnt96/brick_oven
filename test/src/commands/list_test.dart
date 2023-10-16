@@ -185,7 +185,7 @@ void main() {
                   ),
                 ],
                 partials: const [Partial(path: 'header.md')],
-              )
+              ),
             },
             null,
           );

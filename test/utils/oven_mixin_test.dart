@@ -133,7 +133,7 @@ void main() {
 
       verifyNever(mockKeyPressListener.listenToKeystrokes);
       verifyNever(() => mockFileWatcher.events);
-      verifyNever(mockSourceWatcher.start);
+      verifyNever(() => mockSourceWatcher.start([]));
 
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockBrick);
@@ -169,7 +169,7 @@ void main() {
 
       verifyNever(mockKeyPressListener.listenToKeystrokes);
       verifyNever(() => mockFileWatcher.events);
-      verifyNever(mockSourceWatcher.start);
+      verifyNever(() => mockSourceWatcher.start([]));
 
       verify(() => mockBrick.name).called(1);
 
@@ -207,7 +207,7 @@ void main() {
 
       verifyNever(mockKeyPressListener.listenToKeystrokes);
       verifyNever(() => mockFileWatcher.events);
-      verifyNever(mockSourceWatcher.start);
+      verifyNever(() => mockSourceWatcher.start([]));
 
       verify(() => mockBrick.name).called(1);
 
@@ -259,7 +259,7 @@ void main() {
       when(() => mockBrickSource.watcher).thenReturn(mockSourceWatcher);
 
       when(() => mockSourceWatcher.hasRun).thenAnswer((_) => true);
-      when(mockSourceWatcher.start).thenAnswer((_) => Future.value());
+      when(() => mockSourceWatcher.start([])).thenAnswer((_) => Future.value());
       when(mockSourceWatcher.stop).thenAnswer((_) => Future.value());
 
       when(() => mockFileWatcher.events)
@@ -370,7 +370,7 @@ void main() {
       verifyInOrder([
         mockLogger.preheat,
         () => mockLogger.progress('Writing Brick: BRICK'),
-        mockSourceWatcher.start,
+        () => mockSourceWatcher.start([]),
         mockLogger.dingDing,
         mockLogger.watching,
         mockLogger.quit,
@@ -436,7 +436,7 @@ void main() {
       verifyInOrder([
         mockLogger.preheat,
         () => mockLogger.progress('Writing Brick: BRICK'),
-        mockSourceWatcher.start,
+        () => mockSourceWatcher.start([]),
         mockLogger.dingDing,
         mockLogger.watching,
         mockLogger.quit,
@@ -570,7 +570,7 @@ void main() {
       verifyInOrder([
         mockLogger.preheat,
         () => mockLogger.progress('Writing Brick: BRICK'),
-        mockSourceWatcher.start,
+        () => mockSourceWatcher.start([]),
         mockLogger.dingDing,
         mockLogger.watching,
         mockLogger.quit,
@@ -639,7 +639,7 @@ void main() {
       verifyInOrder([
         mockLogger.preheat,
         () => mockLogger.progress('Writing Brick: BRICK'),
-        mockSourceWatcher.start,
+        () => mockSourceWatcher.start([]),
         mockLogger.dingDing,
         mockLogger.watching,
         mockLogger.quit,

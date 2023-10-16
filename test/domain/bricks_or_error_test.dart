@@ -30,7 +30,7 @@ void main() {
           ),
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
-        )
+        ),
       };
 
       final brickOrError = BricksOrError(bricks, null);
@@ -64,7 +64,7 @@ void main() {
           ),
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
-        )
+        ),
       };
 
       final brickOrError = BricksOrError(bricks, null);
@@ -92,7 +92,7 @@ void main() {
           ),
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
-        )
+        ),
       };
 
       final brickOrError = BricksOrError(bricks, null);
@@ -114,7 +114,7 @@ void main() {
           ),
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
-        )
+        ),
       };
 
       final brickOrError = BricksOrError(bricks, null);
