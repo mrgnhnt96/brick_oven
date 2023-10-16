@@ -16,6 +16,6 @@ extension _$BrickAutoequal on Brick {
         urls,
         exclude,
         name,
-        source
+        source,
       ];
 }

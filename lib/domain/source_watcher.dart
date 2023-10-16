@@ -7,10 +7,13 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
+import 'package:brick_oven/utils/separate_dirs_and_paths.dart';
+import 'package:brick_oven/utils/should_exclude_path.dart';
+
 part 'source_watcher.g.dart';
 
 /// the function that happens on the file event
-typedef OnEvent = void Function();
+typedef OnEvent = void Function(String path);
 
 /// {@template source_watcher}
 /// Watches the local files, and updates on events
@@ -65,6 +68,8 @@ class SourceWatcher extends Equatable {
   @visibleForTesting
   List<OnEvent> get events => List.from(_events);
 
+  List<String> _excludedPaths = [];
+
   /// whether the watcher has run
   bool get hasRun => _hasRun;
 
@@ -98,29 +103,37 @@ class SourceWatcher extends Equatable {
   Future<void> reset() async {
     await _stop(removeEvents: false);
 
-    await start();
+    await start(_excludedPaths);
   }
 
   /// starts the watcher
-  Future<void> start() async {
+  Future<void> start(List<String> excludedPaths) async {
+    _excludedPaths = excludedPaths;
+
     if (_listener != null) {
       return reset();
     }
 
+    final (excludedDirs, excludedFiles) = separateDirsAndPaths(_excludedPaths);
+
     _listener = _watcher.events.listen((watchEvent) {
+      if (shouldExcludePath(watchEvent.path, excludedDirs, excludedFiles)) {
+        return;
+      }
+
       // finishes the watcher
       _hasRun = true;
 
       for (final event in _beforeEvents) {
-        event();
+        event(watchEvent.path);
       }
 
       for (final event in _events) {
-        event();
+        event(watchEvent.path);
       }
 
       for (final event in _afterEvents) {
-        event();
+        event(watchEvent.path);
       }
     });
 

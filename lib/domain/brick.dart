@@ -494,6 +494,8 @@ class Brick extends Equatable {
       );
     }
 
+    final excludedPaths = [...exclude, '__brick__', 'bricks', '.git'];
+
     void putInTheOven() {
       final directory = _fileSystem.directory(targetDir);
       if (directory.existsSync()) {
@@ -502,7 +504,7 @@ class Brick extends Equatable {
 
       final mergedFiles = source.mergeFilesAndConfig(
         files,
-        excludedPaths: exclude,
+        excludedPaths: excludedPaths,
         logger: _logger,
       );
       final count = mergedFiles.length;
@@ -603,9 +605,9 @@ class Brick extends Equatable {
 
     if (watch && watcher != null) {
       watcher
-        ..addEvent(putInTheOven)
-        ..addEvent(() => checkBrickYamlConfig(shouldSync: shouldSync))
-        ..start();
+        ..addEvent((_) => putInTheOven)
+        ..addEvent((_) => checkBrickYamlConfig(shouldSync: shouldSync))
+        ..start(excludedPaths);
 
       if (watcher.hasRun) {
         return;
