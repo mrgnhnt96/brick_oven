@@ -217,11 +217,20 @@ class BrickSource extends Equatable {
       final path = normalize(key);
 
       if (excludedFiles.contains(path)) {
-        break;
+        continue;
       }
 
-      if (excludedDirs.any(path.startsWith)) {
-        break;
+      var isExcluded = false;
+      for (final dir in excludedDirs) {
+        final segments = split(path);
+        if (segments.contains(dir)) {
+          isExcluded = true;
+          break;
+        }
+      }
+
+      if (isExcluded) {
+        continue;
       }
 
       brickFiles.add(result[key]!);

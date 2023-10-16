@@ -400,6 +400,61 @@ path:
         verifyNoMoreInteractions(mockLogger);
       },
     );
+
+    test(
+      'should include files that are followed by paths that should be excluded',
+      () {
+        final excludedPaths = [
+          '.history',
+          '.idea',
+          'mobile_app.iml',
+          'brick_oven.yaml',
+          'derry.yaml',
+        ];
+
+        final files = [
+          '.history/file1.dart',
+          '.idea/file2.dart',
+          'mobile_app.iml',
+          'brick_oven.yaml',
+          'derry.yaml',
+          'android/app/src/main/kotlin/com/example/mobile_app/MainActivity.kt',
+          'ios/Runner/AppDelegate.swift',
+          'lib/main.dart',
+        ];
+
+        final fs = MemoryFileSystem();
+
+        for (final file in files) {
+          fs.file(file).createSync(recursive: true);
+        }
+
+        final source = BrickSource.memory(
+          localPath: '.',
+          fileSystem: fs,
+        );
+
+        final brickFiles = source.mergeFilesAndConfig(
+          [],
+          excludedPaths: excludedPaths,
+          logger: mockLogger,
+        ).toList();
+
+        final paths = brickFiles.map((e) => e.path);
+
+        expect(paths.length, 3);
+        expect(
+          paths,
+          contains(
+            'android/app/src/main/kotlin/com/example/mobile_app/MainActivity.kt',
+          ),
+        );
+        expect(paths, contains('ios/Runner/AppDelegate.swift'));
+        expect(paths, contains('lib/main.dart'));
+
+        verifyNoMoreInteractions(mockLogger);
+      },
+    );
   });
 
   group('#fromSourcePath', () {
