@@ -54,13 +54,13 @@ mixin OvenMixin on BrickCooker, BrickCookerArgs, ConfigWatcherMixin {
       if (isWatch) {
         brick.source.watcher
           ?..addEvent(
-            () => logger.fileChanged(brick.name),
+            (path) => logger.fileChanged(path),
             runBefore: true,
           )
-          ..addEvent(logger.preheat, runBefore: true)
-          ..addEvent(logger.dingDing, runAfter: true)
-          ..addEvent(logger.watching, runAfter: true)
-          ..addEvent(logger.keyStrokes, runAfter: true);
+          ..addEvent((_) => logger.preheat(), runBefore: true)
+          ..addEvent((_) => logger.dingDing(), runAfter: true)
+          ..addEvent((_) => logger.watching(), runAfter: true)
+          ..addEvent((_) => logger.keyStrokes(), runAfter: true);
       }
 
       try {
