@@ -20,39 +20,39 @@ class Variable extends Equatable {
 
   /// parses the [yaml] to [Variable]
   ///
-  /// [yaml] must be a string and is the [placeholder] value
-  factory Variable.fromYaml(YamlValue yaml, String name) {
+  /// [yaml] must be a string and is the [name] of the variable
+  factory Variable.fromYaml(YamlValue yaml, String placeholder) {
     if (yaml.isError()) {
       throw VariableException(
-        variable: name,
+        variable: placeholder,
         reason: 'Invalid configuration',
       );
     }
 
     if (yaml.isNone()) {
-      return Variable(name: name, placeholder: name);
+      return Variable(name: placeholder, placeholder: placeholder);
     }
 
     if (!yaml.isString()) {
       throw VariableException(
-        variable: name,
+        variable: placeholder,
         reason: 'Expected type `String` or `null`',
       );
     }
 
-    final placeholder = yaml.asString().value.trim();
+    final name = yaml.asString().value.trim();
 
     if (placeholder.isNotEmpty && placeholder.containsWhitespace()) {
       throw VariableException(
-        variable: name,
-        reason: 'Placeholder cannot contain whitespace',
+        variable: placeholder,
+        reason: 'The placeholder (key) cannot contain whitespace',
       );
     }
 
     if (name.isNotEmpty && name.containsWhitespace()) {
       throw VariableException(
-        variable: name,
-        reason: 'Name cannot contain whitespace',
+        variable: placeholder,
+        reason: 'The name (value) cannot contain whitespace',
       );
     }
 
