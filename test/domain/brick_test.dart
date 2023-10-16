@@ -508,7 +508,7 @@ exclude:
         testDirectoryWatcher = TestDirectoryWatcher();
 
         when(() => mockWatcher.addEvent(any())).thenReturn(voidCallback());
-        when(() =>mockWatcher.start([])).thenAnswer((_) => Future.value());
+        when(() => mockWatcher.start([])).thenAnswer((_) => Future.value());
         when(() => mockWatcher.hasRun).thenReturn(false);
 
         mockProgress = MockProgress();
