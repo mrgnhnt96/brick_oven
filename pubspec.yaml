@@ -1,11 +1,11 @@
 name: brick_oven
-description:  Easily create & format brick templates with the brick_oven cli generator for mason
+description: Easily create & format brick templates with the brick_oven cli generator for mason
 version: 0.1.0-dev
 homepage: https://github.com/mrgnhnt96/brick_oven
 repository: https://github.com/mrgnhnt96/brick_oven
 
 environment:
-  sdk: '>=2.19.0 <3.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   args: ^2.4.0
