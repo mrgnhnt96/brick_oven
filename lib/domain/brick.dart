@@ -487,12 +487,6 @@ class Brick extends Equatable {
     }
 
     final done = _logger.progress('Writing Brick: $name');
-    void fail(String type, String path) {
-      done.fail(
-        '${darkGray.wrap('($name)')} '
-        'Failed to write $type: $path',
-      );
-    }
 
     final excludedPaths = [...exclude, '__brick__', 'bricks', '.git'];
 
@@ -500,116 +494,17 @@ class Brick extends Equatable {
       excludedPaths.add(output);
     }
 
-    void putInTheOven() {
-      final directory = _fileSystem.directory(targetDir);
-      if (directory.existsSync()) {
-        directory.deleteSync(recursive: true);
-      }
-
-      final mergedFiles = source.mergeFilesAndConfig(
-        files,
-        excludedPaths: excludedPaths,
-        logger: _logger,
-      );
-      final count = mergedFiles.length;
-
-      final usedVariables = <String>{};
-      final usedPartials = <String>{};
-
-      final partialPaths = partials.map((e) => e.path).toSet();
-
-      for (final file in mergedFiles) {
-        if (partialPaths.contains(file.path)) {
-          // skip partial file generation
-          continue;
-        }
-
-        FileWriteResult writeResult;
-
-        try {
-          writeResult = file.writeTargetFile(
-            targetDir: targetDir,
-            sourceFile: _fileSystem.file(source.fromSourcePath(file.path)),
-            dirs: dirs,
-            partials: partials,
-            fileSystem: _fileSystem,
-            urls: urls,
-            logger: _logger,
-            outOfFileVariables: defaultVariables,
-          );
-        } on ConfigException catch (e) {
-          fail('file', file.path);
-
-          throw BrickException(
-            brick: name,
-            reason: e.message,
-          );
-        } catch (_) {
-          fail('file', file.path);
-          rethrow;
-        }
-
-        usedVariables.addAll(writeResult.usedVariables);
-        usedPartials.addAll(writeResult.usedPartials);
-      }
-
-      for (final partial in partials) {
-        FileWriteResult writeResult;
-        try {
-          writeResult = partial.writeTargetFile(
-            targetDir: targetDir,
-            sourceFile: _fileSystem.file(source.fromSourcePath(partial.path)),
-            partials: partials,
-            fileSystem: _fileSystem,
-            logger: _logger,
-            outOfFileVariables: defaultVariables,
-          );
-        } on ConfigException catch (e) {
-          fail('partial', partial.path);
-          throw BrickException(
-            brick: name,
-            reason: e.message,
-          );
-        } catch (_) {
-          fail('partial', partial.path);
-
-          rethrow;
-        }
-
-        usedPartials.addAll(writeResult.usedPartials);
-        usedVariables.addAll(writeResult.usedVariables);
-      }
-
-      final partialNames = partials.map((e) => e.path).toSet();
-
-      final unusedVariables = allBrickVariables().difference(usedVariables);
-      final unusedPartials = partialNames.difference(usedPartials);
-
-      if (unusedVariables.isNotEmpty) {
-        final vars = '"${unusedVariables.join('", "')}"';
-        _logger.warn(
-          'Unused variables ($vars) in $name',
-        );
-      }
-
-      if (unusedPartials.isNotEmpty) {
-        final partials = '"${unusedPartials.map(basename).join('", "')}"';
-        _logger.warn(
-          'Unused partials ($partials) in $name',
-        );
-      }
-
-      done.complete(
-        '${cyan.wrap(name)}: cooked '
-        '${yellow.wrap('$count')} file${count == 1 ? '' : 's'}',
-      );
-    }
-
     final watcher = source.watcher;
 
     if (watch && watcher != null) {
       watcher
-        ..addEvent((_) => putInTheOven)
+        ..addEvent(
+          (_) => _putInTheOven(
+            targetDir: targetDir,
+            done: done,
+            excludedPaths: excludedPaths.toSet(),
+          ),
+        )
         ..addEvent((_) => checkBrickYamlConfig(shouldSync: shouldSync))
         ..start(excludedPaths);
 
@@ -618,7 +513,127 @@ class Brick extends Equatable {
       }
     }
 
-    putInTheOven();
+    _putInTheOven(
+      targetDir: targetDir,
+      done: done,
+      excludedPaths: excludedPaths.toSet(),
+    );
     checkBrickYamlConfig(shouldSync: shouldSync);
+  }
+
+  void _fail(Progress progress, String type, String path) {
+    progress.fail(
+      '${darkGray.wrap('($name)')} '
+      'Failed to write $type: $path',
+    );
+  }
+
+  void _putInTheOven({
+    required String targetDir,
+    required Progress done,
+    required Set<String> excludedPaths,
+  }) {
+    final directory = _fileSystem.directory(targetDir);
+    if (directory.existsSync()) {
+      directory.deleteSync(recursive: true);
+    }
+
+    final mergedFiles = source.mergeFilesAndConfig(
+      files,
+      excludedPaths: excludedPaths,
+      logger: _logger,
+    );
+    final count = mergedFiles.length;
+
+    final usedVariables = <String>{};
+    final usedPartials = <String>{};
+
+    final partialPaths = partials.map((e) => e.path).toSet();
+
+    for (final file in mergedFiles) {
+      if (partialPaths.contains(file.path)) {
+        // skip partial file generation
+        continue;
+      }
+
+      FileWriteResult writeResult;
+
+      try {
+        writeResult = file.writeTargetFile(
+          targetDir: targetDir,
+          sourceFile: _fileSystem.file(source.fromSourcePath(file.path)),
+          dirs: dirs,
+          partials: partials,
+          fileSystem: _fileSystem,
+          urls: urls,
+          logger: _logger,
+          outOfFileVariables: defaultVariables,
+        );
+      } on ConfigException catch (e) {
+        _fail(done, 'file', file.path);
+
+        throw BrickException(
+          brick: name,
+          reason: e.message,
+        );
+      } catch (_) {
+        _fail(done, 'file', file.path);
+        rethrow;
+      }
+
+      usedVariables.addAll(writeResult.usedVariables);
+      usedPartials.addAll(writeResult.usedPartials);
+    }
+
+    for (final partial in partials) {
+      FileWriteResult writeResult;
+      try {
+        writeResult = partial.writeTargetFile(
+          targetDir: targetDir,
+          sourceFile: _fileSystem.file(source.fromSourcePath(partial.path)),
+          partials: partials,
+          fileSystem: _fileSystem,
+          logger: _logger,
+          outOfFileVariables: defaultVariables,
+        );
+      } on ConfigException catch (e) {
+        _fail(done, 'partial', partial.path);
+        throw BrickException(
+          brick: name,
+          reason: e.message,
+        );
+      } catch (_) {
+        _fail(done, 'partial', partial.path);
+
+        rethrow;
+      }
+
+      usedPartials.addAll(writeResult.usedPartials);
+      usedVariables.addAll(writeResult.usedVariables);
+    }
+
+    final partialNames = partials.map((e) => e.path).toSet();
+
+    final unusedVariables = allBrickVariables().difference(usedVariables);
+    final unusedPartials = partialNames.difference(usedPartials);
+
+    if (unusedVariables.isNotEmpty) {
+      final vars = '"${unusedVariables.join('", "')}"';
+      _logger.warn(
+        'Unused variables ($vars) in $name',
+      );
+    }
+
+    if (unusedPartials.isNotEmpty) {
+      final partials = '"${unusedPartials.map(basename).join('", "')}"';
+      _logger.warn(
+        'Unused partials ($partials) in $name',
+      );
+    }
+
+    done.complete(
+      '${cyan.wrap(name)}: cooked '
+      '${yellow.wrap('$count')} file${count == 1 ? '' : 's'}',
+    );
   }
 }
