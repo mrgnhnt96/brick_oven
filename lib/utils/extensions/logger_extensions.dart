@@ -27,8 +27,8 @@ extension LoggerX on Logger {
   }
 
   /// writes `📁  File changed (brickName)`
-  void fileChanged(String brickName) {
-    info('\n📁  File changed ${darkGray.wrap('($brickName)')}');
+  void fileChanged(String name) {
+    info('\n📁  File changed ${darkGray.wrap('($name)')}');
   }
 
   /// writes the listen to files message
