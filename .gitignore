@@ -10,3 +10,6 @@ build/
 codecov
 publish_package.sh
 test/.test_runner.dart
+coverage
+
+.history
