@@ -496,6 +496,10 @@ class Brick extends Equatable {
 
     final excludedPaths = [...exclude, '__brick__', 'bricks', '.git'];
 
+    if (output != '.') {
+      excludedPaths.add(output);
+    }
+
     void putInTheOven() {
       final directory = _fileSystem.directory(targetDir);
       if (directory.existsSync()) {
