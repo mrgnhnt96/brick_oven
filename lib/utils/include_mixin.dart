@@ -2,7 +2,7 @@ import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 
 /// a mixin for [includeIf] and [includeIfNot]
-abstract class IncludeMixin {
+mixin IncludeMixin {
   /// whether to include the file in the _mason_ build output
   /// based on the variable provided
   ///
