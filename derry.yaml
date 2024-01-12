@@ -1,7 +1,7 @@
-build:
-  run: flutter packages pub run build_runner build --delete-conflicting-outputs
-  watch: flutter packages pub run build_runner watch --delete-conflicting-outputs
-  clean: flutter packages pub run build_runner clean build
+br:
+  b: dart run build_runner build --delete-conflicting-outputs
+  w: dart run build_runner watch --delete-conflicting-outputs
+  c: dart run build_runner clean build
 
 coverage:
   # - format_coverage --lcov --check-ignore --in=coverage --out=coverage/lcov.info --report-on=lib
@@ -17,22 +17,22 @@ upload_coverage:
 
 test:
   only:
-    - very_good test --test-randomize-ordering-seed random
+    - dart run very_good_cli:very_good test --test-randomize-ordering-seed random
 
   coverage:
     - rm -rf coverage
     - $test:only --coverage --exclude-coverage **/*.g.dart
     - $coverage
 
-clean:
-  proj:
+pub:
+  get:
     - rm -rf pubspec.lock
-    - dart pub get
+    - dart run very_good_cli:very_good packages get --recursive
 
 prep:
   - dart analyze lib test
   - dart format lib test
-  - dart pub global run import_sorter:main
+  - dart run import_sorter:main --ignore-config --no-comments
 
 install:
   - dart pub global activate --source path . --overwrite
