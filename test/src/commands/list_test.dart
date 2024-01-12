@@ -9,7 +9,7 @@ import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/src/commands/list.dart';
-import 'package:brick_oven/utils/di.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';

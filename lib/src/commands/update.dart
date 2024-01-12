@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:brick_oven/utils/di.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/src/constants/constants.dart';
 import 'package:brick_oven/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';

@@ -9,7 +9,7 @@ import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
-import 'package:brick_oven/utils/di.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';

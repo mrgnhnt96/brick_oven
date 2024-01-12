@@ -3,7 +3,7 @@ import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/bricks_or_error.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
-import 'package:brick_oven/utils/di.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';

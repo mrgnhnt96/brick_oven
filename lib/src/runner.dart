@@ -1,6 +1,6 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:brick_oven/utils/di.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_bricks.dart';
 import 'package:brick_oven/src/commands/list.dart';
 import 'package:brick_oven/src/commands/update.dart';

@@ -1,21 +1,19 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:brick_oven/utils/di.dart';
+import 'package:brick_oven/domain/file_write_result.dart';
+import 'package:brick_oven/domain/partial.dart';
+import 'package:brick_oven/domain/variable.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:file/file.dart';
-import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
-import 'package:brick_oven/domain/file_write_result.dart';
-import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/variable.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/src/exception.dart';
 import '../test_utils/di.dart';
-import '../test_utils/mocks.dart';
 
 void main() {
   test('can be instantiated', () {

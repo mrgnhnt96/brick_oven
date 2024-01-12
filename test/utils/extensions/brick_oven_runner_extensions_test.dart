@@ -2,7 +2,7 @@
 
 import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/src/version.dart';
-import 'package:brick_oven/utils/di.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/utils/extensions/brick_oven_runner_extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';

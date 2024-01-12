@@ -1,7 +1,7 @@
 // ignore_for_file: join_return_with_assignment
 
 import 'package:args/args.dart';
-import 'package:brick_oven/utils/di.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/src/constants/constants.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';

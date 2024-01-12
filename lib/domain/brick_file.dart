@@ -8,7 +8,7 @@ import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/di.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/utils/file_replacements.dart';
 import 'package:brick_oven/utils/include_mixin.dart';
 import 'package:equatable/equatable.dart';

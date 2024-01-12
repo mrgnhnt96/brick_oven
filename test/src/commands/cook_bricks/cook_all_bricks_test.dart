@@ -3,15 +3,13 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
-import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/bricks_or_error.dart';
-import 'package:brick_oven/utils/di.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
+import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';

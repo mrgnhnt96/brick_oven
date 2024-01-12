@@ -1,14 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:brick_oven/utils/di.dart';
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:test/test.dart';
-import 'package:watcher/watcher.dart';
-
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/brick_source.dart';
@@ -18,8 +10,14 @@ import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:brick_oven/utils/config_watcher_mixin.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import 'package:brick_oven/utils/oven_mixin.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:test/test.dart';
+import 'package:watcher/watcher.dart';
+
 import '../test_utils/di.dart';
 import '../test_utils/mocks.dart';
 import '../test_utils/test_directory_watcher.dart';
