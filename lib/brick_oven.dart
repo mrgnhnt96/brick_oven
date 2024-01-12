@@ -3,12 +3,9 @@ import 'dart:io';
 import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
-import 'package:usage/usage_io.dart';
 
 import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/src/version.dart';
-
-const _gaTrackingId = 'UA-134218670-3';
 
 /// runs the brick oven, generating bricks
 Future<void> runBrickOven(List<String> arguments) async {
@@ -16,11 +13,6 @@ Future<void> runBrickOven(List<String> arguments) async {
     logger: Logger(),
     pubUpdater: PubUpdater(),
     fileSystem: const LocalFileSystem(),
-    analytics: AnalyticsIO(
-      _gaTrackingId,
-      packageName,
-      packageVersion,
-    ),
   ).run(arguments);
 
   if (exitCode == ExitCode.tempFail.code) {

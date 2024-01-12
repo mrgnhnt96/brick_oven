@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import 'package:mason_logger/mason_logger.dart';
-import 'package:usage/usage_io.dart';
 
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
@@ -16,17 +15,14 @@ class ListCommand extends BrickOvenCommand {
   /// {@macro lists_command}
   ListCommand({
     required super.logger,
-    required Analytics analytics,
     required super.fileSystem,
-  }) : _analytics = analytics {
+  }) {
     argParser.addFlag(
       'verbose',
       abbr: 'v',
       help: 'Lists the bricks with their file & dir configurations',
     );
   }
-
-  final Analytics _analytics;
 
   @override
   String get description =>
@@ -71,19 +67,6 @@ class ListCommand extends BrickOvenCommand {
         );
       }
     }
-
-    unawaited(
-      _analytics.sendEvent(
-        'list',
-        isVerbose ? 'verbose' : 'simple',
-        value: ExitCode.success.code,
-        parameters: {
-          'bricks': bricks.length.toString(),
-        },
-      ),
-    );
-
-    await _analytics.waitForLastPing(timeout: BrickOvenRunner.timeout);
 
     return ExitCode.success.code;
   }

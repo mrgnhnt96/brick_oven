@@ -5,6 +5,7 @@ targets:
         generate_for:
           include:
             - lib/domain/*.dart
+            - lib/domain/take_2/*.dart
           exclude:
               - '**/example/**/*.dart'
 
@@ -12,5 +13,22 @@ targets:
         generate_for:
           include:
             - lib/domain/*.dart
+            - lib/domain/take_2/*.dart
           exclude:
             - '**/example/**/*.dart'
+        options:
+            auto_include: true
+
+      json_serializable:
+        generate_for:
+          include:
+            - lib/domain/*.dart
+            - lib/domain/take_2/*.dart
+          exclude:
+            - '**/example/**/*.dart'
+        options:
+            any_map: true
+            disallow_unrecognized_keys: true
+            field_rename: snake
+            include_if_null: false
+            explicit_to_json: true

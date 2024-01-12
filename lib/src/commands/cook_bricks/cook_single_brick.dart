@@ -2,12 +2,9 @@
 
 import 'dart:async';
 
-import 'package:usage/usage_io.dart';
-
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
-import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:brick_oven/utils/config_watcher_mixin.dart';
 import 'package:brick_oven/utils/extensions/arg_parser_extensions.dart';
@@ -22,10 +19,9 @@ class CookSingleBrick extends BrickOvenCommand
   CookSingleBrick(
     this.brick, {
     required super.fileSystem,
-    required Analytics analytics,
     required super.logger,
     this.keyPressListener,
-  }) : _analytics = analytics {
+  }) {
     argParser
       ..addCookOptionsAndFlags()
       ..addSeparator('${'-' * 79}\n');
@@ -33,7 +29,6 @@ class CookSingleBrick extends BrickOvenCommand
 
   /// The brick to cook
   final Brick brick;
-  final Analytics _analytics;
 
   @override
   final KeyPressListener? keyPressListener;
@@ -47,21 +42,6 @@ class CookSingleBrick extends BrickOvenCommand
   @override
   Future<int> run() async {
     final result = await putInOven({brick});
-
-    unawaited(
-      _analytics.sendEvent(
-        'cook',
-        'one',
-        label: isWatch ? 'watch' : 'no-watch',
-        value: result.code,
-        parameters: {
-          'bricks': 1.toString(),
-          'sync': shouldSync.toString(),
-        },
-      ),
-    );
-
-    await _analytics.waitForLastPing(timeout: BrickOvenRunner.timeout);
 
     return result.code;
   }
