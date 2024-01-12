@@ -8,14 +8,12 @@ import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
-import 'package:usage/usage_io.dart';
 
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/bricks_or_error.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
-import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import '../../../test_utils/fakes.dart';
 import '../../../test_utils/mocks.dart';
@@ -24,20 +22,17 @@ void main() {
   late CookAllBricks command;
   late Logger mockLogger;
   late FileSystem memoryFileSystem;
-  late Analytics mockAnalytics;
   late Brick mockBrick;
 
   setUp(() {
     mockBrick = MockBrick();
     mockLogger = MockLogger();
-    mockAnalytics = MockAnalytics()..stubMethods();
 
     memoryFileSystem = MemoryFileSystem();
 
     command = CookAllBricks(
       logger: mockLogger,
       fileSystem: memoryFileSystem,
-      analytics: mockAnalytics,
     );
   });
 
@@ -46,21 +41,18 @@ void main() {
       expect(command.description, 'Cook all bricks');
 
       verifyNoMoreInteractions(mockLogger);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('name displays correctly', () {
       expect(command.name, 'all');
 
       verifyNoMoreInteractions(mockLogger);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     group('#run', () {
       group('gracefully', () {
         test('when shouldSync and isWatch are default values', () async {
           final command = TestCookAllBricks(
-            analytics: mockAnalytics,
             bricksOrError: BricksOrError({mockBrick}, null),
             logger: mockLogger,
             fileSystem: memoryFileSystem,
@@ -74,35 +66,15 @@ void main() {
             mockLogger.dingDing,
           ]);
 
-          verify(
-            () => mockAnalytics.sendEvent(
-              'cook',
-              'all',
-              label: 'no-watch',
-              value: 0,
-              parameters: {
-                'bricks': '1',
-                'sync': 'true',
-              },
-            ),
-          ).called(1);
-
-          verify(
-            () =>
-                mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
-          ).called(1);
-
           expect(result, ExitCode.success.code);
 
           verifyNoMoreInteractions(mockBrick);
           verifyNoMoreInteractions(mockLogger);
-          verifyNoMoreInteractions(mockAnalytics);
         });
 
         group('when #shouldSync', () {
           test('is false', () async {
             final command = TestCookAllBricks(
-              analytics: mockAnalytics,
               bricksOrError: BricksOrError({mockBrick}, null),
               logger: mockLogger,
               shouldSync: false,
@@ -121,35 +93,14 @@ void main() {
               mockLogger.dingDing,
             ]);
 
-            verify(
-              () => mockAnalytics.sendEvent(
-                'cook',
-                'all',
-                label: 'no-watch',
-                value: 0,
-                parameters: {
-                  'bricks': '1',
-                  'sync': 'false',
-                },
-              ),
-            ).called(1);
-
-            verify(
-              () => mockAnalytics.waitForLastPing(
-                timeout: BrickOvenRunner.timeout,
-              ),
-            ).called(1);
-
             verifyNoMoreInteractions(mockLogger);
             verifyNoMoreInteractions(mockBrick);
-            verifyNoMoreInteractions(mockAnalytics);
 
             expect(result, ExitCode.success.code);
           });
 
           test('is true', () async {
             final command = TestCookAllBricks(
-              analytics: mockAnalytics,
               bricksOrError: BricksOrError({mockBrick}, null),
               logger: mockLogger,
               shouldSync: true,
@@ -168,28 +119,8 @@ void main() {
               mockLogger.dingDing,
             ]);
 
-            verify(
-              () => mockAnalytics.sendEvent(
-                'cook',
-                'all',
-                label: 'no-watch',
-                value: 0,
-                parameters: {
-                  'bricks': '1',
-                  'sync': 'true',
-                },
-              ),
-            ).called(1);
-
-            verify(
-              () => mockAnalytics.waitForLastPing(
-                timeout: BrickOvenRunner.timeout,
-              ),
-            ).called(1);
-
             verifyNoMoreInteractions(mockLogger);
             verifyNoMoreInteractions(mockBrick);
-            verifyNoMoreInteractions(mockAnalytics);
 
             expect(result, ExitCode.success.code);
           });
@@ -236,7 +167,6 @@ void main() {
 
           test('is false', () async {
             final command = TestCookAllBricks(
-              analytics: mockAnalytics,
               bricksOrError: BricksOrError({mockBrick}, null),
               logger: mockLogger,
               isWatch: false,
@@ -256,35 +186,14 @@ void main() {
               mockLogger.dingDing,
             ]);
 
-            verify(
-              () => mockAnalytics.sendEvent(
-                'cook',
-                'all',
-                label: 'no-watch',
-                value: 0,
-                parameters: {
-                  'bricks': '1',
-                  'sync': 'true',
-                },
-              ),
-            ).called(1);
-
-            verify(
-              () => mockAnalytics.waitForLastPing(
-                timeout: BrickOvenRunner.timeout,
-              ),
-            ).called(1);
-
             verifyNoMoreInteractions(mockLogger);
             verifyNoMoreInteractions(mockBrick);
-            verifyNoMoreInteractions(mockAnalytics);
 
             expect(result, ExitCode.success.code);
           });
 
           test('is true', () async {
             final command = TestCookAllBricks(
-              analytics: mockAnalytics,
               bricksOrError: BricksOrError({mockBrick}, null),
               logger: mockLogger,
               isWatch: true,
@@ -311,28 +220,8 @@ void main() {
               mockLogger.exiting,
             ]);
 
-            verify(
-              () => mockAnalytics.sendEvent(
-                'cook',
-                'all',
-                label: 'watch',
-                value: 0,
-                parameters: {
-                  'bricks': '1',
-                  'sync': 'true',
-                },
-              ),
-            ).called(1);
-
-            verify(
-              () => mockAnalytics.waitForLastPing(
-                timeout: BrickOvenRunner.timeout,
-              ),
-            ).called(1);
-
             verifyNoMoreInteractions(mockLogger);
             verifyNoMoreInteractions(mockBrick);
-            verifyNoMoreInteractions(mockAnalytics);
 
             final result = await exitCompleter.future;
 
@@ -344,7 +233,6 @@ void main() {
 
       test('when error occurs when parsing bricks', () async {
         final command = TestCookAllBricks(
-          analytics: mockAnalytics,
           bricksOrError: const BricksOrError(null, 'error'),
           logger: mockLogger,
           fileSystem: memoryFileSystem,
@@ -357,7 +245,6 @@ void main() {
         expect(result, ExitCode.config.code);
 
         verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockAnalytics);
       });
 
       test('when unknown error occurs', () async {
@@ -365,7 +252,6 @@ void main() {
         when(() => mockBrick.cook()).thenThrow(Exception('error'));
 
         final command = TestCookAllBricks(
-          analytics: mockAnalytics,
           bricksOrError: BricksOrError({mockBrick}, null),
           logger: mockLogger,
           fileSystem: memoryFileSystem,
@@ -381,28 +267,10 @@ void main() {
           mockLogger.dingDing,
         ]);
 
-        verify(
-          () => mockAnalytics.sendEvent(
-            'cook',
-            'all',
-            label: 'no-watch',
-            value: 0,
-            parameters: {
-              'bricks': '1',
-              'sync': 'true',
-            },
-          ),
-        ).called(1);
-
-        verify(
-          () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
-        ).called(1);
-
         verify(() => mockBrick.name).called(1);
 
         verifyNoMoreInteractions(mockLogger);
         verifyNoMoreInteractions(mockBrick);
-        verifyNoMoreInteractions(mockAnalytics);
 
         expect(result, ExitCode.success.code);
       });
@@ -413,7 +281,6 @@ void main() {
             .thenThrow(const BrickException(brick: 'BRICK', reason: 'error'));
 
         final command = TestCookAllBricks(
-          analytics: mockAnalytics,
           bricksOrError: BricksOrError({mockBrick}, null),
           logger: mockLogger,
           fileSystem: memoryFileSystem,
@@ -432,30 +299,12 @@ void main() {
           mockLogger.dingDing,
         ]);
 
-        verify(
-          () => mockAnalytics.sendEvent(
-            'cook',
-            'all',
-            label: 'no-watch',
-            value: 0,
-            parameters: {
-              'bricks': '1',
-              'sync': 'true',
-            },
-          ),
-        ).called(1);
-
-        verify(
-          () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
-        ).called(1);
-
         expect(result, ExitCode.success.code);
 
         verify(() => mockBrick.name).called(1);
 
         verifyNoMoreInteractions(mockLogger);
         verifyNoMoreInteractions(mockBrick);
-        verifyNoMoreInteractions(mockAnalytics);
       });
     });
   });
@@ -465,7 +314,6 @@ class TestCookAllBricks extends CookAllBricks {
   TestCookAllBricks({
     required super.logger,
     required super.fileSystem,
-    required super.analytics,
     this.bricksOrError,
     bool? isWatch,
     bool? shouldSync,

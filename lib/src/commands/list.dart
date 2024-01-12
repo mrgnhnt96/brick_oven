@@ -6,7 +6,6 @@ import 'package:mason_logger/mason_logger.dart';
 
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
-import 'package:brick_oven/src/runner.dart';
 
 /// {@template lists_command}
 /// Lists the configured bricks within the config file

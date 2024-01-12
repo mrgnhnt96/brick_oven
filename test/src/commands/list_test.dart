@@ -4,7 +4,6 @@ import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
-import 'package:usage/usage_io.dart';
 
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_dir.dart';
@@ -16,7 +15,6 @@ import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/src/commands/list.dart';
-import 'package:brick_oven/src/runner.dart';
 import '../../test_utils/fakes.dart';
 import '../../test_utils/mocks.dart';
 import '../../test_utils/print_override.dart';
@@ -24,16 +22,13 @@ import '../../test_utils/print_override.dart';
 void main() {
   group('$ListCommand', () {
     late Logger mockLogger;
-    late Analytics mockAnalytics;
     late ListCommand listCommand;
 
     setUp(() {
       mockLogger = MockLogger();
-      mockAnalytics = MockAnalytics()..stubMethods();
 
       listCommand = ListCommand(
         logger: mockLogger,
-        analytics: mockAnalytics,
         fileSystem: MemoryFileSystem(),
       );
     });
@@ -45,7 +40,6 @@ void main() {
       );
 
       verifyNoMoreInteractions(mockLogger);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('accepts alias ls', () {
@@ -55,7 +49,6 @@ void main() {
       );
 
       verifyNoMoreInteractions(mockLogger);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('displays name correctly', () {
@@ -65,13 +58,11 @@ void main() {
       );
 
       verifyNoMoreInteractions(mockLogger);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     group('#isVerbose', () {
       test('returns true when verbose is provided', () {
         final command = TestListCommand(
-          analytics: mockAnalytics,
           logger: mockLogger,
           verbose: true,
         );
@@ -79,22 +70,18 @@ void main() {
         expect(command.isVerbose, true);
 
         verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockAnalytics);
       });
 
       test('returns false when verbose is not provided', () {
-        final command =
-            TestListCommand(analytics: mockAnalytics, logger: mockLogger);
+        final command = TestListCommand(logger: mockLogger);
 
         expect(command.isVerbose, isFalse);
 
         verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockAnalytics);
       });
 
       test('returns false when verbose is provided false', () {
         final command = TestListCommand(
-          analytics: mockAnalytics,
           logger: mockLogger,
           verbose: false,
         );
@@ -102,13 +89,11 @@ void main() {
         expect(command.isVerbose, false);
 
         verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockAnalytics);
       });
     });
 
     test('prints error when configuration is bad and exits with 78', () async {
       final command = TestListCommand(
-        analytics: mockAnalytics,
         logger: mockLogger,
       )..brickOrErrorResponse = const BricksOrError(null, 'bad config');
 
@@ -120,13 +105,11 @@ void main() {
       verify(() => mockLogger.err('bad config')).called(1);
 
       verifyNoMoreInteractions(mockLogger);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     group('brick_oven list', () {
       ListCommand listCommand({required bool verbose}) {
         return TestListCommand(
-          analytics: mockAnalytics,
           logger: mockLogger,
           fileSystem: MemoryFileSystem(),
           verbose: verbose,
@@ -208,26 +191,9 @@ void main() {
             () => mockLogger.info('package_2: example/lib'),
           ).called(1);
 
-          verify(
-            () => mockAnalytics.sendEvent(
-              'list',
-              'simple',
-              value: 0,
-              parameters: {
-                'bricks': '2',
-              },
-            ),
-          ).called(1);
-
-          verify(
-            () =>
-                mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
-          ).called(1);
-
           expect(result, ExitCode.success.code);
 
           verifyNoMoreInteractions(mockLogger);
-          verifyNoMoreInteractions(mockAnalytics);
         },
       );
 
@@ -247,25 +213,9 @@ void main() {
               .info('  (configured) dirs: 1, files: 1, partials: 1, vars: 2'),
         ).called(2);
 
-        verify(
-          () => mockAnalytics.sendEvent(
-            'list',
-            'verbose',
-            value: 0,
-            parameters: {
-              'bricks': '2',
-            },
-          ),
-        ).called(1);
-
-        verify(
-          () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
-        ).called(1);
-
         expect(result, ExitCode.success.code);
 
         verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockAnalytics);
       });
     });
   });
@@ -274,7 +224,6 @@ void main() {
 class TestListCommand extends ListCommand {
   TestListCommand({
     required super.logger,
-    required super.analytics,
     this.verbose,
     FileSystem? fileSystem,
   }) : super(

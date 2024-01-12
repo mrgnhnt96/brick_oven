@@ -5,7 +5,6 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
-import 'package:usage/usage_io.dart';
 
 import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/src/version.dart';
@@ -16,7 +15,6 @@ void main() {
   late Logger mockLogger;
   late BrickOvenRunner brickOvenRunner;
   late PubUpdater mockPubUpdater;
-  late Analytics mockAnalytics;
 
   const versionMessage = '''
 
@@ -28,14 +26,10 @@ Run `brick_oven update` to update
   setUp(() {
     mockLogger = MockLogger();
     mockPubUpdater = MockPubUpdater();
-    mockAnalytics = MockAnalytics();
-
-    when(() => mockAnalytics.firstRun).thenReturn(false);
 
     brickOvenRunner = BrickOvenRunner(
       logger: mockLogger,
       pubUpdater: mockPubUpdater,
-      analytics: mockAnalytics,
       fileSystem: MemoryFileSystem(),
     );
   });
@@ -72,7 +66,6 @@ Run `brick_oven update` to update
 
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockPubUpdater);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('does nothing when tool is up to date', () async {
@@ -89,7 +82,6 @@ Run `brick_oven update` to update
 
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockPubUpdater);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('handles pub update errors gracefully', () async {
@@ -109,7 +101,6 @@ Run `brick_oven update` to update
 
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockPubUpdater);
-      verifyNoMoreInteractions(mockAnalytics);
     });
   });
 }

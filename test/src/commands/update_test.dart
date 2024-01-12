@@ -3,7 +3,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
-import 'package:usage/usage_io.dart';
 
 import 'package:brick_oven/src/commands/update.dart';
 import 'package:brick_oven/src/runner.dart';
@@ -13,7 +12,6 @@ import '../../test_utils/mocks.dart';
 void main() {
   const latestVersion = '0.0.0';
   late Logger mockLogger;
-  late Analytics mockAnalytics;
   late Progress mockProgress;
   late PubUpdater mockPubUpdater;
   late UpdateCommand updateCommand;
@@ -22,14 +20,12 @@ void main() {
     mockLogger = MockLogger();
     mockProgress = MockProgress();
     mockPubUpdater = MockPubUpdater();
-    mockAnalytics = MockAnalytics()..stubMethods();
 
     when(() => mockLogger.progress(any())).thenReturn(mockProgress);
 
     updateCommand = UpdateCommand(
       logger: mockLogger,
       pubUpdater: mockPubUpdater,
-      analytics: mockAnalytics,
     );
   });
 
@@ -43,7 +39,6 @@ void main() {
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockPubUpdater);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('name displays correctly', () {
@@ -53,7 +48,6 @@ void main() {
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockPubUpdater);
-      verifyNoMoreInteractions(mockAnalytics);
     });
   });
 
@@ -79,7 +73,6 @@ void main() {
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockPubUpdater);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('handles pub update errors', () async {
@@ -106,22 +99,9 @@ void main() {
           .called(1);
       verify(() => mockProgress.update('Updating to $latestVersion')).called(1);
 
-      verify(
-        () => mockAnalytics.sendEvent(
-          'update',
-          'success',
-          value: 0,
-          parameters: {
-            'old version': packageVersion,
-            'new version': latestVersion,
-          },
-        ),
-      ).called(1);
-
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockPubUpdater);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('updates when newer version exists', () async {
@@ -147,28 +127,11 @@ void main() {
         ),
       ).called(1);
 
-      verify(
-        () => mockAnalytics.sendEvent(
-          'update',
-          'success',
-          value: 0,
-          parameters: {
-            'old version': packageVersion,
-            'new version': latestVersion,
-          },
-        ),
-      ).called(1);
-
-      verify(
-        () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
-      ).called(1);
-
       expect(result, equals(ExitCode.success.code));
 
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockPubUpdater);
-      verifyNoMoreInteractions(mockAnalytics);
     });
 
     test('does not update when already on latest version', () async {
@@ -189,27 +152,11 @@ void main() {
       verifyNever(() => mockLogger.progress('Updating to $latestVersion'));
       verifyNever(() => mockPubUpdater.update(packageName: packageName));
 
-      verify(
-        () => mockAnalytics.sendEvent(
-          'update',
-          'up-to-date',
-          value: 0,
-          parameters: {
-            'version': packageVersion,
-          },
-        ),
-      ).called(1);
-
-      verify(
-        () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
-      ).called(1);
-
       expect(result, ExitCode.success.code);
 
       verifyNoMoreInteractions(mockLogger);
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockPubUpdater);
-      verifyNoMoreInteractions(mockAnalytics);
     });
   });
 }

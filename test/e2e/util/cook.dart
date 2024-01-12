@@ -24,12 +24,9 @@ Future<void> cook({
   required String command,
   required int numberOfFiles,
 }) async {
-  final isCookAll = command == 'all';
-
   final mockLogger = MockLogger();
   final mockProgress = MockProgress();
   final mockPubUpdater = MockPubUpdater()..stubMethods();
-  final mockAnalytics = MockAnalytics()..stubMethods();
 
   when(() => mockLogger.progress(any())).thenReturn(mockProgress);
 
@@ -67,7 +64,6 @@ Future<void> cook({
   memoryFileSystem.file(join('brick.yaml')).writeAsStringSync(brickYamlContent);
 
   final brickOven = BrickOvenRunner(
-    analytics: mockAnalytics,
     fileSystem: memoryFileSystem,
     logger: mockLogger,
     pubUpdater: mockPubUpdater,
@@ -76,7 +72,6 @@ Future<void> cook({
   final result = await brickOven.run(['cook', command]);
 
   verifyInOrder([
-    () => mockAnalytics.firstRun,
     mockLogger.preheat,
     () => mockLogger.progress('Writing Brick: $brickName'),
     () => mockProgress.complete(
@@ -84,17 +79,6 @@ Future<void> cook({
         ),
     () => mockLogger.info('brick.yaml is in sync'),
     mockLogger.dingDing,
-    () => mockAnalytics.sendEvent(
-          'cook',
-          isCookAll ? 'all' : 'one',
-          label: 'no-watch',
-          value: 0,
-          parameters: {
-            'bricks': '1',
-            'sync': 'true',
-          },
-        ),
-    () => mockAnalytics.waitForLastPing(timeout: BrickOvenRunner.timeout),
     () => mockPubUpdater.getLatestVersion(packageName),
   ]);
 
@@ -133,5 +117,4 @@ Future<void> cook({
   verifyNoMoreInteractions(mockLogger);
   verifyNoMoreInteractions(mockProgress);
   verifyNoMoreInteractions(mockPubUpdater);
-  verifyNoMoreInteractions(mockAnalytics);
 }

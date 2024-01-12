@@ -1,17 +1,15 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/src/runner.dart';
+import 'package:brick_oven/src/version.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
-import 'package:usage/usage_io.dart';
 
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
-import 'package:brick_oven/src/runner.dart';
-import 'package:brick_oven/src/version.dart';
-import 'package:brick_oven/utils/extensions/analytics_extensions.dart';
 import '../test_utils/mocks.dart';
 import '../test_utils/print_override.dart';
 
@@ -39,7 +37,6 @@ void main() {
   group('$BrickOvenRunner', () {
     late Logger mockLogger;
     late PubUpdater mockPubUpdater;
-    late Analytics mockAnalytics;
     late BrickOvenRunner commandRunner;
     late FileSystem fs;
 
@@ -48,14 +45,11 @@ void main() {
 
       mockLogger = MockLogger();
       mockPubUpdater = MockPubUpdater();
-      mockAnalytics = MockAnalytics()..stubMethods();
       fs = MemoryFileSystem();
 
       fs.file(BrickOvenYaml.file)
         ..createSync(recursive: true)
         ..writeAsStringSync('bricks:');
-
-      when(() => mockAnalytics.firstRun).thenReturn(false);
 
       when(
         () => mockPubUpdater.getLatestVersion(any()),
@@ -65,7 +59,6 @@ void main() {
         logger: mockLogger,
         pubUpdater: mockPubUpdater,
         fileSystem: fs,
-        analytics: mockAnalytics,
       );
     });
 
@@ -78,7 +71,6 @@ void main() {
         test('can be enabled', () async {
           final result = await commandRunner.run(['--analytics', 'true']);
 
-          verify(() => mockAnalytics.enabled = true).called(1);
           verify(() => mockLogger.info('analytics enabled.')).called(1);
           verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
 
@@ -86,13 +78,10 @@ void main() {
 
           verifyNoMoreInteractions(mockLogger);
           verifyNoMoreInteractions(mockPubUpdater);
-          verifyNoMoreInteractions(mockAnalytics);
         });
 
         test('can be disabled', () async {
           final result = await commandRunner.run(['--analytics', 'false']);
-
-          verify(() => mockAnalytics.enabled = false).called(1);
 
           verify(() => mockLogger.info('analytics disabled.')).called(1);
           verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
@@ -101,38 +90,6 @@ void main() {
 
           verifyNoMoreInteractions(mockLogger);
           verifyNoMoreInteractions(mockPubUpdater);
-          verifyNoMoreInteractions(mockAnalytics);
-        });
-
-        test('asks for consent when first time running', () async {
-          when(() => mockAnalytics.firstRun).thenReturn(true);
-          when(
-            () => mockLogger.chooseOne(
-              any(),
-              choices: any<List<String>>(named: 'choices'),
-              defaultValue: any<String>(named: 'defaultValue'),
-            ),
-          ).thenAnswer((_) => AnalyticsX.yes);
-
-          await overridePrint(() async {
-            await commandRunner.run([]);
-          });
-
-          verify(() => mockAnalytics.askForConsent(mockLogger)).called(1);
-          verify(() => mockAnalytics.enabled = true).called(1);
-          verify(
-            () => mockLogger.chooseOne(
-              AnalyticsX.formatAsk(),
-              choices: [AnalyticsX.yes, AnalyticsX.no],
-              defaultValue: AnalyticsX.yes,
-            ),
-          ).called(1);
-
-          verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
-
-          verifyNoMoreInteractions(mockLogger);
-          verifyNoMoreInteractions(mockPubUpdater);
-          verifyNoMoreInteractions(mockAnalytics);
         });
       });
 
@@ -143,7 +100,6 @@ void main() {
           logger: mockLogger,
           fileSystem: fs,
           pubUpdater: mockPubUpdater,
-          analytics: mockAnalytics,
           onRun: () {
             throw exception;
           },
@@ -158,7 +114,6 @@ void main() {
 
         verifyNoMoreInteractions(mockLogger);
         verifyNoMoreInteractions(mockPubUpdater);
-        verifyNoMoreInteractions(mockAnalytics);
       });
 
       test('handles $UsageException', () async {
@@ -168,7 +123,6 @@ void main() {
           logger: mockLogger,
           fileSystem: fs,
           pubUpdater: mockPubUpdater,
-          analytics: mockAnalytics,
           onRun: () {
             throw exception;
           },
@@ -183,7 +137,6 @@ void main() {
 
         verifyNoMoreInteractions(mockLogger);
         verifyNoMoreInteractions(mockPubUpdater);
-        verifyNoMoreInteractions(mockAnalytics);
       });
 
       test('handles other exceptions', () async {
@@ -193,7 +146,6 @@ void main() {
           logger: mockLogger,
           fileSystem: fs,
           pubUpdater: mockPubUpdater,
-          analytics: mockAnalytics,
           onRun: () {
             throw exception;
           },
@@ -207,7 +159,6 @@ void main() {
 
         verifyNoMoreInteractions(mockLogger);
         verifyNoMoreInteractions(mockPubUpdater);
-        verifyNoMoreInteractions(mockAnalytics);
       });
 
       test('handles no command', () async {
@@ -218,11 +169,9 @@ void main() {
           expect(result, equals(ExitCode.success.code));
 
           verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
-          verify(() => mockAnalytics.firstRun).called(1);
 
           verifyNoMoreInteractions(mockLogger);
           verifyNoMoreInteractions(mockPubUpdater);
-          verifyNoMoreInteractions(mockAnalytics);
         });
       });
 
@@ -238,11 +187,9 @@ void main() {
 
               verify(() => mockPubUpdater.getLatestVersion(packageName))
                   .called(1);
-              verify(() => mockAnalytics.firstRun).called(1);
 
               verifyNoMoreInteractions(mockLogger);
               verifyNoMoreInteractions(mockPubUpdater);
-              verifyNoMoreInteractions(mockAnalytics);
             });
           },
         );
@@ -258,11 +205,9 @@ void main() {
 
               verify(() => mockPubUpdater.getLatestVersion(packageName))
                   .called(1);
-              verify(() => mockAnalytics.firstRun).called(1);
 
               verifyNoMoreInteractions(mockLogger);
               verifyNoMoreInteractions(mockPubUpdater);
-              verifyNoMoreInteractions(mockAnalytics);
             });
           },
         );
@@ -275,11 +220,9 @@ void main() {
         verify(() => mockLogger.alert(packageVersion)).called(1);
 
         verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
-        verify(() => mockAnalytics.firstRun).called(1);
 
         verifyNoMoreInteractions(mockLogger);
         verifyNoMoreInteractions(mockPubUpdater);
-        verifyNoMoreInteractions(mockAnalytics);
       });
 
       group('#checkForUpdates', () {
@@ -288,11 +231,9 @@ void main() {
 
           verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
           verify(() => mockLogger.info('analytics enabled.')).called(1);
-          verify(() => mockAnalytics.enabled = true).called(1);
 
           verifyNoMoreInteractions(mockLogger);
           verifyNoMoreInteractions(mockPubUpdater);
-          verifyNoMoreInteractions(mockAnalytics);
         });
 
         test('when analytics command is provided with false', () async {
@@ -300,11 +241,9 @@ void main() {
 
           verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
           verify(() => mockLogger.info('analytics disabled.')).called(1);
-          verify(() => mockAnalytics.enabled = false).called(1);
 
           verifyNoMoreInteractions(mockLogger);
           verifyNoMoreInteractions(mockPubUpdater);
-          verifyNoMoreInteractions(mockAnalytics);
         });
 
         test('when version command is provided', () async {
@@ -312,11 +251,9 @@ void main() {
 
           verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
           verify(() => mockLogger.alert(packageVersion)).called(1);
-          verify(() => mockAnalytics.firstRun).called(1);
 
           verifyNoMoreInteractions(mockLogger);
           verifyNoMoreInteractions(mockPubUpdater);
-          verifyNoMoreInteractions(mockAnalytics);
         });
 
         test('when other command is provided', () async {
@@ -325,11 +262,9 @@ void main() {
           });
 
           verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
-          verify(() => mockAnalytics.firstRun).called(1);
 
           verifyNoMoreInteractions(mockLogger);
           verifyNoMoreInteractions(mockPubUpdater);
-          verifyNoMoreInteractions(mockAnalytics);
         });
       });
     });
@@ -342,7 +277,6 @@ class TestBrickOvenRunner extends BrickOvenRunner {
     required super.fileSystem,
     required this.onRun,
     required super.pubUpdater,
-    required super.analytics,
   });
 
   final void Function() onRun;

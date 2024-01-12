@@ -4,7 +4,6 @@ import 'package:file/file.dart' as file;
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
-import 'package:usage/usage_io.dart';
 import 'package:watcher/watcher.dart';
 
 import 'package:brick_oven/domain/brick.dart';
@@ -44,28 +43,7 @@ class MockBrickFile extends Mock implements BrickFile {}
 
 class MockFile extends Mock implements file.File {}
 
-class MockAnalytics extends Mock implements Analytics {}
-
 class MockDirectoryWatcher extends Mock implements DirectoryWatcher {}
-
-extension MockAnalyticsX on MockAnalytics {
-  void stubMethods() {
-    when(() => firstRun).thenReturn(false);
-
-    when(
-      () => sendEvent(
-        any(),
-        any(),
-        label: any(named: 'label'),
-        parameters: any(named: 'parameters'),
-        value: any(named: 'value'),
-      ),
-    ).thenAnswer((_) => Future.value());
-
-    when(() => waitForLastPing(timeout: any(named: 'timeout')))
-        .thenAnswer((_) => Future.value());
-  }
-}
 
 extension PubUpdaterX on MockPubUpdater {
   void stubMethods() {

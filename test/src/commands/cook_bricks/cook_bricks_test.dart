@@ -5,7 +5,6 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
-import 'package:usage/usage_io.dart';
 
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_bricks.dart';
@@ -17,7 +16,6 @@ void main() {
   late CookBricksCommand brickOvenCommand;
   late CommandRunner<void> runner;
   late Logger mockLogger;
-  late Analytics mockAnalytics;
   late PubUpdater mockPubUpdater;
 
   setUp(() {
@@ -37,11 +35,9 @@ bricks:
       );
 
     mockLogger = MockLogger();
-    mockAnalytics = MockAnalytics();
     mockPubUpdater = MockPubUpdater();
 
     brickOvenCommand = CookBricksCommand(
-      analytics: mockAnalytics,
       fileSystem: fs,
       logger: mockLogger,
     );
@@ -50,7 +46,6 @@ bricks:
       fileSystem: fs,
       logger: mockLogger,
       pubUpdater: mockPubUpdater,
-      analytics: mockAnalytics,
     );
   });
 
@@ -67,7 +62,7 @@ bricks:
       );
 
       verifyNoMoreInteractions(mockLogger);
-      verifyNoMoreInteractions(mockAnalytics);
+
       verifyNoMoreInteractions(mockPubUpdater);
     });
 
@@ -78,7 +73,7 @@ bricks:
       );
 
       verifyNoMoreInteractions(mockLogger);
-      verifyNoMoreInteractions(mockAnalytics);
+
       verifyNoMoreInteractions(mockPubUpdater);
     });
 
@@ -86,7 +81,7 @@ bricks:
       expect(brickOvenCommand.name, 'cook');
 
       verifyNoMoreInteractions(mockLogger);
-      verifyNoMoreInteractions(mockAnalytics);
+
       verifyNoMoreInteractions(mockPubUpdater);
     });
 
@@ -102,25 +97,13 @@ bricks:
       );
 
       verifyNoMoreInteractions(mockLogger);
-      verifyNoMoreInteractions(mockAnalytics);
+
       verifyNoMoreInteractions(mockPubUpdater);
     });
 
     group('when configuration is bad', () {
-      late Analytics mockAnalytics;
-
       setUp(() {
-        mockAnalytics = MockAnalytics();
-
         const badConfig = '';
-
-        when(() => mockAnalytics.firstRun).thenReturn(false);
-
-        when(() => mockAnalytics.sendEvent(any(), any()))
-            .thenAnswer((_) => Future.value());
-        when(
-          () => mockAnalytics.waitForLastPing(timeout: any(named: 'timeout')),
-        ).thenAnswer((_) => Future.value());
 
         fs.file(BrickOvenYaml.file)
           ..createSync()
@@ -129,7 +112,6 @@ bricks:
 
       test('add usage footer that config is bad', () {
         brickOvenCommand = CookBricksCommand(
-          analytics: mockAnalytics,
           fileSystem: fs,
           logger: mockLogger,
         );
@@ -141,7 +123,6 @@ bricks:
         );
 
         verifyNoMoreInteractions(mockLogger);
-        verifyNoMoreInteractions(mockAnalytics);
       });
     });
   });
