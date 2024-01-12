@@ -1,0 +1,46 @@
+import 'package:brick_oven/domain/take_2/brick_config.dart';
+import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:brick_oven/domain/take_2/brick_config_entry.dart';
+
+part 'brick_oven_config.g.dart';
+
+@JsonSerializable()
+class BrickOvenConfig extends Equatable {
+  const BrickOvenConfig({
+    required this.bricks,
+    required this.configPath,
+  });
+
+  factory BrickOvenConfig.fromJson(
+    Map json, {
+    required String configPath,
+  }) {
+    json['config_path'] = configPath;
+
+    return _$BrickOvenConfigFromJson(json);
+  }
+
+  @JsonKey(
+    fromJson: BrickConfigEntry.fromJsonList,
+    readValue: _readBrick,
+  )
+  final List<BrickConfigEntry> bricks;
+  final String configPath;
+
+  Iterable<BrickConfig> resolveBricks() =>
+      bricks.map((e) => e.resolve(fromPath: configPath));
+
+  Map<String, dynamic> toJson() => _$BrickOvenConfigToJson(this);
+
+  @override
+  List<Object?> get props => _$props;
+}
+
+List<Map> _readBrick(Map json, String key) {
+  if (json.containsKey(key)) {
+    return List.from(json[key] as List);
+  } else {
+    return [];
+  }
+}
