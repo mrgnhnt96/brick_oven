@@ -10,6 +10,7 @@ import 'package:brick_oven/utils/brick_cooker.dart';
 /// {@template cook_bricks_command}
 /// Writes the bricks from the configuration file
 /// to the brick oven.
+/// {@endtemplate}
 class CookBricksCommand extends BrickOvenCommand with BrickCookerArgs {
   /// {@macro cook_bricks_command}
   CookBricksCommand({
