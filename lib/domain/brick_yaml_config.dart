@@ -97,7 +97,7 @@ class BrickYamlConfig extends Equatable {
   /// the path to the brick.yaml file
   final String path;
 
-  @ignoreAutoequal
+  @ignore
   final FileSystem _fileSystem;
 
   @override

@@ -7,5 +7,8 @@ part of 'file_write_result.dart';
 // **************************************************************************
 
 extension _$FileWriteResultAutoequal on FileWriteResult {
-  List<Object?> get _$props => [usedVariables, usedPartials];
+  List<Object?> get _$props => [
+        usedVariables,
+        usedPartials,
+      ];
 }

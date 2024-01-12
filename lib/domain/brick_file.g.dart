@@ -7,5 +7,11 @@ part of 'brick_file.dart';
 // **************************************************************************
 
 extension _$BrickFileAutoequal on BrickFile {
-  List<Object?> get _$props => [includeIf, includeIfNot, name, path, variables];
+  List<Object?> get _$props => [
+        includeIf,
+        includeIfNot,
+        name,
+        path,
+        variables,
+      ];
 }

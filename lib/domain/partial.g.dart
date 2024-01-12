@@ -7,5 +7,8 @@ part of 'partial.dart';
 // **************************************************************************
 
 extension _$PartialAutoequal on Partial {
-  List<Object?> get _$props => [path, variables];
+  List<Object?> get _$props => [
+        path,
+        variables,
+      ];
 }

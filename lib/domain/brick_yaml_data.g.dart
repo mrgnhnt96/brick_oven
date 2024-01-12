@@ -7,5 +7,8 @@ part of 'brick_yaml_data.dart';
 // **************************************************************************
 
 extension _$BrickYamlDataAutoequal on BrickYamlData {
-  List<Object?> get _$props => [name, vars];
+  List<Object?> get _$props => [
+        name,
+        vars,
+      ];
 }

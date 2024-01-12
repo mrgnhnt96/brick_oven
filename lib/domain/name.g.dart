@@ -7,6 +7,13 @@ part of 'name.dart';
 // **************************************************************************
 
 extension _$NameAutoequal on Name {
-  List<Object?> get _$props =>
-      [tag, prefix, suffix, value, section, invertedSection, braces];
+  List<Object?> get _$props => [
+        tag,
+        prefix,
+        suffix,
+        value,
+        section,
+        invertedSection,
+        braces,
+      ];
 }

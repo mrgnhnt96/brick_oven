@@ -7,5 +7,8 @@ part of 'brick_yaml_config.dart';
 // **************************************************************************
 
 extension _$BrickYamlConfigAutoequal on BrickYamlConfig {
-  List<Object?> get _$props => [ignoreVars, path];
+  List<Object?> get _$props => [
+        ignoreVars,
+        path,
+      ];
 }

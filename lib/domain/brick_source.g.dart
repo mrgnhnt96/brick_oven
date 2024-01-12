@@ -7,5 +7,8 @@ part of 'brick_source.dart';
 // **************************************************************************
 
 extension _$BrickSourceAutoequal on BrickSource {
-  List<Object?> get _$props => [localPath, watcher];
+  List<Object?> get _$props => [
+        localPath,
+        watcher,
+      ];
 }

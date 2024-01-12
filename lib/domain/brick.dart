@@ -319,10 +319,10 @@ class Brick extends Equatable {
   /// the source of the content that the brick will create
   final BrickSource source;
 
-  @ignoreAutoequal
+  @ignore
   final FileSystem _fileSystem;
 
-  @ignoreAutoequal
+  @ignore
   final Logger _logger;
 
   /// variables used not provided by the user

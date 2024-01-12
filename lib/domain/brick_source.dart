@@ -145,7 +145,7 @@ class BrickSource extends Equatable {
   /// Watches the local files, and updates on events
   final SourceWatcher? watcher;
 
-  @ignoreAutoequal
+  @ignore
   final FileSystem _fileSystem;
 
   @override

@@ -7,6 +7,11 @@ part of 'brick_dir.dart';
 // **************************************************************************
 
 extension _$BrickDirAutoequal on BrickDir {
-  List<Object?> get _$props =>
-      [includeIf, includeIfNot, name, originalPath, path];
+  List<Object?> get _$props => [
+        includeIf,
+        includeIfNot,
+        name,
+        originalPath,
+        path,
+      ];
 }

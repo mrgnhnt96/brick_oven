@@ -7,5 +7,10 @@ part of 'brick_url.dart';
 // **************************************************************************
 
 extension _$BrickUrlAutoequal on BrickUrl {
-  List<Object?> get _$props => [path, name, includeIf, includeIfNot];
+  List<Object?> get _$props => [
+        path,
+        name,
+        includeIf,
+        includeIfNot,
+      ];
 }

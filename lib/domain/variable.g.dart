@@ -7,5 +7,8 @@ part of 'variable.dart';
 // **************************************************************************
 
 extension _$VariableAutoequal on Variable {
-  List<Object?> get _$props => [name, placeholder];
+  List<Object?> get _$props => [
+        name,
+        placeholder,
+      ];
 }

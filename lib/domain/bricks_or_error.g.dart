@@ -7,5 +7,8 @@ part of 'bricks_or_error.dart';
 // **************************************************************************
 
 extension _$BricksOrErrorAutoequal on BricksOrError {
-  List<Object?> get _$props => [_bricks, _error];
+  List<Object?> get _$props => [
+        _bricks,
+        _error,
+      ];
 }

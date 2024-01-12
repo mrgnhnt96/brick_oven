@@ -7,5 +7,9 @@ part of 'content_replacement.dart';
 // **************************************************************************
 
 extension _$ContentReplacementAutoequal on ContentReplacement {
-  List<Object?> get _$props => [content, used, data];
+  List<Object?> get _$props => [
+        content,
+        used,
+        data,
+      ];
 }

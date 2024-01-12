@@ -34,23 +34,23 @@ class SourceWatcher extends Equatable {
   /// the source directory of the brick, which will be watched
   final String dirPath;
 
-  @ignoreAutoequal
+  @ignore
   final _afterEvents = <OnEvent>[];
 
-  @ignoreAutoequal
+  @ignore
   final _beforeEvents = <OnEvent>[];
 
-  @ignoreAutoequal
+  @ignore
   final _events = <OnEvent>[];
 
-  @ignoreAutoequal
+  @ignore
   var _hasRun = false;
 
-  @ignoreAutoequal
+  @ignore
   StreamSubscription<WatchEvent>? _listener;
 
   /// the source directory of the brick, which will be watched
-  @ignoreAutoequal
+  @ignore
   final DirectoryWatcher _watcher;
 
   @override
