@@ -13,6 +13,9 @@ extension _$BrickConfigAutoequal on BrickConfig {
         brickConfig,
         files,
         directories,
+        urls,
+        partials,
+        exclude,
       ];
 }
 
@@ -23,7 +26,16 @@ extension _$BrickConfigAutoequal on BrickConfig {
 BrickConfig _$BrickConfigFromJson(Map json) {
   $checkKeys(
     json,
-    allowedKeys: const ['name', 'source', 'brick_config', 'files', 'dirs'],
+    allowedKeys: const [
+      'name',
+      'source',
+      'brick_config',
+      'files',
+      'dirs',
+      'urls',
+      'partials',
+      'exclude'
+    ],
   );
   return BrickConfig(
     name: json['name'] as String,
@@ -35,6 +47,14 @@ BrickConfig _$BrickConfigFromJson(Map json) {
     directories: (json['dirs'] as Map?)?.map(
       (k, e) => MapEntry(k as String, DirectoryConfig.fromJson(e as Map)),
     ),
+    urls: (json['urls'] as Map?)?.map(
+      (k, e) => MapEntry(k as String, UrlConfig.fromJson(e as Map)),
+    ),
+    partials: (json['partials'] as Map?)?.map(
+      (k, e) => MapEntry(k as String, PartialConfig.fromJson(e as Map)),
+    ),
+    exclude:
+        (json['exclude'] as List<dynamic>?)?.map((e) => e as String).toList(),
   );
 }
 
@@ -54,5 +74,9 @@ Map<String, dynamic> _$BrickConfigToJson(BrickConfig instance) {
   writeNotNull('files', instance.files?.map((k, e) => MapEntry(k, e.toJson())));
   writeNotNull(
       'dirs', instance.directories?.map((k, e) => MapEntry(k, e.toJson())));
+  writeNotNull('urls', instance.urls?.map((k, e) => MapEntry(k, e.toJson())));
+  writeNotNull(
+      'partials', instance.partials?.map((k, e) => MapEntry(k, e.toJson())));
+  writeNotNull('exclude', instance.exclude);
   return val;
 }
