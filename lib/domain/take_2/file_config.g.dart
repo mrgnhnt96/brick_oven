@@ -29,7 +29,7 @@ FileConfig _$FileConfigFromJson(Map json) {
         : StringOr<NameConfig>.fromJson(
             json['name'], (value) => NameConfig.fromJson(value as Map)),
     variables: (json['vars'] as Map?)?.map(
-      (k, e) => MapEntry(k as String, e as String),
+      (k, e) => MapEntry(k as String, e as String?),
     ),
     include: json['include'] == null
         ? null

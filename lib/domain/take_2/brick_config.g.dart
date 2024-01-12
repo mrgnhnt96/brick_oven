@@ -8,7 +8,6 @@ part of 'brick_config.dart';
 
 extension _$BrickConfigAutoequal on BrickConfig {
   List<Object?> get _$props => [
-        name,
         source,
         brickConfig,
         files,
@@ -27,7 +26,6 @@ BrickConfig _$BrickConfigFromJson(Map json) {
   $checkKeys(
     json,
     allowedKeys: const [
-      'name',
       'source',
       'brick_config',
       'files',
@@ -38,9 +36,11 @@ BrickConfig _$BrickConfigFromJson(Map json) {
     ],
   );
   return BrickConfig(
-    name: json['name'] as String,
     source: json['source'] as String,
-    brickConfig: json['brick_config'] as String?,
+    brickConfig: json['brick_config'] == null
+        ? null
+        : StringOr<MasonBrickConfig>.fromJson(json['brick_config'],
+            (value) => MasonBrickConfig.fromJson(value as Map)),
     files: (json['files'] as Map?)?.map(
       (k, e) => MapEntry(k as String, FileConfig.fromJson(e as Map)),
     ),
@@ -51,7 +51,8 @@ BrickConfig _$BrickConfigFromJson(Map json) {
       (k, e) => MapEntry(k as String, UrlConfig.fromJson(e as Map)),
     ),
     partials: (json['partials'] as Map?)?.map(
-      (k, e) => MapEntry(k as String, PartialConfig.fromJson(e as Map)),
+      (k, e) => MapEntry(
+          k as String, e == null ? null : PartialConfig.fromJson(e as Map)),
     ),
     exclude:
         (json['exclude'] as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -60,7 +61,6 @@ BrickConfig _$BrickConfigFromJson(Map json) {
 
 Map<String, dynamic> _$BrickConfigToJson(BrickConfig instance) {
   final val = <String, dynamic>{
-    'name': instance.name,
     'source': instance.source,
   };
 
@@ -70,13 +70,17 @@ Map<String, dynamic> _$BrickConfigToJson(BrickConfig instance) {
     }
   }
 
-  writeNotNull('brick_config', instance.brickConfig);
+  writeNotNull(
+      'brick_config',
+      instance.brickConfig?.toJson(
+        (value) => value.toJson(),
+      ));
   writeNotNull('files', instance.files?.map((k, e) => MapEntry(k, e.toJson())));
   writeNotNull(
       'dirs', instance.directories?.map((k, e) => MapEntry(k, e.toJson())));
   writeNotNull('urls', instance.urls?.map((k, e) => MapEntry(k, e.toJson())));
   writeNotNull(
-      'partials', instance.partials?.map((k, e) => MapEntry(k, e.toJson())));
+      'partials', instance.partials?.map((k, e) => MapEntry(k, e?.toJson())));
   writeNotNull('exclude', instance.exclude);
   return val;
 }

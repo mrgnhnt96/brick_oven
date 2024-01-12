@@ -1,4 +1,5 @@
 import 'package:brick_oven/domain/take_2/section_config.dart';
+import 'package:brick_oven/domain/take_2/string_or_entry.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
@@ -15,7 +16,7 @@ class NameConfig extends Equatable {
     this.section,
     this.braces = 2,
   })  : assert(
-          renameWith.isNotEmpty,
+          renameWith == null || renameWith.isNotEmpty,
           'renameWith cannot be empty',
         ),
         assert(
@@ -29,11 +30,11 @@ class NameConfig extends Equatable {
 
   factory NameConfig.fromJson(Map json) => _$NameConfigFromJson(json);
 
-  final String renameWith;
+  final String? renameWith;
   final MustacheTag? format;
   final String prefix;
   final String suffix;
-  final SectionConfig? section;
+  final StringOr<SectionConfig>? section;
   final int braces;
 
   Map<String, dynamic> toJson() => _$NameConfigToJson(this);

@@ -18,7 +18,7 @@ class FileConfig extends Equatable {
 
   final StringOr<NameConfig>? name;
   @JsonKey(name: 'vars')
-  final Map<String, String>? variables;
+  final Map<String, String?>? variables;
   final IncludeConfig? include;
 
   Map<String, dynamic> toJson() => _$FileConfigToJson(this);

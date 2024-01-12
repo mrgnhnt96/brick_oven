@@ -34,21 +34,20 @@ NameConfig _$NameConfigFromJson(Map json) {
     ],
   );
   return NameConfig(
-    renameWith: json['rename_with'] as String,
+    renameWith: json['rename_with'] as String?,
     format: $enumDecodeNullable(_$MustacheTagEnumMap, json['format']),
     prefix: json['prefix'] as String? ?? '',
     suffix: json['suffix'] as String? ?? '',
     section: json['section'] == null
         ? null
-        : SectionConfig.fromJson(json['section'] as Map),
+        : StringOr<SectionConfig>.fromJson(
+            json['section'], (value) => SectionConfig.fromJson(value as Map)),
     braces: json['braces'] as int? ?? 2,
   );
 }
 
 Map<String, dynamic> _$NameConfigToJson(NameConfig instance) {
-  final val = <String, dynamic>{
-    'rename_with': instance.renameWith,
-  };
+  final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -56,10 +55,15 @@ Map<String, dynamic> _$NameConfigToJson(NameConfig instance) {
     }
   }
 
+  writeNotNull('rename_with', instance.renameWith);
   writeNotNull('format', _$MustacheTagEnumMap[instance.format]);
   val['prefix'] = instance.prefix;
   val['suffix'] = instance.suffix;
-  writeNotNull('section', instance.section?.toJson());
+  writeNotNull(
+      'section',
+      instance.section?.toJson(
+        (value) => value.toJson(),
+      ));
   val['braces'] = instance.braces;
   return val;
 }

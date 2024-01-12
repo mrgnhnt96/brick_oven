@@ -16,9 +16,6 @@ abstract mixin class BrickConfigEntry {
 
   Map<String, dynamic> toJson();
 
-  static List<BrickConfigEntry> fromJsonList(List<Map> json) =>
-      json.map(BrickConfigEntry.fromJson).toList();
-
   bool get isReference => this is BrickConfigReference;
   bool get isBrick => this is BrickConfig;
 
@@ -34,7 +31,7 @@ abstract mixin class BrickConfigEntry {
 
       final json = YamlToJson.fromPath(path);
 
-      return BrickConfig.fromJson(json, name: reference.name);
+      return BrickConfig.fromJson(json);
     }
 
     return brick;
