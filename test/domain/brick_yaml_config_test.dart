@@ -1,33 +1,25 @@
+import 'package:brick_oven/domain/brick_yaml_config.dart';
+import 'package:brick_oven/domain/brick_yaml_data.dart';
+import 'package:brick_oven/domain/yaml_value.dart';
+import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/di.dart';
 import 'package:file/file.dart';
-import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
-import 'package:brick_oven/domain/brick_yaml_config.dart';
-import 'package:brick_oven/domain/brick_yaml_data.dart';
-import 'package:brick_oven/domain/yaml_value.dart';
-import 'package:brick_oven/src/exception.dart';
-import '../test_utils/mocks.dart';
+import '../test_utils/di.dart';
 
 void main() {
-  late FileSystem memoryFS;
-  late Logger mockLogger;
-
-  setUp(() {
-    mockLogger = MockLogger();
-
-    memoryFS = MemoryFileSystem();
-  });
+  setUp(setupTestDi);
 
   test('can be instantiated', () {
     expect(
-      () => BrickYamlConfig(
+      () => const BrickYamlConfig(
         path: 'brick.yaml',
-        ignoreVars: const [],
-        fileSystem: memoryFS,
+        ignoreVars: [],
       ),
       returnsNormally,
     );
@@ -43,7 +35,6 @@ brick_config:
       expect(
         () => BrickYamlConfig.fromYaml(
           YamlValue.from(yaml),
-          fileSystem: MemoryFileSystem(),
           configPath: '',
         ),
         throwsA(isA<BrickConfigException>()),
@@ -54,7 +45,6 @@ brick_config:
       expect(
         () => BrickYamlConfig.fromYaml(
           const YamlValue.error('error'),
-          fileSystem: MemoryFileSystem(),
           configPath: '',
         ),
         throwsA(isA<BrickConfigException>()),
@@ -64,7 +54,6 @@ brick_config:
     test('returns $BrickYamlConfig when yaml is string', () {
       final config = BrickYamlConfig.fromYaml(
         YamlValue.from('brick.yaml'),
-        fileSystem: MemoryFileSystem(),
         configPath: '',
       );
 
@@ -78,7 +67,6 @@ path: brick.yaml
 
       final config = BrickYamlConfig.fromYaml(
         YamlValue.from(yaml),
-        fileSystem: MemoryFileSystem(),
         configPath: '',
       );
 
@@ -94,7 +82,6 @@ extra: key
       expect(
         () => BrickYamlConfig.fromYaml(
           YamlValue.from(yaml),
-          fileSystem: MemoryFileSystem(),
           configPath: '',
         ),
         throwsA(isA<BrickConfigException>()),
@@ -110,14 +97,12 @@ ignore_vars:
 
       final config = BrickYamlConfig.fromYaml(
         YamlValue.from(yaml),
-        fileSystem: MemoryFileSystem(),
         configPath: '',
       );
 
-      final expected = BrickYamlConfig(
+      const expected = BrickYamlConfig(
         path: 'brick.yaml',
-        fileSystem: MemoryFileSystem(),
-        ignoreVars: const ['ignore'],
+        ignoreVars: ['ignore'],
       );
 
       expect(config, expected);
@@ -130,13 +115,11 @@ path: brick.yaml
 
       final config = BrickYamlConfig.fromYaml(
         YamlValue.from(yaml),
-        fileSystem: MemoryFileSystem(),
         configPath: join('path', 'to', 'config'),
       );
 
       final expected = BrickYamlConfig(
         path: join('path', 'to', 'config', 'brick.yaml'),
-        fileSystem: MemoryFileSystem(),
         ignoreVars: const [],
       );
 
@@ -146,44 +129,42 @@ path: brick.yaml
 
   group('#data', () {
     test('return null when config file does not exist', () {
-      final config = BrickYamlConfig(
+      const config = BrickYamlConfig(
         path: 'does_not_exist.yaml',
-        ignoreVars: const [],
-        fileSystem: memoryFS,
+        ignoreVars: [],
       );
 
-      expect(config.data(logger: mockLogger), isNull);
+      expect(config.data, isNull);
 
       verify(
-        () => mockLogger.warn('`brick.yaml` not found at does_not_exist.yaml'),
+        () =>
+            di<Logger>().warn('`brick.yaml` not found at does_not_exist.yaml'),
       ).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('return null when config file is not yaml', () {
-      final config = BrickYamlConfig(
+      const config = BrickYamlConfig(
         path: 'brick.yaml',
-        ignoreVars: const [],
-        fileSystem: memoryFS,
+        ignoreVars: [],
       );
 
-      memoryFS.file('brick.yaml').writeAsStringSync('not yaml');
+      di<FileSystem>().file('brick.yaml').writeAsStringSync('not yaml');
 
-      expect(config.data(logger: mockLogger), isNull);
+      expect(config.data, isNull);
 
       verify(
-        () => mockLogger.warn('Error reading `brick.yaml`'),
+        () => di<Logger>().warn('Error reading `brick.yaml`'),
       ).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('supports legacy config file', () {
-      final config = BrickYamlConfig(
+      const config = BrickYamlConfig(
         path: 'brick.yaml',
-        ignoreVars: const [],
-        fileSystem: memoryFS,
+        ignoreVars: [],
       );
 
       const content = '''
@@ -194,23 +175,22 @@ vars:
   - var2
 ''';
 
-      memoryFS.file('brick.yaml').writeAsStringSync(content);
+      di<FileSystem>().file('brick.yaml').writeAsStringSync(content);
 
       const data = BrickYamlData(
         name: 'My Brick',
         vars: ['var1', 'var2'],
       );
 
-      expect(config.data(logger: mockLogger), data);
+      expect(config.data, data);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('warns when vars is incorrect type', () {
-      final config = BrickYamlConfig(
+      const config = BrickYamlConfig(
         path: 'brick.yaml',
-        ignoreVars: const [],
-        fileSystem: memoryFS,
+        ignoreVars: [],
       );
 
       const content = '''
@@ -219,50 +199,49 @@ name: My Brick
 vars: sup yo
 ''';
 
-      memoryFS.file('brick.yaml').writeAsStringSync(content);
+      di<FileSystem>().file('brick.yaml').writeAsStringSync(content);
 
       const data = BrickYamlData(
         name: 'My Brick',
         vars: [],
       );
 
-      expect(config.data(logger: mockLogger), data);
+      expect(config.data, data);
 
       verify(
-        () => mockLogger.warn('`vars` is an unsupported type in `brick.yaml`'),
+        () =>
+            di<Logger>().warn('`vars` is an unsupported type in `brick.yaml`'),
       ).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('returns when vars is not provided', () {
-      final config = BrickYamlConfig(
+      const config = BrickYamlConfig(
         path: 'brick.yaml',
-        ignoreVars: const [],
-        fileSystem: memoryFS,
+        ignoreVars: [],
       );
 
       const content = '''
 name: My Brick
 ''';
 
-      memoryFS.file('brick.yaml').writeAsStringSync(content);
+      di<FileSystem>().file('brick.yaml').writeAsStringSync(content);
 
       const data = BrickYamlData(
         name: 'My Brick',
         vars: [],
       );
 
-      expect(config.data(logger: mockLogger), data);
+      expect(config.data, data);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('returns data of config file', () {
-      final config = BrickYamlConfig(
+      const config = BrickYamlConfig(
         path: 'brick.yaml',
-        ignoreVars: const [],
-        fileSystem: memoryFS,
+        ignoreVars: [],
       );
 
       const content = '''
@@ -273,31 +252,29 @@ vars:
   var2:
 ''';
 
-      memoryFS.file('brick.yaml').writeAsStringSync(content);
+      di<FileSystem>().file('brick.yaml').writeAsStringSync(content);
 
       const data = BrickYamlData(
         name: 'My Brick',
         vars: ['var1', 'var2'],
       );
 
-      expect(config.data(logger: mockLogger), data);
+      expect(config.data, data);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
   });
 
   group('#props', () {
     test('instances are equal', () {
-      final instance = BrickYamlConfig(
+      const instance = BrickYamlConfig(
         path: 'brick.yaml',
-        ignoreVars: const [],
-        fileSystem: MemoryFileSystem(),
+        ignoreVars: [],
       );
 
-      final instance2 = BrickYamlConfig(
+      const instance2 = BrickYamlConfig(
         path: 'brick.yaml',
-        ignoreVars: const [],
-        fileSystem: MemoryFileSystem(),
+        ignoreVars: [],
       );
 
       expect(instance, instance2);

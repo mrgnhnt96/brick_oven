@@ -1,4 +1,5 @@
 import 'package:args/command_runner.dart';
+import 'package:brick_oven/utils/di.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:yaml/yaml.dart';
@@ -14,16 +15,13 @@ import 'package:brick_oven/src/exception.dart';
 /// {@endtemplate}
 abstract class BrickOvenCommand extends Command<int> {
   /// {@macro brick_oven_command}
-  BrickOvenCommand({
-    required this.fileSystem,
-    required this.logger,
-  });
+  BrickOvenCommand();
 
   /// the file system to be used for all file operations
-  final FileSystem fileSystem;
+  FileSystem get fileSystem => di<FileSystem>();
 
   /// the logger to be used for all logging
-  final Logger logger;
+  Logger get logger => di<Logger>();
 
   /// gets the current working directory
   Directory get cwd {
@@ -105,8 +103,6 @@ abstract class BrickOvenCommand extends Command<int> {
           yaml,
           name,
           configPath: configPath,
-          fileSystem: fileSystem,
-          logger: logger,
         );
 
         bricks.add(brick);

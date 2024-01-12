@@ -1,7 +1,9 @@
 // ignore_for_file: cascade_invocations
 
+import 'package:brick_oven/utils/di.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -12,6 +14,7 @@ import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/constants.dart';
 import 'package:brick_oven/utils/file_replacements.dart';
+import '../test_utils/di.dart';
 import '../test_utils/mocks.dart';
 
 void main() {
@@ -410,19 +413,18 @@ before text {{name}} after text
   });
 
   group('#writeFile', () {
-    late MockLogger mockLogger;
-    late FileSystem fileSystem;
     late File sourceFile;
     late File targetFile;
     const sourceFilePath = 'source.dart';
     const targetFilePath = 'target.dart';
 
     setUp(() {
-      mockLogger = MockLogger();
-      fileSystem = MemoryFileSystem();
-      sourceFile = fileSystem.file(sourceFilePath)..createSync(recursive: true);
+      setupTestDi();
 
-      targetFile = fileSystem.file(targetFilePath);
+      sourceFile = di<FileSystem>().file(sourceFilePath)
+        ..createSync(recursive: true);
+
+      targetFile = di<FileSystem>().file(targetFilePath);
     });
 
     test('copies file when no variables or partials are provided', () {
@@ -434,19 +436,17 @@ before text {{name}} after text
         variables: [],
         sourceFile: sourceFile,
         targetFile: targetFile,
-        fileSystem: fileSystem,
-        logger: mockLogger,
       );
 
       expect(result, const FileWriteResult.empty());
 
       expect(targetFile.readAsStringSync(), 'hello from this side');
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('prints warning if excess variables exist', () {
-      verifyNever(() => mockLogger.warn(any()));
+      verifyNever(() => di<Logger>().warn(any()));
 
       const variable = Variable(placeholder: '_HELLO_', name: 'hello');
 
@@ -463,8 +463,6 @@ before text {{name}} after text
           variable,
           extraVariable,
         ],
-        fileSystem: fileSystem,
-        logger: mockLogger,
       );
 
       expect(
@@ -476,16 +474,16 @@ before text {{name}} after text
       );
 
       verify(
-        () => mockLogger.warn(
+        () => di<Logger>().warn(
           'Unused variables ("${extraVariable.name}") in `${sourceFile.path}`',
         ),
       ).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('ignores out of file variables when checking excess variables', () {
-      verifyNever(() => mockLogger.warn(any()));
+      verifyNever(() => di<Logger>().warn(any()));
 
       const variable = Variable(placeholder: '_HELLO_', name: 'hello');
 
@@ -506,8 +504,6 @@ before text {{name}} after text
         sourceFile: sourceFile,
         targetFile: targetFile,
         variables: [variable],
-        fileSystem: fileSystem,
-        logger: mockLogger,
       );
 
       expect(
@@ -518,11 +514,11 @@ before text {{name}} after text
         ),
       );
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('includes out of file variables in content replacement', () {
-      verifyNever(() => mockLogger.warn(any()));
+      verifyNever(() => di<Logger>().warn(any()));
 
       // should be ignored by default
       const indexValueVariable = Variable(
@@ -543,8 +539,6 @@ before text {{name}} after text
         sourceFile: sourceFile,
         targetFile: targetFile,
         variables: [variable],
-        fileSystem: fileSystem,
-        logger: mockLogger,
       );
 
       expect(
@@ -557,11 +551,11 @@ before text {{name}} after text
 
       expect(targetFile.readAsStringSync(), 'replace: {{hello}} {{lol}}');
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('prints warning if file does not exist', () {
-      verifyNever(() => mockLogger.warn(any()));
+      verifyNever(() => di<Logger>().warn(any()));
 
       const variable = Variable(placeholder: '_HELLO_', name: 'hello');
       const extraVariable = Variable(placeholder: '_GOODBYE_', name: 'goodbye');
@@ -574,19 +568,17 @@ before text {{name}} after text
         sourceFile: sourceFile,
         targetFile: targetFile,
         variables: [variable, extraVariable],
-        fileSystem: fileSystem,
-        logger: mockLogger,
       );
 
       expect(result, const FileWriteResult.empty());
 
       verify(
-        () => mockLogger.warn(
+        () => di<Logger>().warn(
           'source file does not exist: ${sourceFile.path}',
         ),
       ).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('writes sections, variables, and partials', () {
@@ -624,8 +616,6 @@ partials.page.md
         sourceFile: sourceFile,
         targetFile: targetFile,
         variables: [variable, section],
-        fileSystem: fileSystem,
-        logger: mockLogger,
       );
 
       expect(
@@ -638,7 +628,7 @@ partials.page.md
 
       expect(targetFile.readAsStringSync(), expectedContent);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
   });
 }

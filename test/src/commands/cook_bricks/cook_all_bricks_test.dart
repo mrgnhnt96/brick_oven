@@ -3,50 +3,45 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import 'package:brick_oven/utils/extensions/logger_extensions.dart';
+import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/bricks_or_error.dart';
+import 'package:brick_oven/utils/di.dart';
+import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
+import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/bricks_or_error.dart';
-import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
-import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/src/key_press_listener.dart';
-import 'package:brick_oven/utils/extensions/logger_extensions.dart';
+import '../../../test_utils/di.dart';
 import '../../../test_utils/fakes.dart';
 import '../../../test_utils/mocks.dart';
 
 void main() {
   late CookAllBricks command;
-  late Logger mockLogger;
-  late FileSystem memoryFileSystem;
   late Brick mockBrick;
 
   setUp(() {
+    setupTestDi();
+
     mockBrick = MockBrick();
-    mockLogger = MockLogger();
-
-    memoryFileSystem = MemoryFileSystem();
-
-    command = CookAllBricks(
-      logger: mockLogger,
-      fileSystem: memoryFileSystem,
-    );
+    command = CookAllBricks();
   });
 
   group('$CookAllBricks', () {
     test('description displays correctly', () {
       expect(command.description, 'Cook all bricks');
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('name displays correctly', () {
       expect(command.name, 'all');
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     group('#run', () {
@@ -54,46 +49,42 @@ void main() {
         test('when shouldSync and isWatch are default values', () async {
           final command = TestCookAllBricks(
             bricksOrError: BricksOrError({mockBrick}, null),
-            logger: mockLogger,
-            fileSystem: memoryFileSystem,
           );
 
           final result = await command.run();
 
           verifyInOrder([
-            mockLogger.preheat,
+            di<Logger>().preheat,
             mockBrick.cook,
-            mockLogger.dingDing,
+            di<Logger>().dingDing,
           ]);
 
           expect(result, ExitCode.success.code);
 
           verifyNoMoreInteractions(mockBrick);
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
         });
 
         group('when #shouldSync', () {
           test('is false', () async {
             final command = TestCookAllBricks(
               bricksOrError: BricksOrError({mockBrick}, null),
-              logger: mockLogger,
               shouldSync: false,
-              fileSystem: memoryFileSystem,
             );
 
             final result = await command.run();
 
             verifyInOrder([
-              mockLogger.preheat,
+              di<Logger>().preheat,
               () => mockBrick.cook(
                     output: any(named: 'output'),
                     shouldSync: false,
                     watch: false,
                   ),
-              mockLogger.dingDing,
+              di<Logger>().dingDing,
             ]);
 
-            verifyNoMoreInteractions(mockLogger);
+            verifyNoMoreInteractions(di<Logger>());
             verifyNoMoreInteractions(mockBrick);
 
             expect(result, ExitCode.success.code);
@@ -102,24 +93,22 @@ void main() {
           test('is true', () async {
             final command = TestCookAllBricks(
               bricksOrError: BricksOrError({mockBrick}, null),
-              logger: mockLogger,
               shouldSync: true,
-              fileSystem: memoryFileSystem,
             );
 
             final result = await command.run();
 
             verifyInOrder([
-              mockLogger.preheat,
+              di<Logger>().preheat,
               () => mockBrick.cook(
                     output: any(named: 'output'),
                     shouldSync: true,
                     watch: false,
                   ),
-              mockLogger.dingDing,
+              di<Logger>().dingDing,
             ]);
 
-            verifyNoMoreInteractions(mockLogger);
+            verifyNoMoreInteractions(di<Logger>());
             verifyNoMoreInteractions(mockBrick);
 
             expect(result, ExitCode.success.code);
@@ -145,7 +134,6 @@ void main() {
 
             keyPressListener = KeyPressListener(
               stdin: mockStdin,
-              logger: mockLogger,
               toExit: exitCompleter.complete,
             );
 
@@ -168,25 +156,23 @@ void main() {
           test('is false', () async {
             final command = TestCookAllBricks(
               bricksOrError: BricksOrError({mockBrick}, null),
-              logger: mockLogger,
               isWatch: false,
-              fileSystem: memoryFileSystem,
               keyPressListener: keyPressListener,
             );
 
             final result = await command.run();
 
             verifyInOrder([
-              mockLogger.preheat,
+              di<Logger>().preheat,
               () => mockBrick.cook(
                     output: any(named: 'output'),
                     shouldSync: true,
                     watch: false,
                   ),
-              mockLogger.dingDing,
+              di<Logger>().dingDing,
             ]);
 
-            verifyNoMoreInteractions(mockLogger);
+            verifyNoMoreInteractions(di<Logger>());
             verifyNoMoreInteractions(mockBrick);
 
             expect(result, ExitCode.success.code);
@@ -195,9 +181,7 @@ void main() {
           test('is true', () async {
             final command = TestCookAllBricks(
               bricksOrError: BricksOrError({mockBrick}, null),
-              logger: mockLogger,
               isWatch: true,
-              fileSystem: memoryFileSystem,
               keyPressListener: keyPressListener,
             );
 
@@ -207,20 +191,20 @@ void main() {
             verify(() => mockBrick.source).called(1);
 
             verifyInOrder([
-              mockLogger.preheat,
+              di<Logger>().preheat,
               () => mockBrick.cook(
                     output: any(named: 'output'),
                     shouldSync: true,
                     watch: true,
                   ),
-              mockLogger.dingDing,
-              mockLogger.watching,
-              mockLogger.quit,
-              mockLogger.reload,
-              mockLogger.exiting,
+              di<Logger>().dingDing,
+              di<Logger>().watching,
+              di<Logger>().quit,
+              di<Logger>().reload,
+              di<Logger>().exiting,
             ]);
 
-            verifyNoMoreInteractions(mockLogger);
+            verifyNoMoreInteractions(di<Logger>());
             verifyNoMoreInteractions(mockBrick);
 
             final result = await exitCompleter.future;
@@ -234,17 +218,15 @@ void main() {
       test('when error occurs when parsing bricks', () async {
         final command = TestCookAllBricks(
           bricksOrError: const BricksOrError(null, 'error'),
-          logger: mockLogger,
-          fileSystem: memoryFileSystem,
         );
 
         final result = await command.run();
 
-        verify(() => mockLogger.err('error')).called(1);
+        verify(() => di<Logger>().err('error')).called(1);
 
         expect(result, ExitCode.config.code);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('when unknown error occurs', () async {
@@ -253,23 +235,21 @@ void main() {
 
         final command = TestCookAllBricks(
           bricksOrError: BricksOrError({mockBrick}, null),
-          logger: mockLogger,
-          fileSystem: memoryFileSystem,
         );
 
         final result = await command.run();
 
         verifyInOrder([
-          mockLogger.preheat,
+          di<Logger>().preheat,
           mockBrick.cook,
-          () => mockLogger.warn('Unknown error: Exception: error'),
-          () => mockLogger.err('Could not cook brick: BRICK'),
-          mockLogger.dingDing,
+          () => di<Logger>().warn('Unknown error: Exception: error'),
+          () => di<Logger>().err('Could not cook brick: BRICK'),
+          di<Logger>().dingDing,
         ]);
 
         verify(() => mockBrick.name).called(1);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
         verifyNoMoreInteractions(mockBrick);
 
         expect(result, ExitCode.success.code);
@@ -282,28 +262,26 @@ void main() {
 
         final command = TestCookAllBricks(
           bricksOrError: BricksOrError({mockBrick}, null),
-          logger: mockLogger,
-          fileSystem: memoryFileSystem,
         );
 
         final result = await command.run();
 
         verifyInOrder([
-          mockLogger.preheat,
+          di<Logger>().preheat,
           mockBrick.cook,
-          () => mockLogger.warn(
+          () => di<Logger>().warn(
                 'Invalid brick config: "BRICK"\n'
                 'Reason: error',
               ),
-          () => mockLogger.err('Could not cook brick: BRICK'),
-          mockLogger.dingDing,
+          () => di<Logger>().err('Could not cook brick: BRICK'),
+          di<Logger>().dingDing,
         ]);
 
         expect(result, ExitCode.success.code);
 
         verify(() => mockBrick.name).called(1);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
         verifyNoMoreInteractions(mockBrick);
       });
     });
@@ -312,8 +290,6 @@ void main() {
 
 class TestCookAllBricks extends CookAllBricks {
   TestCookAllBricks({
-    required super.logger,
-    required super.fileSystem,
     this.bricksOrError,
     bool? isWatch,
     bool? shouldSync,

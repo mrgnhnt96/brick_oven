@@ -1,11 +1,4 @@
 import 'package:autoequal/autoequal.dart';
-import 'package:equatable/equatable.dart';
-import 'package:file/file.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:meta/meta.dart';
-import 'package:path/path.dart' as p show extension;
-import 'package:path/path.dart' hide extension;
-
 import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/brick_url.dart';
 import 'package:brick_oven/domain/content_replacement.dart';
@@ -15,8 +8,14 @@ import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/di.dart';
 import 'package:brick_oven/utils/file_replacements.dart';
 import 'package:brick_oven/utils/include_mixin.dart';
+import 'package:equatable/equatable.dart';
+import 'package:file/file.dart';
+import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p show extension;
+import 'package:path/path.dart' hide extension;
 
 part 'brick_file.g.dart';
 
@@ -290,15 +289,13 @@ class BrickFile extends Equatable with FileReplacements, IncludeMixin {
     required List<Variable> outOfFileVariables,
     required List<Partial> partials,
     required List<BrickUrl> urls,
-    required FileSystem fileSystem,
-    required Logger logger,
   }) {
     final pathContent = newPathForFile(
       urls: urls,
       dirs: dirs,
     );
 
-    final file = fileSystem.file(join(targetDir, pathContent.content))
+    final file = di<FileSystem>().file(join(targetDir, pathContent.content))
       ..createSync(recursive: true);
 
     if (pathContent.data['url'] != null) {
@@ -315,8 +312,6 @@ class BrickFile extends Equatable with FileReplacements, IncludeMixin {
         variables: variables,
         outOfFileVariables: outOfFileVariables,
         partials: partials,
-        fileSystem: fileSystem,
-        logger: logger,
       );
 
       return FileWriteResult(

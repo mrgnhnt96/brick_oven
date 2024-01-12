@@ -1,4 +1,5 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/utils/di.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -29,8 +30,6 @@ class Brick extends Equatable {
   const Brick({
     required this.name,
     required this.source,
-    required Logger logger,
-    required FileSystem fileSystem,
     this.dirs = const [],
     this.files = const [],
     this.partials = const [],
@@ -38,8 +37,7 @@ class Brick extends Equatable {
     this.brickYamlConfig,
     this.exclude = const [],
     this.urls = const [],
-  })  : _fileSystem = fileSystem,
-        _logger = logger;
+  });
 
   const Brick._fromYaml({
     required this.name,
@@ -51,17 +49,12 @@ class Brick extends Equatable {
     required this.brickYamlConfig,
     required this.partials,
     required this.urls,
-    required FileSystem fileSystem,
-    required Logger logger,
-  })  : _fileSystem = fileSystem,
-        _logger = logger;
+  });
 
   /// parses [yaml]
   factory Brick.fromYaml(
     YamlValue yaml,
     String name, {
-    required FileSystem fileSystem,
-    required Logger logger,
     String? configPath,
   }) {
     if (yaml.isError()) {
@@ -85,7 +78,6 @@ class Brick extends Equatable {
       source = BrickSource.fromYaml(
         YamlValue.from(data.remove('source')),
         configPath: configPath,
-        fileSystem: fileSystem,
       );
     } on ConfigException catch (e) {
       throw BrickException(
@@ -261,7 +253,6 @@ class Brick extends Equatable {
     if (!brickConfig.isNone()) {
       brickYamlConfig = BrickYamlConfig.fromYaml(
         brickConfig,
-        fileSystem: fileSystem,
         configPath: dirname(configPath ?? ''),
       );
     }
@@ -283,8 +274,6 @@ class Brick extends Equatable {
       name: name,
       configPath: configPath,
       brickYamlConfig: brickYamlConfig,
-      fileSystem: fileSystem,
-      logger: logger,
     );
   }
 
@@ -318,12 +307,6 @@ class Brick extends Equatable {
 
   /// the source of the content that the brick will create
   final BrickSource source;
-
-  @ignore
-  final FileSystem _fileSystem;
-
-  @ignore
-  final Logger _logger;
 
   /// variables used not provided by the user
   static List<Variable> get defaultVariables => [
@@ -410,7 +393,7 @@ class Brick extends Equatable {
       return;
     }
 
-    final brickYaml = config.data(logger: _logger);
+    final brickYaml = config.data;
 
     if (brickYaml == null) {
       return;
@@ -422,7 +405,7 @@ class Brick extends Equatable {
 
     if (brickYaml.name != name) {
       isInSync = false;
-      _logger.warn(
+      di<Logger>().warn(
         '`name` (${brickYaml.name}) in brick.yaml does not '
         'match the name in $brickOvenFileName ($name)',
       );
@@ -439,7 +422,7 @@ class Brick extends Equatable {
       isInSync = false;
       final vars =
           '"${variablesInBrickYaml.difference(variables).join('", "')}"';
-      _logger.warn(
+      di<Logger>().warn(
         'Variables ($vars) exist in brick.yaml but not in $brickOvenFileName',
       );
     }
@@ -449,15 +432,15 @@ class Brick extends Equatable {
       final vars =
           '"${variables.difference(variablesInBrickYaml).join('", "')}"';
 
-      _logger.warn(
+      di<Logger>().warn(
         'Variables ($vars) exist in $brickOvenFileName but not in brick.yaml',
       );
     }
 
     if (isInSync) {
-      _logger.info(darkGray.wrap('brick.yaml is in sync'));
+      di<Logger>().info(darkGray.wrap('brick.yaml is in sync'));
     } else {
-      _logger.err('brick.yaml is out of sync');
+      di<Logger>().err('brick.yaml is out of sync');
     }
   }
 
@@ -486,7 +469,7 @@ class Brick extends Equatable {
       names.add(partial.fileName);
     }
 
-    final done = _logger.progress('Writing Brick: $name');
+    final done = di<Logger>().progress('Writing Brick: $name');
 
     final excludedPaths = [...exclude, '__brick__', 'bricks', '.git'];
 
@@ -533,7 +516,7 @@ class Brick extends Equatable {
     required Progress done,
     required Set<String> excludedPaths,
   }) {
-    final directory = _fileSystem.directory(targetDir);
+    final directory = di<FileSystem>().directory(targetDir);
     if (directory.existsSync()) {
       directory.deleteSync(recursive: true);
     }
@@ -541,7 +524,6 @@ class Brick extends Equatable {
     final mergedFiles = source.mergeFilesAndConfig(
       files,
       excludedPaths: excludedPaths,
-      logger: _logger,
     );
     final count = mergedFiles.length;
 
@@ -561,12 +543,10 @@ class Brick extends Equatable {
       try {
         writeResult = file.writeTargetFile(
           targetDir: targetDir,
-          sourceFile: _fileSystem.file(source.fromSourcePath(file.path)),
+          sourceFile: di<FileSystem>().file(source.fromSourcePath(file.path)),
           dirs: dirs,
           partials: partials,
-          fileSystem: _fileSystem,
           urls: urls,
-          logger: _logger,
           outOfFileVariables: defaultVariables,
         );
       } on ConfigException catch (e) {
@@ -590,10 +570,9 @@ class Brick extends Equatable {
       try {
         writeResult = partial.writeTargetFile(
           targetDir: targetDir,
-          sourceFile: _fileSystem.file(source.fromSourcePath(partial.path)),
+          sourceFile:
+              di<FileSystem>().file(source.fromSourcePath(partial.path)),
           partials: partials,
-          fileSystem: _fileSystem,
-          logger: _logger,
           outOfFileVariables: defaultVariables,
         );
       } on ConfigException catch (e) {
@@ -619,14 +598,14 @@ class Brick extends Equatable {
 
     if (unusedVariables.isNotEmpty) {
       final vars = '"${unusedVariables.join('", "')}"';
-      _logger.warn(
+      di<Logger>().warn(
         'Unused variables ($vars) in $name',
       );
     }
 
     if (unusedPartials.isNotEmpty) {
       final partials = '"${unusedPartials.map(basename).join('", "')}"';
-      _logger.warn(
+      di<Logger>().warn(
         'Unused partials ($partials) in $name',
       );
     }

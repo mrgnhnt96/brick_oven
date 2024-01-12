@@ -12,11 +12,14 @@ import 'package:mason_logger/mason_logger.dart';
 /// Writes all bricks from the configuration file
 /// {@endtemplate}
 class CookAllBricks extends BrickOvenCommand
-    with BrickCooker, BrickCookerArgs, ConfigWatcherMixin, OvenMixin {
+    with
+        BrickCooker,
+        BrickCookerArgs,
+        ConfigWatcherMixin,
+        LoggerMixin,
+        OvenMixin {
   /// {@macro cook_all_bricks_command}
   CookAllBricks({
-    required super.fileSystem,
-    required super.logger,
     this.keyPressListener,
   }) {
     argParser

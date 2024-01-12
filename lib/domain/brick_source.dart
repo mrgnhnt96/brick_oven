@@ -1,4 +1,5 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/utils/di.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -12,7 +13,6 @@ import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
-import 'package:brick_oven/utils/separate_dirs_and_paths.dart';
 import 'package:brick_oven/utils/should_exclude_path.dart';
 
 part 'brick_source.g.dart';
@@ -25,25 +25,18 @@ class BrickSource extends Equatable {
   /// {@macro brick_source}
   BrickSource({
     required this.localPath,
-    required FileSystem fileSystem,
-  })  : _fileSystem = fileSystem,
-        watcher = localPath != null ? SourceWatcher(localPath) : null;
+  }) : watcher = localPath != null ? SourceWatcher(localPath) : null;
 
   /// parses the [value] into the appropriate type of source
-  factory BrickSource.fromString(
-    String value, {
-    required FileSystem fileSystem,
-  }) {
+  factory BrickSource.fromString(String value) {
     return BrickSource(
       localPath: value,
-      fileSystem: fileSystem,
     );
   }
 
   /// parse [yaml] into the source
   factory BrickSource.fromYaml(
     YamlValue yaml, {
-    required FileSystem fileSystem,
     String? configPath,
   }) {
     if (yaml.isError()) {
@@ -58,10 +51,7 @@ class BrickSource extends Equatable {
     if (yaml.isString()) {
       final path = BrickDir.cleanPath(join(configDir, yaml.asString().value));
 
-      return BrickSource.fromString(
-        path,
-        fileSystem: fileSystem,
-      );
+      return BrickSource.fromString(path);
     }
 
     BrickSource handleYaml(YamlMap yaml) {
@@ -72,7 +62,7 @@ class BrickSource extends Equatable {
       if (localPath.isNone()) {
         final path = BrickDir.cleanPath(configDir);
         if (path.isEmpty) {
-          return BrickSource.none(fileSystem: fileSystem);
+          return const BrickSource.none();
         }
 
         throw SourceException(
@@ -99,13 +89,10 @@ class BrickSource extends Equatable {
           BrickDir.cleanPath(join(configDir, localPath.asString().value));
 
       if (path.isEmpty) {
-        return BrickSource.none(fileSystem: fileSystem);
+        return const BrickSource.none();
       }
 
-      return BrickSource.fromString(
-        path,
-        fileSystem: fileSystem,
-      );
+      return BrickSource.fromString(path);
     }
 
     if (yaml.isYaml()) {
@@ -115,7 +102,7 @@ class BrickSource extends Equatable {
     final path = BrickDir.cleanPath(configDir);
 
     if (path.isEmpty) {
-      return BrickSource.none(fileSystem: fileSystem);
+      return const BrickSource.none();
     }
 
     throw SourceException(
@@ -128,15 +115,12 @@ class BrickSource extends Equatable {
   @visibleForTesting
   const BrickSource.memory({
     required this.localPath,
-    required FileSystem fileSystem,
     this.watcher,
-  }) : _fileSystem = fileSystem;
+  });
 
   /// creates and empty source
-  const BrickSource.none({
-    required FileSystem fileSystem,
-  })  : localPath = null,
-        _fileSystem = fileSystem,
+  const BrickSource.none()
+      : localPath = null,
         watcher = null;
 
   /// the local path of the source files
@@ -144,9 +128,6 @@ class BrickSource extends Equatable {
 
   /// Watches the local files, and updates on events
   final SourceWatcher? watcher;
-
-  @ignore
-  final FileSystem _fileSystem;
 
   @override
   List<Object?> get props => _$props;
@@ -169,7 +150,6 @@ class BrickSource extends Equatable {
   /// variables & configurations
   Iterable<BrickFile> mergeFilesAndConfig(
     Iterable<BrickFile> configFiles, {
-    required Logger logger,
     Iterable<String> excludedPaths = const [],
   }) {
     final configs = configFiles.toMap();
@@ -183,7 +163,7 @@ class BrickSource extends Equatable {
         continue;
       }
 
-      logger
+      di<Logger>()
         ..info('')
         ..warn(
           'The configured file "$file" does not exist within $sourceDir',
@@ -200,14 +180,12 @@ class BrickSource extends Equatable {
       ..addAll(sourceFiles)
       ..addAll(configs);
 
-    final (excludedDirs, excludedFiles) = separateDirsAndPaths(excludedPaths);
-
     final brickFiles = <BrickFile>[];
 
     for (final key in result.keys) {
       final path = normalize(key);
 
-      if (shouldExcludePath(path, excludedDirs, excludedFiles)) {
+      if (shouldExcludePath(path, excludedPaths)) {
         continue;
       }
 
@@ -225,7 +203,7 @@ class BrickSource extends Equatable {
       return [];
     }
 
-    final dir = _fileSystem.directory(localPath);
+    final dir = di<FileSystem>().directory(localPath);
 
     if (!dir.existsSync()) {
       return [];

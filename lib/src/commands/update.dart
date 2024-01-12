@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:brick_oven/src/runner.dart';
+import 'package:brick_oven/utils/di.dart';
+import 'package:brick_oven/src/constants/constants.dart';
 import 'package:brick_oven/src/version.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
@@ -11,14 +12,7 @@ import 'package:pub_updater/pub_updater.dart';
 /// {@endtemplate}
 class UpdateCommand extends Command<int> {
   /// {@macro update_command}
-  UpdateCommand({
-    required PubUpdater pubUpdater,
-    required Logger logger,
-  })  : _pubUpdater = pubUpdater,
-        _logger = logger;
-
-  final PubUpdater _pubUpdater;
-  final Logger _logger;
+  UpdateCommand();
 
   @override
   final String description = 'Updates brick_oven to the latest version';
@@ -31,11 +25,13 @@ class UpdateCommand extends Command<int> {
 
   @override
   Future<int> run() async {
-    final progress = _logger.progress('Checking for updates');
+    final updater = di<PubUpdater>();
+
+    final progress = di<Logger>().progress('Checking for updates');
     late final String latestVersion;
 
     try {
-      latestVersion = await _pubUpdater.getLatestVersion(packageName);
+      latestVersion = await updater.getLatestVersion(Constants.packageName);
     } catch (error) {
       progress.fail('Failed to get latest version');
 
@@ -55,7 +51,7 @@ class UpdateCommand extends Command<int> {
     try {
       progress.update('Updating to $latestVersion');
 
-      await _pubUpdater.update(packageName: packageName);
+      await updater.update(packageName: Constants.packageName);
     } catch (error) {
       progress.fail('Failed to update brick_oven');
 

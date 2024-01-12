@@ -1,4 +1,5 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/utils/di.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -21,14 +22,12 @@ class BrickYamlConfig extends Equatable {
   /// {@macro brick_yaml_config}
   const BrickYamlConfig({
     required this.path,
-    required FileSystem fileSystem,
     required this.ignoreVars,
-  }) : _fileSystem = fileSystem;
+  });
 
   /// {@macro brick_yaml_config}
   factory BrickYamlConfig.fromYaml(
     YamlValue yaml, {
-    required FileSystem fileSystem,
     required String configPath,
   }) {
     if (yaml.isError()) {
@@ -40,7 +39,6 @@ class BrickYamlConfig extends Equatable {
 
       return BrickYamlConfig(
         path: join(configPath, path),
-        fileSystem: fileSystem,
         ignoreVars: const [],
       );
     }
@@ -83,7 +81,6 @@ class BrickYamlConfig extends Equatable {
     return BrickYamlConfig(
       path: join(configPath, dir),
       ignoreVars: ignoreVars,
-      fileSystem: fileSystem,
     );
   }
 
@@ -97,26 +94,23 @@ class BrickYamlConfig extends Equatable {
   /// the path to the brick.yaml file
   final String path;
 
-  @ignore
-  final FileSystem _fileSystem;
-
   @override
   List<Object?> get props => _$props;
 
   /// the data within the brick.yaml file
   // ignore: library_private_types_in_public_api
-  BrickYamlData? data({required Logger logger}) {
-    final file = _fileSystem.file(path);
+  BrickYamlData? get data {
+    final file = di<FileSystem>().file(path);
 
     if (!file.existsSync()) {
-      logger.warn('`brick.yaml` not found at $path');
+      di<Logger>().warn('`brick.yaml` not found at $path');
       return null;
     }
 
     final yaml = YamlValue.from(loadYaml(file.readAsStringSync()));
 
     if (!yaml.isYaml()) {
-      logger.warn('Error reading `brick.yaml`');
+      di<Logger>().warn('Error reading `brick.yaml`');
       return null;
     }
 
@@ -144,7 +138,7 @@ class BrickYamlConfig extends Equatable {
     }
 
     if (!varsRaw.isYaml()) {
-      logger.warn('`vars` is an unsupported type in `brick.yaml`');
+      di<Logger>().warn('`vars` is an unsupported type in `brick.yaml`');
 
       return BrickYamlData(
         name: name,

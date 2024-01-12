@@ -1,31 +1,25 @@
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:path/path.dart';
-import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
-
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_source.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
-import '../test_utils/mocks.dart';
+import 'package:brick_oven/utils/di.dart';
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:path/path.dart';
+import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
+
+import '../test_utils/di.dart';
 
 void main() {
   const localPath = 'local_path';
-  late MockLogger mockLogger;
 
-  setUp(() {
-    mockLogger = MockLogger();
-  });
+  setUp(setupTestDi);
 
-  List<String> createFakeFiles(
-    void Function(FileSystem) createFileSystem,
-  ) {
-    final fileSystem = MemoryFileSystem();
-    createFileSystem(fileSystem);
-
+  List<String> createFakeFiles() {
     final fakePaths = [
       join(localPath, 'file1.dart'),
       join(localPath, 'to', 'file2.dart'),
@@ -33,22 +27,21 @@ void main() {
     ];
 
     for (final file in fakePaths) {
-      fileSystem.file(file).createSync(recursive: true);
+      di<FileSystem>().file(file).createSync(recursive: true);
     }
 
     return fakePaths;
   }
 
   test('can be instantiated', () {
-    final instance =
-        BrickSource(localPath: 'test', fileSystem: MemoryFileSystem());
+    final instance = BrickSource(localPath: 'test');
 
     expect(instance, isA<BrickSource>());
   });
 
   group('#none', () {
     test('local path is null', () {
-      final instance = BrickSource.none(fileSystem: MemoryFileSystem());
+      const instance = BrickSource.none();
 
       expect(instance.localPath, isNull);
     });
@@ -64,7 +57,6 @@ $path
 ''') as String;
         final instance = BrickSource.fromYaml(
           YamlValue.from(yaml),
-          fileSystem: MemoryFileSystem(),
         );
 
         expect(instance.localPath, path);
@@ -73,7 +65,6 @@ $path
       test('should return when empty', () {
         final instance = BrickSource.fromYaml(
           YamlValue.from(YamlMap.wrap({'path': ''})),
-          fileSystem: MemoryFileSystem(),
         );
 
         expect(instance.localPath, isNull);
@@ -85,7 +76,6 @@ $path
         final instance = BrickSource.fromYaml(
           YamlValue.from('.'),
           configPath: 'path/to/config.yaml',
-          fileSystem: MemoryFileSystem(),
         );
 
         expect(instance.localPath, 'path/to');
@@ -98,7 +88,6 @@ $path
           return BrickSource.fromYaml(
             YamlValue.from(null),
             configPath: 'path/to/config.yaml',
-            fileSystem: MemoryFileSystem(),
           );
         }
 
@@ -116,7 +105,6 @@ path:
           return BrickSource.fromYaml(
             YamlValue.from(yaml),
             configPath: 'path/to/config.yaml',
-            fileSystem: MemoryFileSystem(),
           );
         }
 
@@ -130,7 +118,6 @@ path: $path
 
         final instance = BrickSource.fromYaml(
           YamlValue.yaml(yaml),
-          fileSystem: MemoryFileSystem(),
         );
 
         expect(instance.localPath, path);
@@ -147,7 +134,6 @@ extra: key
         expect(
           () => BrickSource.fromYaml(
             YamlValue.yaml(yaml),
-            fileSystem: MemoryFileSystem(),
           ),
           throwsA(isA<ConfigException>()),
         );
@@ -157,7 +143,6 @@ extra: key
         expect(
           () => BrickSource.fromYaml(
             const YamlError('error'),
-            fileSystem: MemoryFileSystem(),
           ),
           throwsA(isA<ConfigException>()),
         );
@@ -170,7 +155,6 @@ path:
 
         final instance = BrickSource.fromYaml(
           YamlValue.from(yaml),
-          fileSystem: MemoryFileSystem(),
         );
 
         expect(instance.localPath, isNull);
@@ -185,7 +169,6 @@ path:
         expect(
           () => BrickSource.fromYaml(
             YamlValue.yaml(yaml),
-            fileSystem: MemoryFileSystem(),
           ),
           throwsA(isA<ConfigException>()),
         );
@@ -194,7 +177,6 @@ path:
       test('should return null when not provided', () {
         final instance = BrickSource.fromYaml(
           const YamlValue.none(),
-          fileSystem: MemoryFileSystem(),
         );
 
         expect(instance.localPath, isNull);
@@ -204,20 +186,17 @@ path:
 
   group('#files', () {
     test('should return no files when no source is provided', () {
-      final instance = BrickSource.none(fileSystem: MemoryFileSystem());
+      const instance = BrickSource.none();
 
       expect(instance.files(), isEmpty);
     });
 
     test('should return files from local directory', () {
-      late BrickSource source;
+      const source = BrickSource.memory(
+        localPath: localPath,
+      );
 
-      final fakePaths = createFakeFiles((fs) {
-        source = BrickSource.memory(
-          localPath: localPath,
-          fileSystem: fs,
-        );
-      });
+      final fakePaths = createFakeFiles();
 
       final files = source.files();
 
@@ -231,9 +210,8 @@ path:
 
   group('#sourceDir', () {
     test('should return local path when provided', () {
-      final instance = BrickSource.memory(
+      const instance = BrickSource.memory(
         localPath: localPath,
-        fileSystem: MemoryFileSystem(),
       );
 
       expect(instance.sourceDir, localPath);
@@ -242,16 +220,13 @@ path:
 
   group('#mergeFilesAndConfig', () {
     test('should return all source files', () {
-      late BrickSource source;
+      const source = BrickSource.memory(
+        localPath: localPath,
+      );
 
-      final fakePaths = createFakeFiles((fs) {
-        source = BrickSource.memory(
-          localPath: localPath,
-          fileSystem: fs,
-        );
-      });
+      final fakePaths = createFakeFiles();
 
-      final mergedFiles = source.mergeFilesAndConfig([], logger: mockLogger);
+      final mergedFiles = source.mergeFilesAndConfig([]);
 
       expect(mergedFiles, hasLength(fakePaths.length));
 
@@ -259,31 +234,29 @@ path:
         expect(fakePaths, contains('$localPath$separator${file.path}'));
       }
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('should return no config file when source files do not exist', () {
       final source = BrickSource(
         localPath: localPath,
-        fileSystem: MemoryFileSystem(),
       );
 
       final configFiles = ['file1.dart', 'file2.dart'].map(BrickFile.new);
 
-      verifyNever(() => mockLogger.info(any()));
-      verifyNever(() => mockLogger.warn(any()));
+      verifyNever(() => di<Logger>().info(any()));
+      verifyNever(() => di<Logger>().warn(any()));
 
-      final mergedFiles =
-          source.mergeFilesAndConfig(configFiles, logger: mockLogger);
+      final mergedFiles = source.mergeFilesAndConfig(configFiles);
 
-      verify(() => mockLogger.info('')).called(2);
+      verify(() => di<Logger>().info('')).called(2);
       verify(
-        () => mockLogger.warn(
+        () => di<Logger>().warn(
           'The configured file "file1.dart" does not exist within local_path',
         ),
       ).called(1);
       verify(
-        () => mockLogger.warn(
+        () => di<Logger>().warn(
           'The configured file "file2.dart" does not exist within local_path',
         ),
       ).called(1);
@@ -294,26 +267,22 @@ path:
         expect(configFiles, isNot(contains(file)));
       }
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('should return all config files', () {
-      late BrickSource source;
+      const source = BrickSource.memory(
+        localPath: localPath,
+      );
 
-      final files = createFakeFiles((fs) {
-        source = BrickSource.memory(
-          localPath: localPath,
-          fileSystem: fs,
-        );
-      });
+      final files = createFakeFiles();
 
       final configFiles = files.map((e) {
         final path = e.replaceFirst('$localPath/', '');
         return BrickFile(path);
       });
 
-      final mergedFiles =
-          source.mergeFilesAndConfig(configFiles, logger: mockLogger);
+      final mergedFiles = source.mergeFilesAndConfig(configFiles);
 
       expect(mergedFiles, hasLength(configFiles.length));
 
@@ -321,18 +290,15 @@ path:
         expect(configFiles, contains(file));
       }
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('should return merged config files onto source files', () {
-      late BrickSource source;
+      const source = BrickSource.memory(
+        localPath: localPath,
+      );
 
-      final fakePaths = createFakeFiles((fs) {
-        source = BrickSource.memory(
-          localPath: localPath,
-          fileSystem: fs,
-        );
-      });
+      final fakePaths = createFakeFiles();
 
       final configFiles = <BrickFile>[];
 
@@ -347,8 +313,7 @@ path:
         );
       }
 
-      final mergedFiles =
-          source.mergeFilesAndConfig(configFiles, logger: mockLogger);
+      final mergedFiles = source.mergeFilesAndConfig(configFiles);
 
       expect(mergedFiles, hasLength(fakePaths.length));
 
@@ -364,7 +329,7 @@ path:
       'should exclude files that match or are children of excluded paths',
       () {
         final excludedPaths = [
-          'excluded',
+          'excluded/**',
           'other/file.dart',
         ];
 
@@ -376,101 +341,88 @@ path:
           'other/file.dart',
         ];
 
-        final fs = MemoryFileSystem();
-
         for (final file in files) {
-          fs.file(file).createSync(recursive: true);
+          di<FileSystem>().file(file).createSync(recursive: true);
         }
 
-        final source = BrickSource.memory(
+        const source = BrickSource.memory(
           localPath: '.',
-          fileSystem: fs,
         );
 
         final brickFiles = source.mergeFilesAndConfig(
           [],
           excludedPaths: excludedPaths,
-          logger: mockLogger,
         ).toList();
 
         expect(brickFiles.length, 2);
         expect(brickFiles[0].path, 'file1.dart');
         expect(brickFiles[1].path, 'file2.dart');
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       },
     );
 
     test(
-      'should include files that are followed by paths that should be excluded',
-      () {
-        final excludedPaths = [
-          '.history',
-          '.idea',
-          'mobile_app.iml',
-          'brick_oven.yaml',
-          'derry.yaml',
-        ];
+        'should include files that are followed by paths that should be excluded',
+        () {
+      final excludedPaths = [
+        '.history/**',
+        '.idea/**',
+        'mobile_app.iml',
+        'brick_oven.yaml',
+        'derry.yaml',
+      ];
 
-        final files = [
-          '.history/file1.dart',
-          '.idea/file2.dart',
-          'mobile_app.iml',
-          'brick_oven.yaml',
-          'derry.yaml',
+      final files = [
+        '.history/file1.dart',
+        '.idea/file2.dart',
+        'mobile_app.iml',
+        'brick_oven.yaml',
+        'derry.yaml',
+        'android/app/src/main/kotlin/com/example/mobile_app/MainActivity.kt',
+        'ios/Runner/AppDelegate.swift',
+        'lib/main.dart',
+      ];
+
+      for (final file in files) {
+        di<FileSystem>().file(file).createSync(recursive: true);
+      }
+
+      const source = BrickSource.memory(
+        localPath: '.',
+      );
+
+      final brickFiles = source.mergeFilesAndConfig(
+        [],
+        excludedPaths: excludedPaths,
+      ).toList();
+
+      final paths = brickFiles.map((e) => e.path);
+
+      expect(paths.length, 3);
+      expect(
+        paths,
+        contains(
           'android/app/src/main/kotlin/com/example/mobile_app/MainActivity.kt',
-          'ios/Runner/AppDelegate.swift',
-          'lib/main.dart',
-        ];
+        ),
+      );
+      expect(paths, contains('ios/Runner/AppDelegate.swift'));
+      expect(paths, contains('lib/main.dart'));
 
-        final fs = MemoryFileSystem();
-
-        for (final file in files) {
-          fs.file(file).createSync(recursive: true);
-        }
-
-        final source = BrickSource.memory(
-          localPath: '.',
-          fileSystem: fs,
-        );
-
-        final brickFiles = source.mergeFilesAndConfig(
-          [],
-          excludedPaths: excludedPaths,
-          logger: mockLogger,
-        ).toList();
-
-        final paths = brickFiles.map((e) => e.path);
-
-        expect(paths.length, 3);
-        expect(
-          paths,
-          contains(
-            'android/app/src/main/kotlin/com/example/mobile_app/MainActivity.kt',
-          ),
-        );
-        expect(paths, contains('ios/Runner/AppDelegate.swift'));
-        expect(paths, contains('lib/main.dart'));
-
-        verifyNoMoreInteractions(mockLogger);
-      },
-    );
+      verifyNoMoreInteractions(di<Logger>());
+    });
   });
 
   group('#fromSourcePath', () {
     test('should join source dir with files path', () {
       final source = BrickSource(
         localPath: localPath,
-        fileSystem: MemoryFileSystem(),
       );
       const fileName = 'file.dart';
 
       const file = BrickFile(fileName);
 
-      expect(
-        source.fromSourcePath(file.path),
-        join(localPath, fileName),
-      );
+      expect(source.fromSourcePath(file.path), join(localPath, fileName));
     });
   });
 }

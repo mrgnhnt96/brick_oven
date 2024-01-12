@@ -1,162 +1,159 @@
+import 'package:brick_oven/src/commands/update.dart';
+import 'package:brick_oven/src/version.dart';
+import 'package:brick_oven/utils/di.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
 
-import 'package:brick_oven/src/commands/update.dart';
-import 'package:brick_oven/src/runner.dart';
-import 'package:brick_oven/src/version.dart';
+import '../../test_utils/di.dart';
 import '../../test_utils/mocks.dart';
 
 void main() {
   const latestVersion = '0.0.0';
-  late Logger mockLogger;
   late Progress mockProgress;
-  late PubUpdater mockPubUpdater;
   late UpdateCommand updateCommand;
 
   setUp(() {
-    mockLogger = MockLogger();
+    setupTestDi();
+
     mockProgress = MockProgress();
-    mockPubUpdater = MockPubUpdater();
 
-    when(() => mockLogger.progress(any())).thenReturn(mockProgress);
+    when(() => di<Logger>().progress(any())).thenReturn(mockProgress);
 
-    updateCommand = UpdateCommand(
-      logger: mockLogger,
-      pubUpdater: mockPubUpdater,
-    );
+    updateCommand = UpdateCommand();
   });
 
   group('$UpdateCommand', () {
     test('description displays correctly', () {
       expect(
         updateCommand.description,
-        'Updates $packageName to the latest version',
+        'Updates brick_oven to the latest version',
       );
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
-      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(di<PubUpdater>());
     });
 
     test('name displays correctly', () {
       expect(updateCommand.name, 'update');
       expect(UpdateCommand.commandName, 'update');
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
-      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(di<PubUpdater>());
     });
   });
 
-  group('$packageName update', () {
+  group('package update', () {
     test('handles pub latest version query errors', () async {
       when(
-        () => mockPubUpdater.getLatestVersion(any()),
+        () => di<PubUpdater>().getLatestVersion(any()),
       ).thenThrow(Exception('oops'));
 
       final result = await updateCommand.run();
 
       expect(result, ExitCode.software.code);
 
-      verify(() => mockLogger.progress('Checking for updates')).called(1);
+      verify(() => di<Logger>().progress('Checking for updates')).called(1);
       verify(() => mockProgress.fail('Failed to get latest version'));
-      verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
+      verify(() => di<PubUpdater>().getLatestVersion('brick_oven')).called(1);
       verifyNever(
-        () => mockPubUpdater.update(
+        () => di<PubUpdater>().update(
           packageName: any(named: 'packageName'),
         ),
       );
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
-      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(di<PubUpdater>());
     });
 
     test('handles pub update errors', () async {
       when(
-        () => mockPubUpdater.getLatestVersion(any()),
+        () => di<PubUpdater>().getLatestVersion(any()),
       ).thenAnswer((_) => Future.value(latestVersion));
 
       when(
-        () => mockPubUpdater.update(packageName: any(named: 'packageName')),
+        () => di<PubUpdater>().update(packageName: any(named: 'packageName')),
       ).thenThrow(Exception('oops'));
 
       final result = await updateCommand.run();
 
       expect(result, equals(ExitCode.software.code));
 
-      verify(() => mockLogger.progress('Checking for updates')).called(1);
-      verify(() => mockProgress.fail('Failed to update $packageName'));
-      verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
+      verify(() => di<Logger>().progress('Checking for updates')).called(1);
+      verify(() => mockProgress.fail('Failed to update brick_oven'));
+      verify(() => di<PubUpdater>().getLatestVersion('brick_oven')).called(1);
       verify(
-        () => mockPubUpdater.update(packageName: packageName),
+        () => di<PubUpdater>().update(packageName: 'brick_oven'),
       ).called(1);
 
       verify(() => mockProgress.update('Successfully checked for updates'))
           .called(1);
       verify(() => mockProgress.update('Updating to $latestVersion')).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
-      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(di<PubUpdater>());
     });
 
     test('updates when newer version exists', () async {
       when(
-        () => mockPubUpdater.getLatestVersion(any()),
+        () => di<PubUpdater>().getLatestVersion(any()),
       ).thenAnswer((_) => Future.value(latestVersion));
 
       when(
-        () => mockPubUpdater.update(packageName: any(named: 'packageName')),
+        () => di<PubUpdater>().update(packageName: any(named: 'packageName')),
       ).thenAnswer((_) => Future.value(ProcessResult(0, 0, '', '')));
 
       final result = await updateCommand.run();
 
-      verify(() => mockLogger.progress('Checking for updates')).called(1);
+      verify(() => di<Logger>().progress('Checking for updates')).called(1);
       verify(() => mockProgress.update('Successfully checked for updates'))
           .called(1);
       verify(() => mockProgress.update('Updating to $latestVersion')).called(1);
-      verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
-      verify(() => mockPubUpdater.update(packageName: packageName)).called(1);
+      verify(() => di<PubUpdater>().getLatestVersion('brick_oven')).called(1);
+      verify(() => di<PubUpdater>().update(packageName: 'brick_oven'))
+          .called(1);
       verify(
         () => mockProgress.complete(
-          'Successfully updated $packageName to $latestVersion',
+          'Successfully updated brick_oven to $latestVersion',
         ),
       ).called(1);
 
       expect(result, equals(ExitCode.success.code));
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
-      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(di<PubUpdater>());
     });
 
     test('does not update when already on latest version', () async {
       when(
-        () => mockPubUpdater.getLatestVersion(any()),
+        () => di<PubUpdater>().getLatestVersion(any()),
       ).thenAnswer((_) => Future.value(packageVersion));
 
       final result = await updateCommand.run();
 
-      verify(() => mockLogger.progress('Checking for updates')).called(1);
+      verify(() => di<Logger>().progress('Checking for updates')).called(1);
       verify(() => mockProgress.update('Successfully checked for updates'))
           .called(1);
       verify(
         () => mockProgress
-            .complete('$packageName is already at the latest version.'),
+            .complete('brick_oven is already at the latest version.'),
       ).called(1);
-      verify(() => mockPubUpdater.getLatestVersion(packageName)).called(1);
-      verifyNever(() => mockLogger.progress('Updating to $latestVersion'));
-      verifyNever(() => mockPubUpdater.update(packageName: packageName));
+      verify(() => di<PubUpdater>().getLatestVersion('brick_oven')).called(1);
+      verifyNever(() => di<Logger>().progress('Updating to $latestVersion'));
+      verifyNever(() => di<PubUpdater>().update(packageName: 'brick_oven'));
 
       expect(result, ExitCode.success.code);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
-      verifyNoMoreInteractions(mockPubUpdater);
+      verifyNoMoreInteractions(di<PubUpdater>());
     });
   });
 }

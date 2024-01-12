@@ -1,5 +1,6 @@
 // ignore_for_file: cascade_invocations
 
+import 'package:brick_oven/utils/di.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -13,6 +14,7 @@ import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
+import '../test_utils/di.dart';
 import '../test_utils/mocks.dart';
 
 void main() {
@@ -143,8 +145,6 @@ vars:
   });
 
   group('#writeTargetFile', () {
-    late FileSystem fs;
-    late Logger mockLogger;
     const targetDir = 'bricks';
     const fileName = 'file.dart';
     const sourcePath = 'path/to/$fileName';
@@ -152,10 +152,9 @@ vars:
     late File sourceFile;
 
     setUp(() {
-      mockLogger = MockLogger();
+      setupTestDi();
 
-      fs = MemoryFileSystem();
-      sourceFile = fs.file(sourcePath)
+      sourceFile = di<FileSystem>().file(sourcePath)
         ..create(recursive: true)
         ..writeAsStringSync(defaultContent);
     });
@@ -169,13 +168,11 @@ vars:
           partials: [],
           sourceFile: sourceFile,
           targetDir: '',
-          fileSystem: fs,
-          logger: mockLogger,
         ),
         throwsA(isA<PartialException>()),
       );
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('writes file on target dir root', () {
@@ -186,13 +183,14 @@ vars:
         targetDir: targetDir,
         sourceFile: sourceFile,
         partials: [],
-        fileSystem: fs,
-        logger: mockLogger,
       );
 
-      expect(fs.file(join(targetDir, '{{~ $fileName }}')).existsSync(), isTrue);
+      expect(
+        di<FileSystem>().file(join(targetDir, '{{~ $fileName }}')).existsSync(),
+        isTrue,
+      );
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
   });
 }
@@ -207,8 +205,6 @@ class TestBrickPartial extends Partial {
     required File sourceFile,
     required List<Variable> variables,
     required List<Partial> partials,
-    required FileSystem? fileSystem,
-    required Logger logger,
   }) {
     throw const FileException(file: 'file', reason: 'reason');
   }

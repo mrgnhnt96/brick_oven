@@ -1,3 +1,4 @@
+import 'package:brick_oven/utils/di.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
@@ -32,8 +33,6 @@ mixin FileReplacements {
     required List<Variable> variables,
     required List<Variable> outOfFileVariables,
     required List<Partial> partials,
-    required FileSystem? fileSystem,
-    required Logger logger,
   }) {
     if (variables.isEmpty && partials.isEmpty) {
       sourceFile.copySync(targetFile.path);
@@ -49,7 +48,7 @@ mixin FileReplacements {
     final usedPartials = <String>{};
 
     if (!sourceFile.existsSync()) {
-      logger.warn('source file does not exist: ${sourceFile.path}');
+      di<Logger>().warn('source file does not exist: ${sourceFile.path}');
       return const FileWriteResult.empty();
     }
 
@@ -84,7 +83,7 @@ mixin FileReplacements {
 
     if (unusedVariables.isNotEmpty) {
       final vars = '"${unusedVariables.map((e) => e).join('", "')}"';
-      logger.warn(
+      di<Logger>().warn(
         'Unused variables ($vars) in `${sourceFile.path}`',
       );
     }

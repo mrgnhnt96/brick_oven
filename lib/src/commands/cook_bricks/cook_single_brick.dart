@@ -14,12 +14,15 @@ import 'package:brick_oven/utils/oven_mixin.dart';
 /// Writes a single brick from the configuration file
 /// {@endtemplate}
 class CookSingleBrick extends BrickOvenCommand
-    with BrickCooker, BrickCookerArgs, ConfigWatcherMixin, OvenMixin {
+    with
+        BrickCooker,
+        BrickCookerArgs,
+        ConfigWatcherMixin,
+        LoggerMixin,
+        OvenMixin {
   /// {@macro cook_single_brick_command}
   CookSingleBrick(
     this.brick, {
-    required super.fileSystem,
-    required super.logger,
     this.keyPressListener,
   }) {
     argParser

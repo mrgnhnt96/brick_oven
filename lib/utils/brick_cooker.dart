@@ -1,17 +1,21 @@
 import 'package:args/command_runner.dart';
+import 'package:brick_oven/utils/di.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 
+/// The base command for logger
+mixin LoggerMixin {
+  /// the logger for output messages
+  Logger get logger => di<Logger>();
+}
+
 /// {@template brick_cooker}
 /// A base class for `BrickOvenCommand`s that cook bricks.
 /// {@endtemplate}
 mixin BrickCooker {
-  /// the logger for output messages
-  Logger get logger;
-
   /// {@macro key_press_listener}
   KeyPressListener? get keyPressListener;
 }

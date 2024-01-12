@@ -1,15 +1,14 @@
 import 'package:autoequal/autoequal.dart';
-import 'package:equatable/equatable.dart';
-import 'package:file/file.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:path/path.dart';
-
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/di.dart';
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 import 'package:brick_oven/utils/file_replacements.dart';
+import 'package:equatable/equatable.dart';
+import 'package:file/file.dart';
+import 'package:path/path.dart';
 
 part 'partial.g.dart';
 
@@ -125,10 +124,8 @@ class Partial extends Equatable with FileReplacements {
     required File sourceFile,
     required List<Partial> partials,
     required List<Variable> outOfFileVariables,
-    required FileSystem fileSystem,
-    required Logger logger,
   }) {
-    final file = fileSystem.file(join(targetDir, toPartialFile()))
+    final file = di<FileSystem>().file(join(targetDir, toPartialFile()))
       ..createSync(recursive: true);
 
     try {
@@ -138,8 +135,6 @@ class Partial extends Equatable with FileReplacements {
         variables: variables,
         outOfFileVariables: outOfFileVariables,
         partials: partials,
-        fileSystem: fileSystem,
-        logger: logger,
       );
     } catch (e) {
       if (e is ConfigException) {

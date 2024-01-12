@@ -1,13 +1,5 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:path/path.dart';
-import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
-
 import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/brick_file.dart';
 import 'package:brick_oven/domain/brick_url.dart';
@@ -19,7 +11,16 @@ import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
 import 'package:brick_oven/src/exception.dart';
-import '../test_utils/mocks.dart';
+import 'package:brick_oven/utils/di.dart';
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:path/path.dart';
+import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
+
+import '../test_utils/di.dart';
 
 void main() {
   const fileExtensions = {
@@ -30,11 +31,7 @@ void main() {
     'file.md': '.md',
   };
 
-  late MockLogger mockLogger;
-
-  setUp(() {
-    mockLogger = MockLogger();
-  });
+  setUp(setupTestDi);
 
   test('can be instantiated', () {
     expect(BrickFile(join('path', 'to', 'file.dart')), isA<BrickFile>());
@@ -660,11 +657,7 @@ yooooo:
   });
 
   group('#writeTargetFiles', () {
-    late FileSystem memoryFileSystem;
-
-    setUp(() {
-      memoryFileSystem = MemoryFileSystem();
-    });
+    setUp(setupTestDi);
 
     test('Throws $FileException when #writeFile throws', () {
       const instance = TestBrickFile.throws('file.dart');
@@ -674,16 +667,14 @@ yooooo:
           urls: [],
           outOfFileVariables: [],
           partials: [],
-          sourceFile: memoryFileSystem.file('file.dart'),
+          sourceFile: di<FileSystem>().file('file.dart'),
           dirs: [],
           targetDir: '',
-          fileSystem: memoryFileSystem,
-          logger: mockLogger,
         ),
         throwsA(isA<FileException>()),
       );
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('returns used variables from write file', () {
@@ -694,7 +685,7 @@ yooooo:
         name: Name('name'),
       );
 
-      final sourceFile = memoryFileSystem.file('file.dart');
+      final sourceFile = di<FileSystem>().file('file.dart');
 
       sourceFile
         ..createSync(recursive: true)
@@ -714,8 +705,6 @@ yooooo:
           ),
         ],
         targetDir: '',
-        fileSystem: memoryFileSystem,
-        logger: mockLogger,
       );
 
       const expected = FileWriteResult(
@@ -725,13 +714,13 @@ yooooo:
 
       expect(result, expected);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('returns used variables from write url', () {
       const instance = BrickFile.config('path/to/url');
 
-      final sourceFile = memoryFileSystem.file('file');
+      final sourceFile = di<FileSystem>().file('file');
 
       sourceFile.createSync(recursive: true);
 
@@ -747,8 +736,6 @@ yooooo:
           ),
         ],
         targetDir: '',
-        fileSystem: memoryFileSystem,
-        logger: mockLogger,
       );
 
       const expected = FileWriteResult(
@@ -758,7 +745,7 @@ yooooo:
 
       expect(result, expected);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
   });
 
@@ -799,8 +786,6 @@ class TestBrickFile extends BrickFile {
     required File sourceFile,
     required List<Variable> variables,
     required List<Partial> partials,
-    required FileSystem? fileSystem,
-    required Logger logger,
   }) {
     throw const FileException(file: 'file', reason: 'reason');
   }

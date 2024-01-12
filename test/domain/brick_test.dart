@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:brick_oven/utils/di.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -25,19 +26,14 @@ import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/constants.dart';
+import '../test_utils/di.dart';
 import '../test_utils/fakes.dart';
 import '../test_utils/mocks.dart';
 import '../test_utils/print_override.dart';
 import '../test_utils/test_directory_watcher.dart';
 
 void main() {
-  late Logger mockLogger;
-
-  setUp(() {
-    mockLogger = MockLogger();
-
-    registerFallbackValue(mockLogger);
-  });
+  setUp(setupTestDi);
 
   const brickName = 'super_awesome';
   const localPath = 'localPath';
@@ -106,20 +102,16 @@ urls:
       final result = Brick.fromYaml(
         YamlValue.from(yaml),
         'YOLO',
-        fileSystem: MemoryFileSystem(),
-        logger: mockLogger,
       );
 
       final brick = Brick(
         name: 'YOLO',
-        brickYamlConfig: BrickYamlConfig(
-          fileSystem: MemoryFileSystem(),
-          ignoreVars: const [],
+        brickYamlConfig: const BrickYamlConfig(
+          ignoreVars: [],
           path: './brick.yaml',
         ),
         source: BrickSource(
           localPath: 'oven',
-          fileSystem: MemoryFileSystem(),
         ),
         dirs: [
           BrickDir(
@@ -189,13 +181,11 @@ urls:
             name: Name('me_too', invertedSection: 'device'),
           ),
         ],
-        fileSystem: MemoryFileSystem(),
-        logger: mockLogger,
       );
 
       expect(result, brick);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     group('throws $BrickException', () {
@@ -204,13 +194,11 @@ urls:
           () => Brick.fromYaml(
             const YamlValue.error('error'),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           throwsA(isA<BrickException>()),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('when yaml is not map', () {
@@ -218,13 +206,11 @@ urls:
           () => Brick.fromYaml(
             const YamlValue.string('Jar Jar Binks'),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           throwsA(isA<BrickException>()),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('when source is incorrect type', () {
@@ -236,13 +222,11 @@ source: ${1}
           () => Brick.fromYaml(
             YamlValue.from(yaml),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           throwsA(isA<BrickException>()),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('when extra keys are provided', () {
@@ -254,13 +238,11 @@ vars:
           () => Brick.fromYaml(
             YamlValue.from(yaml),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           throwsA(isA<BrickException>()),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('when dirs is not a map', () {
@@ -273,13 +255,11 @@ dirs:
           () => Brick.fromYaml(
             YamlValue.from(yaml),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           throwsA(isA<BrickException>()),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('when files is not a map', () {
@@ -292,13 +272,11 @@ files:
           () => Brick.fromYaml(
             YamlValue.from(yaml),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           throwsA(isA<FileException>()),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('when partials is not a map', () {
@@ -311,13 +289,11 @@ partials:
           () => Brick.fromYaml(
             YamlValue.from(yaml),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           throwsA(isA<BrickException>()),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('when urls is not map', () {
@@ -329,13 +305,11 @@ urls: url/path
           () => Brick.fromYaml(
             YamlValue.from(yaml),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           throwsA(isA<BrickException>()),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       group('brick config', () {
@@ -348,13 +322,11 @@ brick_config:
             () => Brick.fromYaml(
               YamlValue.from(yaml),
               brickName,
-              fileSystem: MemoryFileSystem(),
-              logger: mockLogger,
             ),
             returnsNormally,
           );
 
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
         });
 
         test('returns provided brick config', () {
@@ -366,17 +338,14 @@ brick_config: brick.yaml
             Brick.fromYaml(
               YamlValue.from(yaml),
               brickName,
-              fileSystem: MemoryFileSystem(),
-              logger: mockLogger,
             ).brickYamlConfig,
-            BrickYamlConfig(
+            const BrickYamlConfig(
               path: './brick.yaml',
-              ignoreVars: const [],
-              fileSystem: MemoryFileSystem(),
+              ignoreVars: [],
             ),
           );
 
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
         });
       });
     });
@@ -401,13 +370,11 @@ exclude:
           () => Brick.fromYaml(
             YamlValue.from(yaml),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           throwsA(isA<BrickException>()),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('parses list', () {
@@ -421,22 +388,17 @@ exclude:
           Brick.fromYaml(
             YamlValue.from(yaml),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           Brick(
             exclude: const [excludeDir],
             name: brickName,
             source: BrickSource(
               localPath: localPath,
-              fileSystem: MemoryFileSystem(),
             ),
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('parses string', () {
@@ -449,22 +411,17 @@ exclude: $excludeDir
           Brick.fromYaml(
             YamlValue.from(yaml),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           Brick(
             exclude: const [excludeDir],
             name: brickName,
             source: BrickSource(
               localPath: localPath,
-              fileSystem: MemoryFileSystem(),
             ),
-            logger: mockLogger,
-            fileSystem: MemoryFileSystem(),
           ),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('throws $BrickException non strings are provided', () {
@@ -481,13 +438,11 @@ exclude:
           () => Brick.fromYaml(
             YamlValue.from(yaml),
             brickName,
-            fileSystem: MemoryFileSystem(),
-            logger: mockLogger,
           ),
           throwsA(isA<BrickException>()),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
     });
   });
@@ -496,14 +451,11 @@ exclude:
   group(
     'watcher',
     () {
-      late FileSystem fs;
       late SourceWatcher mockWatcher;
       late TestDirectoryWatcher testDirectoryWatcher;
-      late Logger mockLogger;
       late Progress mockProgress;
 
       setUp(() {
-        fs = MemoryFileSystem();
         mockWatcher = MockSourceWatcher();
         testDirectoryWatcher = TestDirectoryWatcher();
 
@@ -517,10 +469,8 @@ exclude:
         when(() => mockProgress.fail(any())).thenReturn(voidCallback());
         when(() => mockProgress.update(any())).thenReturn(voidCallback());
 
-        mockLogger = MockLogger();
-
-        when(() => mockLogger.progress(any())).thenReturn(mockProgress);
-        when(() => mockLogger.success(any())).thenReturn(null);
+        when(() => di<Logger>().progress(any())).thenReturn(mockProgress);
+        when(() => di<Logger>().success(any())).thenReturn(null);
       });
 
       tearDown(() {
@@ -535,29 +485,27 @@ exclude:
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
-              fileSystem: fs,
               watcher: mockWatcher,
             ),
-            fileSystem: fs,
-            logger: mockLogger,
           );
 
-          final fakeSourcePath = fs.file(join(localPath, filePath));
+          final fakeSourcePath =
+              di<FileSystem>().file(join(localPath, filePath));
 
-          final targetFile = fs.file(join(brickPath, filePath));
+          final targetFile = di<FileSystem>().file(join(brickPath, filePath));
 
           expect(targetFile.existsSync(), isFalse);
 
-          fs.file(fakeSourcePath).createSync(recursive: true);
+          di<FileSystem>().file(fakeSourcePath).createSync(recursive: true);
 
           testBrick.cook();
 
           expect(targetFile.existsSync(), isTrue);
 
-          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+          verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
               .called(1);
 
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
           verifyNoMoreInteractions(mockWatcher);
         });
 
@@ -566,24 +514,22 @@ exclude:
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
-              fileSystem: fs,
               watcher: mockWatcher,
             ),
-            fileSystem: fs,
-            logger: mockLogger,
           );
 
-          final fakeSourcePath = fs.file(join(localPath, filePath));
+          final fakeSourcePath =
+              di<FileSystem>().file(join(localPath, filePath));
 
           const output = 'out';
 
-          final targetFile = fs.file(
+          final targetFile = di<FileSystem>().file(
             join(output, brickName, '__brick__', filePath),
           );
 
           expect(targetFile.existsSync(), isFalse);
 
-          fs.file(fakeSourcePath).createSync(recursive: true);
+          di<FileSystem>().file(fakeSourcePath).createSync(recursive: true);
 
           testBrick.cook(watch: true, output: output);
 
@@ -594,10 +540,10 @@ exclude:
           verify(() => mockWatcher.start(any())).called(1);
           verify(() => mockWatcher.hasRun).called(1);
 
-          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+          verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
               .called(1);
 
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
           verifyNoMoreInteractions(mockWatcher);
         });
 
@@ -606,17 +552,14 @@ exclude:
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
-              fileSystem: fs,
               watcher: SourceWatcher.config(
                 dirPath: localPath,
                 watcher: testDirectoryWatcher,
               ),
             ),
-            fileSystem: fs,
-            logger: mockLogger,
           );
 
-          final sourceFile = fs.file(join(localPath, filePath));
+          final sourceFile = di<FileSystem>().file(join(localPath, filePath));
 
           const content = '// content';
 
@@ -624,7 +567,7 @@ exclude:
             ..createSync(recursive: true)
             ..writeAsStringSync(content);
 
-          final targetFile = fs.file(join(brickPath, filePath));
+          final targetFile = di<FileSystem>().file(join(brickPath, filePath));
 
           expect(targetFile.existsSync(), isFalse);
 
@@ -642,10 +585,10 @@ exclude:
           expect(targetFile.readAsStringSync(), newContent);
           expect(testBrick.source.watcher?.isRunning, isTrue);
 
-          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+          verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
               .called(1);
 
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
         });
 
         test('file gets added on create event', () async {
@@ -653,21 +596,18 @@ exclude:
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
-              fileSystem: fs,
               watcher: SourceWatcher.config(
                 dirPath: localPath,
                 watcher: testDirectoryWatcher,
               ),
             ),
-            fileSystem: fs,
-            logger: mockLogger,
           );
 
-          final sourceFile = fs.file(join(localPath, filePath));
+          final sourceFile = di<FileSystem>().file(join(localPath, filePath));
 
           const content = '// content';
 
-          final targetFile = fs.file(join(brickPath, filePath));
+          final targetFile = di<FileSystem>().file(join(brickPath, filePath));
 
           expect(sourceFile.existsSync(), isFalse);
           expect(targetFile.existsSync(), isFalse);
@@ -685,10 +625,10 @@ exclude:
           expect(targetFile.readAsStringSync(), content);
 
           expect(testBrick.source.watcher?.isRunning, isTrue);
-          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+          verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
               .called(1);
 
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
         });
 
         test('file gets delete on delete event', () async {
@@ -696,21 +636,18 @@ exclude:
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
-              fileSystem: fs,
               watcher: SourceWatcher.config(
                 dirPath: localPath,
                 watcher: testDirectoryWatcher,
               ),
             ),
-            fileSystem: fs,
-            logger: mockLogger,
           );
 
-          final sourceFile = fs.file(join(localPath, filePath));
+          final sourceFile = di<FileSystem>().file(join(localPath, filePath));
 
           const content = '// content';
 
-          final targetFile = fs.file(join(brickPath, filePath));
+          final targetFile = di<FileSystem>().file(join(brickPath, filePath));
 
           sourceFile
             ..createSync(recursive: true)
@@ -732,24 +669,21 @@ exclude:
 
           expect(testBrick.source.watcher?.isRunning, isTrue);
 
-          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+          verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
               .called(1);
 
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
         });
 
         test('writes bricks when no watcher is available', () {
-          final testBrick = Brick(
+          const testBrick = Brick(
             name: brickName,
             source: BrickSource.memory(
               localPath: localPath,
-              fileSystem: fs,
             ),
-            fileSystem: fs,
-            logger: mockLogger,
           );
 
-          final sourceFile = fs.file(join(localPath, filePath));
+          final sourceFile = di<FileSystem>().file(join(localPath, filePath));
 
           const content = '// content';
 
@@ -757,7 +691,7 @@ exclude:
             ..createSync(recursive: true)
             ..writeAsStringSync(content);
 
-          final targetFile = fs.file(join(brickPath, filePath));
+          final targetFile = di<FileSystem>().file(join(brickPath, filePath));
 
           expect(targetFile.existsSync(), isFalse);
 
@@ -768,29 +702,30 @@ exclude:
 
           expect(testBrick.source.watcher?.isRunning, isNull);
 
-          verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+          verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
               .called(1);
 
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
         });
 
         test('prints warning if excess variables exist', () {
-          verifyNever(() => mockLogger.warn(any()));
+          verifyNever(() => di<Logger>().warn(any()));
 
-          fs.file(join('path', 'file1.dart')).createSync(recursive: true);
+          di<FileSystem>()
+              .file(join('path', 'file1.dart'))
+              .createSync(recursive: true);
 
-          fs.file(join('path', 'file2.dart')).createSync(recursive: true);
+          di<FileSystem>()
+              .file(join('path', 'file2.dart'))
+              .createSync(recursive: true);
 
-          fs.file('partial').createSync(recursive: true);
+          di<FileSystem>().file('partial').createSync(recursive: true);
 
           final brick = Brick(
             name: 'BRICK',
             source: BrickSource(
               localPath: '.',
-              fileSystem: fs,
             ),
-            logger: mockLogger,
-            fileSystem: fs,
             partials: const [
               Partial(
                 path: 'partial',
@@ -831,39 +766,40 @@ exclude:
           const vars = '"fileVar1", "fileVar2", "partialVar"';
 
           verify(
-            () => mockLogger
+            () => di<Logger>()
                 .warn('Unused variables ("fileVar1") in `./path/file1.dart`'),
           ).called(1);
           verify(
-            () => mockLogger
+            () => di<Logger>()
                 .warn('Unused variables ("fileVar2") in `./path/file2.dart`'),
           ).called(1);
           verify(
-            () => mockLogger
+            () => di<Logger>()
                 .warn('Unused variables ("partialVar") in `./partial`'),
           ).called(1);
-          verify(() => mockLogger.warn('Unused variables ($vars) in BRICK'))
+          verify(() => di<Logger>().warn('Unused variables ($vars) in BRICK'))
               .called(1);
-          verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
+          verify(() => di<Logger>().progress('Writing Brick: BRICK')).called(1);
 
-          verify(() => mockLogger.warn('Unused partials ("partial") in BRICK'))
-              .called(1);
+          verify(
+            () => di<Logger>().warn('Unused partials ("partial") in BRICK'),
+          ).called(1);
 
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
         });
 
         test('does not print warning if excess variables do not exist', () {
-          verifyNever(() => mockLogger.warn(any()));
+          verifyNever(() => di<Logger>().warn(any()));
 
-          fs.file(join('path', 'file1.dart'))
+          di<FileSystem>().file(join('path', 'file1.dart'))
             ..createSync(recursive: true)
             ..writeAsStringSync('fileVar1');
 
-          fs.file(join('path', 'to', 'file2.dart'))
+          di<FileSystem>().file(join('path', 'to', 'file2.dart'))
             ..createSync(recursive: true)
             ..writeAsStringSync('fileVar2\npartials.partial');
 
-          fs.file('partial')
+          di<FileSystem>().file('partial')
             ..createSync(recursive: true)
             ..writeAsStringSync('partialVar');
 
@@ -871,10 +807,7 @@ exclude:
             name: 'BRICK',
             source: BrickSource(
               localPath: '.',
-              fileSystem: fs,
             ),
-            logger: mockLogger,
-            fileSystem: fs,
             partials: const [
               Partial(
                 path: 'partial',
@@ -912,9 +845,9 @@ exclude:
           // ignore: cascade_invocations
           brick.cook();
 
-          verify(() => mockLogger.progress('Writing Brick: BRICK')).called(1);
+          verify(() => di<Logger>().progress('Writing Brick: BRICK')).called(1);
 
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
         });
       });
 
@@ -923,17 +856,14 @@ exclude:
           name: brickName,
           source: BrickSource.memory(
             localPath: localPath,
-            fileSystem: fs,
             watcher: SourceWatcher.config(
               dirPath: localPath,
               watcher: testDirectoryWatcher,
             ),
           ),
-          fileSystem: fs,
-          logger: mockLogger,
         );
 
-        final sourceFile = fs.file(join(localPath, filePath));
+        final sourceFile = di<FileSystem>().file(join(localPath, filePath));
 
         const content = '// content';
 
@@ -941,7 +871,7 @@ exclude:
           ..createSync(recursive: true)
           ..writeAsStringSync(content);
 
-        final targetFile = fs.file(join(brickPath, filePath));
+        final targetFile = di<FileSystem>().file(join(brickPath, filePath));
 
         expect(targetFile.existsSync(), isFalse);
 
@@ -956,30 +886,26 @@ exclude:
 
         expect(testBrick.source.watcher?.isRunning, isFalse);
 
-        verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+        verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
             .called(1);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
     },
   );
 
   group('#cook', () {
-    late FileSystem fs;
-    late Logger mockLogger;
     late Progress mockProgress;
 
     setUp(() {
-      fs = MemoryFileSystem();
-      mockLogger = MockLogger();
       mockProgress = MockProgress();
 
       when(() => mockProgress.complete(any())).thenReturn(voidCallback());
       when(() => mockProgress.fail(any())).thenReturn(voidCallback());
       when(() => mockProgress.update(any())).thenReturn(voidCallback());
 
-      when(() => mockLogger.progress(any())).thenReturn(mockProgress);
-      when(() => mockLogger.success(any())).thenReturn(null);
+      when(() => di<Logger>().progress(any())).thenReturn(mockProgress);
+      when(() => di<Logger>().success(any())).thenReturn(null);
 
       registerFallbackValue(MockLogger());
       registerFallbackValue(MockFile());
@@ -989,11 +915,7 @@ exclude:
     test('throws $BrickException when duplicate partials exist', () {
       final brick = Brick(
         name: 'Brick',
-        source: BrickSource.none(
-          fileSystem: MemoryFileSystem(),
-        ),
-        logger: mockLogger,
-        fileSystem: fs,
+        source: const BrickSource.none(),
         partials: [
           Partial(
             path: join(localPath, filePath),
@@ -1015,7 +937,7 @@ exclude:
         ),
       );
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
     });
 
@@ -1028,8 +950,6 @@ exclude:
       when(
         () => mockPartial.writeTargetFile(
           targetDir: any(named: 'targetDir'),
-          logger: any(named: 'logger'),
-          fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
@@ -1040,11 +960,7 @@ exclude:
 
       final brick = Brick(
         name: 'Brick',
-        source: BrickSource.none(
-          fileSystem: MemoryFileSystem(),
-        ),
-        logger: mockLogger,
-        fileSystem: fs,
+        source: const BrickSource.none(),
         partials: [mockPartial],
       );
 
@@ -1058,7 +974,7 @@ exclude:
           '(Brick) Failed to write partial: $filePath',
         ),
       ).called(1);
-      verify(() => mockLogger.progress('Writing Brick: Brick')).called(1);
+      verify(() => di<Logger>().progress('Writing Brick: Brick')).called(1);
 
       verify(() => mockPartial.path).called(3);
       verify(() => mockPartial.fileName).called(2);
@@ -1066,15 +982,13 @@ exclude:
       verify(
         () => mockPartial.writeTargetFile(
           targetDir: any(named: 'targetDir'),
-          logger: any(named: 'logger'),
-          fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
         ),
       ).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockPartial);
     });
@@ -1088,8 +1002,6 @@ exclude:
       when(
         () => mockPartial.writeTargetFile(
           targetDir: any(named: 'targetDir'),
-          logger: any(named: 'logger'),
-          fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
@@ -1100,11 +1012,7 @@ exclude:
 
       final brick = Brick(
         name: 'Brick',
-        source: BrickSource.none(
-          fileSystem: MemoryFileSystem(),
-        ),
-        logger: mockLogger,
-        fileSystem: fs,
+        source: const BrickSource.none(),
         partials: [mockPartial],
       );
 
@@ -1118,22 +1026,20 @@ exclude:
           '(Brick) Failed to write partial: $filePath',
         ),
       ).called(1);
-      verify(() => mockLogger.progress('Writing Brick: Brick')).called(1);
+      verify(() => di<Logger>().progress('Writing Brick: Brick')).called(1);
       verify(() => mockPartial.path).called(3);
       verify(() => mockPartial.fileName).called(2);
 
       verify(
         () => mockPartial.writeTargetFile(
           targetDir: any(named: 'targetDir'),
-          logger: any(named: 'logger'),
-          fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
         ),
       ).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockPartial);
     });
@@ -1145,7 +1051,6 @@ exclude:
       when(
         () => mockSource.mergeFilesAndConfig(
           any(),
-          logger: any(named: 'logger'),
           excludedPaths: any(named: 'excludedPaths'),
         ),
       ).thenReturn([mockFile]);
@@ -1163,8 +1068,6 @@ exclude:
           urls: any(named: 'urls'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
-          logger: any(named: 'logger'),
-          fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
           dirs: any(named: 'dirs'),
@@ -1176,8 +1079,6 @@ exclude:
       final brick = Brick(
         name: 'Brick',
         source: mockSource,
-        logger: mockLogger,
-        fileSystem: fs,
         files: [mockFile],
       );
 
@@ -1188,15 +1089,13 @@ exclude:
 
       verify(() => mockProgress.fail('(Brick) Failed to write file: $filePath'))
           .called(1);
-      verify(() => mockLogger.progress('Writing Brick: Brick')).called(1);
+      verify(() => di<Logger>().progress('Writing Brick: Brick')).called(1);
       verify(() => mockFile.path).called(3);
       verify(
         () => mockFile.writeTargetFile(
           urls: any(named: 'urls'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
-          logger: any(named: 'logger'),
-          fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
           dirs: any(named: 'dirs'),
@@ -1207,7 +1106,6 @@ exclude:
       verify(
         () => mockSource.mergeFilesAndConfig(
           [mockFile],
-          logger: mockLogger,
           excludedPaths: any(named: 'excludedPaths'),
         ),
       ).called(1);
@@ -1215,7 +1113,7 @@ exclude:
         () => mockSource.fromSourcePath(filePath),
       ).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockFile);
       verifyNoMoreInteractions(mockSource);
@@ -1228,7 +1126,6 @@ exclude:
       when(
         () => mockSource.mergeFilesAndConfig(
           any(),
-          logger: any(named: 'logger'),
           excludedPaths: any(named: 'excludedPaths'),
         ),
       ).thenReturn([mockFile]);
@@ -1246,8 +1143,6 @@ exclude:
           urls: any(named: 'urls'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
-          logger: any(named: 'logger'),
-          fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
           dirs: any(named: 'dirs'),
@@ -1259,8 +1154,6 @@ exclude:
       final brick = Brick(
         name: 'Brick',
         source: mockSource,
-        logger: mockLogger,
-        fileSystem: fs,
         files: [mockFile],
       );
 
@@ -1271,15 +1164,13 @@ exclude:
 
       verify(() => mockProgress.fail('(Brick) Failed to write file: $filePath'))
           .called(1);
-      verify(() => mockLogger.progress('Writing Brick: Brick')).called(1);
+      verify(() => di<Logger>().progress('Writing Brick: Brick')).called(1);
       verify(() => mockFile.path).called(3);
       verify(
         () => mockFile.writeTargetFile(
           urls: any(named: 'urls'),
           outOfFileVariables: any(named: 'outOfFileVariables'),
           targetDir: any(named: 'targetDir'),
-          logger: any(named: 'logger'),
-          fileSystem: any(named: 'fileSystem'),
           partials: any(named: 'partials'),
           sourceFile: any(named: 'sourceFile'),
           dirs: any(named: 'dirs'),
@@ -1290,7 +1181,6 @@ exclude:
       verify(
         () => mockSource.mergeFilesAndConfig(
           [mockFile],
-          logger: mockLogger,
           excludedPaths: any(named: 'excludedPaths'),
         ),
       ).called(1);
@@ -1298,7 +1188,7 @@ exclude:
         () => mockSource.fromSourcePath(filePath),
       ).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockFile);
       verifyNoMoreInteractions(mockSource);
@@ -1309,94 +1199,86 @@ exclude:
         () {
       final testBrick = Brick(
         name: brickName,
-        logger: mockLogger,
-        source: BrickSource.memory(
+        source: const BrickSource.memory(
           localPath: localPath,
-          fileSystem: fs,
         ),
         files: [BrickFile(filePath)],
-        fileSystem: fs,
       );
 
-      final fakeSourcePath = fs.file(
+      final fakeSourcePath = di<FileSystem>().file(
         testBrick.source.fromSourcePath(testBrick.files.single.path),
       );
 
-      final targetFile = fs.file(join(brickPath, filePath));
+      final targetFile = di<FileSystem>().file(join(brickPath, filePath));
 
       expect(targetFile.existsSync(), isFalse);
 
-      fs.file(fakeSourcePath).createSync(recursive: true);
+      di<FileSystem>().file(fakeSourcePath).createSync(recursive: true);
 
       testBrick.cook();
 
       expect(targetFile.existsSync(), isTrue);
 
-      verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+      verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
           .called(1);
       verify(() => mockProgress.complete('super_awesome: cooked 1 file'))
           .called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
     });
 
     test('uses provided path for output when provided', () {
       final testBrick = Brick(
         name: brickName,
-        logger: mockLogger,
-        source: BrickSource.memory(
+        source: const BrickSource.memory(
           localPath: localPath,
-          fileSystem: fs,
         ),
         files: [BrickFile(filePath)],
-        fileSystem: fs,
       );
 
-      final fakeSourcePath = fs.file(
+      final fakeSourcePath = di<FileSystem>().file(
         testBrick.source.fromSourcePath(testBrick.files.single.path),
       );
 
       const output = 'out';
 
-      final targetFile = fs.file(
+      final targetFile = di<FileSystem>().file(
         join(output, brickName, '__brick__', filePath),
       );
 
       expect(targetFile.existsSync(), isFalse);
 
-      fs.file(fakeSourcePath).createSync(recursive: true);
+      di<FileSystem>().file(fakeSourcePath).createSync(recursive: true);
 
       testBrick.cook(output: output);
 
       expect(targetFile.existsSync(), isTrue);
 
-      verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+      verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
           .called(1);
       verify(() => mockProgress.complete('super_awesome: cooked 1 file'))
           .called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
     });
 
     test('deletes directory if exists', () {
       final testBrick = Brick(
         name: brickName,
-        logger: mockLogger,
-        source: BrickSource.memory(
+        source: const BrickSource.memory(
           localPath: localPath,
-          fileSystem: fs,
         ),
         files: [BrickFile(filePath)],
-        fileSystem: fs,
       );
 
-      final fakeSourcePath = fs.file(
+      final fakeSourcePath = di<FileSystem>().file(
         testBrick.source.fromSourcePath(testBrick.files.single.path),
       );
 
-      final fakeUnneededFile = fs.file(join(brickPath, 'unneeded.dart'));
+      final fakeUnneededFile =
+          di<FileSystem>().file(join(brickPath, 'unneeded.dart'));
 
       expect(fakeUnneededFile.existsSync(), isFalse);
 
@@ -1404,18 +1286,18 @@ exclude:
 
       expect(fakeUnneededFile.existsSync(), isTrue);
 
-      fs.file(fakeSourcePath).createSync(recursive: true);
+      di<FileSystem>().file(fakeSourcePath).createSync(recursive: true);
 
       testBrick.cook();
 
       expect(fakeUnneededFile.existsSync(), isFalse);
 
-      verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+      verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
           .called(1);
       verify(() => mockProgress.complete('super_awesome: cooked 1 file'))
           .called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
     });
 
@@ -1423,39 +1305,42 @@ exclude:
       const files = ['file1.dart', 'file2.dart', 'file3.dart'];
 
       for (final file in files) {
-        final fakeSourcePath = fs.file(join(localPath, file));
+        final fakeSourcePath = di<FileSystem>().file(join(localPath, file));
 
-        fs.file(fakeSourcePath).createSync(recursive: true);
+        di<FileSystem>().file(fakeSourcePath).createSync(recursive: true);
       }
 
       final testBrick = Brick(
         name: brickName,
-        logger: mockLogger,
-        source: BrickSource.memory(
+        source: const BrickSource.memory(
           localPath: localPath,
-          fileSystem: fs,
         ),
         files: [for (final file in files) BrickFile(file)],
-        fileSystem: fs,
       );
 
       for (final file in testBrick.files) {
-        expect(fs.file(join(brickPath, file.path)).existsSync(), isFalse);
+        expect(
+          di<FileSystem>().file(join(brickPath, file.path)).existsSync(),
+          isFalse,
+        );
       }
 
       testBrick.cook();
 
       for (final file in testBrick.files) {
-        expect(fs.file(join(brickPath, file.path)).existsSync(), isTrue);
+        expect(
+          di<FileSystem>().file(join(brickPath, file.path)).existsSync(),
+          isTrue,
+        );
       }
 
-      verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+      verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
           .called(1);
 
       verify(() => mockProgress.complete('super_awesome: cooked 3 files'))
           .called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
     });
 
@@ -1463,25 +1348,24 @@ exclude:
       const files = ['file1.dart', 'path/file2.dart', 'path/to/file3.dart'];
 
       for (final file in files) {
-        final fakeSourcePath = fs.file(join(localPath, file));
+        final fakeSourcePath = di<FileSystem>().file(join(localPath, file));
 
-        fs.file(fakeSourcePath).createSync(recursive: true);
+        di<FileSystem>().file(fakeSourcePath).createSync(recursive: true);
       }
 
       final testBrick = Brick(
         name: brickName,
-        logger: mockLogger,
-        source: BrickSource.memory(
+        source: const BrickSource.memory(
           localPath: localPath,
-          fileSystem: fs,
         ),
         partials: [for (final file in files) Partial(path: file)],
-        fileSystem: fs,
       );
 
       for (final partial in testBrick.partials) {
         expect(
-          fs.file(join(brickPath, partial.toPartialFile())).existsSync(),
+          di<FileSystem>()
+              .file(join(brickPath, partial.toPartialFile()))
+              .existsSync(),
           isFalse,
         );
       }
@@ -1490,20 +1374,22 @@ exclude:
 
       for (final partial in testBrick.partials) {
         expect(
-          fs.file(join(brickPath, partial.toPartialFile())).existsSync(),
+          di<FileSystem>()
+              .file(join(brickPath, partial.toPartialFile()))
+              .existsSync(),
           isTrue,
         );
 
         expect(
-          fs.file(join(brickPath, partial.path)).existsSync(),
+          di<FileSystem>().file(join(brickPath, partial.path)).existsSync(),
           isFalse,
         );
       }
 
-      verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+      verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
           .called(1);
       verify(
-        () => mockLogger.warn(
+        () => di<Logger>().warn(
           'Unused partials ("file1.dart", "file2.dart", "file3.dart") in super_awesome',
         ),
       ).called(1);
@@ -1511,7 +1397,7 @@ exclude:
       verify(() => mockProgress.complete('super_awesome: cooked 3 files'))
           .called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
     });
 
@@ -1523,34 +1409,31 @@ exclude:
           variables: [Variable(name: 'name', placeholder: '_VAL_')],
         );
 
-        fs.file(join(localPath, filePath))
+        di<FileSystem>().file(join(localPath, filePath))
           ..createSync(recursive: true)
           ..writeAsStringSync('_VAL_ $kIndexValue');
 
-        final targetFile = fs.file(join(brickPath, file.path));
+        final targetFile = di<FileSystem>().file(join(brickPath, file.path));
 
-        Brick(
+        const Brick(
           name: brickName,
-          logger: mockLogger,
           source: BrickSource.memory(
             localPath: localPath,
-            fileSystem: fs,
           ),
-          files: const [file],
-          fileSystem: fs,
+          files: [file],
         ).cook();
 
         const expected = '{{name}} {{.}}';
 
         expect(targetFile.readAsStringSync(), expected);
 
-        verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+        verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
             .called(1);
 
         verify(() => mockProgress.complete('super_awesome: cooked 1 file'))
             .called(1);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
         verifyNoMoreInteractions(mockProgress);
       });
 
@@ -1558,38 +1441,36 @@ exclude:
         const file = 'file1.dart';
         const partial = Partial(path: file);
 
-        fs.file(join(localPath, file))
+        di<FileSystem>().file(join(localPath, file))
           ..createSync(recursive: true)
           ..writeAsStringSync(kIndexValue);
 
-        final targetFile = fs.file(join(brickPath, partial.toPartialFile()));
+        final targetFile =
+            di<FileSystem>().file(join(brickPath, partial.toPartialFile()));
 
-        Brick(
+        const Brick(
           name: brickName,
-          logger: mockLogger,
           source: BrickSource.memory(
             localPath: localPath,
-            fileSystem: fs,
           ),
-          partials: const [partial],
-          fileSystem: fs,
+          partials: [partial],
         ).cook();
 
         const expected = '{{.}}';
 
         expect(targetFile.readAsStringSync(), expected);
 
-        verify(() => mockLogger.progress('Writing Brick: super_awesome'))
+        verify(() => di<Logger>().progress('Writing Brick: super_awesome'))
             .called(1);
         verify(
-          () => mockLogger
+          () => di<Logger>()
               .warn('Unused partials ("file1.dart") in super_awesome'),
         ).called(1);
 
         verify(() => mockProgress.complete('super_awesome: cooked 1 file'))
             .called(1);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
         verifyNoMoreInteractions(mockProgress);
       });
     });
@@ -1597,14 +1478,10 @@ exclude:
 
   group('#allBrickVariables', () {
     test('ignores dot annotation', () {
-      final brick = Brick(
+      const brick = Brick(
         name: '',
-        source: BrickSource.none(
-          fileSystem: MemoryFileSystem(),
-        ),
-        logger: mockLogger,
-        fileSystem: MemoryFileSystem(),
-        files: const [
+        source: BrickSource.none(),
+        files: [
           BrickFile.config(
             '',
             variables: [
@@ -1618,19 +1495,15 @@ exclude:
 
       expect(brick.allBrickVariables(), {'var1'});
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     group('files', () {
       test('gets #variables from files', () {
-        final brick = Brick(
+        const brick = Brick(
           name: '',
-          source: BrickSource.none(
-            fileSystem: MemoryFileSystem(),
-          ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
-          files: const [
+          source: BrickSource.none(),
+          files: [
             BrickFile.config(
               '',
               variables: [
@@ -1662,18 +1535,14 @@ exclude:
           },
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('gets #variables from partials', () {
-        final brick = Brick(
+        const brick = Brick(
           name: '',
-          source: BrickSource.none(
-            fileSystem: MemoryFileSystem(),
-          ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
-          partials: const [
+          source: BrickSource.none(),
+          partials: [
             Partial(
               path: '',
               variables: [
@@ -1705,18 +1574,14 @@ exclude:
           },
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('gets #includeIf', () {
-        final brick = Brick(
+        const brick = Brick(
           name: '',
-          source: BrickSource.none(
-            fileSystem: MemoryFileSystem(),
-          ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
-          files: const [
+          source: BrickSource.none(),
+          files: [
             BrickFile.config(
               '',
               includeIf: 'var1',
@@ -1736,18 +1601,14 @@ exclude:
           },
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('gets #includeIfNot', () {
-        final brick = Brick(
+        const brick = Brick(
           name: '',
-          source: BrickSource.none(
-            fileSystem: MemoryFileSystem(),
-          ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
-          files: const [
+          source: BrickSource.none(),
+          files: [
             BrickFile.config(
               '',
               includeIfNot: 'var1',
@@ -1767,17 +1628,13 @@ exclude:
           },
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('gets #name', () {
         final brick = Brick(
           name: '',
-          source: BrickSource.none(
-            fileSystem: MemoryFileSystem(),
-          ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
+          source: const BrickSource.none(),
           files: [
             BrickFile.config(
               '',
@@ -1800,7 +1657,7 @@ exclude:
           },
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
     });
 
@@ -1808,11 +1665,7 @@ exclude:
       test('gets #names', () {
         final brick = Brick(
           name: '',
-          source: BrickSource.none(
-            fileSystem: MemoryFileSystem(),
-          ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
+          source: const BrickSource.none(),
           dirs: [
             BrickDir(name: Name('name1', section: 'section'), path: ''),
             BrickDir(
@@ -1832,17 +1685,13 @@ exclude:
           },
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('gets #includeIf', () {
         final brick = Brick(
           name: '',
-          source: BrickSource.none(
-            fileSystem: MemoryFileSystem(),
-          ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
+          source: const BrickSource.none(),
           dirs: [
             BrickDir(
               path: '',
@@ -1863,17 +1712,13 @@ exclude:
           },
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('gets #includeIfNot', () {
         final brick = Brick(
           name: '',
-          source: BrickSource.none(
-            fileSystem: MemoryFileSystem(),
-          ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
+          source: const BrickSource.none(),
           dirs: [
             BrickDir(
               path: '',
@@ -1900,11 +1745,7 @@ exclude:
       test('gets #names', () {
         final brick = Brick(
           name: '',
-          source: BrickSource.none(
-            fileSystem: MemoryFileSystem(),
-          ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
+          source: const BrickSource.none(),
           urls: [
             BrickUrl('path', name: Name('name1', section: 'section')),
             BrickUrl(
@@ -1924,7 +1765,7 @@ exclude:
           },
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
     });
   });
@@ -1939,112 +1780,89 @@ exclude:
     });
 
     test('returns when shouldSync is false', () {
-      Brick(
+      const Brick(
         name: '',
-        source: BrickSource.none(
-          fileSystem: MemoryFileSystem(),
-        ),
-        logger: mockLogger,
-        fileSystem: MemoryFileSystem(),
+        source: BrickSource.none(),
       ).checkBrickYamlConfig(shouldSync: false);
 
       expect(printLogs, isEmpty);
     });
 
     test('returns when brickYamlConfig is null', () {
-      Brick(
+      const Brick(
         name: '',
-        source: BrickSource.none(
-          fileSystem: MemoryFileSystem(),
-        ),
-        logger: mockLogger,
-        fileSystem: MemoryFileSystem(),
+        source: BrickSource.none(),
       ).checkBrickYamlConfig(shouldSync: true);
 
       expect(printLogs, isEmpty);
     });
 
     test('warns when data returns null in reading brick.yaml file', () {
-      when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
-          .thenReturn(null);
-      verifyNever(() => mockLogger.warn(any()));
+      when(() => mockBrickYamlConfig.data).thenReturn(null);
+      verifyNever(() => di<Logger>().warn(any()));
 
       Brick(
         name: '',
-        source: BrickSource.none(
-          fileSystem: MemoryFileSystem(),
-        ),
+        source: const BrickSource.none(),
         brickYamlConfig: mockBrickYamlConfig,
-        logger: mockLogger,
-        fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
     });
 
     test('warns when names are not in sync', () {
-      when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
+      when(() => mockBrickYamlConfig.data)
           .thenReturn(const BrickYamlData(name: 'Master Skywalker', vars: []));
 
       when(() => mockBrickYamlConfig.ignoreVars).thenReturn([]);
 
-      verifyNever(() => mockLogger.warn(any()));
+      verifyNever(() => di<Logger>().warn(any()));
 
       Brick(
         name: 'Master Yoda',
-        source: BrickSource.none(
-          fileSystem: MemoryFileSystem(),
-        ),
+        source: const BrickSource.none(),
         brickYamlConfig: mockBrickYamlConfig,
-        logger: mockLogger,
-        fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
 
       verify(
-        () => mockLogger.warn(
+        () => di<Logger>().warn(
           '`name` (Master Skywalker) in brick.yaml does not '
           'match the name in brick_oven.yaml (Master Yoda)',
         ),
       ).called(1);
 
-      verify(() => mockLogger.err('brick.yaml is out of sync')).called(1);
+      verify(() => di<Logger>().err('brick.yaml is out of sync')).called(1);
     });
 
     test('alerts when brick.yaml is in sync', () {
-      when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
+      when(() => mockBrickYamlConfig.data)
           .thenReturn(const BrickYamlData(name: 'Count Dooku', vars: []));
 
       when(() => mockBrickYamlConfig.ignoreVars).thenReturn([]);
 
-      verifyNever(() => mockLogger.info(any()));
+      verifyNever(() => di<Logger>().info(any()));
 
       Brick(
         name: 'Count Dooku',
-        source: BrickSource.none(
-          fileSystem: MemoryFileSystem(),
-        ),
+        source: const BrickSource.none(),
         brickYamlConfig: mockBrickYamlConfig,
-        logger: mockLogger,
-        fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
 
-      verifyNever(() => mockLogger.warn(any()));
-      verifyNever(() => mockLogger.err(any()));
-      verify(() => mockLogger.info(darkGray.wrap('brick.yaml is in sync')))
+      verifyNever(() => di<Logger>().warn(any()));
+      verifyNever(() => di<Logger>().err(any()));
+      verify(() => di<Logger>().info(darkGray.wrap('brick.yaml is in sync')))
           .called(1);
     });
 
     test('ignores extra default variables', () {
-      when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
+      when(() => mockBrickYamlConfig.data)
           .thenReturn(const BrickYamlData(name: 'Count Dooku', vars: []));
 
       when(() => mockBrickYamlConfig.ignoreVars).thenReturn([]);
 
-      verifyNever(() => mockLogger.info(any()));
+      verifyNever(() => di<Logger>().info(any()));
 
       Brick(
         name: 'Count Dooku',
-        source: BrickSource.none(
-          fileSystem: MemoryFileSystem(),
-        ),
+        source: const BrickSource.none(),
         files: [
           BrickFile.config(
             '',
@@ -2056,28 +1874,24 @@ exclude:
           ),
         ],
         brickYamlConfig: mockBrickYamlConfig,
-        logger: mockLogger,
-        fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
 
-      verifyNever(() => mockLogger.warn(any()));
-      verifyNever(() => mockLogger.err(any()));
-      verify(() => mockLogger.info(darkGray.wrap('brick.yaml is in sync')))
+      verifyNever(() => di<Logger>().warn(any()));
+      verifyNever(() => di<Logger>().err(any()));
+      verify(() => di<Logger>().info(darkGray.wrap('brick.yaml is in sync')))
           .called(1);
     });
 
     test('ignores $BrickYamlConfig.ignoreVars from sync', () {
-      when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
+      when(() => mockBrickYamlConfig.data)
           .thenReturn(const BrickYamlData(name: 'Count Dooku', vars: []));
       when(() => mockBrickYamlConfig.ignoreVars).thenReturn(['favorite_color']);
 
-      verifyNever(() => mockLogger.info(any()));
+      verifyNever(() => di<Logger>().info(any()));
 
       Brick(
         name: 'Count Dooku',
-        source: BrickSource.none(
-          fileSystem: MemoryFileSystem(),
-        ),
+        source: const BrickSource.none(),
         files: const [
           BrickFile.config(
             '',
@@ -2087,20 +1901,17 @@ exclude:
           ),
         ],
         brickYamlConfig: mockBrickYamlConfig,
-        logger: mockLogger,
-        fileSystem: MemoryFileSystem(),
       ).checkBrickYamlConfig(shouldSync: true);
 
-      verifyNever(() => mockLogger.warn(any()));
-      verifyNever(() => mockLogger.err(any()));
-      verify(() => mockLogger.info(darkGray.wrap('brick.yaml is in sync')))
+      verifyNever(() => di<Logger>().warn(any()));
+      verifyNever(() => di<Logger>().err(any()));
+      verify(() => di<Logger>().info(darkGray.wrap('brick.yaml is in sync')))
           .called(1);
     });
 
     group('alerts when brick.yaml is in out of sync', () {
       test('when brick.yaml contains extra variables', () {
-        when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
-            .thenReturn(
+        when(() => mockBrickYamlConfig.data).thenReturn(
           const BrickYamlData(
             name: 'Count Dooku',
             vars: ['var1', 'var2'],
@@ -2109,21 +1920,17 @@ exclude:
 
         when(() => mockBrickYamlConfig.ignoreVars).thenReturn([]);
 
-        verifyNever(() => mockLogger.warn(any()));
-        verifyNever(() => mockLogger.err(any()));
+        verifyNever(() => di<Logger>().warn(any()));
+        verifyNever(() => di<Logger>().err(any()));
 
         Brick(
           name: 'Count Dooku',
-          source: BrickSource.none(
-            fileSystem: MemoryFileSystem(),
-          ),
+          source: const BrickSource.none(),
           brickYamlConfig: mockBrickYamlConfig,
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
         ).checkBrickYamlConfig(shouldSync: true);
 
         verify(
-          () => mockLogger.warn(
+          () => di<Logger>().warn(
             darkGray.wrap(
               'Variables ("var1", "var2") exist in brick.yaml but not in brick_oven.yaml',
             ),
@@ -2131,13 +1938,12 @@ exclude:
         ).called(1);
 
         verify(
-          () => mockLogger.err('brick.yaml is out of sync'),
+          () => di<Logger>().err('brick.yaml is out of sync'),
         ).called(1);
       });
 
       test('when brick_oven.yaml contains extra variables', () {
-        when(() => mockBrickYamlConfig.data(logger: any(named: 'logger')))
-            .thenReturn(
+        when(() => mockBrickYamlConfig.data).thenReturn(
           const BrickYamlData(
             name: 'Count Dooku',
             vars: [],
@@ -2146,17 +1952,13 @@ exclude:
 
         when(() => mockBrickYamlConfig.ignoreVars).thenReturn([]);
 
-        verifyNever(() => mockLogger.warn(any()));
-        verifyNever(() => mockLogger.err(any()));
+        verifyNever(() => di<Logger>().warn(any()));
+        verifyNever(() => di<Logger>().err(any()));
 
         Brick(
           name: 'Count Dooku',
-          source: BrickSource.none(
-            fileSystem: MemoryFileSystem(),
-          ),
+          source: const BrickSource.none(),
           brickYamlConfig: mockBrickYamlConfig,
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
           dirs: [
             BrickDir(
               name: Name('var1'),
@@ -2167,7 +1969,7 @@ exclude:
         ).checkBrickYamlConfig(shouldSync: true);
 
         verify(
-          () => mockLogger.warn(
+          () => di<Logger>().warn(
             darkGray.wrap(
               'Variables ("var1", "var2") exist in brick_oven.yaml but not in brick.yaml',
             ),
@@ -2175,7 +1977,7 @@ exclude:
         ).called(1);
 
         verify(
-          () => mockLogger.err('brick.yaml is out of sync'),
+          () => di<Logger>().err('brick.yaml is out of sync'),
         ).called(1);
       });
     });

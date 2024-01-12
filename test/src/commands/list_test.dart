@@ -1,10 +1,4 @@
 import 'package:args/args.dart';
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:test/test.dart';
-
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_dir.dart';
 import 'package:brick_oven/domain/brick_file.dart';
@@ -15,22 +9,23 @@ import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/src/commands/list.dart';
+import 'package:brick_oven/utils/di.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:test/test.dart';
+
+import '../../test_utils/di.dart';
 import '../../test_utils/fakes.dart';
-import '../../test_utils/mocks.dart';
 import '../../test_utils/print_override.dart';
 
 void main() {
   group('$ListCommand', () {
-    late Logger mockLogger;
     late ListCommand listCommand;
 
     setUp(() {
-      mockLogger = MockLogger();
+      setupTestDi();
 
-      listCommand = ListCommand(
-        logger: mockLogger,
-        fileSystem: MemoryFileSystem(),
-      );
+      listCommand = ListCommand();
     });
 
     test('displays description correctly', () {
@@ -39,7 +34,7 @@ void main() {
         'Lists all configured bricks from ${BrickOvenYaml.file}',
       );
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('accepts alias ls', () {
@@ -48,7 +43,7 @@ void main() {
         ['ls'],
       );
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('displays name correctly', () {
@@ -57,61 +52,56 @@ void main() {
         'list',
       );
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     group('#isVerbose', () {
       test('returns true when verbose is provided', () {
         final command = TestListCommand(
-          logger: mockLogger,
           verbose: true,
         );
 
         expect(command.isVerbose, true);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('returns false when verbose is not provided', () {
-        final command = TestListCommand(logger: mockLogger);
+        final command = TestListCommand();
 
         expect(command.isVerbose, isFalse);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('returns false when verbose is provided false', () {
         final command = TestListCommand(
-          logger: mockLogger,
           verbose: false,
         );
 
         expect(command.isVerbose, false);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
     });
 
     test('prints error when configuration is bad and exits with 78', () async {
-      final command = TestListCommand(
-        logger: mockLogger,
-      )..brickOrErrorResponse = const BricksOrError(null, 'bad config');
+      final command = TestListCommand()
+        ..brickOrErrorResponse = const BricksOrError(null, 'bad config');
 
-      verifyNever(() => mockLogger.err(any()));
+      verifyNever(() => di<Logger>().err(any()));
 
       final code = await command.run();
 
       expect(code, 78);
-      verify(() => mockLogger.err('bad config')).called(1);
+      verify(() => di<Logger>().err('bad config')).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     group('brick_oven list', () {
       ListCommand listCommand({required bool verbose}) {
         return TestListCommand(
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
           verbose: verbose,
         )..brickOrErrorResponse = BricksOrError(
             {
@@ -119,10 +109,7 @@ void main() {
                 name: 'package_1',
                 source: BrickSource.fromString(
                   'example/lib',
-                  fileSystem: MemoryFileSystem(),
                 ),
-                fileSystem: MemoryFileSystem(),
-                logger: mockLogger,
                 dirs: [
                   BrickDir(
                     path: 'lib/nested',
@@ -146,10 +133,7 @@ void main() {
                 name: 'package_2',
                 source: BrickSource.fromString(
                   'example/lib',
-                  fileSystem: MemoryFileSystem(),
                 ),
-                fileSystem: MemoryFileSystem(),
-                logger: mockLogger,
                 dirs: [
                   BrickDir(
                     path: 'lib/nested',
@@ -184,16 +168,16 @@ void main() {
           final result = await listCommand(verbose: false).run();
 
           verify(
-            () => mockLogger.info('package_1: example/lib'),
+            () => di<Logger>().info('package_1: example/lib'),
           ).called(1);
 
           verify(
-            () => mockLogger.info('package_2: example/lib'),
+            () => di<Logger>().info('package_2: example/lib'),
           ).called(1);
 
           expect(result, ExitCode.success.code);
 
-          verifyNoMoreInteractions(mockLogger);
+          verifyNoMoreInteractions(di<Logger>());
         },
       );
 
@@ -201,21 +185,21 @@ void main() {
         final result = await listCommand(verbose: true).run();
 
         verify(
-          () => mockLogger.info('package_1: example/lib'),
+          () => di<Logger>().info('package_1: example/lib'),
         ).called(1);
 
         verify(
-          () => mockLogger.info('package_2: example/lib'),
+          () => di<Logger>().info('package_2: example/lib'),
         ).called(1);
 
         verify(
-          () => mockLogger
+          () => di<Logger>()
               .info('  (configured) dirs: 1, files: 1, partials: 1, vars: 2'),
         ).called(2);
 
         expect(result, ExitCode.success.code);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
     });
   });
@@ -223,12 +207,8 @@ void main() {
 
 class TestListCommand extends ListCommand {
   TestListCommand({
-    required super.logger,
     this.verbose,
-    FileSystem? fileSystem,
-  }) : super(
-          fileSystem: fileSystem ?? MemoryFileSystem(),
-        );
+  });
 
   final bool? verbose;
 

@@ -2,11 +2,14 @@
 
 import 'dart:async';
 
+import 'package:brick_oven/utils/di.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/extensions/logger_extensions.dart';
+import '../test_utils/di.dart';
 import '../test_utils/fakes.dart';
 import '../test_utils/mocks.dart';
 
@@ -18,21 +21,20 @@ void main() {
   group('$KeyPressListener', () {
     final mockStdout = MockStdout();
     final mockStdin = MockStdin();
-    late MockLogger mockLogger;
     late KeyPressListener keyPressListener;
     void fakeExit(int _) {}
 
     setUp(() {
+      setupTestDi();
+
       reset(mockStdout);
       reset(mockStdin);
 
       when(() => mockStdin.hasTerminal).thenReturn(true);
       when(() => mockStdout.supportsAnsiEscapes).thenReturn(true);
 
-      mockLogger = MockLogger();
       keyPressListener = KeyPressListener(
         stdin: mockStdin,
-        logger: mockLogger,
         toExit: fakeExit,
       );
 
@@ -46,17 +48,17 @@ void main() {
 
       expect(() => keyPressListener.listenToKeystrokes(), returnsNormally);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('sets up key listener', () async {
       verifyNever(mockStdin.asBroadcastStream);
-      verifyNever(() => mockLogger.info(any()));
+      verifyNever(() => di<Logger>().info(any()));
 
       keyPressListener.listenToKeystrokes();
 
-      verify(mockLogger.quit).called(1);
-      verify(mockLogger.reload).called(1);
+      verify(di<Logger>().quit).called(1);
+      verify(di<Logger>().reload).called(1);
 
       verify(() => mockStdin.lineMode = false).called(1);
       verify(() => mockStdin.echoMode = false).called(1);
@@ -65,7 +67,7 @@ void main() {
 
       verify(mockStdin.asBroadcastStream).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     group('#keyListener', () {
@@ -77,7 +79,7 @@ void main() {
           throwsStateError,
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('sets line and echo mode to false', () {
@@ -86,7 +88,7 @@ void main() {
         verify(() => mockStdin.lineMode = false).called(1);
         verify(() => mockStdin.echoMode = false).called(1);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('listens for key presses', () async {
@@ -119,7 +121,7 @@ void main() {
         expect(qPressed, isTrue);
         expect(escPressed, isTrue);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
     });
 
@@ -127,7 +129,6 @@ void main() {
       final stdin = FakeStdin();
 
       final instance = KeyPressListener(
-        logger: mockLogger,
         stdin: stdin,
         toExit: fakeExit,
       );
@@ -137,10 +138,10 @@ void main() {
       expect(instance.listenToKeystrokes, returnsNormally);
       expect(instance.listenToKeystrokes, returnsNormally);
 
-      verify(mockLogger.quit).called(4);
-      verify(mockLogger.reload).called(4);
+      verify(di<Logger>().quit).called(4);
+      verify(di<Logger>().reload).called(4);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     group('#keyPresses', () {
@@ -149,7 +150,6 @@ void main() {
         var exitCode = 1;
         final action = KeyPressListener(
           stdin: mockStdin,
-          logger: mockLogger,
           toExit: (code) {
             hasExited = true;
             exitCode = code;
@@ -163,9 +163,9 @@ void main() {
 
         expect(hasExited, isTrue);
         expect(exitCode, 0);
-        verify(mockLogger.exiting).called(1);
+        verify(di<Logger>().exiting).called(1);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('"r" logs and exits with code 75', () {
@@ -173,7 +173,6 @@ void main() {
         var exitCode = 1;
         final action = KeyPressListener(
           stdin: mockStdin,
-          logger: mockLogger,
           toExit: (code) {
             hasExited = true;
             exitCode = code;
@@ -187,9 +186,9 @@ void main() {
 
         expect(hasExited, isTrue);
         expect(exitCode, 75);
-        verify(() => mockLogger.restart()).called(1);
+        verify(() => di<Logger>().restart()).called(1);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('"esc" logs', () {
@@ -200,10 +199,10 @@ void main() {
 
         action!.call();
 
-        verify(mockLogger.quit).called(1);
-        verify(mockLogger.reload).called(1);
+        verify(di<Logger>().quit).called(1);
+        verify(di<Logger>().reload).called(1);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
     });
   });

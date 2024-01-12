@@ -12,10 +12,7 @@ import 'package:brick_oven/src/commands/brick_oven.dart';
 /// {@endtemplate}
 class ListCommand extends BrickOvenCommand {
   /// {@macro lists_command}
-  ListCommand({
-    required super.logger,
-    required super.fileSystem,
-  }) {
+  ListCommand() {
     argParser.addFlag(
       'verbose',
       abbr: 'v',

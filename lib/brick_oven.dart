@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:brick_oven/utils/di.dart';
+import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
@@ -8,11 +10,16 @@ import 'package:brick_oven/src/runner.dart';
 
 /// runs the brick oven, generating bricks
 Future<void> runBrickOven(List<String> arguments) async {
-  final exitCode = await BrickOvenRunner(
-    logger: Logger(),
-    pubUpdater: PubUpdater(),
-    fileSystem: const LocalFileSystem(),
-  ).run(arguments);
+  setupDi();
+
+  di
+    ..registerLazySingleton<FileSystem>(LocalFileSystem.new)
+    ..registerLazySingleton<PubUpdater>(PubUpdater.new)
+    ..registerLazySingleton<Logger>(Logger.new);
+
+  final runner = BrickOvenRunner();
+
+  final exitCode = await runner.run(arguments);
 
   if (exitCode == ExitCode.tempFail.code) {
     await runBrickOven(arguments);

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:brick_oven/utils/di.dart';
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
@@ -18,16 +20,13 @@ import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:brick_oven/utils/config_watcher_mixin.dart';
 import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import 'package:brick_oven/utils/oven_mixin.dart';
+import '../test_utils/di.dart';
 import '../test_utils/mocks.dart';
 import '../test_utils/test_directory_watcher.dart';
 import '../test_utils/test_file_watcher.dart';
 
 void main() {
-  late Logger mockLogger;
-
-  setUp(() {
-    mockLogger = MockLogger();
-  });
+  setUp(setupTestDi);
 
   tearDown(() {
     KeyPressListener.stream = null;
@@ -37,36 +36,30 @@ void main() {
     test('returns super $KeyPressListener', () {
       final listener = KeyPressListener(
         stdin: MockStdin(),
-        logger: mockLogger,
         toExit: (_) {},
       );
 
       final instance = TestOvenMixin(
         keyPressListener: listener,
-        logger: mockLogger,
         fileWatchers: {},
       );
 
       expect(instance.keyListener, listener);
-
-      verifyNoMoreInteractions(mockLogger);
     });
 
     test('returns default $KeyPressListener', () {
       final instance = TestOvenMixin(
-        logger: mockLogger,
         fileWatchers: {},
       );
 
       expect(instance.keyListener, isA<KeyPressListener>());
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     group('default $KeyPressListener', () {
       test('calls toExit  when key is pressed', () async {
         final instance = TestOvenMixin(
-          logger: mockLogger,
           fileWatchers: {},
         );
 
@@ -76,12 +69,11 @@ void main() {
 
         expect(() => toExit(exitCode.code), returnsNormally);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('exits with code provided to toExit', () async {
         final instance = TestOvenMixin(
-          logger: mockLogger,
           fileWatchers: {},
         );
 
@@ -91,7 +83,7 @@ void main() {
 
         expect(() async => toExit(exitCode.code), returnsNormally);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
     });
   });
@@ -117,7 +109,6 @@ void main() {
     test('runs gracefully', () async {
       final oven = TestOvenMixin(
         keyPressListener: mockKeyPressListener,
-        logger: mockLogger,
         outputDir: 'my_path',
         fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
       );
@@ -126,16 +117,16 @@ void main() {
       expect(result.code, ExitCode.success.code);
 
       verifyInOrder([
-        mockLogger.preheat,
+        di<Logger>().preheat,
         () => mockBrick.cook(output: 'my_path'),
-        mockLogger.dingDing,
+        di<Logger>().dingDing,
       ]);
 
       verifyNever(mockKeyPressListener.listenToKeystrokes);
       verifyNever(() => mockFileWatcher.events);
       verifyNever(() => mockSourceWatcher.start(any()));
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockBrick);
       verifyNoMoreInteractions(mockBrickSource);
       verifyNoMoreInteractions(mockSourceWatcher);
@@ -151,7 +142,6 @@ void main() {
 
       final oven = TestOvenMixin(
         keyPressListener: mockKeyPressListener,
-        logger: mockLogger,
         outputDir: 'my_path',
         fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
       );
@@ -160,11 +150,11 @@ void main() {
       expect(result.code, ExitCode.success.code);
 
       verifyInOrder([
-        mockLogger.preheat,
+        di<Logger>().preheat,
         () => mockBrick.cook(output: 'my_path'),
-        () => mockLogger.warn('my error'),
-        () => mockLogger.err('Could not cook brick: BRICK'),
-        mockLogger.dingDing,
+        () => di<Logger>().warn('my error'),
+        () => di<Logger>().err('Could not cook brick: BRICK'),
+        di<Logger>().dingDing,
       ]);
 
       verifyNever(mockKeyPressListener.listenToKeystrokes);
@@ -173,7 +163,7 @@ void main() {
 
       verify(() => mockBrick.name).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockBrick);
       verifyNoMoreInteractions(mockBrickSource);
       verifyNoMoreInteractions(mockSourceWatcher);
@@ -189,7 +179,6 @@ void main() {
 
       final oven = TestOvenMixin(
         keyPressListener: mockKeyPressListener,
-        logger: mockLogger,
         outputDir: 'my_path',
         fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
       );
@@ -198,11 +187,11 @@ void main() {
       expect(result.code, ExitCode.success.code);
 
       verifyInOrder([
-        mockLogger.preheat,
+        di<Logger>().preheat,
         () => mockBrick.cook(output: 'my_path'),
-        () => mockLogger.warn('Unknown error: Exception: my error'),
-        () => mockLogger.err('Could not cook brick: BRICK'),
-        mockLogger.dingDing,
+        () => di<Logger>().warn('Unknown error: Exception: my error'),
+        () => di<Logger>().err('Could not cook brick: BRICK'),
+        di<Logger>().dingDing,
       ]);
 
       verifyNever(mockKeyPressListener.listenToKeystrokes);
@@ -211,7 +200,7 @@ void main() {
 
       verify(() => mockBrick.name).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockBrick);
       verifyNoMoreInteractions(mockBrickSource);
       verifyNoMoreInteractions(mockSourceWatcher);
@@ -222,7 +211,6 @@ void main() {
 
   group('watch', () {
     late Stdin mockStdin;
-    late Logger mockLogger;
     late Brick mockBrick;
     late BrickSource mockBrickSource;
     late Progress mockProgress;
@@ -236,7 +224,6 @@ void main() {
     setUp(() {
       mockBrick = MockBrick();
       mockStdin = MockStdin();
-      mockLogger = MockLogger();
       mockBrickSource = MockBrickSource();
       mockSourceWatcher = MockSourceWatcher();
       mockProgress = MockProgress();
@@ -247,11 +234,10 @@ void main() {
 
       keyPressListener = KeyPressListener(
         stdin: mockStdin,
-        logger: mockLogger,
         toExit: exitCompleter.complete,
       );
 
-      when(() => mockLogger.progress(any())).thenReturn(mockProgress);
+      when(() => di<Logger>().progress(any())).thenReturn(mockProgress);
 
       when(() => mockStdin.hasTerminal).thenReturn(true);
 
@@ -282,7 +268,6 @@ void main() {
     test('runs gracefully', () async {
       final oven = TestOvenMixin(
         keyPressListener: keyPressListener,
-        logger: mockLogger,
         outputDir: 'my_path',
         isWatch: true,
         fileWatchers: {BrickOvenYaml.file: mockFileWatcher},
@@ -294,12 +279,12 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       verifyInOrder([
-        mockLogger.preheat,
+        di<Logger>().preheat,
         () => mockBrick.cook(output: 'my_path', watch: true),
-        mockLogger.dingDing,
-        mockLogger.watching,
-        mockLogger.quit,
-        mockLogger.reload,
+        di<Logger>().dingDing,
+        di<Logger>().watching,
+        di<Logger>().quit,
+        di<Logger>().reload,
       ]);
 
       verify(() => mockFileWatcher.events).called(1);
@@ -315,13 +300,13 @@ void main() {
       verify(() => mockBrick.configPath).called(1);
       verify(() => mockBrickSource.watcher).called(1);
 
-      verify(mockLogger.exiting).called(1);
+      verify(di<Logger>().exiting).called(1);
 
       final exitCode = await exitCompleter.future;
       // expects success because `q` was pressed
       expect(exitCode, ExitCode.success.code);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockBrick);
       verifyNoMoreInteractions(mockBrickSource);
@@ -338,7 +323,6 @@ void main() {
 
       final oven = TestOvenMixin(
         keyPressListener: keyPressListener,
-        logger: mockLogger,
         outputDir: 'my_path',
         isWatch: true,
         fileWatchers: {BrickOvenYaml.file: testFileWatcher},
@@ -347,8 +331,6 @@ void main() {
       final brick = Brick(
         name: 'BRICK',
         source: mockBrickSource,
-        fileSystem: MemoryFileSystem(),
-        logger: mockLogger,
       );
 
       unawaited(
@@ -369,14 +351,14 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       verifyInOrder([
-        mockLogger.preheat,
-        () => mockLogger.progress('Writing Brick: BRICK'),
+        di<Logger>().preheat,
+        () => di<Logger>().progress('Writing Brick: BRICK'),
         () => mockSourceWatcher.start(any()),
-        mockLogger.dingDing,
-        mockLogger.watching,
-        mockLogger.quit,
-        mockLogger.reload,
-        mockLogger.configChanged,
+        di<Logger>().dingDing,
+        di<Logger>().watching,
+        di<Logger>().quit,
+        di<Logger>().reload,
+        di<Logger>().configChanged,
         mockSourceWatcher.stop,
       ]);
 
@@ -386,7 +368,7 @@ void main() {
       verify(() => mockSourceWatcher.hasRun).called(1);
       verify(() => mockBrickSource.watcher).called(3);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockBrick);
       verifyNoMoreInteractions(mockBrickSource);
@@ -403,7 +385,6 @@ void main() {
 
       final oven = TestOvenMixin(
         keyPressListener: keyPressListener,
-        logger: mockLogger,
         outputDir: 'my_path',
         isWatch: true,
         fileWatchers: {'config_path': testFileWatcher},
@@ -412,8 +393,6 @@ void main() {
       final brick = Brick(
         name: 'BRICK',
         source: mockBrickSource,
-        fileSystem: MemoryFileSystem(),
-        logger: mockLogger,
         configPath: 'config_path',
       );
 
@@ -435,14 +414,14 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       verifyInOrder([
-        mockLogger.preheat,
-        () => mockLogger.progress('Writing Brick: BRICK'),
+        di<Logger>().preheat,
+        () => di<Logger>().progress('Writing Brick: BRICK'),
         () => mockSourceWatcher.start(any()),
-        mockLogger.dingDing,
-        mockLogger.watching,
-        mockLogger.quit,
-        mockLogger.reload,
-        mockLogger.configChanged,
+        di<Logger>().dingDing,
+        di<Logger>().watching,
+        di<Logger>().quit,
+        di<Logger>().reload,
+        di<Logger>().configChanged,
         mockSourceWatcher.stop,
       ]);
 
@@ -452,7 +431,7 @@ void main() {
       verify(() => mockSourceWatcher.hasRun).called(1);
       verify(() => mockBrickSource.watcher).called(3);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockBrick);
       verifyNoMoreInteractions(mockBrickSource);
@@ -469,7 +448,6 @@ void main() {
 
       final oven = TestOvenMixin(
         keyPressListener: keyPressListener,
-        logger: mockLogger,
         outputDir: 'my_path',
         isWatch: true,
         fileWatchers: {BrickOvenYaml.file: testFileWatcher},
@@ -479,14 +457,11 @@ void main() {
         name: 'BRICK',
         source: BrickSource.memory(
           localPath: '',
-          fileSystem: MemoryFileSystem(),
           watcher: SourceWatcher.config(
             dirPath: '',
             watcher: testDirectoryWatcher,
           ),
         ),
-        fileSystem: MemoryFileSystem(),
-        logger: mockLogger,
       );
 
       unawaited(
@@ -507,19 +482,19 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       verifyInOrder([
-        mockLogger.preheat,
-        () => mockLogger.progress('Writing Brick: BRICK'),
-        mockLogger.dingDing,
-        mockLogger.watching,
-        mockLogger.quit,
-        mockLogger.reload,
-        () => mockLogger.fileChanged('path/to/file.txt'),
-        mockLogger.preheat,
-        mockLogger.dingDing,
-        mockLogger.watching,
-        mockLogger.quit,
-        mockLogger.reload,
-        mockLogger.exiting,
+        di<Logger>().preheat,
+        () => di<Logger>().progress('Writing Brick: BRICK'),
+        di<Logger>().dingDing,
+        di<Logger>().watching,
+        di<Logger>().quit,
+        di<Logger>().reload,
+        () => di<Logger>().fileChanged('path/to/file.txt'),
+        di<Logger>().preheat,
+        di<Logger>().dingDing,
+        di<Logger>().watching,
+        di<Logger>().quit,
+        di<Logger>().reload,
+        di<Logger>().exiting,
       ]);
 
       final exitCode = await exitCompleter.future;
@@ -528,7 +503,7 @@ void main() {
 
       verify(() => mockProgress.complete('BRICK: cooked 0 files')).called(2);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockBrick);
       verifyNoMoreInteractions(mockBrickSource);
@@ -544,7 +519,6 @@ void main() {
 
       final oven = TestOvenMixin(
         keyPressListener: keyPressListener,
-        logger: mockLogger,
         outputDir: 'my_path',
         isWatch: true,
         fileWatchers: {BrickOvenYaml.file: testFileWatcher},
@@ -553,8 +527,6 @@ void main() {
       final brick = Brick(
         name: 'BRICK',
         source: mockBrickSource,
-        fileSystem: MemoryFileSystem(),
-        logger: mockLogger,
       );
 
       unawaited(
@@ -570,14 +542,14 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       verifyInOrder([
-        mockLogger.preheat,
-        () => mockLogger.progress('Writing Brick: BRICK'),
+        di<Logger>().preheat,
+        () => di<Logger>().progress('Writing Brick: BRICK'),
         () => mockSourceWatcher.start(any()),
-        mockLogger.dingDing,
-        mockLogger.watching,
-        mockLogger.quit,
-        mockLogger.reload,
-        () => mockLogger.info('\nRestarting...'),
+        di<Logger>().dingDing,
+        di<Logger>().watching,
+        di<Logger>().quit,
+        di<Logger>().reload,
+        () => di<Logger>().info('\nRestarting...'),
       ]);
 
       final exitCode = await exitCompleter.future;
@@ -592,7 +564,7 @@ void main() {
           .called(2);
       verify(() => mockSourceWatcher.addEvent(any(), runAfter: true)).called(3);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockBrick);
       verifyNoMoreInteractions(mockBrickSource);
@@ -609,7 +581,6 @@ void main() {
 
       final oven = TestOvenMixin(
         keyPressListener: keyPressListener,
-        logger: mockLogger,
         outputDir: 'my_path',
         isWatch: true,
         fileWatchers: {BrickOvenYaml.file: testFileWatcher},
@@ -618,8 +589,6 @@ void main() {
       final brick = Brick(
         name: 'BRICK',
         source: mockBrickSource,
-        fileSystem: MemoryFileSystem(),
-        logger: mockLogger,
       );
 
       unawaited(
@@ -632,20 +601,20 @@ void main() {
 
       await Future<void>.delayed(Duration.zero);
 
-      verify(mockLogger.exiting).called(1);
+      verify(di<Logger>().exiting).called(1);
 
       final exitCode = await exitCompleter.future;
       // expects success because `q` was pressed
       expect(exitCode, ExitCode.success.code);
 
       verifyInOrder([
-        mockLogger.preheat,
-        () => mockLogger.progress('Writing Brick: BRICK'),
+        di<Logger>().preheat,
+        () => di<Logger>().progress('Writing Brick: BRICK'),
         () => mockSourceWatcher.start(any()),
-        mockLogger.dingDing,
-        mockLogger.watching,
-        mockLogger.quit,
-        mockLogger.reload,
+        di<Logger>().dingDing,
+        di<Logger>().watching,
+        di<Logger>().quit,
+        di<Logger>().reload,
       ]);
 
       verify(() => mockBrickSource.watcher).called(2);
@@ -656,7 +625,7 @@ void main() {
       verify(() => mockSourceWatcher.addEvent(any(), runAfter: true)).called(3);
       verify(() => mockSourceWatcher.hasRun).called(1);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
       verifyNoMoreInteractions(mockProgress);
       verifyNoMoreInteractions(mockBrick);
       verifyNoMoreInteractions(mockBrickSource);
@@ -667,17 +636,19 @@ void main() {
 }
 
 class TestOvenMixin extends BrickOvenCommand
-    with BrickCooker, BrickCookerArgs, ConfigWatcherMixin, OvenMixin {
+    with
+        BrickCooker,
+        BrickCookerArgs,
+        ConfigWatcherMixin,
+        LoggerMixin,
+        OvenMixin {
   TestOvenMixin({
-    required super.logger,
     required this.fileWatchers,
     this.keyPressListener,
     this.outputDir = '',
     this.isWatch = false,
     this.shouldSync = true,
-  }) : super(
-          fileSystem: MemoryFileSystem(),
-        );
+  });
 
   @override
   final bool isWatch;

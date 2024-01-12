@@ -1,36 +1,30 @@
 import 'package:args/args.dart';
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:test/test.dart';
-
 import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/bricks_or_error.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
+import 'package:brick_oven/utils/di.dart';
+import 'package:file/file.dart';
+import 'package:mason_logger/mason_logger.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:test/test.dart';
+
+import '../../test_utils/di.dart';
 import '../../test_utils/fakes.dart';
-import '../../test_utils/mocks.dart';
 
 void main() {
-  late FileSystem fs;
   late BrickOvenCommand brickOvenCommand;
-  late Logger mockLogger;
 
   void createFile(String path, String content) {
-    fs.file(path)
+    di<FileSystem>().file(path)
       ..createSync(recursive: true)
       ..writeAsStringSync(content);
   }
 
   setUp(() {
-    fs = MemoryFileSystem();
-    mockLogger = MockLogger();
+    setupTestDi();
 
-    brickOvenCommand = TestBrickOvenCommand(
-      fs,
-      logger: mockLogger,
-    );
+    brickOvenCommand = TestBrickOvenCommand();
   });
 
   group('$BrickOvenCommand', () {
@@ -52,7 +46,7 @@ bricks:
         expect(bricks, isNotNull);
         expect(bricks.length, 3);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('returns error when when ${BrickOvenYaml.file} is bad', () {
@@ -65,7 +59,7 @@ bricks:
           const BricksOrError(null, 'Invalid brick oven configuration file'),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('returns error when ${BrickOvenYaml.file} does not exist', () {
@@ -74,7 +68,7 @@ bricks:
           const BricksOrError(null, 'No ${BrickOvenYaml.file} file found'),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('return $BricksOrError with error yaml has bad syntax', () {
@@ -94,7 +88,7 @@ bricks:
           startsWith('Invalid configuration, '),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('return $BricksOrError with error when extra keys are provided', () {
@@ -117,7 +111,7 @@ second:
           'Unknown keys: "second"',
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('return $BricksOrError error when source is null in sub config file',
@@ -144,7 +138,7 @@ source:
           contains('`source` value is required in sub config files'),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('return $BricksOrError error when config file does not exist', () {
@@ -161,12 +155,12 @@ bricks:
         expect(result, const BricksOrError(<Brick>{}, null));
 
         verify(
-          () => mockLogger.warn(
+          () => di<Logger>().warn(
             'Brick configuration file not found | (first) -- $path.yaml',
           ),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('return $BricksOrError error when config file is not type map', () {
@@ -188,7 +182,7 @@ bricks:
           contains('Brick configuration file must be of type'),
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
 
       test('return $BricksOrError error when brick is not correct type', () {
@@ -208,7 +202,7 @@ bricks:
           'Reason: Expected `Map` or `String` (path to brick configuration file)',
         );
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
     });
 
@@ -217,21 +211,16 @@ bricks:
         final cwd = brickOvenCommand.cwd;
 
         expect(cwd, isNotNull);
-        expect(cwd.path, fs.currentDirectory.path);
+        expect(cwd.path, di<FileSystem>().currentDirectory.path);
 
-        verifyNoMoreInteractions(mockLogger);
+        verifyNoMoreInteractions(di<Logger>());
       });
     });
   });
 }
 
 class TestBrickOvenCommand extends BrickOvenCommand {
-  TestBrickOvenCommand(
-    FileSystem fs, {
-    required super.logger,
-  }) : super(
-          fileSystem: fs,
-        );
+  TestBrickOvenCommand();
 
   @override
   ArgResults get argResults => FakeArgResults(data: <String, dynamic>{});

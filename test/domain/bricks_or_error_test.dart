@@ -1,19 +1,15 @@
-import 'package:file/memory.dart';
+import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/brick_source.dart';
+import 'package:brick_oven/domain/bricks_or_error.dart';
+import 'package:brick_oven/utils/di.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import 'package:brick_oven/domain/brick.dart';
-import 'package:brick_oven/domain/brick_source.dart';
-import 'package:brick_oven/domain/bricks_or_error.dart';
-import '../test_utils/mocks.dart';
+import '../test_utils/di.dart';
 
 void main() {
-  late Logger mockLogger;
-
-  setUp(() {
-    mockLogger = MockLogger();
-  });
+  setUp(setupTestDi);
 
   test('can be instantiated', () {
     expect(() => const BricksOrError(null, null), returnsNormally);
@@ -26,10 +22,7 @@ void main() {
           name: 'brick',
           source: BrickSource.fromString(
             'source',
-            fileSystem: MemoryFileSystem(),
           ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
         ),
       };
 
@@ -37,7 +30,7 @@ void main() {
 
       expect(brickOrError.bricks, bricks);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('throws an error when value is error', () {
@@ -60,10 +53,7 @@ void main() {
           name: 'brick',
           source: BrickSource.fromString(
             'source',
-            fileSystem: MemoryFileSystem(),
           ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
         ),
       };
 
@@ -71,7 +61,7 @@ void main() {
 
       expect(() => brickOrError.error, throwsA(isA<Error>()));
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
   });
 
@@ -88,10 +78,7 @@ void main() {
           name: 'brick',
           source: BrickSource.fromString(
             'source',
-            fileSystem: MemoryFileSystem(),
           ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
         ),
       };
 
@@ -99,7 +86,7 @@ void main() {
 
       expect(brickOrError.isError, false);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
   });
 
@@ -110,10 +97,7 @@ void main() {
           name: 'brick',
           source: BrickSource.fromString(
             'source',
-            fileSystem: MemoryFileSystem(),
           ),
-          logger: mockLogger,
-          fileSystem: MemoryFileSystem(),
         ),
       };
 
@@ -121,7 +105,7 @@ void main() {
 
       expect(brickOrError.isBricks, true);
 
-      verifyNoMoreInteractions(mockLogger);
+      verifyNoMoreInteractions(di<Logger>());
     });
 
     test('return false when value is error', () {

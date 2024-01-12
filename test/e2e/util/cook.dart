@@ -1,9 +1,11 @@
+import 'package:brick_oven/utils/di.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
+import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 
 import 'package:brick_oven/src/runner.dart';
@@ -24,18 +26,21 @@ Future<void> cook({
   required String command,
   required int numberOfFiles,
 }) async {
-  final mockLogger = MockLogger();
   final mockProgress = MockProgress();
-  final mockPubUpdater = MockPubUpdater()..stubMethods();
+  setupDi();
 
-  when(() => mockLogger.progress(any())).thenReturn(mockProgress);
+  di
+    ..registerLazySingleton<Logger>(MockLogger.new)
+    ..registerLazySingleton<FileSystem>(MemoryFileSystem.new)
+    ..registerLazySingleton<PubUpdater>(MockPubUpdater.new);
+
+  when(() => di<Logger>().progress(any())).thenReturn(mockProgress);
 
   final testPath = join('test', 'e2e');
   final fixturePath = join(testPath, 'fixtures');
   final sourcePath = join(testPath, 'sources');
 
   const localFileSystem = LocalFileSystem();
-  final memoryFileSystem = MemoryFileSystem();
 
   final brickFixturePath = join(fixturePath, brickName);
   final brickSourcePath = join(sourcePath, brickName);
@@ -48,7 +53,7 @@ Future<void> cook({
   for (final file in files) {
     final relativePath = relative(file.path, from: brickSourcePath);
 
-    final memoryFile = memoryFileSystem.file(relativePath)
+    final memoryFile = di<FileSystem>().file(relativePath)
       ..createSync(recursive: true);
     try {
       memoryFile.writeAsStringSync(file.readAsStringSync());
@@ -61,25 +66,21 @@ Future<void> cook({
       .file(join(brickFixturePath, 'brick.yaml'))
       .readAsStringSync();
 
-  memoryFileSystem.file(join('brick.yaml')).writeAsStringSync(brickYamlContent);
+  di<FileSystem>().file(join('brick.yaml')).writeAsStringSync(brickYamlContent);
 
-  final brickOven = BrickOvenRunner(
-    fileSystem: memoryFileSystem,
-    logger: mockLogger,
-    pubUpdater: mockPubUpdater,
-  );
+  final brickOven = BrickOvenRunner();
 
   final result = await brickOven.run(['cook', command]);
 
   verifyInOrder([
-    mockLogger.preheat,
-    () => mockLogger.progress('Writing Brick: $brickName'),
+    di<Logger>().preheat,
+    () => di<Logger>().progress('Writing Brick: $brickName'),
     () => mockProgress.complete(
           '$brickName: cooked $numberOfFiles file${numberOfFiles > 1 ? 's' : ''}',
         ),
-    () => mockLogger.info('brick.yaml is in sync'),
-    mockLogger.dingDing,
-    () => mockPubUpdater.getLatestVersion(packageName),
+    () => di<Logger>().info('brick.yaml is in sync'),
+    di<Logger>().dingDing,
+    () => di<PubUpdater>().getLatestVersion(any()),
   ]);
 
   expect(result, ExitCode.success.code);
@@ -97,7 +98,7 @@ Future<void> cook({
       from: join(brickFixturePath, '__brick__'),
     );
     final expectedFile =
-        memoryFileSystem.file(join(brickResultPath, relativePath));
+        di<FileSystem>().file(join(brickResultPath, relativePath));
 
     expect(expectedFile.existsSync(), isTrue);
 
@@ -114,7 +115,7 @@ Future<void> cook({
     expect(content, expected);
   }
 
-  verifyNoMoreInteractions(mockLogger);
+  verifyNoMoreInteractions(di<Logger>());
   verifyNoMoreInteractions(mockProgress);
-  verifyNoMoreInteractions(mockPubUpdater);
+  verifyNoMoreInteractions(di<PubUpdater>());
 }
