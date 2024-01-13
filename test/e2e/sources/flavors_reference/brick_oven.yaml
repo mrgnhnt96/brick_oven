@@ -1,0 +1,3 @@
+bricks:
+  flavors_reference:
+    path: source/brick_oven.yaml
