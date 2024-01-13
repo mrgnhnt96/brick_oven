@@ -12,47 +12,79 @@ import 'package:path/path.dart' as p;
 
 part 'brick_config.g.dart';
 
+extension _MasonBrickConfigX on StringOr<MasonBrickConfig> {
+  StringOr<MasonBrickConfig> updateRootPath(String rootPath) {
+    if (isString) {
+      return StringOr(string: p.join(rootPath, string));
+    }
+
+    return StringOr(
+      object: MasonBrickConfig(
+        path: p.join(rootPath, object!.path),
+        ignoreVars: object!.ignoreVars,
+      ),
+    );
+  }
+}
+
 @JsonSerializable()
 class BrickConfig extends BrickConfigEntry with EquatableMixin, VarsMixin {
-  BrickConfig({
+  factory BrickConfig({
     required String sourcePath,
     required StringOr<MasonBrickConfig>? masonBrickConfig,
+    required Map<String, FileConfig>? fileConfigs,
+    required Map<String, DirectoryConfig>? directoryConfigs,
+    required Map<String, UrlConfig>? urlConfigs,
+    required Map<String, PartialConfig?>? partialConfigs,
+    required List<String>? exclude,
+    required String? configPath,
+  }) {
+    if (configPath == null) {
+      return BrickConfig._(
+        sourcePath: sourcePath,
+        masonBrickConfig: masonBrickConfig,
+        fileConfigs: fileConfigs,
+        directoryConfigs: directoryConfigs,
+        urlConfigs: urlConfigs,
+        partialConfigs: partialConfigs,
+        exclude: exclude,
+        configPath: configPath,
+      );
+    }
+
+    final configDir = p.dirname(configPath);
+
+    final updatedSourcePath = p.join(configDir, sourcePath);
+
+    final updateMasonBrickConfig = masonBrickConfig?.updateRootPath(configDir);
+
+    return BrickConfig._(
+      sourcePath: updatedSourcePath,
+      masonBrickConfig: updateMasonBrickConfig,
+      fileConfigs: fileConfigs,
+      directoryConfigs: directoryConfigs,
+      urlConfigs: urlConfigs,
+      partialConfigs: partialConfigs,
+      exclude: exclude,
+      configPath: configPath,
+    );
+  }
+  BrickConfig._({
+    required this.sourcePath,
+    required this.masonBrickConfig,
     required this.fileConfigs,
     required this.directoryConfigs,
     required this.urlConfigs,
     required this.partialConfigs,
     required this.exclude,
     required this.configPath,
-  })  : sourcePath = configPath == null
-            ? sourcePath
-            : p.join(p.dirname(configPath), sourcePath),
-        masonBrickConfig = configPath == null
-            ? masonBrickConfig
-            : masonBrickConfig == null
-                ? null
-                : masonBrickConfig.isString == true
-                    ? StringOr(
-                        string: p.join(
-                          p.dirname(configPath),
-                          masonBrickConfig.string,
-                        ),
-                      )
-                    : StringOr(
-                        object: MasonBrickConfig(
-                          path: p.join(
-                            p.dirname(configPath),
-                            masonBrickConfig.object!.path,
-                          ),
-                          ignoreVars: masonBrickConfig.object!.ignoreVars,
-                        ),
-                      ),
-        assert(
+  }) : assert(
           configPath == null || configPath.endsWith('brick_oven.yaml'),
           'configPath must end with brick_oven.yaml',
         );
 
   BrickConfig.self(BrickConfig self)
-      : this(
+      : this._(
           sourcePath: self.sourcePath,
           masonBrickConfig: self.masonBrickConfig,
           fileConfigs: self.fileConfigs,
