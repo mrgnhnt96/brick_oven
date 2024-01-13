@@ -1,7 +1,9 @@
 import 'package:brick_oven/domain/config/brick_config.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:brick_oven/domain/config/brick_config_entry.dart';
+import 'package:mason_logger/mason_logger.dart';
 
 part 'brick_oven_config.g.dart';
 
@@ -24,14 +26,24 @@ class BrickOvenConfig extends Equatable {
   final Map<String, BrickConfigEntry>? bricks;
   final String configPath;
 
-  Map<String, BrickConfig> resolveBricks() =>
-      bricks?.map(
-        (k, v) => MapEntry(
-          k,
-          v.resolve(fromPath: configPath),
-        ),
-      ) ??
-      {};
+  Map<String, BrickConfig> resolveBricks() {
+    final resolved = <String, BrickConfig>{};
+    final bricks = this.bricks;
+
+    if (bricks == null) {
+      return resolved;
+    }
+
+    for (final MapEntry(key: name, value: config) in bricks.entries) {
+      try {
+        resolved[name] = config.resolve(fromPath: configPath);
+      } catch (e) {
+        di<Logger>().err('Failed to resolve brick $name');
+      }
+    }
+
+    return resolved;
+  }
 
   Map<String, dynamic> toJson() => _$BrickOvenConfigToJson(this);
 
