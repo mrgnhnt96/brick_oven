@@ -8,13 +8,14 @@ import 'package:brick_oven/domain/config/url_config.dart';
 import 'package:brick_oven/utils/vars_mixin.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:path/path.dart' as p;
 
 part 'brick_config.g.dart';
 
 @JsonSerializable()
 class BrickConfig extends BrickConfigEntry with EquatableMixin, VarsMixin {
-  const BrickConfig({
-    required this.sourcePath,
+  BrickConfig({
+    required String sourcePath,
     required this.masonBrickConfig,
     required this.fileConfigs,
     required this.directoryConfigs,
@@ -22,7 +23,13 @@ class BrickConfig extends BrickConfigEntry with EquatableMixin, VarsMixin {
     required this.partialConfigs,
     required this.exclude,
     required this.configPath,
-  });
+  })  : sourcePath = configPath == null
+            ? sourcePath
+            : p.join(p.dirname(configPath), sourcePath),
+        assert(
+          configPath == null || configPath.endsWith('brick_oven.yaml'),
+          'configPath must end with brick_oven.yaml',
+        );
 
   BrickConfig.self(BrickConfig self)
       : this(
@@ -40,23 +47,9 @@ class BrickConfig extends BrickConfigEntry with EquatableMixin, VarsMixin {
     Map json, {
     required String? configPath,
   }) {
-    final sanitized = <dynamic, dynamic>{};
+    json['config_path'] = configPath;
 
-    if (json.keys.length == 1) {
-      final first = json.entries.first;
-      if (first.value is! Map) {
-        throw Exception('value must be a Map');
-      }
-
-      sanitized.addAll(Map.from(first.value as Map));
-      sanitized['name'] ??= first.key;
-    } else {
-      sanitized.addAll(json);
-    }
-
-    sanitized['config_path'] = configPath;
-
-    return _$BrickConfigFromJson(sanitized);
+    return _$BrickConfigFromJson(json);
   }
 
   @JsonKey(name: 'source')
