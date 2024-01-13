@@ -16,7 +16,7 @@ part 'brick_config.g.dart';
 class BrickConfig extends BrickConfigEntry with EquatableMixin, VarsMixin {
   BrickConfig({
     required String sourcePath,
-    required this.masonBrickConfig,
+    required StringOr<MasonBrickConfig>? masonBrickConfig,
     required this.fileConfigs,
     required this.directoryConfigs,
     required this.urlConfigs,
@@ -26,6 +26,26 @@ class BrickConfig extends BrickConfigEntry with EquatableMixin, VarsMixin {
   })  : sourcePath = configPath == null
             ? sourcePath
             : p.join(p.dirname(configPath), sourcePath),
+        masonBrickConfig = configPath == null
+            ? masonBrickConfig
+            : masonBrickConfig == null
+                ? null
+                : masonBrickConfig.isString == true
+                    ? StringOr(
+                        string: p.join(
+                          p.dirname(configPath),
+                          masonBrickConfig.string,
+                        ),
+                      )
+                    : StringOr(
+                        object: MasonBrickConfig(
+                          path: p.join(
+                            p.dirname(configPath),
+                            masonBrickConfig.object!.path,
+                          ),
+                          ignoreVars: masonBrickConfig.object!.ignoreVars,
+                        ),
+                      ),
         assert(
           configPath == null || configPath.endsWith('brick_oven.yaml'),
           'configPath must end with brick_oven.yaml',
