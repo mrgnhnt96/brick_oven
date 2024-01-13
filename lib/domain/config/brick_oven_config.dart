@@ -39,6 +39,7 @@ class BrickOvenConfig extends Equatable {
         resolved[name] = config.resolve(fromPath: configPath);
       } catch (e) {
         di<Logger>().err('Failed to resolve brick $name');
+        di<Logger>().err('   $e');
       }
     }
 

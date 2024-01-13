@@ -17,7 +17,6 @@ class CookBricksCommand extends BrickOvenCommand with BrickCookerArgs {
     final bricks = config?.resolveBricks();
 
     if (bricks == null) {
-      _subBricksWarning = 'Failed to resolve bricks';
       return;
     }
 
