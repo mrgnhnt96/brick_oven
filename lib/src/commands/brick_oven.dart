@@ -1,5 +1,8 @@
 import 'package:args/command_runner.dart';
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/domain/config/brick_oven_config.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
+import 'package:brick_oven/utils/yaml_to_json.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 
@@ -19,5 +22,23 @@ abstract class BrickOvenCommand extends Command<int> {
   /// gets the current working directory
   Directory get cwd {
     return fileSystem.currentDirectory;
+  }
+
+  BrickOvenConfig? getBrickOvenConfig() {
+    final configFile = BrickOvenYaml.findNearest(cwd);
+
+    if (configFile == null) {
+      throw Exception('Config file not found');
+    }
+
+    final json = YamlToJson.fromFile(configFile);
+
+    try {
+      return BrickOvenConfig.fromJson(json, configPath: configFile.path);
+    } catch (e) {
+      // do nothing
+    }
+
+    return null;
   }
 }

@@ -1,10 +1,7 @@
 import 'dart:async';
 
-import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/implementations/brick_impl.dart';
 import 'package:brick_oven/domain/interfaces/brick.dart';
-import 'package:brick_oven/domain/config/brick_oven_config.dart';
-import 'package:brick_oven/utils/yaml_to_json.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
@@ -40,17 +37,19 @@ class CookAllBricks extends BrickOvenCommand
   @override
   String get name => 'all';
 
+  bool _hasWarned = false;
+
   @override
   Future<int> run() async {
-    final configFile = BrickOvenYaml.findNearest(cwd);
+    final config = getBrickOvenConfig();
 
-    if (configFile == null) {
-      throw Exception('Config file not found');
+    if (config == null) {
+      if (!_hasWarned) {
+        _hasWarned = true;
+        logger.err('Failed to parse config file');
+      }
+      return 1;
     }
-
-    final json = YamlToJson.fromFile(configFile);
-
-    final config = BrickOvenConfig.fromJson(json, configPath: configFile.path);
 
     final bricks = <Brick>{};
 

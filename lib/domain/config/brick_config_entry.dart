@@ -1,6 +1,9 @@
 import 'package:brick_oven/domain/config/brick_config.dart';
 import 'package:brick_oven/domain/config/brick_config_reference.dart';
+import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/utils/yaml_to_json.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart';
 
 abstract mixin class BrickConfigEntry {
@@ -10,7 +13,14 @@ abstract mixin class BrickConfigEntry {
     try {
       return BrickConfigReference.fromJson(json);
     } catch (_) {
+      // do nothing
+    }
+
+    try {
       return BrickConfig.fromJson(json, configPath: null);
+    } catch (err) {
+      di<Logger>().err('Failed to parse brick config');
+      throw const BrickConfigException(reason: 'Failed to parse brick config');
     }
   }
 
