@@ -4,19 +4,27 @@ bricks:
     brick_config: brick.yaml
     dirs:
       android:
-        include_if: android
+        include:
+          if: android
       ios:
-        include_if: ios
+        include:
+          if: ios
     files:
       build.gradle:
-        include_if: android
+        include:
+          if: android
       Podfile:
-        include_if: ios
+        include:
+          if: ios
       example/android.dart:
-        include_if: android
+        include:
+          if: android
       example/ios.dart:
-        include_if: ios
+        include:
+          if: ios
       tests/android_tests.dart:
-        include_if: android
+        include:
+          if: android
       tests/ios_tests.dart:
-        include_if: ios
+        include:
+          if: ios

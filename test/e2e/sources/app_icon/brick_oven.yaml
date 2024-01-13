@@ -6,5 +6,5 @@ bricks:
     urls:
       icon:
         name:
-          value: url
+          rename_with: url
           braces: 2

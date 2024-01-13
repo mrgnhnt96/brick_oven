@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:brick_oven/src/constants/constants.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
-import 'package:brick_oven/src/runner.dart';
 import 'package:brick_oven/src/version.dart';
 
 void main() {
@@ -20,6 +20,6 @@ void main() {
 
     final yamlName = yaml.value['name'] as String;
 
-    expect(yamlName, packageName);
+    expect(yamlName, Constants.packageName);
   });
 }

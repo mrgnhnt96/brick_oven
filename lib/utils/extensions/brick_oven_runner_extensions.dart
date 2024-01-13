@@ -1,6 +1,8 @@
 // ignore_for_file: join_return_with_assignment
 
 import 'package:args/args.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
+import 'package:brick_oven/src/constants/constants.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
 
@@ -54,16 +56,14 @@ Run `brick_oven update` to update
   }
 
   /// checks if there is an update available for the tool
-  Future<void> checkForUpdates({
-    required PubUpdater updater,
-    required Logger logger,
-  }) async {
+  Future<void> checkForUpdates() async {
     try {
-      final latestVersion = await updater.getLatestVersion(packageName);
+      final latestVersion =
+          await di<PubUpdater>().getLatestVersion(Constants.packageName);
       final isUpToDate = packageVersion == latestVersion;
 
       if (!isUpToDate) {
-        logger.info(formatUpdate(packageVersion, latestVersion));
+        di<Logger>().info(formatUpdate(packageVersion, latestVersion));
       }
     } catch (_) {}
   }

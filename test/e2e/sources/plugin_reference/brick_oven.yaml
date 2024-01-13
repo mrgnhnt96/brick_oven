@@ -1,0 +1,3 @@
+bricks:
+  plugin_reference:
+      path: source/brick_oven.yaml

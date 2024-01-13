@@ -5,7 +5,7 @@ bricks:
     files:
       main_flavor.dart:
         name:
-          value: . # could also be _INDEX_VALUE_
+          rename_with: . # could also be _INDEX_VALUE_
           section: flavors
           prefix: main_
         vars:

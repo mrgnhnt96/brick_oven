@@ -1,18 +1,12 @@
-import 'package:path/path.dart';
+import 'package:glob/glob.dart';
 
 /// checks if the path should be excluded
 bool shouldExcludePath(
   String path,
-  List<String> excludedDirs,
-  List<String> excludedFiles,
+  Iterable<String> exclude,
 ) {
-  if (excludedFiles.contains(path)) {
-    return true;
-  }
-
-  for (final dir in excludedDirs) {
-    final segments = split(path);
-    if (segments.contains(dir)) {
+  for (final pattern in exclude) {
+    if (Glob(pattern).matches(path)) {
       return true;
     }
   }

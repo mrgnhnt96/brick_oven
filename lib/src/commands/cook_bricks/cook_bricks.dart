@@ -1,7 +1,3 @@
-import 'package:file/file.dart';
-import 'package:mason_logger/mason_logger.dart';
-import 'package:usage/usage_io.dart';
-
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
@@ -13,38 +9,19 @@ import 'package:brick_oven/utils/brick_cooker.dart';
 /// {@endtemplate}
 class CookBricksCommand extends BrickOvenCommand with BrickCookerArgs {
   /// {@macro cook_bricks_command}
-  CookBricksCommand({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Analytics analytics,
-  }) : super(fileSystem: fileSystem, logger: logger) {
-    addSubcommand(
-      CookAllBricks(
-        fileSystem: fileSystem,
-        logger: logger,
-        analytics: analytics,
-      ),
-    );
+  CookBricksCommand() {
+    addSubcommand(CookAllBricks());
 
-    final bricksOrError = this.bricks();
+    final config = getBrickOvenConfig();
 
-    if (bricksOrError.isError) {
-      _subBricksWarning =
-          '\n[WARNING] Unable to load bricks\n${bricksOrError.error}';
+    final bricks = config?.resolveBricks();
+
+    if (bricks == null) {
       return;
     }
 
-    final bricks = bricksOrError.bricks;
-
-    for (final brick in bricks) {
-      addSubcommand(
-        CookSingleBrick(
-          brick,
-          fileSystem: fileSystem,
-          logger: logger,
-          analytics: analytics,
-        ),
-      );
+    for (final MapEntry(key: name, value: brick) in bricks.entries) {
+      addSubcommand(CookSingleBrick(name, brick));
     }
   }
 

@@ -1,0 +1,13 @@
+source: oven
+brick_config: brick.yaml
+files:
+  main_flavor.dart:
+    name:
+      rename_with: . # could also be _INDEX_VALUE_
+      section: flavors
+      prefix: main_
+    vars:
+      _FLAVORS_: flavors
+  README.md:
+    vars:
+      _FLAVORS_: flavors

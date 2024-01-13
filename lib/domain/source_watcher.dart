@@ -7,7 +7,6 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
-import 'package:brick_oven/utils/separate_dirs_and_paths.dart';
 import 'package:brick_oven/utils/should_exclude_path.dart';
 
 part 'source_watcher.g.dart';
@@ -114,10 +113,11 @@ class SourceWatcher extends Equatable {
       return reset();
     }
 
-    final (excludedDirs, excludedFiles) = separateDirsAndPaths(_excludedPaths);
-
     _listener = _watcher.events.listen((watchEvent) {
-      if (shouldExcludePath(watchEvent.path, excludedDirs, excludedFiles)) {
+      if (shouldExcludePath(
+        watchEvent.path,
+        excludedPaths,
+      )) {
         return;
       }
 

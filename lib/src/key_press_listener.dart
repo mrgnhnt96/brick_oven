@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 
@@ -19,9 +20,7 @@ class KeyPressListener {
   KeyPressListener({
     required Stdin stdin,
     required this.toExit,
-    required Logger logger,
-  })  : _stdin = stdin,
-        _logger = logger;
+  }) : _stdin = stdin;
 
   /// the listener of key presses
   static StreamSubscription<List<int>>? _listener;
@@ -32,7 +31,6 @@ class KeyPressListener {
   /// we only need one stream for stdin
   static Stream<List<int>>? stream;
 
-  final Logger _logger;
   final Stdin _stdin;
 
   /// the method to call when a key is pressed
@@ -45,18 +43,18 @@ class KeyPressListener {
   KeyMap get keyPresses => {
         'q': () {
           _listener?.cancel();
-          _logger.exiting();
+          di<Logger>().exiting();
 
           toExit(ExitCode.success.code);
         },
         'r': () {
           _listener?.cancel();
-          _logger.restart();
+          di<Logger>().restart();
 
           toExit(ExitCode.tempFail.code);
         },
         // escape key
-        0x1b: _logger.keyStrokes,
+        0x1b: di<Logger>().keyStrokes,
       } as KeyMap;
 
   /// Returns a stream of keypresses.
@@ -84,7 +82,7 @@ class KeyPressListener {
       return;
     }
 
-    _logger.keyStrokes();
+    di<Logger>().keyStrokes();
 
     keyListener(keys: keyPresses);
   }

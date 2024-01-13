@@ -1,8 +1,7 @@
 // ignore_for_file: parameter_assignments
 
+import 'package:brick_oven/src/constants/constants.dart';
 import 'package:meta/meta.dart';
-
-import 'package:brick_oven/utils/constants.dart';
 
 /// the formats that Mustache supports
 enum MustacheTag {
@@ -106,7 +105,7 @@ extension MustacheTagX on MustacheTag {
       var wrappedContent = content;
 
       if (!isWrapped) {
-        braceCount ??= kDefaultBraces;
+        braceCount ??= Constants.kDefaultBraces;
 
         final startBraces = (startDeliminator ?? '{') * braceCount;
         final endBraces = (endDeliminator ?? '}') * braceCount;
