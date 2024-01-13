@@ -1,6 +1,6 @@
-import 'package:brick_oven/domain/take_2/brick_config.dart';
-import 'package:brick_oven/domain/take_2/brick_config_reference.dart';
-import 'package:brick_oven/domain/take_2/utils/yaml_to_json.dart';
+import 'package:brick_oven/domain/config/brick_config.dart';
+import 'package:brick_oven/domain/config/brick_config_reference.dart';
+import 'package:brick_oven/utils/yaml_to_json.dart';
 import 'package:path/path.dart';
 
 abstract mixin class BrickConfigEntry {

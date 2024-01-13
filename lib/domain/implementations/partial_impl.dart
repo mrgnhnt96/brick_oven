@@ -1,7 +1,7 @@
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/interfaces/partial.dart';
 import 'package:brick_oven/domain/interfaces/variable.dart';
-import 'package:brick_oven/domain/take_2/utils/file_replacements.dart';
+import 'package:brick_oven/utils/file_replacements.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:path/path.dart' as p;
 

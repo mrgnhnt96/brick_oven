@@ -4,8 +4,8 @@ import 'package:brick_oven/domain/interfaces/partial.dart';
 import 'package:brick_oven/domain/interfaces/source.dart';
 import 'package:brick_oven/domain/interfaces/url.dart';
 import 'package:brick_oven/domain/source_watcher.dart';
-import 'package:brick_oven/domain/take_2/brick_config.dart';
-import 'package:brick_oven/domain/take_2/utils/variables_mixin.dart';
+import 'package:brick_oven/domain/config/brick_config.dart';
+import 'package:brick_oven/utils/variables_mixin.dart';
 
 /// {@template brick}
 /// A brick is a collection of files that can be copied, altered, and/or

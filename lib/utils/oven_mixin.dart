@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/interfaces/brick.dart';
-import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
@@ -14,9 +13,6 @@ import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 
-/// {@template oven_mixin}
-/// A mixin for [BrickOvenCommand]s that cook bricks.
-/// {@endtemplate}
 mixin OvenMixin
     on BrickCooker, BrickCookerArgs, ConfigWatcherMixin, LoggerMixin {
   /// {@macro key_press_listener}

@@ -1,7 +1,7 @@
 import 'package:brick_oven/domain/interfaces/include.dart';
 import 'package:brick_oven/domain/interfaces/name.dart';
-import 'package:brick_oven/domain/take_2/url_config.dart';
-import 'package:brick_oven/domain/take_2/utils/variables_mixin.dart';
+import 'package:brick_oven/domain/config/url_config.dart';
+import 'package:brick_oven/utils/variables_mixin.dart';
 
 /// {@template url}
 /// A url is a collection of files that can be copied, altered, and/or

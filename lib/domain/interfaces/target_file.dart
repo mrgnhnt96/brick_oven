@@ -5,9 +5,9 @@ import 'package:brick_oven/domain/interfaces/include.dart';
 import 'package:brick_oven/domain/interfaces/name.dart';
 import 'package:brick_oven/domain/interfaces/url.dart';
 import 'package:brick_oven/domain/interfaces/variable.dart';
-import 'package:brick_oven/domain/take_2/file_config.dart';
+import 'package:brick_oven/domain/config/file_config.dart';
 import 'package:brick_oven/domain/content_replacement.dart';
-import 'package:brick_oven/domain/take_2/utils/variables_mixin.dart';
+import 'package:brick_oven/utils/variables_mixin.dart';
 
 /// {@template target_file}
 /// A target file is a file that can be copied, altered, and/or

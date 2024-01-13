@@ -5,7 +5,7 @@ targets:
         generate_for:
           include:
             - lib/domain/*.dart
-            - lib/domain/take_2/*.dart
+            - lib/domain/config/*.dart
           exclude:
               - '**/example/**/*.dart'
 
@@ -13,7 +13,7 @@ targets:
         generate_for:
           include:
             - lib/domain/*.dart
-            - lib/domain/take_2/*.dart
+            - lib/domain/config/*.dart
           exclude:
             - '**/example/**/*.dart'
         options:
@@ -23,7 +23,7 @@ targets:
         generate_for:
           include:
             - lib/domain/*.dart
-            - lib/domain/take_2/*.dart
+            - lib/domain/config/*.dart
           exclude:
             - '**/example/**/*.dart'
         options:

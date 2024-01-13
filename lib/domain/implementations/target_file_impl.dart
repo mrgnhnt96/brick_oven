@@ -10,7 +10,7 @@ import 'package:brick_oven/domain/interfaces/name.dart';
 import 'package:brick_oven/domain/interfaces/target_file.dart';
 import 'package:brick_oven/domain/interfaces/url.dart';
 import 'package:brick_oven/domain/interfaces/variable.dart';
-import 'package:brick_oven/domain/take_2/utils/file_replacements.dart';
+import 'package:brick_oven/utils/file_replacements.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/utils/patterns.dart';

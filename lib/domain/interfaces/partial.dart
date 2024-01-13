@@ -1,7 +1,7 @@
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/interfaces/variable.dart';
-import 'package:brick_oven/domain/take_2/partial_config.dart';
-import 'package:brick_oven/domain/take_2/utils/variables_mixin.dart';
+import 'package:brick_oven/domain/config/partial_config.dart';
+import 'package:brick_oven/utils/variables_mixin.dart';
 
 /// {@template partial}
 /// The base class for a partial file

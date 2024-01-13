@@ -1,6 +1,6 @@
-import 'package:brick_oven/domain/take_2/include_config.dart';
-import 'package:brick_oven/domain/take_2/name_config.dart';
-import 'package:brick_oven/domain/take_2/utils/vars_mixin.dart';
+import 'package:brick_oven/domain/config/include_config.dart';
+import 'package:brick_oven/domain/config/name_config.dart';
+import 'package:brick_oven/utils/vars_mixin.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 

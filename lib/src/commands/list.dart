@@ -4,8 +4,8 @@ import 'dart:async';
 
 import 'package:brick_oven/domain/implementations/brick_impl.dart';
 import 'package:brick_oven/domain/interfaces/brick.dart';
-import 'package:brick_oven/domain/take_2/brick_oven_config.dart';
-import 'package:brick_oven/domain/take_2/utils/yaml_to_json.dart';
+import 'package:brick_oven/domain/config/brick_oven_config.dart';
+import 'package:brick_oven/utils/yaml_to_json.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:mason_logger/mason_logger.dart';
 

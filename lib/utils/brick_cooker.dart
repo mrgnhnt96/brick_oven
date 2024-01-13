@@ -2,7 +2,7 @@ import 'package:args/command_runner.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:mason_logger/mason_logger.dart';
 
-import 'package:brick_oven/domain/take_2/brick_config.dart';
+import 'package:brick_oven/domain/config/brick_config.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 

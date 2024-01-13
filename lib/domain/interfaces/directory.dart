@@ -1,7 +1,7 @@
 import 'package:brick_oven/domain/interfaces/include.dart';
 import 'package:brick_oven/domain/interfaces/name.dart';
-import 'package:brick_oven/domain/take_2/directory_config.dart';
-import 'package:brick_oven/domain/take_2/utils/variables_mixin.dart';
+import 'package:brick_oven/domain/config/directory_config.dart';
+import 'package:brick_oven/utils/variables_mixin.dart';
 
 /// {@template directory}
 /// A directory is a collection of files that can be copied, altered, and/or

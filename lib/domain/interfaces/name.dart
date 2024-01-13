@@ -1,5 +1,5 @@
-import 'package:brick_oven/domain/take_2/name_config.dart';
-import 'package:brick_oven/domain/take_2/utils/variables_mixin.dart';
+import 'package:brick_oven/domain/config/name_config.dart';
+import 'package:brick_oven/utils/variables_mixin.dart';
 
 abstract class Name extends NameConfig with VariablesMixin {
   Name(super.config) : super.self();

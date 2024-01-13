@@ -1,7 +1,7 @@
 import 'package:brick_oven/domain/interfaces/brick.dart';
 import 'package:brick_oven/domain/interfaces/mason_brick.dart';
-import 'package:brick_oven/domain/take_2/mason_brick_config.dart';
-import 'package:brick_oven/domain/take_2/utils/yaml_to_json.dart';
+import 'package:brick_oven/domain/config/mason_brick_config.dart';
+import 'package:brick_oven/utils/yaml_to_json.dart';
 import 'package:brick_oven/src/constants/constants.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:mason_logger/mason_logger.dart';

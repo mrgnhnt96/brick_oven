@@ -1,4 +1,4 @@
-import 'package:brick_oven/domain/take_2/brick_config_entry.dart';
+import 'package:brick_oven/domain/config/brick_config_entry.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
