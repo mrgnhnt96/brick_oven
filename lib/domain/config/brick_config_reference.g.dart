@@ -7,10 +7,7 @@ part of 'brick_config_reference.dart';
 // **************************************************************************
 
 extension _$BrickConfigReferenceAutoequal on BrickConfigReference {
-  List<Object?> get _$props => [
-        name,
-        path,
-      ];
+  List<Object?> get _$props => [path];
 }
 
 // **************************************************************************
@@ -20,10 +17,9 @@ extension _$BrickConfigReferenceAutoequal on BrickConfigReference {
 BrickConfigReference _$BrickConfigReferenceFromJson(Map json) {
   $checkKeys(
     json,
-    allowedKeys: const ['name', 'path'],
+    allowedKeys: const ['path'],
   );
   return BrickConfigReference(
-    name: json['name'] as String,
     path: json['path'] as String,
   );
 }
@@ -31,6 +27,5 @@ BrickConfigReference _$BrickConfigReferenceFromJson(Map json) {
 Map<String, dynamic> _$BrickConfigReferenceToJson(
         BrickConfigReference instance) =>
     <String, dynamic>{
-      'name': instance.name,
       'path': instance.path,
     };

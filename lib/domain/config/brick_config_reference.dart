@@ -7,14 +7,12 @@ part 'brick_config_reference.g.dart';
 @JsonSerializable()
 class BrickConfigReference extends BrickConfigEntry with EquatableMixin {
   const BrickConfigReference({
-    required this.name,
     required this.path,
   });
 
   factory BrickConfigReference.fromJson(Map json) =>
       _$BrickConfigReferenceFromJson(json);
 
-  final String name;
   final String path;
 
   bool get isRelative => !path.startsWith('/');
