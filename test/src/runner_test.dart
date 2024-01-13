@@ -30,13 +30,13 @@ Available commands:
 Run "brick_oven help <command>" for more information about a command.''';
 
 void main() {
+  setUp(setupTestDi);
+
   group('$BrickOvenRunner', () {
     late BrickOvenRunner commandRunner;
 
     setUp(() {
       printLogs = [];
-
-      setupTestDi();
 
       di<FileSystem>().file(BrickOvenYaml.file)
         ..createSync(recursive: true)
@@ -47,10 +47,6 @@ void main() {
       ).thenAnswer((_) => Future.value(packageVersion));
 
       commandRunner = BrickOvenRunner();
-    });
-
-    test('time out is correct duration', () {
-      expect(BrickOvenRunner.timeout, const Duration(milliseconds: 500));
     });
 
     group('run', () {

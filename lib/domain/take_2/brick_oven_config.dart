@@ -21,15 +21,17 @@ class BrickOvenConfig extends Equatable {
     return _$BrickOvenConfigFromJson(json);
   }
 
-  final Map<String, BrickConfigEntry> bricks;
+  final Map<String, BrickConfigEntry>? bricks;
   final String configPath;
 
-  Map<String, BrickConfig> resolveBricks() => bricks.map(
+  Map<String, BrickConfig> resolveBricks() =>
+      bricks?.map(
         (k, v) => MapEntry(
           k,
           v.resolve(fromPath: configPath),
         ),
-      );
+      ) ??
+      {};
 
   Map<String, dynamic> toJson() => _$BrickOvenConfigToJson(this);
 

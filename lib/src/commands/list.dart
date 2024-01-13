@@ -2,6 +2,11 @@
 
 import 'dart:async';
 
+import 'package:brick_oven/domain/implementations/brick_impl.dart';
+import 'package:brick_oven/domain/interfaces/brick.dart';
+import 'package:brick_oven/domain/take_2/brick_oven_config.dart';
+import 'package:brick_oven/domain/take_2/utils/yaml_to_json.dart';
+import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
@@ -10,7 +15,7 @@ import 'package:brick_oven/src/commands/brick_oven.dart';
 /// {@template lists_command}
 /// Lists the configured bricks within the config file
 /// {@endtemplate}
-class ListCommand extends BrickOvenCommand {
+class ListCommand extends BrickOvenCommand with BrickCookerArgs {
   /// {@macro lists_command}
   ListCommand() {
     argParser.addFlag(
@@ -34,26 +39,44 @@ class ListCommand extends BrickOvenCommand {
   Future<int> run() async {
     const tab = '  ';
 
-    final bricksOrError = this.bricks();
-    if (bricksOrError.isError) {
-      logger.err(bricksOrError.error);
-      return ExitCode.config.code;
+    final configFile = BrickOvenYaml.findNearest(cwd);
+
+    if (configFile == null) {
+      throw Exception('Config file not found');
     }
 
-    final bricks = bricksOrError.bricks;
+    final json = YamlToJson.fromFile(configFile);
+
+    final config = BrickOvenConfig.fromJson(json, configPath: configFile.path);
+
+    final bricks = <Brick>{};
+
+    for (final MapEntry(key: name, value: config)
+        in config.resolveBricks().entries) {
+      bricks.add(
+        BrickImpl(
+          config,
+          name: name,
+          outputDir: outputDir,
+          watch: isWatch,
+          shouldSync: shouldSync,
+        ),
+      );
+    }
 
     for (final brick in bricks) {
       logger.info(
         '${cyan.wrap(brick.name)}: '
-        '${darkGray.wrap(brick.source.sourceDir)}',
+        '${darkGray.wrap(brick.source.path)}',
       );
 
       if (isVerbose) {
-        final dirsString = 'dirs: ${yellow.wrap(brick.dirs.length.toString())}';
+        final dirsString =
+            'dirs: ${yellow.wrap(brick.directories.length.toString())}';
         final filesString =
-            'files: ${yellow.wrap(brick.files.length.toString())}';
+            'files: ${yellow.wrap('${brick.fileConfigs?.keys.length ?? 0}')}';
         final varsString =
-            'vars: ${yellow.wrap(brick.allBrickVariables().length.toString())}';
+            'vars: ${yellow.wrap(brick.variables.length.toString())}';
         final partialsString =
             'partials: ${yellow.wrap(brick.partials.length.toString())}';
 

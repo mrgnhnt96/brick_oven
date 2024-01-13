@@ -23,15 +23,24 @@ BrickOvenConfig _$BrickOvenConfigFromJson(Map json) {
     allowedKeys: const ['bricks', 'config_path'],
   );
   return BrickOvenConfig(
-    bricks: (json['bricks'] as Map).map(
+    bricks: (json['bricks'] as Map?)?.map(
       (k, e) => MapEntry(k as String, BrickConfigEntry.fromJson(e as Map)),
     ),
     configPath: json['config_path'] as String,
   );
 }
 
-Map<String, dynamic> _$BrickOvenConfigToJson(BrickOvenConfig instance) =>
-    <String, dynamic>{
-      'bricks': instance.bricks.map((k, e) => MapEntry(k, e.toJson())),
-      'config_path': instance.configPath,
-    };
+Map<String, dynamic> _$BrickOvenConfigToJson(BrickOvenConfig instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull(
+      'bricks', instance.bricks?.map((k, e) => MapEntry(k, e.toJson())));
+  val['config_path'] = instance.configPath;
+  return val;
+}

@@ -31,9 +31,6 @@ class BrickOvenRunner extends CommandRunner<int> {
     addCommand(UpdateCommand());
   }
 
-  /// Standard timeout duration for the CLI.
-  static const timeout = Duration(milliseconds: 500);
-
   @override
   Future<int> run(Iterable<String> args) async {
     try {
