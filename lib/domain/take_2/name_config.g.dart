@@ -9,7 +9,7 @@ part of 'name_config.dart';
 extension _$NameConfigAutoequal on NameConfig {
   List<Object?> get _$props => [
         renameWith,
-        format,
+        tag,
         prefix,
         suffix,
         section,
@@ -35,14 +35,14 @@ NameConfig _$NameConfigFromJson(Map json) {
   );
   return NameConfig(
     renameWith: json['rename_with'] as String?,
-    format: $enumDecodeNullable(_$MustacheTagEnumMap, json['format']),
+    tag: $enumDecodeNullable(_$MustacheTagEnumMap, json['format']),
     prefix: json['prefix'] as String? ?? '',
     suffix: json['suffix'] as String? ?? '',
     section: json['section'] == null
         ? null
         : StringOr<SectionConfig>.fromJson(
             json['section'], (value) => SectionConfig.fromJson(value as Map)),
-    braces: json['braces'] as int? ?? 2,
+    braces: json['braces'] as int? ?? Constants.kDefaultBraces,
   );
 }
 
@@ -56,7 +56,7 @@ Map<String, dynamic> _$NameConfigToJson(NameConfig instance) {
   }
 
   writeNotNull('rename_with', instance.renameWith);
-  writeNotNull('format', _$MustacheTagEnumMap[instance.format]);
+  writeNotNull('format', _$MustacheTagEnumMap[instance.tag]);
   val['prefix'] = instance.prefix;
   val['suffix'] = instance.suffix;
   writeNotNull(

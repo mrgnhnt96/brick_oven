@@ -7,8 +7,14 @@ part 'mason_brick_config.g.dart';
 class MasonBrickConfig extends Equatable {
   const MasonBrickConfig({
     required this.path,
-    required this.ignoreVars,
+    this.ignoreVars = const [],
   });
+
+  MasonBrickConfig.self(MasonBrickConfig config)
+      : this(
+          ignoreVars: config.ignoreVars,
+          path: config.path,
+        );
 
   factory MasonBrickConfig.fromJson(Map json) =>
       _$MasonBrickConfigFromJson(json);

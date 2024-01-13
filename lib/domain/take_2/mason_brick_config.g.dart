@@ -24,8 +24,10 @@ MasonBrickConfig _$MasonBrickConfigFromJson(Map json) {
   );
   return MasonBrickConfig(
     path: json['path'] as String,
-    ignoreVars:
-        (json['ignore_vars'] as List<dynamic>).map((e) => e as String).toList(),
+    ignoreVars: (json['ignore_vars'] as List<dynamic>?)
+            ?.map((e) => e as String)
+            .toList() ??
+        const [],
   );
 }
 

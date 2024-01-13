@@ -8,9 +8,9 @@ part of 'file_config.dart';
 
 extension _$FileConfigAutoequal on FileConfig {
   List<Object?> get _$props => [
-        name,
-        variables,
-        include,
+        nameConfig,
+        variableConfig,
+        includeConfig,
       ];
 }
 
@@ -24,14 +24,14 @@ FileConfig _$FileConfigFromJson(Map json) {
     allowedKeys: const ['name', 'vars', 'include'],
   );
   return FileConfig(
-    name: json['name'] == null
+    nameConfig: json['name'] == null
         ? null
         : StringOr<NameConfig>.fromJson(
             json['name'], (value) => NameConfig.fromJson(value as Map)),
-    variables: (json['vars'] as Map?)?.map(
+    variableConfig: (json['vars'] as Map?)?.map(
       (k, e) => MapEntry(k as String, e as String?),
     ),
-    include: json['include'] == null
+    includeConfig: json['include'] == null
         ? null
         : IncludeConfig.fromJson(json['include'] as Map),
   );
@@ -48,10 +48,10 @@ Map<String, dynamic> _$FileConfigToJson(FileConfig instance) {
 
   writeNotNull(
       'name',
-      instance.name?.toJson(
+      instance.nameConfig?.toJson(
         (value) => value.toJson(),
       ));
-  writeNotNull('vars', instance.variables);
-  writeNotNull('include', instance.include?.toJson());
+  writeNotNull('vars', instance.variableConfig);
+  writeNotNull('include', instance.includeConfig?.toJson());
   return val;
 }

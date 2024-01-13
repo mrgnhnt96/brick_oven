@@ -1,4 +1,5 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/src/constants/constants.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file/file.dart';
@@ -16,7 +17,6 @@ import 'package:brick_oven/domain/partial.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/constants.dart';
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 
 part 'brick.g.dart';
@@ -310,7 +310,7 @@ class Brick extends Equatable {
 
   /// variables used not provided by the user
   static List<Variable> get defaultVariables => [
-        const Variable(name: '.', placeholder: kIndexValue),
+        const Variable(name: '.', placeholder: Constants.kIndexValue),
       ];
 
   @override
@@ -411,7 +411,7 @@ class Brick extends Equatable {
       );
     }
 
-    final alwaysRemove = [kIndexValue, '.', ...config.ignoreVars];
+    final alwaysRemove = [Constants.kIndexValue, '.', ...config.ignoreVars];
 
     final variables = allBrickVariables()..removeAll(alwaysRemove);
 

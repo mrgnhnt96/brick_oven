@@ -1,7 +1,11 @@
+import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/domain/take_2/brick_oven_config.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_all_bricks.dart';
 import 'package:brick_oven/src/commands/cook_bricks/cook_single_brick.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
+
+import 'package:brick_oven/domain/take_2/utils/yaml_to_json.dart';
 
 /// {@template cook_bricks_command}
 /// Writes the bricks from the configuration file
@@ -12,20 +16,21 @@ class CookBricksCommand extends BrickOvenCommand with BrickCookerArgs {
   CookBricksCommand() {
     addSubcommand(CookAllBricks());
 
-    final bricksOrError = this.bricks();
+    final configFile = BrickOvenYaml.findNearest(cwd);
 
-    if (bricksOrError.isError) {
-      _subBricksWarning =
-          '\n[WARNING] Unable to load bricks\n${bricksOrError.error}';
+    if (configFile == null) {
+      _subBricksWarning = '\n[WARNING] No ${BrickOvenYaml.file} file found';
       return;
     }
 
-    final bricks = bricksOrError.bricks;
+    final json = YamlToJson.fromFile(configFile);
 
-    for (final brick in bricks) {
-      addSubcommand(
-        CookSingleBrick(brick),
-      );
+    final config = BrickOvenConfig.fromJson(json, configPath: configFile.path);
+
+    final bricks = config.resolveBricks();
+
+    for (final MapEntry(key: name, value: brick) in bricks.entries) {
+      addSubcommand(CookSingleBrick(name, brick));
     }
   }
 

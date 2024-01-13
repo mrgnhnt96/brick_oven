@@ -7,7 +7,7 @@ part of 'partial_config.dart';
 // **************************************************************************
 
 extension _$PartialConfigAutoequal on PartialConfig {
-  List<Object?> get _$props => [variables];
+  List<Object?> get _$props => [variableConfig];
 }
 
 // **************************************************************************
@@ -20,8 +20,8 @@ PartialConfig _$PartialConfigFromJson(Map json) {
     allowedKeys: const ['vars'],
   );
   return PartialConfig(
-    variables: (json['vars'] as Map?)?.map(
-      (k, e) => MapEntry(k as String, e as String),
+    variableConfig: (json['vars'] as Map?)?.map(
+      (k, e) => MapEntry(k as String, e as String?),
     ),
   );
 }
@@ -35,6 +35,6 @@ Map<String, dynamic> _$PartialConfigToJson(PartialConfig instance) {
     }
   }
 
-  writeNotNull('vars', instance.variables);
+  writeNotNull('vars', instance.variableConfig);
   return val;
 }

@@ -1,3 +1,4 @@
+import 'package:brick_oven/src/constants/constants.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
@@ -5,7 +6,6 @@ import 'package:brick_oven/domain/name.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
 import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/constants.dart';
 
 void main() {
   group('$Name', () {
@@ -41,10 +41,10 @@ void main() {
       });
 
       test(
-          'when value is $kIndexValue and section and invertedSection are not set',
+          'when value is ${Constants.kIndexValue} and section and invertedSection are not set',
           () {
         expect(
-          () => Name(kIndexValue),
+          () => Name(Constants.kIndexValue),
           throwsA(isA<AssertionError>()),
         );
       });
@@ -328,13 +328,13 @@ $key:
         );
       });
 
-      test('converted $kIndexValue to correct format', () {
+      test('converted ${Constants.kIndexValue} to correct format', () {
         expect(
-          Name(kIndexValue, invertedSection: 'section').format(),
+          Name(Constants.kIndexValue, invertedSection: 'section').format(),
           '{{^section}}{{{.}}}{{/section}}',
         );
         expect(
-          Name(kIndexValue, section: 'section').format(),
+          Name(Constants.kIndexValue, section: 'section').format(),
           '{{#section}}{{{.}}}{{/section}}',
         );
       });

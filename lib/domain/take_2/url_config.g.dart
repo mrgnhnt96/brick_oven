@@ -7,7 +7,10 @@ part of 'url_config.dart';
 // **************************************************************************
 
 extension _$UrlConfigAutoequal on UrlConfig {
-  List<Object?> get _$props => [name];
+  List<Object?> get _$props => [
+        nameConfig,
+        includeConfig,
+      ];
 }
 
 // **************************************************************************
@@ -17,11 +20,14 @@ extension _$UrlConfigAutoequal on UrlConfig {
 UrlConfig _$UrlConfigFromJson(Map json) {
   $checkKeys(
     json,
-    allowedKeys: const ['name'],
+    allowedKeys: const ['name', 'include'],
   );
   return UrlConfig(
-    name:
+    nameConfig:
         json['name'] == null ? null : NameConfig.fromJson(json['name'] as Map),
+    includeConfig: json['include'] == null
+        ? null
+        : IncludeConfig.fromJson(json['include'] as Map),
   );
 }
 
@@ -34,6 +40,7 @@ Map<String, dynamic> _$UrlConfigToJson(UrlConfig instance) {
     }
   }
 
-  writeNotNull('name', instance.name?.toJson());
+  writeNotNull('name', instance.nameConfig?.toJson());
+  writeNotNull('include', instance.includeConfig?.toJson());
   return val;
 }

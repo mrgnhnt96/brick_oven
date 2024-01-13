@@ -2,7 +2,8 @@
 
 import 'dart:async';
 
-import 'package:brick_oven/domain/brick.dart';
+import 'package:brick_oven/domain/implementations/brick_impl.dart';
+import 'package:brick_oven/domain/take_2/brick_config.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';
@@ -22,6 +23,7 @@ class CookSingleBrick extends BrickOvenCommand
         OvenMixin {
   /// {@macro cook_single_brick_command}
   CookSingleBrick(
+    this.name,
     this.brick, {
     this.keyPressListener,
   }) {
@@ -30,8 +32,11 @@ class CookSingleBrick extends BrickOvenCommand
       ..addSeparator('${'-' * 79}\n');
   }
 
+  @override
+  final String name;
+
   /// The brick to cook
-  final Brick brick;
+  final BrickConfig brick;
 
   @override
   final KeyPressListener? keyPressListener;
@@ -40,11 +45,16 @@ class CookSingleBrick extends BrickOvenCommand
   String get description => 'Cook the brick: $name';
 
   @override
-  String get name => brick.name;
-
-  @override
   Future<int> run() async {
-    final result = await putInOven({brick});
+    final result = await putInOven({
+      BrickImpl(
+        brick,
+        name: name,
+        outputDir: outputDir,
+        watch: isWatch,
+        shouldSync: shouldSync,
+      ),
+    });
 
     return result.code;
   }

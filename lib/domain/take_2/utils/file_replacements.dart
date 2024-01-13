@@ -1,4 +1,3 @@
-import 'package:brick_oven/src/constants/constants.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -6,11 +5,13 @@ import 'package:meta/meta.dart';
 
 import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
-import 'package:brick_oven/domain/partial.dart';
-import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/enums/mustache_section.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
 import 'package:brick_oven/src/exception.dart';
+import 'package:brick_oven/src/constants/constants.dart';
+
+import 'package:brick_oven/domain/interfaces/variable.dart';
+import 'package:brick_oven/domain/interfaces/partial.dart';
 
 /// {@template file_replacements}
 /// the methods to replace variables and partials in a file
@@ -20,7 +21,7 @@ mixin FileReplacements {
   @visibleForTesting
   static const sectionSetUp = '---set-up-section---';
 
-  /// writes the [targetFile] content using the [sourceFile]'s content and
+  /// writes the [targetPath] content using the [sourcePath]'s content and
   /// replacing the [variables] and [partials] with their configured values
   ///
   /// [outOfFileVariables] are variables that are not configured in the
@@ -28,12 +29,16 @@ mixin FileReplacements {
   /// [outOfFileVariables] are not included in the sync
   /// (brick.yaml or brick_oven.yaml) list
   FileWriteResult writeFile({
-    required File targetFile,
-    required File sourceFile,
-    required List<Variable> variables,
-    required List<Variable> outOfFileVariables,
-    required List<Partial> partials,
+    required String targetPath,
+    required String sourcePath,
+    required Iterable<Variable> variables,
+    required Iterable<Variable> outOfFileVariables,
+    required Iterable<Partial> partials,
   }) {
+    final targetFile = di<FileSystem>().file(targetPath)
+      ..createSync(recursive: true);
+    final sourceFile = di<FileSystem>().file(sourcePath);
+
     if (variables.isEmpty && partials.isEmpty) {
       sourceFile.copySync(targetFile.path);
 
@@ -58,9 +63,7 @@ mixin FileReplacements {
       // formats the content
       final sectionResult = checkForSections(content, variable);
       content = sectionResult.content;
-      if (sectionResult.used.isNotEmpty) {
-        usedVariables.addAll(sectionResult.used);
-      }
+      usedVariables.addAll(sectionResult.used);
 
       final variableResult = checkForVariables(content, variable);
       content = variableResult.content;
@@ -114,7 +117,7 @@ mixin FileReplacements {
           newContent.replaceAll(partialPattern, partial.toPartialInput());
 
       if (compareContent != newContent) {
-        partialsUsed.add(partial.path);
+        partialsUsed.add(partial.fileName);
       }
     }
 

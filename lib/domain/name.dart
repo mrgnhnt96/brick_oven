@@ -1,10 +1,11 @@
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/src/constants/constants.dart';
 import 'package:equatable/equatable.dart';
 
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
 import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/constants.dart';
+
 import 'package:brick_oven/utils/extensions/yaml_map_extensions.dart';
 
 part 'name.g.dart';
@@ -26,7 +27,7 @@ class Name extends Equatable {
     int? braces,
   })  : prefix = prefix ?? '',
         suffix = suffix ?? '',
-        braces = braces ?? kDefaultBraces,
+        braces = braces ?? Constants.kDefaultBraces,
         assert(
           braces == null || braces > 1 && braces < 4,
           'braces must be 2 or 3',
@@ -37,8 +38,8 @@ class Name extends Equatable {
           'section and invertedSection cannot both be set',
         ),
         assert(
-          value != kIndexValue ||
-              value == kIndexValue &&
+          value != Constants.kIndexValue ||
+              value == Constants.kIndexValue &&
                   (section != null || invertedSection != null),
           'to access the index value, section or '
           'inverted section must be provided',
@@ -187,7 +188,7 @@ class Name extends Equatable {
   }) {
     var result = value;
 
-    if (result == kIndexValue) {
+    if (result == Constants.kIndexValue) {
       result = '.';
     }
 

@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:brick_oven/src/constants/constants.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -25,7 +26,6 @@ import 'package:brick_oven/domain/source_watcher.dart';
 import 'package:brick_oven/domain/variable.dart';
 import 'package:brick_oven/domain/yaml_value.dart';
 import 'package:brick_oven/src/exception.dart';
-import 'package:brick_oven/utils/constants.dart';
 import '../test_utils/di.dart';
 import '../test_utils/fakes.dart';
 import '../test_utils/mocks.dart';
@@ -352,7 +352,7 @@ brick_config: brick.yaml
 
     test('#defaultVariables has correct values', () {
       const expected = [
-        Variable(name: '.', placeholder: kIndexValue),
+        Variable(name: '.', placeholder: Constants.kIndexValue),
       ];
 
       expect(Brick.defaultVariables, expected);
@@ -1411,7 +1411,7 @@ exclude:
 
         di<FileSystem>().file(join(localPath, filePath))
           ..createSync(recursive: true)
-          ..writeAsStringSync('_VAL_ $kIndexValue');
+          ..writeAsStringSync('_VAL_ ${Constants.kIndexValue}');
 
         final targetFile = di<FileSystem>().file(join(brickPath, file.path));
 
@@ -1443,7 +1443,7 @@ exclude:
 
         di<FileSystem>().file(join(localPath, file))
           ..createSync(recursive: true)
-          ..writeAsStringSync(kIndexValue);
+          ..writeAsStringSync(Constants.kIndexValue);
 
         final targetFile =
             di<FileSystem>().file(join(brickPath, partial.toPartialFile()));

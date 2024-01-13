@@ -10,7 +10,7 @@ abstract mixin class BrickConfigEntry {
     try {
       return BrickConfigReference.fromJson(json);
     } catch (_) {
-      return BrickConfig.fromJson(json);
+      return BrickConfig.fromJson(json, configPath: null);
     }
   }
 
@@ -31,7 +31,10 @@ abstract mixin class BrickConfigEntry {
 
       final json = YamlToJson.fromPath(path);
 
-      return BrickConfig.fromJson(json);
+      return BrickConfig.fromJson(
+        json,
+        configPath: path,
+      );
     }
 
     return brick;

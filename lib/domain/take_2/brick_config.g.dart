@@ -8,13 +8,14 @@ part of 'brick_config.dart';
 
 extension _$BrickConfigAutoequal on BrickConfig {
   List<Object?> get _$props => [
-        source,
-        brickConfig,
-        files,
-        directories,
-        urls,
-        partials,
+        sourcePath,
+        masonBrickConfig,
+        fileConfigs,
+        directoryConfigs,
+        urlConfigs,
+        partialConfigs,
         exclude,
+        configPath,
       ];
 }
 
@@ -32,36 +33,38 @@ BrickConfig _$BrickConfigFromJson(Map json) {
       'dirs',
       'urls',
       'partials',
-      'exclude'
+      'exclude',
+      'config_path'
     ],
   );
   return BrickConfig(
-    source: json['source'] as String,
-    brickConfig: json['brick_config'] == null
+    sourcePath: json['source'] as String,
+    masonBrickConfig: json['brick_config'] == null
         ? null
         : StringOr<MasonBrickConfig>.fromJson(json['brick_config'],
             (value) => MasonBrickConfig.fromJson(value as Map)),
-    files: (json['files'] as Map?)?.map(
+    fileConfigs: (json['files'] as Map?)?.map(
       (k, e) => MapEntry(k as String, FileConfig.fromJson(e as Map)),
     ),
-    directories: (json['dirs'] as Map?)?.map(
+    directoryConfigs: (json['dirs'] as Map?)?.map(
       (k, e) => MapEntry(k as String, DirectoryConfig.fromJson(e as Map)),
     ),
-    urls: (json['urls'] as Map?)?.map(
+    urlConfigs: (json['urls'] as Map?)?.map(
       (k, e) => MapEntry(k as String, UrlConfig.fromJson(e as Map)),
     ),
-    partials: (json['partials'] as Map?)?.map(
+    partialConfigs: (json['partials'] as Map?)?.map(
       (k, e) => MapEntry(
           k as String, e == null ? null : PartialConfig.fromJson(e as Map)),
     ),
     exclude:
         (json['exclude'] as List<dynamic>?)?.map((e) => e as String).toList(),
+    configPath: json['config_path'] as String?,
   );
 }
 
 Map<String, dynamic> _$BrickConfigToJson(BrickConfig instance) {
   final val = <String, dynamic>{
-    'source': instance.source,
+    'source': instance.sourcePath,
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -72,15 +75,18 @@ Map<String, dynamic> _$BrickConfigToJson(BrickConfig instance) {
 
   writeNotNull(
       'brick_config',
-      instance.brickConfig?.toJson(
+      instance.masonBrickConfig?.toJson(
         (value) => value.toJson(),
       ));
-  writeNotNull('files', instance.files?.map((k, e) => MapEntry(k, e.toJson())));
   writeNotNull(
-      'dirs', instance.directories?.map((k, e) => MapEntry(k, e.toJson())));
-  writeNotNull('urls', instance.urls?.map((k, e) => MapEntry(k, e.toJson())));
+      'files', instance.fileConfigs?.map((k, e) => MapEntry(k, e.toJson())));
+  writeNotNull('dirs',
+      instance.directoryConfigs?.map((k, e) => MapEntry(k, e.toJson())));
   writeNotNull(
-      'partials', instance.partials?.map((k, e) => MapEntry(k, e?.toJson())));
+      'urls', instance.urlConfigs?.map((k, e) => MapEntry(k, e.toJson())));
+  writeNotNull('partials',
+      instance.partialConfigs?.map((k, e) => MapEntry(k, e?.toJson())));
   writeNotNull('exclude', instance.exclude);
+  writeNotNull('config_path', instance.configPath);
   return val;
 }

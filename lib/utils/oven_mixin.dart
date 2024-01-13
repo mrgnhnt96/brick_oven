@@ -3,8 +3,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:brick_oven/domain/brick.dart';
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
+import 'package:brick_oven/domain/interfaces/brick.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
@@ -45,14 +45,14 @@ mixin OvenMixin
   ///
   /// If [isWatch] is true, the [bricks] will be cooked on every change to the
   /// [BrickOvenYaml.file] or [Brick.configPath] and
-  /// the [Brick.source] directory/files.
+  /// the [Brick.sourcePath] directory/files.
   Future<ExitCode> putInOven(Set<Brick> bricks) async {
     logger.preheat();
 
     for (final brick in bricks) {
       if (isWatch) {
-        brick.source.watcher
-          ?..addEvent(
+        brick.watcher
+          ..addEvent(
             logger.fileChanged,
             runBefore: true,
           )
@@ -63,11 +63,7 @@ mixin OvenMixin
       }
 
       try {
-        brick.cook(
-          output: outputDir,
-          watch: isWatch,
-          shouldSync: shouldSync,
-        );
+        brick.cook();
       } on ConfigException catch (e) {
         logger
           ..warn(e.message)
@@ -104,7 +100,7 @@ mixin OvenMixin
             logger.configChanged();
 
             await cancelConfigWatchers(shouldQuit: false);
-            await brick.source.watcher?.stop();
+            await brick.watcher.stop();
           },
         ),
       );
@@ -116,7 +112,7 @@ mixin OvenMixin
         logger.configChanged();
 
         for (final brick in bricks) {
-          await brick.source.watcher?.stop();
+          await brick.watcher.stop();
         }
       },
     );
