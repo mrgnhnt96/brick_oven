@@ -10,6 +10,7 @@ void main() {
     const bricks = {
       'app_icon': 1,
       'bio': 1,
+      'brick_oven_reference': 1,
       'documentation': 4,
       'favorite_color': 1,
       'flavors': 2,
