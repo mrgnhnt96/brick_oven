@@ -247,12 +247,12 @@
     },
     "vars": {
       "type": "object",
-      "description": "A map of placeholder to variables.",
+      "description": "Variables to be replaced within the file contents.",
       "additionalProperties": false,
       "patternProperties": {
         "^[a-zA-Z0-9_\\-\\.]+$": {
           "type": ["string", "null"],
-          "description": "The configuration for a variable",
+          "description": "The placeholder found within the file's content, to be replaced by the variable provided.",
           "additionalProperties": false
         }
       }
