@@ -8,6 +8,7 @@ import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:brick_oven/utils/config_watcher_mixin.dart';
 import 'package:brick_oven/utils/extensions/arg_parser_extensions.dart';
 import 'package:brick_oven/utils/oven_mixin.dart';
+import 'package:mason_logger/mason_logger.dart';
 
 /// {@template cook_all_bricks_command}
 /// Writes all bricks from the configuration file
@@ -48,7 +49,7 @@ class CookAllBricks extends BrickOvenCommand
         _hasWarned = true;
         logger.err('Failed to parse config file');
       }
-      return 1;
+      return ExitCode.software.code;
     }
 
     final bricks = <Brick>{};
