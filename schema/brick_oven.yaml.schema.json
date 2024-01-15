@@ -123,11 +123,11 @@
         },
         "urls": {
           "type": "object",
-          "description": "The files that will be setup as a url",
+          "description": "The files that will be setup as a url. The file should not have an extension.",
           "additionalProperties": false,
           "minProperties": 1,
           "patternProperties": {
-            "^((\\w+|(\\.\\w+))[\\/])*(\\w+\\.\\w+)$": {
+            "^(\\.?\\w+[\\/])*\\.?\\w+$": {
               "type": "object",
               "description": "The configuration for a url",
               "additionalProperties": false,
