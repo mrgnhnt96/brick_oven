@@ -36,7 +36,6 @@
                 "path": {
                   "type": "string",
                   "description": "Points to a brick definition file.",
-                  // must be a valid file path ending with `brick_oven.yaml`
                   "pattern": "^(((\\.\\.)?[\\/])?|((\\w+|(\\.\\w+))[\\/]))+brick_oven\\.yaml$"
                 }
               }
@@ -57,8 +56,25 @@
           "pattern": "^(((\\.\\.)?[\\/])?|((\\w+|(\\.\\w+))[\\/]))+\\w+$"
         },
         "brick_config": {
-          "type": "string",
-          "description": "The mason brick configuration file (brick.yaml) to be used to validate the integrity of the brick."
+          "type": ["string", "object"],
+          "description": "The mason brick configuration file (brick.yaml) to be used to validate the integrity of the brick.",
+          "additionalProperties": false,
+          "required": ["path"],
+          "pattern": "^(((\\.\\.)?[\\/])?|((\\w+|(\\.\\w+))[\\/]))+brick\\.ya?ml$",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Points to a brick configuration file.",
+              "pattern": "^(((\\.\\.)?[\\/])?|((\\w+|(\\.\\w+))[\\/]))+brick\\.ya?ml$"
+            },
+            "ignore_vars": {
+              "type": "array",
+              "description": "A list of variables to be ignored when validating the brick configuration file.",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
         },
         "files": {
           "type": "object",
@@ -100,6 +116,45 @@
                 },
                 "include": {
                   "$ref": "#/$defs/include"
+                }
+              }
+            }
+          }
+        },
+        "urls": {
+          "type": "object",
+          "description": "The files that will be setup as a url",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "patternProperties": {
+            "^((\\w+|(\\.\\w+))[\\/])*(\\w+\\.\\w+)$": {
+              "type": "object",
+              "description": "The configuration for a url",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "$ref": "#/$defs/name"
+                },
+                "include": {
+                  "$ref": "#/$defs/include"
+                }
+              }
+            }
+          }
+        },
+        "partials": {
+          "type": "object",
+          "description": "The files that will be used as partials",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "patternProperties": {
+            "^((\\w+|(\\.\\w+))[\\/])*(\\w+\\.\\w+)$": {
+              "type": "object",
+              "description": "The configuration for the partial",
+              "additionalProperties": false,
+              "properties": {
+                "vars": {
+                  "$ref": "#/$defs/vars"
                 }
               }
             }
