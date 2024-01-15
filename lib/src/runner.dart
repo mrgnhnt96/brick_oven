@@ -1,13 +1,14 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:brick_oven/utils/dependency_injection.dart';
+import 'package:mason_logger/mason_logger.dart';
+
 import 'package:brick_oven/src/commands/cook_bricks/cook_bricks.dart';
 import 'package:brick_oven/src/commands/list.dart';
 import 'package:brick_oven/src/commands/update.dart';
 import 'package:brick_oven/src/constants/constants.dart';
 import 'package:brick_oven/src/version.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/utils/extensions/brick_oven_runner_extensions.dart';
-import 'package:mason_logger/mason_logger.dart';
 
 /// the name of the package
 

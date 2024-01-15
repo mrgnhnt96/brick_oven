@@ -1,10 +1,11 @@
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
+import 'package:mason_logger/mason_logger.dart';
+
 import 'package:brick_oven/domain/brick_oven_yaml.dart';
 import 'package:brick_oven/domain/config/brick_oven_config.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/utils/yaml_to_json.dart';
-import 'package:file/file.dart';
-import 'package:mason_logger/mason_logger.dart';
 
 /// {@template brick_oven_command}
 /// The base command for all brick oven commands

@@ -1,3 +1,8 @@
+import 'package:file/file.dart' hide Directory;
+import 'package:mason_logger/mason_logger.dart';
+import 'package:path/path.dart';
+
+import 'package:brick_oven/domain/config/mason_brick_config.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/implementations/directory_impl.dart';
 import 'package:brick_oven/domain/implementations/mason_brick_impl.dart';
@@ -11,13 +16,9 @@ import 'package:brick_oven/domain/interfaces/partial.dart';
 import 'package:brick_oven/domain/interfaces/source.dart';
 import 'package:brick_oven/domain/interfaces/url.dart';
 import 'package:brick_oven/domain/source_watcher.dart';
-import 'package:brick_oven/domain/config/mason_brick_config.dart';
 import 'package:brick_oven/src/constants/constants.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
-import 'package:file/file.dart' hide Directory;
-import 'package:mason_logger/mason_logger.dart';
-import 'package:path/path.dart';
 
 /// {@macro brick}
 class BrickImpl extends Brick {

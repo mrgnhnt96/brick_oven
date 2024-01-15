@@ -1,3 +1,5 @@
+import 'package:brick_oven/domain/config/file_config.dart';
+import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/interfaces/brick.dart';
 import 'package:brick_oven/domain/interfaces/directory.dart';
@@ -5,8 +7,6 @@ import 'package:brick_oven/domain/interfaces/include.dart';
 import 'package:brick_oven/domain/interfaces/name.dart';
 import 'package:brick_oven/domain/interfaces/url.dart';
 import 'package:brick_oven/domain/interfaces/variable.dart';
-import 'package:brick_oven/domain/config/file_config.dart';
-import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/utils/variables_mixin.dart';
 
 /// {@template target_file}

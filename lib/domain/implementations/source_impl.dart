@@ -1,12 +1,13 @@
-import 'package:brick_oven/domain/implementations/target_file_impl.dart';
-import 'package:brick_oven/domain/interfaces/source.dart';
-import 'package:brick_oven/domain/interfaces/target_file.dart';
-import 'package:brick_oven/domain/config/file_config.dart';
-import 'package:brick_oven/utils/dependency_injection.dart';
-import 'package:brick_oven/utils/should_exclude_path.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as p;
+
+import 'package:brick_oven/domain/config/file_config.dart';
+import 'package:brick_oven/domain/implementations/target_file_impl.dart';
+import 'package:brick_oven/domain/interfaces/source.dart';
+import 'package:brick_oven/domain/interfaces/target_file.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
+import 'package:brick_oven/utils/should_exclude_path.dart';
 
 /// {@macro source}
 class SourceImpl extends Source {

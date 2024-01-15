@@ -1,3 +1,7 @@
+import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:path/path.dart' as p;
+
 import 'package:brick_oven/domain/config/brick_config_entry.dart';
 import 'package:brick_oven/domain/config/directory_config.dart';
 import 'package:brick_oven/domain/config/file_config.dart';
@@ -6,9 +10,6 @@ import 'package:brick_oven/domain/config/partial_config.dart';
 import 'package:brick_oven/domain/config/string_or_entry.dart';
 import 'package:brick_oven/domain/config/url_config.dart';
 import 'package:brick_oven/utils/vars_mixin.dart';
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:path/path.dart' as p;
 
 part 'brick_config.g.dart';
 

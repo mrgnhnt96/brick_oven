@@ -1,10 +1,11 @@
+import 'package:path/path.dart' as p;
+
 import 'package:brick_oven/domain/implementations/include_impl.dart';
 import 'package:brick_oven/domain/implementations/name_impl.dart';
 import 'package:brick_oven/domain/interfaces/directory.dart';
 import 'package:brick_oven/domain/interfaces/include.dart';
 import 'package:brick_oven/domain/interfaces/name.dart';
 import 'package:brick_oven/utils/patterns.dart';
-import 'package:path/path.dart' as p;
 
 ///{@macro directory}
 class DirectoryImpl extends Directory {

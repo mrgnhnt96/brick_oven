@@ -1,14 +1,14 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:brick_oven/src/runner.dart';
-import 'package:brick_oven/src/version.dart';
-import 'package:brick_oven/utils/dependency_injection.dart';
-import 'package:brick_oven/utils/extensions/brick_oven_runner_extensions.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 
+import 'package:brick_oven/src/runner.dart';
+import 'package:brick_oven/src/version.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
+import 'package:brick_oven/utils/extensions/brick_oven_runner_extensions.dart';
 import '../../test_utils/di.dart';
 
 void main() {

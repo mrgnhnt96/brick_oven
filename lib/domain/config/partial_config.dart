@@ -1,6 +1,7 @@
-import 'package:brick_oven/utils/vars_mixin.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import 'package:brick_oven/utils/vars_mixin.dart';
 
 part 'partial_config.g.dart';
 

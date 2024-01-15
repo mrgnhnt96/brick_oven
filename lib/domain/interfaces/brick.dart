@@ -1,10 +1,10 @@
+import 'package:brick_oven/domain/config/brick_config.dart';
 import 'package:brick_oven/domain/interfaces/directory.dart';
 import 'package:brick_oven/domain/interfaces/mason_brick.dart';
 import 'package:brick_oven/domain/interfaces/partial.dart';
 import 'package:brick_oven/domain/interfaces/source.dart';
 import 'package:brick_oven/domain/interfaces/url.dart';
 import 'package:brick_oven/domain/source_watcher.dart';
-import 'package:brick_oven/domain/config/brick_config.dart';
 import 'package:brick_oven/utils/variables_mixin.dart';
 
 /// {@template brick}

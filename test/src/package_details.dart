@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:brick_oven/src/constants/constants.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
+import 'package:brick_oven/src/constants/constants.dart';
 import 'package:brick_oven/src/version.dart';
 
 void main() {

@@ -2,8 +2,8 @@
 
 import 'dart:async';
 
-import 'package:brick_oven/domain/implementations/brick_impl.dart';
 import 'package:brick_oven/domain/config/brick_config.dart';
+import 'package:brick_oven/domain/implementations/brick_impl.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
 import 'package:brick_oven/src/key_press_listener.dart';
 import 'package:brick_oven/utils/brick_cooker.dart';

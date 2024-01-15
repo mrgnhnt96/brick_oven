@@ -1,5 +1,5 @@
-import 'package:brick_oven/domain/interfaces/target_file.dart';
 import 'package:brick_oven/domain/config/file_config.dart';
+import 'package:brick_oven/domain/interfaces/target_file.dart';
 
 /// {@template source}
 /// The base class for where a brick is sourced from

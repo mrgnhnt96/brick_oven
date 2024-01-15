@@ -1,3 +1,6 @@
+import 'package:file/file.dart' hide Directory;
+import 'package:path/path.dart' as p;
+
 import 'package:brick_oven/domain/content_replacement.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/implementations/include_impl.dart';
@@ -10,12 +13,10 @@ import 'package:brick_oven/domain/interfaces/name.dart';
 import 'package:brick_oven/domain/interfaces/target_file.dart';
 import 'package:brick_oven/domain/interfaces/url.dart';
 import 'package:brick_oven/domain/interfaces/variable.dart';
-import 'package:brick_oven/utils/file_replacements.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
+import 'package:brick_oven/utils/file_replacements.dart';
 import 'package:brick_oven/utils/patterns.dart';
-import 'package:file/file.dart' hide Directory;
-import 'package:path/path.dart' as p;
 
 /// {@macro target_file}
 class TargetFileImpl extends TargetFile with FileReplacements {

@@ -2,12 +2,12 @@
 
 import 'dart:async';
 
-import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 import 'package:brick_oven/src/key_press_listener.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import '../test_utils/di.dart';
 import '../test_utils/fakes.dart';

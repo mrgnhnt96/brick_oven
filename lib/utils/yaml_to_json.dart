@@ -1,8 +1,9 @@
 import 'dart:convert';
 
-import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:file/file.dart';
 import 'package:yaml/yaml.dart';
+
+import 'package:brick_oven/utils/dependency_injection.dart';
 
 class YamlToJson {
   YamlToJson._({

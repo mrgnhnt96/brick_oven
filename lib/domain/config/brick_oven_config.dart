@@ -1,9 +1,10 @@
-import 'package:brick_oven/domain/config/brick_config.dart';
-import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:brick_oven/domain/config/brick_config_entry.dart';
 import 'package:mason_logger/mason_logger.dart';
+
+import 'package:brick_oven/domain/config/brick_config.dart';
+import 'package:brick_oven/domain/config/brick_config_entry.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 
 part 'brick_oven_config.g.dart';
 

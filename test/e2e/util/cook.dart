@@ -1,4 +1,3 @@
-import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -8,6 +7,7 @@ import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 
 import 'package:brick_oven/src/runner.dart';
+import 'package:brick_oven/utils/dependency_injection.dart';
 import 'package:brick_oven/utils/extensions/logger_extensions.dart';
 import '../../test_utils/di.dart';
 import '../../test_utils/mocks.dart';

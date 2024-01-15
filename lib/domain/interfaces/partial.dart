@@ -1,6 +1,6 @@
+import 'package:brick_oven/domain/config/partial_config.dart';
 import 'package:brick_oven/domain/file_write_result.dart';
 import 'package:brick_oven/domain/interfaces/variable.dart';
-import 'package:brick_oven/domain/config/partial_config.dart';
 import 'package:brick_oven/utils/variables_mixin.dart';
 
 /// {@template partial}
