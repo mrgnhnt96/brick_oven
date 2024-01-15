@@ -8,7 +8,7 @@ import 'package:brick_oven/domain/interfaces/partial.dart';
 import 'package:brick_oven/domain/interfaces/variable.dart';
 import 'package:brick_oven/enums/mustache_section.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
-import 'package:brick_oven/src/constants/constants.dart';
+import 'package:brick_oven/utils/constants.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
 

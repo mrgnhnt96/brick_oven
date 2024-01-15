@@ -2,7 +2,7 @@
 
 import 'package:meta/meta.dart';
 
-import 'package:brick_oven/src/constants/constants.dart';
+import 'package:brick_oven/utils/constants.dart';
 
 /// the formats that Mustache supports
 enum MustacheTag {

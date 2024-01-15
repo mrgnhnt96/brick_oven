@@ -2,7 +2,7 @@ import 'package:path/path.dart';
 
 import 'package:brick_oven/domain/interfaces/name.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
-import 'package:brick_oven/src/constants/constants.dart';
+import 'package:brick_oven/utils/constants.dart';
 
 /// {@macro name}
 class NameImpl extends Name {

@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:brick_oven/domain/config/section_config.dart';
 import 'package:brick_oven/domain/config/string_or_entry.dart';
 import 'package:brick_oven/enums/mustache_tag.dart';
-import 'package:brick_oven/src/constants/constants.dart';
+import 'package:brick_oven/utils/constants.dart';
 import 'package:brick_oven/utils/vars_mixin.dart';
 
 part 'name_config.g.dart';

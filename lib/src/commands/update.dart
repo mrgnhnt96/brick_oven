@@ -4,7 +4,7 @@ import 'package:args/command_runner.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_updater/pub_updater.dart';
 
-import 'package:brick_oven/src/constants/constants.dart';
+import 'package:brick_oven/utils/constants.dart';
 import 'package:brick_oven/src/version.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
 

@@ -16,7 +16,7 @@ import 'package:brick_oven/domain/interfaces/partial.dart';
 import 'package:brick_oven/domain/interfaces/source.dart';
 import 'package:brick_oven/domain/interfaces/url.dart';
 import 'package:brick_oven/domain/source_watcher.dart';
-import 'package:brick_oven/src/constants/constants.dart';
+import 'package:brick_oven/utils/constants.dart';
 import 'package:brick_oven/src/exception.dart';
 import 'package:brick_oven/utils/dependency_injection.dart';
 
