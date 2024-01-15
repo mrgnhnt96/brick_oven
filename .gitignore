@@ -14,3 +14,4 @@ coverage
 
 .history
 .lh
+.test_optimizer.dart
