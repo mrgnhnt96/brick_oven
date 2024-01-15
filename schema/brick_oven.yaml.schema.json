@@ -1,0 +1,212 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Brick Oven",
+    "description": "The brick_oven.yaml schema to create templates for the mason ecosystem",
+    "oneOf": [
+        {
+            "properties": {
+                "additionalProperties": false,
+                "bricks": {
+                    "$ref": "#/$defs/bricks"
+                }
+            },
+            "required": [
+                "bricks"
+            ]
+        },
+        {
+            "$ref": "#/$defs/brick"
+        }
+    ],
+    "$defs": {
+        "bricks": {
+            "type": "object",
+            "description": "A map of brick names to brick definitions.",
+            "additionalProperties": false,
+            "patternProperties": {
+                "^[a-zA-Z0-9_\\-\\.]+$": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/brick"
+                        },
+                        {
+                            "type": "object",
+                            "description": "A reference to a brick definition file.",
+                            "additionalProperties": false,
+                            "required": [
+                                "path"
+                            ],
+                            "properties": {
+                                "path": {
+                                    "type": "string",
+                                    "description": "Points to a brick definition file.",
+                                    // must be a valid file path ending with `brick_oven.yaml`
+                                    "pattern": "^(((\\.\\.)?[\\/])?|((\\w+|(\\.\\w+))[\\/]))+brick_oven\\.yaml$"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "brick": {
+            "type": "object",
+            "description": "The configuration for a brick",
+            "additionalProperties": false,
+            "required": [
+                "source"
+            ],
+            "properties": {
+                "source": {
+                    "type": "string",
+                    "description": "Points to the source files to be used for the brick template.",
+                    "pattern": "^(((\\.\\.)?[\\/])?|((\\w+|(\\.\\w+))[\\/]))+\\w+$"
+                },
+                "brick_config": {
+                    "type": "string",
+                    "description": "The mason brick configuration file (brick.yaml) to be used to validate the integrity of the brick."
+                },
+                "files": {
+                    "type": "object",
+                    "description": "The files that will be manipulated, via their name or contents.",
+                    "additionalProperties": false,
+                    "minProperties": 1,
+                    "patternProperties": {
+                        "^((\\w+|(\\.\\w+))[\\/])*(\\w+\\.\\w+)$": {
+                            "type": "object",
+                            "description": "The configuration for a file",
+                            "additionalProperties": false,
+                            "properties": {
+                                "name": {
+                                    "$ref": "#/$defs/name"
+                                },
+                                "include": {
+                                    "$ref": "#/$defs/include"
+                                },
+                                "vars": {
+                                    "$ref": "#/$defs/vars"
+                                }
+                            }
+                        }
+                    }
+                },
+                "dirs": {
+                    "type": "object",
+                    "description": "The directories that will be manipulated, via their name.",
+                    "additionalProperties": false,
+                    "minProperties": 1,
+                    "patternProperties": {
+                        "^(\\.?\\w+[\\/])*\\.?\\w+$": {
+                            "type": "object",
+                            "description": "The configuration for a directory",
+                            "additionalProperties": false,
+                            "properties": {
+                                "name": {
+                                    "$ref": "#/$defs/name"
+                                },
+                                "include": {
+                                    "$ref": "#/$defs/include"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "name": {
+            "type": [
+                "string",
+                "object",
+                "null"
+            ],
+            "description": "The name of the file, to be replaced by the variable provided",
+            "additionalProperties": false,
+            "required": [
+                "rename_with"
+            ],
+            "properties": {
+                "rename_with": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "The name of the variable to be used to rename the file."
+                },
+                "prefix": {
+                    "type": "string",
+                    "description": "The prefix to be added before the variable value. (e.g. `prefix_{{variable}}`)"
+                },
+                "suffix": {
+                    "type": "string",
+                    "description": "(Excluding the extension) The suffix to be added after the variable value. (e.g. `{{variable}}_suffix`)"
+                },
+                "section": {
+                    "$ref": "#/$defs/section"
+                },
+                "braces": {
+                    "type": "integer",
+                    "description": "The number of braces (2 or 3) to be added around the variable. (e.g. `{{variable}} or {{{variable}}}`)",
+                    "minimum": 2,
+                    "maximum": 3,
+                    "default": 3
+                }
+            }
+        },
+        "section": {
+            "type": [
+                "string",
+                "object",
+                "null"
+            ],
+            "description": "Declares the variable to be is used to access properties of nested values.",
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The name of the variable that will be used to access the desired property."
+                },
+                "is_inverted": {
+                    "type": "boolean",
+                    "description": "If true, the section will be inverted. (e.g. {{^section}})"
+                }
+            }
+        },
+        "include": {
+            "type": "object",
+            "description": "Whether or not to include the file based on the variable value.",
+            "additionalProperties": false,
+            "required": [
+                "if"
+            ],
+            "properties": {
+                "if": {
+                    "type": "string",
+                    "description": "The name of the variable to be used to determine whether or not to include the file."
+                },
+                "is_inverted": {
+                    "type": "boolean",
+                    "description": "If true, the include will be inverted. (e.g. {{^include}})",
+                    "default": false
+                }
+            }
+        },
+        "vars": {
+            "type": "object",
+            "description": "A map of placeholder to variables.",
+            "additionalProperties": false,
+            "patternProperties": {
+                "^[a-zA-Z0-9_\\-\\.]+$": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "The configuration for a variable",
+                    "additionalProperties": false
+                }
+            }
+        }
+    }
+}
