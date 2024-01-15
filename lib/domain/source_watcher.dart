@@ -21,7 +21,7 @@ class SourceWatcher extends Equatable {
   /// {@macro source_watcher}
   SourceWatcher(
     this.dirPath, {
-    required this.excludePaths,
+    this.excludePaths = const [],
   }) : _watcher = DirectoryWatcher(dirPath);
 
   /// allows to set the watcher

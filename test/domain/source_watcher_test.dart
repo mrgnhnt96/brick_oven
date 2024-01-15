@@ -53,7 +53,7 @@ void main() {
         () async {
           expect(watcher.isRunning, isFalse);
 
-          await watcher.start([]);
+          await watcher.start();
 
           expect(watcher.isRunning, isFalse);
         },
@@ -66,7 +66,7 @@ void main() {
 
           watcher.addEvent((_) {});
 
-          await watcher.start([]);
+          await watcher.start();
 
           expect(watcher.isRunning, isTrue);
         },
@@ -77,7 +77,7 @@ void main() {
 
         watcher.addEvent((_) {}, runBefore: true);
 
-        await watcher.start([]);
+        await watcher.start();
 
         expect(watcher.isRunning, isTrue);
       });
@@ -87,7 +87,7 @@ void main() {
 
         watcher.addEvent((_) {}, runAfter: true);
 
-        await watcher.start([]);
+        await watcher.start();
 
         expect(watcher.isRunning, isTrue);
       });
@@ -125,19 +125,19 @@ void main() {
         test('creates a listener', () async {
           expect(watcher.listener, isNull);
 
-          await watcher.start([]);
+          await watcher.start();
 
           expect(watcher.listener, isNotNull);
         });
 
         test('calls reset when listener is not null', () async {
-          await watcher.start([]);
+          await watcher.start();
 
           final listener1 = watcher.listener;
 
           expect(watcher.listener, isNotNull);
 
-          await watcher.start([]);
+          await watcher.start();
 
           final listener2 = watcher.listener;
 
@@ -151,7 +151,7 @@ void main() {
 
           testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
 
-          await watcher.start([]);
+          await watcher.start();
 
           await expectLater(watcher.hasRun, isTrue);
         });
@@ -165,7 +165,7 @@ void main() {
 
           testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
 
-          await watcher.start([]);
+          await watcher.start();
 
           expect(hasRunEvent, isTrue);
         });
@@ -182,7 +182,7 @@ void main() {
 
           testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
 
-          await watcher.start([]);
+          await watcher.start();
 
           expect(hasRunEvent, isTrue);
         });
@@ -199,7 +199,7 @@ void main() {
 
           testDirectoryWatcher.triggerEvent(WatchEvent(ChangeType.ADD, ''));
 
-          await watcher.start([]);
+          await watcher.start();
 
           expect(hasRunEvent, isTrue);
         });
@@ -233,7 +233,7 @@ void main() {
 
     group('#stop', () {
       test('sets listener to null', () async {
-        await watcher.start([]);
+        await watcher.start();
 
         expect(watcher.listener, isNotNull);
 

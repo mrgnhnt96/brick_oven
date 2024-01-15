@@ -9,6 +9,6 @@ part of 'source_watcher.dart';
 extension _$SourceWatcherAutoequal on SourceWatcher {
   List<Object?> get _$props => [
         dirPath,
-        _excludedPaths,
+        excludePaths,
       ];
 }
