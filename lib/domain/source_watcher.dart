@@ -3,11 +3,10 @@
 import 'dart:async';
 
 import 'package:autoequal/autoequal.dart';
+import 'package:brick_oven/utils/should_exclude_path.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
-
-import 'package:brick_oven/utils/should_exclude_path.dart';
 
 part 'source_watcher.g.dart';
 
@@ -20,7 +19,10 @@ typedef OnEvent = void Function(String path);
 @autoequal
 class SourceWatcher extends Equatable {
   /// {@macro source_watcher}
-  SourceWatcher(this.dirPath) : _watcher = DirectoryWatcher(dirPath);
+  SourceWatcher(
+    this.dirPath, {
+    required this.excludePaths,
+  }) : _watcher = DirectoryWatcher(dirPath);
 
   /// allows to set the watcher
   /// to be used only for testing
@@ -28,10 +30,13 @@ class SourceWatcher extends Equatable {
   SourceWatcher.config({
     required this.dirPath,
     required DirectoryWatcher watcher,
+    this.excludePaths = const [],
   }) : _watcher = watcher;
 
   /// the source directory of the brick, which will be watched
   final String dirPath;
+
+  final Iterable<String> excludePaths;
 
   @ignore
   final _afterEvents = <OnEvent>[];
@@ -67,8 +72,6 @@ class SourceWatcher extends Equatable {
   @visibleForTesting
   List<OnEvent> get events => List.from(_events);
 
-  List<String> _excludedPaths = [];
-
   /// whether the watcher has run
   bool get hasRun => _hasRun;
 
@@ -102,22 +105,17 @@ class SourceWatcher extends Equatable {
   Future<void> reset() async {
     await _stop(removeEvents: false);
 
-    await start(_excludedPaths);
+    await start();
   }
 
   /// starts the watcher
-  Future<void> start(List<String> excludedPaths) async {
-    _excludedPaths = excludedPaths;
-
+  Future<void> start() async {
     if (_listener != null) {
       return reset();
     }
 
     _listener = _watcher.events.listen((watchEvent) {
-      if (shouldExcludePath(
-        watchEvent.path,
-        excludedPaths,
-      )) {
+      if (shouldExcludePath(watchEvent.path, excludePaths)) {
         return;
       }
 

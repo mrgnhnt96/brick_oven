@@ -115,7 +115,13 @@ class BrickImpl extends Brick {
 
   SourceWatcher? _watcher;
   @override
-  SourceWatcher get watcher => _watcher ??= SourceWatcher(sourcePath);
+  SourceWatcher get watcher => _watcher ??= SourceWatcher(
+        sourcePath,
+        excludePaths: [
+          ...?exclude,
+          if (outputDir != '.') outputDir,
+        ],
+      );
 
   @override
   void cook() {
@@ -141,12 +147,6 @@ class BrickImpl extends Brick {
 
     final done = di<Logger>().progress('Writing Brick: $name');
 
-    final excludedPaths = [
-      ...?exclude,
-      ...Constants.excludedDirs,
-      if (outputDir != '.') outputDir,
-    ];
-
     if (watch) {
       watcher.addEvent(
         (_) => _putInTheOven(
@@ -158,7 +158,7 @@ class BrickImpl extends Brick {
         watcher.addEvent((_) => masonBrick?.check(this));
       }
 
-      watcher.start(excludedPaths);
+      watcher.start();
 
       if (watcher.hasRun) {
         return;
