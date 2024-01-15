@@ -141,17 +141,16 @@ class BrickImpl extends Brick {
 
     final done = di<Logger>().progress('Writing Brick: $name');
 
-    final excludedPaths = [...?exclude, '__brick__', 'bricks', '.git'];
-
-    if (outputDir != '.') {
-      excludedPaths.add(outputDir);
-    }
+    final excludedPaths = [
+      ...?exclude,
+      ...Constants.excludedDirs,
+      if (outputDir != '.') outputDir,
+    ];
 
     if (watch) {
       watcher.addEvent(
         (_) => _putInTheOven(
           done: done,
-          excludedPaths: excludedPaths.toSet(),
         ),
       );
 
@@ -168,7 +167,6 @@ class BrickImpl extends Brick {
 
     _putInTheOven(
       done: done,
-      excludedPaths: excludedPaths.toSet(),
     );
     masonBrick?.check(this);
   }
@@ -182,7 +180,6 @@ class BrickImpl extends Brick {
 
   void _putInTheOven({
     required Progress done,
-    required Set<String> excludedPaths,
   }) {
     final targetFiles = source.combineFiles();
     final count = targetFiles.length;

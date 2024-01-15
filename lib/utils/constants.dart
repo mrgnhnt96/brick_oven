@@ -21,4 +21,11 @@ class Constants {
 
   /// variables to ignore configuring the target file
   static List<String> get variablesToIgnore => [kIndexValue, '.'];
+
+  static List<String> get excludedDirs => [
+        '__brick__',
+        'bricks',
+        '.git',
+        '.dart_tool',
+      ];
 }
