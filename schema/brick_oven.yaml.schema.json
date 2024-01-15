@@ -55,6 +55,10 @@
           "description": "Points to the source files to be used for the brick template.",
           "pattern": "^(((\\.\\.)?[\\/])?|((\\w+|(\\.\\w+))[\\/]))+\\w+$"
         },
+        "exclude": {
+          "type": "array",
+          "description": "A list of files or directories to be excluded from the brick template."
+        },
         "brick_config": {
           "type": ["string", "object"],
           "description": "The mason brick configuration file (brick.yaml) to be used to validate the integrity of the brick.",
