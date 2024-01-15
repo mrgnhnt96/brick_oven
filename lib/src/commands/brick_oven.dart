@@ -29,7 +29,7 @@ abstract class BrickOvenCommand extends Command<int> {
     final configFile = BrickOvenYaml.findNearest(cwd);
 
     if (configFile == null) {
-      throw Exception('Config file not found');
+      return null;
     }
 
     final json = YamlToJson.fromFile(configFile);
