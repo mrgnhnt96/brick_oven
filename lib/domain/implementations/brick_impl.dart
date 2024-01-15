@@ -119,7 +119,10 @@ class BrickImpl extends Brick {
 
   @override
   void cook() {
-    final targetDir = join(outputDir, name, '__brick__');
+    final output = di<FileSystem>().directory(outputDir);
+    if (output.existsSync()) {
+      output.deleteSync(recursive: true);
+    }
 
     final names = <String>{};
 
@@ -147,7 +150,6 @@ class BrickImpl extends Brick {
     if (watch) {
       watcher.addEvent(
         (_) => _putInTheOven(
-          targetDir: targetDir,
           done: done,
           excludedPaths: excludedPaths.toSet(),
         ),
@@ -165,7 +167,6 @@ class BrickImpl extends Brick {
     }
 
     _putInTheOven(
-      targetDir: targetDir,
       done: done,
       excludedPaths: excludedPaths.toSet(),
     );
@@ -180,15 +181,9 @@ class BrickImpl extends Brick {
   }
 
   void _putInTheOven({
-    required String targetDir,
     required Progress done,
     required Set<String> excludedPaths,
   }) {
-    final directory = di<FileSystem>().directory(targetDir);
-    if (directory.existsSync()) {
-      directory.deleteSync(recursive: true);
-    }
-
     final targetFiles = source.combineFiles();
     final count = targetFiles.length;
 
