@@ -129,7 +129,6 @@ class BrickConfig extends BrickConfigEntry with EquatableMixin, VarsMixin {
       ];
 
   @override
-  @override
   Map<String, dynamic> toJson() => _$BrickConfigToJson(this);
 
   @override
