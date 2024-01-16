@@ -1,3 +1,9 @@
+# 0.1.4-dev | 1.16.2024
+
+- Fix: concurrent edit during loop
+- Feat: gracefully handle missing file during cook
+- Feat: Wrap cook in try catch to gracefully fail
+
 # 0.1.3-dev | 1.16.2024
 
 - Fix: Update locked version of `brick_oven`
