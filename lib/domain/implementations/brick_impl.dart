@@ -148,11 +148,15 @@ class BrickImpl extends Brick {
     final done = di<Logger>().progress('Writing Brick: $name');
 
     if (watch) {
-      watcher.addEvent(
-        (_) => _putInTheOven(
-          done: done,
-        ),
-      );
+      watcher.addEvent((_) {
+        try {
+          _putInTheOven(
+            done: done,
+          );
+        } catch (_) {
+          done.fail('Failed to cook brick $name');
+        }
+      });
 
       if (masonBrick != null) {
         watcher.addEvent((_) => masonBrick?.check(this));
@@ -165,9 +169,14 @@ class BrickImpl extends Brick {
       }
     }
 
-    _putInTheOven(
-      done: done,
-    );
+    try {
+      _putInTheOven(
+        done: done,
+      );
+    } catch (_) {
+      done.fail('Failed to cook brick $name');
+    }
+
     masonBrick?.check(this);
   }
 
