@@ -236,16 +236,22 @@
       "type": "object",
       "description": "Whether or not to include the file based on the variable value.",
       "additionalProperties": false,
-      "required": ["if"],
+      "oneOf": [
+        {
+          "required": ["if"]
+        },
+        {
+          "required": ["if_not"]
+        }
+      ],
       "properties": {
         "if": {
           "type": "string",
-          "description": "The name of the variable to be used to determine whether or not to include the file."
+          "description": "The name of the variable, if the value is truthy, the file will be included."
         },
-        "is_inverted": {
-          "type": "boolean",
-          "description": "If true, the include will be inverted. (e.g. {{^include}})",
-          "default": false
+        "if_not": {
+          "type": "string",
+          "description": "The name of the variable, if the value is falsy, the file will be included."
         }
       }
     },
