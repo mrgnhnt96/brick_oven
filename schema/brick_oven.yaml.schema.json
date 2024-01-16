@@ -36,7 +36,7 @@
                 "path": {
                   "type": "string",
                   "description": "Points to a brick definition file.",
-                  "pattern": "^(((\\.\\.)?[\\/])?|((\\w+|(\\.\\w+))[\\/]))+brick_oven\\.yaml$"
+                  "pattern": "^(((\\.\\.)?[\\/])?|(([\\w-]+|(\\.[\\w-]+))[\\/]))+brick_oven\\.yaml$"
                 }
               }
             }
@@ -53,7 +53,7 @@
         "source": {
           "type": "string",
           "description": "Points to the source files to be used for the brick template.",
-          "pattern": "^(((\\.\\.)?[\\/])?|((\\w+|(\\.\\w+))[\\/]))+\\w+$"
+          "pattern": "^(((\\.\\.)?[\\/])?|(([\\w-]+|(\\.[\\w-]+))[\\/]))+[\\w-]+$"
         },
         "exclude": {
           "type": "array",
@@ -64,12 +64,12 @@
           "description": "The mason brick configuration file (brick.yaml) to be used to validate the integrity of the brick.",
           "additionalProperties": false,
           "required": ["path"],
-          "pattern": "^(((\\.\\.)?[\\/])?|((\\w+|(\\.\\w+))[\\/]))+brick\\.ya?ml$",
+          "pattern": "^(((\\.\\.)?[\\/])?|(([\\w-]+|(\\.[\\w-]+))[\\/]))+brick\\.ya?ml$",
           "properties": {
             "path": {
               "type": "string",
               "description": "Points to a brick configuration file.",
-              "pattern": "^(((\\.\\.)?[\\/])?|((\\w+|(\\.\\w+))[\\/]))+brick\\.ya?ml$"
+              "pattern": "^(((\\.\\.)?[\\/])?|(([\\w-]+|(\\.[\\w-]+))[\\/]))+brick\\.ya?ml$"
             },
             "ignore_vars": {
               "type": "array",
