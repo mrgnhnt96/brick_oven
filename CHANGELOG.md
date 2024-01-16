@@ -1,3 +1,7 @@
+# 0.1.3-dev | 1.16.2024
+
+- Fix: Update locked version of `brick_oven`
+
 # 0.1.2-dev | 1.16.2024
 
 - Fix: Add include and name variables during file name setup
