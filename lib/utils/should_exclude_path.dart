@@ -1,5 +1,6 @@
-import 'package:brick_oven/utils/constants.dart';
 import 'package:glob/glob.dart';
+
+import 'package:brick_oven/utils/constants.dart';
 
 /// checks if the path should be excluded
 bool shouldExcludePath(

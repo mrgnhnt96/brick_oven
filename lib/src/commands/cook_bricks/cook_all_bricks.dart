@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:mason_logger/mason_logger.dart';
+
 import 'package:brick_oven/domain/implementations/brick_impl.dart';
 import 'package:brick_oven/domain/interfaces/brick.dart';
 import 'package:brick_oven/src/commands/brick_oven.dart';
@@ -8,7 +10,6 @@ import 'package:brick_oven/utils/brick_cooker.dart';
 import 'package:brick_oven/utils/config_watcher_mixin.dart';
 import 'package:brick_oven/utils/extensions/arg_parser_extensions.dart';
 import 'package:brick_oven/utils/oven_mixin.dart';
-import 'package:mason_logger/mason_logger.dart';
 
 /// {@template cook_all_bricks_command}
 /// Writes all bricks from the configuration file

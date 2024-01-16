@@ -3,10 +3,11 @@
 import 'dart:async';
 
 import 'package:autoequal/autoequal.dart';
-import 'package:brick_oven/utils/should_exclude_path.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
+
+import 'package:brick_oven/utils/should_exclude_path.dart';
 
 part 'source_watcher.g.dart';
 

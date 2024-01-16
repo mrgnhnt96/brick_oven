@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
-import 'package:brick_oven/utils/constants.dart';
 import 'package:brick_oven/src/version.dart';
+import 'package:brick_oven/utils/constants.dart';
 
 void main() {
   test('version matches the pubspec version', () {

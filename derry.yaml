@@ -30,6 +30,7 @@ pub:
     - dart run very_good_cli:very_good packages get --recursive
 
 prep:
+  - $br:b
   - dart analyze lib test/domain test/enums test/src test/test_utils test/utils
   - dart format lib test/domain test/enums test/src test/test_utils test/utils
   - dart run import_sorter:main --ignore-config --no-comments
