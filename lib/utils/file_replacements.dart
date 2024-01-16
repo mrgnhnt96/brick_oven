@@ -38,6 +38,14 @@ mixin FileReplacements {
       ..createSync(recursive: true);
     final sourceFile = di<FileSystem>().file(sourcePath);
 
+    if (!sourceFile.existsSync()) {
+      di<Logger>().err(
+        '${sourceFile.path} does not exist, please provide the correct path',
+      );
+
+      return const FileWriteResult.empty();
+    }
+
     if (variables.isEmpty && partials.isEmpty) {
       sourceFile.copySync(targetFile.path);
 
