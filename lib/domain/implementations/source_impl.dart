@@ -53,12 +53,9 @@ class SourceImpl extends Source {
 
   @override
   List<TargetFile> combineFiles() {
-    final configs = fileConfigs;
-
     final targetFileConfigs = this.targetFileConfigs();
 
-    final keys = configs.keys;
-    for (final file in keys) {
+    for (final file in {...fileConfigs.keys}) {
       if (targetFileConfigs.contains(file)) {
         continue;
       }
@@ -66,15 +63,15 @@ class SourceImpl extends Source {
       di<Logger>()
         ..info('')
         ..warn(
-          'The configured file "$file" does not exist within $path',
+          'The configured file "$file" does not exist',
         );
 
-      configs.remove(file);
+      fileConfigs.remove(file);
     }
 
     final result = <String, FileConfig?>{}
       ..addAll({for (final file in targetFileConfigs) file: null})
-      ..addAll(configs);
+      ..addAll(fileConfigs);
 
     final targetFiles = <TargetFile>[];
 
