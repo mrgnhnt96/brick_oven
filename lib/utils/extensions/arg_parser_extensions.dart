@@ -8,6 +8,7 @@ extension ArgParserX on ArgParser {
     addOutputOption();
     addWatchFlag();
     addSyncFlag();
+    addVerboseFlag();
   }
 
   /// the output directory
@@ -45,6 +46,15 @@ extension ArgParserX on ArgParser {
       negatable: false,
       help: 'Watch for file changes and '
           're-cook the bricks as they change.',
+    );
+  }
+
+  @visibleForTesting
+  void addVerboseFlag() {
+    addFlag(
+      'verbose',
+      negatable: false,
+      help: 'Output verbose logging',
     );
   }
 }

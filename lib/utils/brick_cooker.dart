@@ -29,6 +29,9 @@ mixin BrickCookerArgs on Command<int> {
   /// the [BrickConfig.sourcePath] directory
   bool get isWatch => _get<bool>('watch') ?? false;
 
+  /// Whether to print verbose logs to console
+  bool get isVerbose => _get<bool>('verbose') ?? false;
+
   /// whether to validate if the brick.yaml file is synced
   bool get shouldSync => _get<bool>('sync') ?? true;
 

@@ -61,16 +61,24 @@ mixin OvenMixin
 
       try {
         brick.cook();
-      } on ConfigException catch (e) {
+      } on ConfigException catch (e, stacktrace) {
         logger
           ..warn(e.message)
           ..err('Could not cook brick: ${brick.name}');
 
+        if (isVerbose) {
+          logger.info(stacktrace.toString());
+        }
+
         continue;
-      } catch (e) {
+      } catch (e, stacktrace) {
         logger
           ..warn('Unknown error: $e')
           ..err('Could not cook brick: ${brick.name}');
+
+        if (isVerbose) {
+          logger.info(stacktrace.toString());
+        }
         continue;
       }
     }
