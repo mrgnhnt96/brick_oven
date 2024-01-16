@@ -1,0 +1,8 @@
+bricks:
+  include_if:
+    source: oven
+    brick_config: brick.yaml
+    files:
+      file.md:
+        include:
+          if: value

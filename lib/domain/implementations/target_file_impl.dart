@@ -143,8 +143,12 @@ class TargetFileImpl extends TargetFile with FileReplacements {
       variablesUsed.addAll(url!.vars);
 
       newPath = p.join(newPath, url.formatName());
+      variablesUsed.addAll(url.name?.vars ?? []);
     } else {
       newPath = p.join(newPath, formatName());
+      variablesUsed
+        ..addAll(name?.vars ?? [])
+        ..addAll(include?.vars ?? []);
     }
 
     variablesUsed.addAll(name?.vars ?? []);

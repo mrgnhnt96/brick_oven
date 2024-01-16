@@ -1,0 +1,7 @@
+name: include_if
+description: An example that uses include_if
+version: 1.0.0
+
+vars:
+  value:
+    type: boolean
